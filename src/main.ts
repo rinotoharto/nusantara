@@ -91,7 +91,7 @@ renderer.setAnimationLoop(() => {
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati);
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
-  hudSiluman.perbarui(siluman.penjaga, pemain.posisi, camera);
+  hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
   input.akhirFrame();
 
   renderer.render(scene, camera);

@@ -46,11 +46,21 @@ function ruasMemotongLingkaran(x1: number, z1: number, x2: number, z2: number, c
  * Garis pandang dari mata pengamat ke sasaran bebas dari rumah, tebing, batu, dan batang pohon.
  * Diuji di bidang datar; benda padat menghalangi kalau puncaknya lebih tinggi dari mata.
  */
-export function garisPandangBebas(data: DataTabrakan, dari: THREE.Vector3, ke: THREE.Vector3, tinggiMata: number): boolean {
+export function garisPandangBebas(
+  data: DataTabrakan,
+  dari: THREE.Vector3,
+  ke: THREE.Vector3,
+  tinggiMata: number,
+  kotakTambahan: readonly THREE.Box3[] = [],
+): boolean {
   const yMata = Math.min(dari.y, ke.y) + tinggiMata;
   for (const p of data.padat) {
     if (p.kotak.max.y <= yMata) continue;
     if (ruasMemotongKotak(dari.x, dari.z, ke.x, ke.z, p.kotak)) return false;
+  }
+  // Penghalang tambahan (semak) menutup pandangan walau lebih rendah dari mata.
+  for (const k of kotakTambahan) {
+    if (ruasMemotongKotak(dari.x, dari.z, ke.x, ke.z, k)) return false;
   }
   for (const t of data.pohon) {
     if (ruasMemotongLingkaran(dari.x, dari.z, ke.x, ke.z, t.x, t.z, t.jari + 0.2)) return false;
@@ -75,6 +85,7 @@ export function ujiPandang(
   sasaran: THREE.Vector3,
   data: DataTabrakan,
   tinggiMata: number,
+  kotakTambahan: readonly THREE.Box3[] = [],
 ): HasilPandang {
   const dx = sasaran.x - posisi.x;
   const dz = sasaran.z - posisi.z;
@@ -84,7 +95,7 @@ export function ujiPandang(
     const cos = (Math.sin(hadap) * dx + Math.cos(hadap) * dz) / jarak;
     if (cos < Math.cos((sudutDerajat * Math.PI) / 180 / 2)) return { terlihat: false, jarak };
   }
-  return { terlihat: garisPandangBebas(data, posisi, sasaran, tinggiMata), jarak };
+  return { terlihat: garisPandangBebas(data, posisi, sasaran, tinggiMata, kotakTambahan), jarak };
 }
 
 /**

@@ -1,30 +1,122 @@
 {
   "keterangan": "Area uji menyelinap di utara desa: jalur 80 m dari selatan ke utara di sebelah timur tebing. Sumbu: -z = utara.",
-  "mulai": { "x": 14, "z": -34 },
-  "tujuan": { "x": 14, "z": -114 },
+  "mulai": {
+    "x": 14,
+    "z": -34
+  },
+  "tujuan": {
+    "x": 14,
+    "z": -114
+  },
   "penjaga": [
     {
       "nama": "penjaga-selatan",
       "mode": "bolak-balik",
-      "titik": [ { "x": 4, "z": -46 }, { "x": 24, "z": -46 } ]
+      "titik": [
+        {
+          "x": 4,
+          "z": -46
+        },
+        {
+          "x": 24,
+          "z": -46
+        }
+      ]
     },
     {
       "nama": "penjaga-tengah",
       "mode": "melingkar",
-      "titik": [ { "x": 6, "z": -64 }, { "x": 22, "z": -66 }, { "x": 22, "z": -78 }, { "x": 6, "z": -76 } ]
+      "titik": [
+        {
+          "x": 6,
+          "z": -64
+        },
+        {
+          "x": 22,
+          "z": -66
+        },
+        {
+          "x": 22,
+          "z": -78
+        },
+        {
+          "x": 6,
+          "z": -76
+        }
+      ]
     },
     {
       "nama": "penjaga-utara",
       "mode": "bolak-balik",
-      "titik": [ { "x": 2, "z": -94 }, { "x": 26, "z": -100 } ]
+      "titik": [
+        {
+          "x": 2,
+          "z": -94
+        },
+        {
+          "x": 26,
+          "z": -100
+        }
+      ]
     }
   ],
   "batu": [
-    { "x": 10, "z": -54, "lebar": 3.5, "tinggi": 2.6, "dalam": 2.5 },
-    { "x": 21, "z": -58, "lebar": 2.5, "tinggi": 2.2, "dalam": 3 },
-    { "x": 4, "z": -70, "lebar": 3, "tinggi": 2.8, "dalam": 3 },
-    { "x": 24, "z": -86, "lebar": 4, "tinggi": 2.4, "dalam": 2.5 },
-    { "x": 12, "z": -106, "lebar": 3, "tinggi": 2.6, "dalam": 3 }
+    {
+      "x": 10,
+      "z": -54,
+      "lebar": 3.5,
+      "tinggi": 2.6,
+      "dalam": 2.5
+    },
+    {
+      "x": 21,
+      "z": -58,
+      "lebar": 2.5,
+      "tinggi": 2.2,
+      "dalam": 3
+    },
+    {
+      "x": 4,
+      "z": -70,
+      "lebar": 3,
+      "tinggi": 2.8,
+      "dalam": 3
+    },
+    {
+      "x": 24,
+      "z": -86,
+      "lebar": 4,
+      "tinggi": 2.4,
+      "dalam": 2.5
+    },
+    {
+      "x": 12,
+      "z": -106,
+      "lebar": 3,
+      "tinggi": 2.6,
+      "dalam": 3
+    }
   ],
-  "semak": []
+  "semak": [
+    {
+      "x": 16,
+      "z": -49
+    },
+    {
+      "x": 6,
+      "z": -58
+    },
+    {
+      "x": 17,
+      "z": -71
+    },
+    {
+      "x": 9,
+      "z": -86
+    },
+    {
+      "x": 19,
+      "z": -100
+    }
+  ]
 }

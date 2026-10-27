@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Penjaga } from '../stealth/guard';
+import type { KeadaanPemain } from '../stealth/stealth-manager';
 
 const JARAK_TANDA = 30; // tanda di atas kepala hanya tampil dalam jarak ini
 
@@ -10,8 +11,25 @@ const JARAK_TANDA = 30; // tanda di atas kepala hanya tampil dalam jarak ini
 export class HudSiluman {
   private readonly tanda = new Map<Penjaga, HTMLDivElement>();
   private readonly proyeksi = new THREE.Vector3();
+  private readonly vignet: HTMLDivElement;
+  private readonly sembunyi: HTMLDivElement;
 
-  perbarui(penjagaSemua: Penjaga[], posPemain: THREE.Vector3, kamera: THREE.Camera): void {
+  constructor() {
+    this.vignet = document.createElement('div');
+    this.vignet.className = 'hud-vignet';
+    this.sembunyi = document.createElement('div');
+    this.sembunyi.className = 'hud hud-sembunyi';
+    document.body.append(this.vignet, this.sembunyi);
+  }
+
+  perbarui(penjagaSemua: Penjaga[], keadaan: KeadaanPemain, kamera: THREE.Camera): void {
+    const posPemain = keadaan.posisi;
+    // Di dalam semak: pinggiran layar gelap; teks memberi tahu apakah sudah tersembunyi.
+    this.vignet.classList.toggle('tampil', keadaan.semak !== null);
+    const teks = keadaan.tersembunyi ? 'Tersembunyi' : keadaan.semak ? 'Jongkok (C) untuk bersembunyi' : '';
+    if (this.sembunyi.textContent !== teks) this.sembunyi.textContent = teks;
+    this.sembunyi.classList.toggle('tersembunyi', keadaan.tersembunyi);
+
     for (const p of penjagaSemua) {
       let el = this.tanda.get(p);
       if (!el) {

@@ -162,7 +162,7 @@ export class Penjaga extends Lawan {
     if (!k.tersembunyi || jarak < k.jarakTembus) {
       terlihat =
         jarak < P.jarakDengar ||
-        ujiPandang(this.posisi, this.hadap, P.sudutKejar, P.jarakPutus, k.posisi, this.data, P.tinggiMata).terlihat;
+        ujiPandang(this.posisi, this.hadap, P.sudutKejar, P.jarakPutus, k.posisi, this.data, P.tinggiMata, this.konteks.penghalangSemak).terlihat;
     }
     this.terlihat = terlihat;
     if (terlihat) {
@@ -322,7 +322,7 @@ export class Penjaga extends Lawan {
   private perbaruiCuriga(dt: number): void {
     const k = this.konteks.pemain;
     const jarakPandang = P.jarakPandang * k.faktorJarak;
-    let hasil = ujiPandang(this.posisi, this.hadap, P.sudutPandang, jarakPandang, k.posisi, this.data, P.tinggiMata);
+    let hasil = ujiPandang(this.posisi, this.hadap, P.sudutPandang, jarakPandang, k.posisi, this.data, P.tinggiMata, this.konteks.penghalangSemak);
     if (k.tersembunyi && hasil.jarak >= k.jarakTembus) hasil = { terlihat: false, jarak: hasil.jarak };
     this.terlihat = hasil.terlihat;
     if (hasil.terlihat) {

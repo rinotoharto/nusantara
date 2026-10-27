@@ -5,6 +5,7 @@ import type { Dunia } from '../world';
 import { tinggiMedan } from '../world/terrain';
 import { AREA_UJI, SILUMAN } from './config';
 import { Penjaga } from './guard';
+import { Semak, semakDi } from './bush';
 
 /** Keadaan pemain yang dinilai penjaga; diperbarui tiap frame sebelum lawan bergerak. */
 export interface KeadaanPemain {
@@ -14,6 +15,8 @@ export interface KeadaanPemain {
   jongkok: boolean;
   /** Pengali jarak pandang penjaga terhadap pemain: 1 normal, 0,5 saat jongkok atau di semak. */
   faktorJarak: number;
+  /** Semak yang sedang ditempati, atau null. */
+  semak: Semak | null;
   /** Berjongkok di dalam semak: tidak terlihat kecuali penjaga lebih dekat dari `jarakTembus`. */
   tersembunyi: boolean;
   jarakTembus: number;
@@ -22,6 +25,9 @@ export interface KeadaanPemain {
 export interface KonteksSiluman {
   pemain: KeadaanPemain;
   penjaga: Penjaga[];
+  semak: Semak[];
+  /** Kotak semak yang menghalangi pandangan ke pemain: semua kecuali semak yang ditempatinya. */
+  penghalangSemak: THREE.Box3[];
 }
 
 const bahanBatu = new THREE.MeshStandardMaterial({ color: 0x6f6a60, roughness: 1 });
@@ -33,9 +39,20 @@ const bahanBatu = new THREE.MeshStandardMaterial({ color: 0x6f6a60, roughness: 1
  */
 export class PengelolaSiluman {
   readonly penjaga: Penjaga[] = [];
+  readonly semak: Semak[] = [];
   readonly konteks: KonteksSiluman = {
-    pemain: { posisi: new THREE.Vector3(), lari: false, jongkok: false, faktorJarak: 1, tersembunyi: false, jarakTembus: 2 },
+    pemain: {
+      posisi: new THREE.Vector3(),
+      lari: false,
+      jongkok: false,
+      faktorJarak: 1,
+      semak: null,
+      tersembunyi: false,
+      jarakTembus: SILUMAN.semak.jarakTembus,
+    },
     penjaga: this.penjaga,
+    semak: this.semak,
+    penghalangSemak: [],
   };
   readonly mulai = AREA_UJI.mulai;
   readonly tujuan = AREA_UJI.tujuan;
@@ -75,6 +92,12 @@ export class PengelolaSiluman {
     tiang.name = 'tiang-tujuan';
     scene.add(tiang);
 
+    for (const s of AREA_UJI.semak) {
+      const semak = new Semak(s.x, s.z);
+      scene.add(semak.mesh);
+      this.semak.push(semak);
+    }
+
     for (const rute of AREA_UJI.penjaga) {
       const penjaga = new Penjaga(dunia.tabrakan, rute, this.konteks);
       scene.add(penjaga.grup, penjaga.kerucut.mesh);
@@ -89,7 +112,12 @@ export class PengelolaSiluman {
     k.posisi.copy(pemain.posisi);
     k.lari = pemain.laju > SILUMAN.pemain.lajuLari;
     k.jongkok = pemain.jongkok;
-    k.faktorJarak = pemain.jongkok ? SILUMAN.pemain.faktorJarakJongkok : 1;
-    k.tersembunyi = false;
+    k.semak = semakDi(this.semak, pemain.posisi);
+    // Jongkok atau di dalam semak: hanya terlihat dari jarak setengah. Keduanya: tersembunyi.
+    k.faktorJarak = k.semak ? SILUMAN.pemain.faktorJarakSemak : pemain.jongkok ? SILUMAN.pemain.faktorJarakJongkok : 1;
+    k.tersembunyi = pemain.jongkok && k.semak !== null;
+    const penghalang = this.konteks.penghalangSemak;
+    penghalang.length = 0;
+    for (const s of this.semak) if (s !== k.semak) penghalang.push(s.kotak);
   }
 }
