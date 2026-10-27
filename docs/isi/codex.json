@@ -1,0 +1,330 @@
+{
+  "entri": [
+    {
+      "id": "prasasti-kudadu",
+      "judul": "Prasasti Kudadu",
+      "jenis": "sumber",
+      "label": "fakta",
+      "ringkas": "Prasasti tembaga tahun 1294 berisi kesaksian Raden Wijaya sendiri tentang pelariannya dan anugerah bagi desa Kudadu yang menolongnya.",
+      "isi": [
+        "Prasasti Kudadu, disebut juga Prasasti Gunung Butak, adalah lempengan tembaga berangka tahun 1216 Saka (1294 Masehi), dikeluarkan setahun setelah Majapahit berdiri. Ditemukan di Gunung Butak, Desa Kemloko, Kecamatan Trawas, Kabupaten Mojokerto. Inilah sumber tertua dan paling kuat untuk peristiwa 1292 sampai 1293, karena dibuat oleh pelakunya sendiri hanya dua tahun setelah kejadian.",
+        "Isinya adalah perintah Raja Kertarajasa Jayawardhana, nama penobatan Raden Wijaya, yang menetapkan desa Kudadu sebagai sima: tanah bebas pajak yang hasilnya diperuntukkan bagi penduduknya. Anugerah itu diberikan karena pemimpin desa Kudadu telah menolong Wijaya ketika ia dikejar pasukan Jayakatwang setelah Singasari jatuh.",
+        "Di bagian pembukanya, Wijaya menyebut dirinya keturunan Narasinghamurti dan menantu Kertanagara, serta mendaftar para pejabat tinggi kerajaan, termasuk Arya Wiraraja. Bagian berikutnya menceritakan bagaimana ia diperintahkan Kertanagara menghadang musuh di utara, menang, lalu mendapati ibu kota telah jatuh; bagaimana ia melarikan diri bersama pengikutnya, dikejar, diberi makan dan disembunyikan oleh kepala desa Kudadu, sampai akhirnya menyeberang ke Madura. TODO-VERIFIKASI: rincian bagian ini perlu dicocokkan dengan edisi Brandes (Oud-Javaansche Oorkonden LXXXI) atau terjemahan Slametmuljana.",
+        "Karena dibuat untuk kepentingan raja yang baru naik takhta, prasasti ini tetap perlu dibaca dengan hati-hati: ia menonjolkan kesetiaan Wijaya kepada Kertanagara dan jasa para penolongnya, dan diam tentang hal yang tidak menguntungkan."
+      ],
+      "kutipan": {
+        "teks": "kṛtanagara duhitāsamāgamasampanna, kṛtarājasajayawarddhana nāma rājābhiṣeka — \"yang bersanding dengan putri Kertanagara, bernama penobatan Kertarajasa Jayawardhana\"",
+        "sumber": "Prasasti Kudadu (1294), lempeng IIa, alih aksara menurut edisi Brandes; terjemahan perlu dicek (TODO-VERIFIKASI)"
+      },
+      "sumber": [
+        "Prasasti Kudadu (1216 Saka / 1294 M), Museum Nasional Jakarta",
+        "J.L.A. Brandes, Oud-Javaansche Oorkonden, no. LXXXI (1913)",
+        "Slametmuljana, Menuju Puncak Kemegahan (1965), bab tentang Prasasti Kudadu"
+      ],
+      "terkait": [
+        "desa-kudadu",
+        "jayakatwang",
+        "rakryan"
+      ],
+      "dibukaOleh": "dialog:kudadu-tiba"
+    },
+    {
+      "id": "jayakatwang",
+      "judul": "Jayakatwang",
+      "jenis": "tokoh",
+      "label": "fakta",
+      "ringkas": "Penguasa Gelang-gelang yang memberontak dan meruntuhkan Singasari pada 1292, lalu dikalahkan Wijaya dan pasukan Mongol pada 1293.",
+      "isi": [
+        "Jayakatwang adalah penguasa Gelang-gelang, wilayah di sekitar Kediri yang berada di bawah Singasari. Pada 1292 ia memberontak terhadap Kertanagara. Menurut Pararaton, ia mengirim pasukan kecil menyerang dari utara sebagai pengalih, sementara pasukan utama menyerbu ibu kota dari selatan. Kertanagara tewas dan Singasari jatuh. Peristiwa ini dicatat oleh Prasasti Kudadu dan Nagarakretagama dari pihak Jawa, serta Yuan Shi dari pihak Mongol.",
+        "Setelah menang, Jayakatwang memerintah dari Daha (Kediri). Ia menerima pernyataan tunduk Raden Wijaya dan mengizinkannya membuka hutan Tarik, yang kelak menjadi Majapahit. Awal 1293, pasukan Mongol yang datang untuk menghukum Kertanagara justru diarahkan Wijaya menyerang Daha. Daha jatuh dan Jayakatwang ditawan oleh Mongol. Yuan Shi mencatat ia dibawa ke kapal; nasib akhirnya tidak pasti. TODO-VERIFIKASI: cek Yuan Shi (terjemahan Groeneveldt) tentang akhir Jayakatwang.",
+        "Motifnya bersifat tafsir. Pararaton menggambarkannya sebagai keturunan raja Kediri yang menuntut balas atas kekalahan leluhurnya, Kertajaya, dari Ken Arok pada 1222. Kalau benar, pemberontakannya bukan sekadar perebutan kekuasaan, melainkan dendam dinasti yang menunggu tujuh puluh tahun. Sumber sezaman tidak menyebut alasan ini."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Nagarakretagama (1365), pupuh 44",
+        "Pararaton (abad ke-15 sampai ke-16)",
+        "Yuan Shi, bagian tentang Jawa (terjemahan W.P. Groeneveldt, 1876)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "desa-kudadu"
+      ],
+      "dibukaOleh": "pertarungan-pertama"
+    },
+    {
+      "id": "desa-kudadu",
+      "judul": "Desa Kudadu",
+      "jenis": "tempat",
+      "label": "fakta",
+      "ringkas": "Desa yang menyembunyikan dan memberi makan Raden Wijaya saat pelarian; dianugerahi status sima pada 1294.",
+      "isi": [
+        "Kudadu adalah desa tempat Raden Wijaya dan sisa pengikutnya berlindung ketika dikejar pasukan Jayakatwang pada akhir 1292. Kepala desanya memberi mereka makan, menyembunyikan mereka, dan membantu perjalanan selanjutnya. Jasa itu dibalas dua tahun kemudian dengan Prasasti Kudadu, yang menjadikan desa ini sima, tanah bebas pajak kerajaan.",
+        "Letak persis Kudadu tidak diketahui. Prasastinya ditemukan di lereng Gunung Butak dekat Trawas, Mojokerto, tetapi prasasti sima tidak selalu ditemukan di desa yang disebutnya. Para ahli umumnya menempatkan Kudadu di Jawa Timur antara bekas ibu kota Singasari dan pantai utara, di jalur pelarian Wijaya menuju Madura. TODO-VERIFIKASI: cek usulan lokasi dalam Slametmuljana atau penelitian arkeologi terbaru.",
+        "Nama kepala desa Kudadu tidak dicatat. Dalam game ini ia mewakili rakyat biasa yang pilihannya menentukan jalannya sejarah: menolong buronan berarti mempertaruhkan seluruh desa."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Pararaton (abad ke-15 sampai ke-16)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "jayakatwang"
+      ],
+      "dibukaOleh": "area:desa-kudadu"
+    },
+    {
+      "id": "rakryan",
+      "judul": "Rakryan",
+      "jenis": "istilah",
+      "label": "fakta",
+      "ringkas": "Gelar Jawa Kuno untuk pejabat tinggi dan bangsawan; dipakai untuk para menteri utama kerajaan.",
+      "isi": [
+        "Rakryan (sering ditulis rakryan atau rakyan) adalah gelar kehormatan Jawa Kuno bagi pejabat tinggi dan kerabat istana. Prasasti Kudadu menyebut tiga menteri utama, rakryan mantri katrini: rakryan mantri hino, halu, dan sirikan, serta para rakryan lain yang menjabat patih, demang, dan kanuruhan.",
+        "Dalam percakapan, gelar ini dipakai untuk menyapa orang berkedudukan tinggi dengan hormat. Raden Wijaya, sebagai menantu raja, layak disapa demikian oleh rakyat biasa."
+      ],
+      "kutipan": {
+        "teks": "tinaḍah de rakryan mantri katriṇi, rakryan mantri hino, rakryan mantri halu, rakryan mantri sirikan — \"disampaikan oleh ketiga rakryan mantri: hino, halu, dan sirikan\"",
+        "sumber": "Prasasti Kudadu (1294), lempeng IIa"
+      },
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "P.J. Zoetmulder, Kamus Jawa Kuna-Indonesia"
+      ],
+      "terkait": [
+        "prasasti-kudadu"
+      ],
+      "dibukaOleh": "dialog:kudadu-tiba"
+    },
+    {
+      "id": "raden-wijaya",
+      "judul": "Raden Wijaya",
+      "jenis": "tokoh",
+      "label": "fakta",
+      "ringkas": "Menantu Kertanagara yang selamat dari runtuhnya Singasari dan mendirikan Majapahit pada 1293 dengan gelar Kertarajasa Jayawardhana.",
+      "isi": [
+        "Raden Wijaya, dalam prasasti disebut Nararya Sanggramawijaya, adalah bangsawan Singasari keturunan Narasinghamurti dan menantu Raja Kertanagara. Ketika Jayakatwang menyerang pada 1292, ia memimpin pasukan yang menghadang musuh di utara, menang, lalu mendapati ibu kota sudah jatuh. Semua ini ia ceritakan sendiri dalam Prasasti Kudadu (1294).",
+        "Pelariannya ke Madura, pernyataan tunduk kepada Jayakatwang, pembukaan hutan Tarik, dan siasatnya memakai pasukan Mongol untuk menjatuhkan Daha lalu mengusir Mongol itu sendiri membawanya ke takhta pada 1293. Ia dinobatkan dengan nama Kertarajasa Jayawardhana dan memerintah sampai 1309.",
+        "Tidak ada potret atau gambaran fisiknya yang bertahan. Arca Harihara dari Candi Simping diyakini sebagai perwujudannya setelah wafat, tetapi itu ikonografi dewa, bukan potret. Wajah dan pakaiannya dalam game ini adalah rekaan dari relief dan arca sezaman."
+      ],
+      "kutipan": {
+        "teks": "TODO-VERIFIKASI: kutipan Nagarakretagama pupuh 45 tentang penobatan Kertarajasa, terjemahan Slametmuljana",
+        "sumber": "Nagarakretagama (1365)"
+      },
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Nagarakretagama (1365), pupuh 44 sampai 47",
+        "Pararaton",
+        "Yuan Shi (terjemahan Groeneveldt)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "jayakatwang",
+        "madura-wiraraja"
+      ],
+      "dibukaOleh": "dialog:pantai-perahu"
+    },
+    {
+      "id": "gajah-pagon",
+      "judul": "Gajah Pagon",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "Pengikut Wijaya yang terluka di paha saat pelarian dan, menurut Pararaton, ditinggalkan di desa Pandakan untuk dirawat.",
+      "isi": [
+        "Gajah Pagon dikenal hanya dari Pararaton. Dalam pelarian dari Singasari, ia tertusuk tombak di paha dan tidak sanggup berjalan cepat. Wijaya menitipkannya kepada kepala desa Pandakan, yang bernama Macan Kuping, agar dirawat sampai sembuh.",
+        "Kisah ini tidak muncul dalam Prasasti Kudadu maupun Nagarakretagama, sehingga diberi label interpretasi: cerita dari sumber yang ditulis dua abad kemudian, mungkin berdasar tradisi lisan. Namun kisah ini menunjukkan hal yang masuk akal: rombongan Wijaya terus menyusut, dan tiap orang yang tertinggal adalah keputusan yang berat.",
+        "Dalam game, pemain boleh membawanya terus. Itu pilihan pemain, bukan catatan sejarah; Pararaton mencatat ia ditinggal di Pandakan."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton (terjemahan Padmapuspita, 1966)"
+      ],
+      "terkait": [
+        "pandakan",
+        "pararaton",
+        "nambi"
+      ],
+      "dibukaOleh": "dialog:pandakan-pagon"
+    },
+    {
+      "id": "nambi",
+      "judul": "Nambi",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "Pengikut setia Wijaya dalam pelarian, kelak menjadi patih (mahapatih) Majapahit yang pertama.",
+      "isi": [
+        "Nambi menyertai Wijaya sejak pelarian dari Singasari, menurut Pararaton. Setelah Majapahit berdiri ia diangkat menjadi patih, jabatan tertinggi di bawah raja. Prasasti Kudadu menyebut seorang patih dalam daftar pejabatnya; TODO-VERIFIKASI apakah nama Nambi tertulis di sana.",
+        "Nasibnya tragis: pada masa Jayanegara, putra Wijaya, ia dituduh memberontak dan dibunuh bersama keluarganya di Lumajang (sekitar 1316). Ini bahan bab 3 game ini.",
+        "Dalam game, Nambi adalah taktikus yang tenang, suara yang memilih jalan aman."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton",
+        "Prasasti Kudadu (1294)",
+        "Kidung Sorandaka"
+      ],
+      "terkait": [
+        "ranggalawe",
+        "lembu-sora",
+        "raden-wijaya"
+      ],
+      "dibukaOleh": "dialog:hutan-pembukaan"
+    },
+    {
+      "id": "ranggalawe",
+      "judul": "Ranggalawe",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "Putra Arya Wiraraja, pengikut Wijaya yang paling berapi-api; kelak memberontak dan tewas pada 1295.",
+      "isi": [
+        "Ranggalawe adalah putra Arya Wiraraja dari Madura. Menurut Pararaton dan Kidung Ranggalawe, ia bergabung dengan Wijaya membawa orang-orang Madura saat membuka hutan Tarik, dan berperan besar dalam pertempuran melawan Daha dan Mongol.",
+        "Setelah Majapahit berdiri, ia kecewa karena jabatan patih diberikan kepada Nambi, bukan kepadanya. Ia memberontak di Tuban dan tewas dalam pertempuran di Sungai Tambak Beras melawan Kebo Anabrang, sekitar 1295. Ini bahan bab 2.",
+        "Dalam game, ia suara yang selalu memilih cepat dan berani. TODO-VERIFIKASI: apakah Ranggalawe sudah ikut sejak pelarian 1292 atau baru bergabung di Madura; Pararaton menyiratkan yang kedua. Kehadirannya di pelarian adalah penyederhanaan game."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton",
+        "Kidung Ranggalawe"
+      ],
+      "terkait": [
+        "nambi",
+        "lembu-sora",
+        "madura-wiraraja"
+      ],
+      "dibukaOleh": "dialog:hutan-pembukaan"
+    },
+    {
+      "id": "lembu-sora",
+      "judul": "Lembu Sora",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "Prajurit senior pengikut Wijaya, paman Ranggalawe; kelak dibunuh setelah pemberontakan Ranggalawe.",
+      "isi": [
+        "Lembu Sora adalah pengikut Wijaya sejak pelarian, menurut Pararaton. Dalam pertempuran melawan Daha ia dikenal sebagai prajurit tangguh. Setelah Majapahit berdiri ia menjabat sebagai salah satu pejabat tinggi.",
+        "Pada pemberontakan Ranggalawe, keponakannya, Sora membunuh Kebo Anabrang yang telah menewaskan Ranggalawe. Perbuatan itu kelak menjadi alasan untuk menyingkirkannya; ia dibunuh di istana sekitar 1300. Kidung Sorandaka mengisahkan hal ini.",
+        "Dalam game, ia suara hati nurani di antara pengikut: yang mengingatkan bahwa pasukan adalah orang-orangnya, bukan jumlahnya."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton",
+        "Kidung Sorandaka"
+      ],
+      "terkait": [
+        "nambi",
+        "ranggalawe"
+      ],
+      "dibukaOleh": "dialog:hutan-pembukaan"
+    },
+    {
+      "id": "pararaton",
+      "judul": "Pararaton",
+      "jenis": "sumber",
+      "label": "interpretasi",
+      "ringkas": "Kitab Jawa Kuno abad ke-15 sampai ke-16 yang paling rinci mengisahkan pelarian Wijaya, tetapi bercampur legenda.",
+      "isi": [
+        "Pararaton, Kitab Para Raja, adalah naskah berbahasa Jawa Tengahan yang ditulis sekitar abad ke-15 sampai ke-16, dua abad setelah peristiwa 1292. Isinya dari Ken Arok sampai akhir Majapahit. Bagian tentang pelarian Wijaya adalah yang paling rinci di antara semua sumber: nama-nama pengikut, Gajah Pagon yang terluka, pertolongan desa, penyeberangan ke Madura, dan nasihat Wiraraja.",
+        "Karena jaraknya jauh dari peristiwa dan gayanya seperti babad, rincian Pararaton diberi label interpretasi dalam game ini, kecuali kalau sumber sezaman mendukungnya. Nama Majapahit dari buah maja yang pahit, misalnya, hanya dari Pararaton dan diberi label legenda.",
+        "Cara membacanya: Pararaton bagus untuk suasana dan adegan, Prasasti Kudadu untuk fakta."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton, edisi Brandes (1896; edisi kedua Krom, 1920)",
+        "Terjemahan Indonesia: Ki J. Padmapuspita (1966)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "gajah-pagon"
+      ],
+      "dibukaOleh": "dialog:pandakan-pagon"
+    },
+    {
+      "id": "sima",
+      "judul": "Sima",
+      "jenis": "istilah",
+      "label": "fakta",
+      "ringkas": "Tanah atau desa yang dibebaskan dari pajak kerajaan oleh raja, biasanya sebagai hadiah atas jasa atau untuk menopang bangunan suci.",
+      "isi": [
+        "Sima adalah status istimewa yang diberikan raja kepada sebuah desa atau tanah: pajak yang seharusnya masuk ke kerajaan dialihkan untuk keperluan tertentu, misalnya memelihara candi, atau diberikan kepada penduduknya sebagai anugerah. Penetapan sima diumumkan lewat prasasti pada batu atau tembaga, dengan tanggal, saksi, dan kutukan bagi yang melanggar.",
+        "Prasasti Kudadu adalah prasasti sima: Kertarajasa menjadikan Kudadu sima sebagai balas jasa atas pertolongan di malam pelarian. Sebagian besar pengetahuan kita tentang Jawa kuno berasal dari ribuan prasasti sima semacam ini."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Boechari, Melacak Sejarah Kuno Indonesia Lewat Prasasti (2012)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "desa-kudadu"
+      ],
+      "dibukaOleh": "dialog:kudadu-malam"
+    },
+    {
+      "id": "madura-wiraraja",
+      "judul": "Arya Wiraraja dan Sumenep",
+      "jenis": "tokoh",
+      "label": "fakta",
+      "ringkas": "Penguasa Sumenep, Madura, yang menampung Wijaya dan menjadi penasihat siasatnya; namanya tercatat dalam Prasasti Kudadu.",
+      "isi": [
+        "Arya Wiraraja adalah penguasa Sumenep di Madura timur. Menurut Pararaton, ia dahulu pejabat Singasari yang disingkirkan Kertanagara ke Madura, dan ia pula yang berkirim surat kepada Jayakatwang sebelum pemberontakan. Ketika Wijaya menyeberang, Wiraraja menampungnya, lalu menyarankan siasat berpura-pura tunduk kepada Jayakatwang dan meminta hutan Tarik.",
+        "Perannya sebagai tokoh sezaman dipastikan oleh Prasasti Kudadu, yang menyebut Sang Arya Wiraraja di antara para menteri Kertarajasa. Rincian siasatnya hanya dari Pararaton. Setelah Majapahit berdiri ia diberi wilayah Lumajang. TODO-VERIFIKASI: perjanjian pembagian wilayah dengan Wijaya menurut Pararaton.",
+        "Madura pada 1292: pulau dengan hubungan erat ke Jawa Timur, pelabuhan kecil, dan penduduk yang kelak menjadi tenaga pembuka hutan Tarik."
+      ],
+      "kutipan": {
+        "teks": "mapasanggahan sang aryya wîrarāja — \"yang bergelar Sang Arya Wiraraja\"",
+        "sumber": "Prasasti Kudadu (1294), lempeng IIa, alih aksara edisi Brandes"
+      },
+      "sumber": [
+        "Prasasti Kudadu (1294), lempeng IIa",
+        "Pararaton",
+        "Nagarakretagama"
+      ],
+      "terkait": [
+        "raden-wijaya",
+        "ranggalawe"
+      ],
+      "dibukaOleh": "dialog:pantai-perahu"
+    },
+    {
+      "id": "prajurit-singasari",
+      "judul": "Prajurit Singasari",
+      "jenis": "benda",
+      "label": "interpretasi",
+      "ringkas": "Pasukan kerajaan Singasari: prajurit kaki bertombak, keris, perisai rotan, dan pemanah, tanpa zirah berat.",
+      "isi": [
+        "Tidak ada catatan tertulis tentang susunan pasukan Singasari. Gambarannya disusun dari relief Candi Jago (abad ke-13) dan Candi Penataran: prajurit bertelanjang dada dengan kain, bersenjata tombak, keris, pedang pendek, perisai, dan busur. Zirah hampir tidak terlihat; pelindung paling banyak berupa ikat kepala dan kain tebal.",
+        "Pasukan utara yang dipimpin Wijaya pada 1292 adalah pasukan kerajaan yang menang di medannya sendiri, lalu tercerai-berai setelah ibu kota jatuh. Prajurit yang tercecer dan bersembunyi di desa-desa, seperti yang ditemukan pemain di lumbung Kudadu, adalah rekaan yang masuk akal, bukan catatan."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Relief Candi Jago dan Candi Penataran",
+        "Prasasti Kudadu (1294)"
+      ],
+      "terkait": [
+        "raden-wijaya",
+        "jayakatwang"
+      ],
+      "dibukaOleh": "dialog:lumbung-prajurit"
+    },
+    {
+      "id": "pandakan",
+      "judul": "Desa Pandakan",
+      "jenis": "tempat",
+      "label": "interpretasi",
+      "ringkas": "Desa tempat Gajah Pagon ditinggalkan menurut Pararaton; dalam game diletakkan di jalur sebelum Kudadu.",
+      "isi": [
+        "Pandakan disebut Pararaton sebagai desa tempat Wijaya menitipkan Gajah Pagon yang terluka kepada kepala desanya, Macan Kuping. Lokasinya tidak diketahui dan nama itu tidak muncul di prasasti mana pun.",
+        "Dalam game, Pandakan dijadikan dukuh kecil di jalur menuju Kudadu supaya keputusan tentang Gajah Pagon bisa dimainkan di area yang sama. Urutan sebenarnya dalam Pararaton belum dipastikan (TODO-VERIFIKASI)."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Pararaton (terjemahan Padmapuspita)"
+      ],
+      "terkait": [
+        "gajah-pagon",
+        "desa-kudadu"
+      ],
+      "dibukaOleh": "dialog:pandakan-pagon"
+    }
+  ]
+}

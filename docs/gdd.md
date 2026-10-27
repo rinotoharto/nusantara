@@ -4,7 +4,7 @@ Oct 27, 2026 · @rino
 
 ## Ringkasan konsep
 
-Game aksi-petualangan orang ketiga berbasis web, 15 sampai 20 menit permainan untuk bab pertama, mengikuti Raden Wijaya dari runtuhnya Singasari (1292) sampai berdirinya Majapahit (1293). Pemain memainkan Raden Wijaya sendiri, bukan tokoh fiktif, dan setiap misi berpijak pada peristiwa yang tercatat dalam sumber sejarah.
+Game aksi-petualangan orang ketiga berbasis web, sekitar 90 menit permainan untuk bab pertama, mengikuti Raden Wijaya dari runtuhnya Singasari (1292) sampai berdirinya Majapahit (1293). Pemain memainkan Raden Wijaya sendiri, bukan tokoh fiktif, dan setiap misi berpijak pada peristiwa yang tercatat dalam sumber sejarah.
 
 Judul: seri **Nusantara**, jilid pertama **Nusantara: Rise of Majapahit** (judul Indonesia untuk pemasaran lokal: *Lahirnya Majapahit*). Jilid berikutnya mengikuti pola yang sama, misalnya *Nusantara: Sumpah Palapa*. Kata Nusantara sendiri berasal dari masa Majapahit (Sumpah Palapa, Nagarakretagama) dan menjadi entri ensiklopedia pertama yang dibuka pemain.
 
@@ -32,7 +32,7 @@ Rangkaian peristiwa di bawah ini disusun dari ingatan saya atas sumber-sumber ut
 | 1292 | Jayakatwang, bupati Gelang-Gelang, memberontak; pasukannya menyerang Singasari dari utara dan selatan | Pararaton, Nagarakretagama, Prasasti Kudadu | Tinggi untuk peristiwanya; detail taktik dari Pararaton |
 | 1292 | Raden Wijaya memimpin pasukan utara, menang, lalu mendapati ibu kota jatuh dan Kertanegara tewas | Pararaton, Prasasti Kudadu | Tinggi; Prasasti Kudadu adalah kesaksian Wijaya sendiri |
 | 1292 | Pelarian Wijaya bersama pengikut setia, dibantu kepala desa Kudadu, menyeberang ke Madura | Prasasti Kudadu (1294), Pararaton | Tinggi; jumlah pengikut dan kisah heroiknya dari Pararaton, lebih rendah |
-| 1292 | Arya Wiraraja menampung Wijaya di Sumenep dan menyarankan berpura-pura tunduk kepada Jayakatwang | Pararaton | Sedang, hanya dari sumber yang lebih muda |
+| 1292 | Arya Wiraraja menampung Wijaya di Sumenep dan menyarankan berpura-pura tunduk kepada Jayakatwang | Pararaton; nama Wiraraja sebagai mantri tercatat di Prasasti Kudadu (1294) | Tokohnya tinggi (sezaman); perannya di Sumenep sedang, hanya dari Pararaton |
 | 1292 | Jayakatwang mengizinkan Wijaya membuka hutan Tarik; nama Majapahit lahir dari buah maja yang pahit | Pararaton | Peristiwa sedang; asal nama tergolong legenda |
 | Awal 1293 | Armada Mongol (Shi Bi, Ike Mese, Gao Xing; sekitar 20.000 prajurit) mendarat di pesisir Jawa Timur dekat Tuban | Yuan Shi | Tinggi; angka pasukan perlu dicek |
 | 1293 | Wijaya menyatakan tunduk kepada Mongol dan mengajak mereka menyerang Daha (Kediri) | Yuan Shi, Pararaton | Tinggi, dua tradisi sumber sepakat |
@@ -42,7 +42,7 @@ Rangkaian peristiwa di bawah ini disusun dari ingatan saya atas sumber-sumber ut
 
 Sumber yang wajib dibaca sebelum menulis naskah:
 
-- Prasasti Kudadu (1294): kesaksian langsung Wijaya tentang pelariannya. Sumber paling kuat untuk bab ini.
+- Prasasti Kudadu (1294): kesaksian langsung Wijaya tentang pelariannya. Sumber paling kuat untuk bab ini. Edisi: Brandes, Oud-Javaansche Oorkonden LXXXI; terjemahan Indonesia dalam Slametmuljana, Menuju Puncak Kemegahan. Alih aksara di Wikipedia Indonesia tampak mengikuti Brandes tapi terjemahannya tidak bisa diandalkan. Memuat nama Wiraraja sebagai mantri dan menyebut Wijaya sebagai menantu Kertanagara.
 - Yuan Shi, bagian tentang Jawa (Jawa/Zhao-wa) dan biografi Shi Bi serta Gao Xing: sudut pandang Mongol, lengkap dengan kronologi ekspedisi.
 - Nagarakretagama (Mpu Prapanca, 1365): sudut pandang resmi istana Majapahit, singkat untuk periode ini.
 - Pararaton (sekitar abad ke-15 sampai ke-16): paling rinci dan dramatis, tapi bercampur legenda; cocok untuk adegan, hati-hati untuk fakta.
@@ -52,15 +52,30 @@ Sumber yang wajib dibaca sebelum menulis naskah:
 
 ## Cerita dan struktur misi
 
-Bab ini terdiri dari tujuh misi berurutan, masing-masing 2 sampai 4 menit, yang bersama-sama membentuk satu busur: kehilangan, bertahan, menyusun siasat, dan menang dengan kecerdikan, bukan kekuatan. Tema yang ditonjolkan: Wijaya mengalahkan dua musuh yang jauh lebih kuat dengan kesabaran dan sekutu.
+Bab ini terdiri dari tujuh misi berurutan dengan total sekitar 90 menit (prolog 3 menit, misi 2 sampai 7 masing-masing 10 sampai 18 menit), yang bersama-sama membentuk satu busur: kehilangan, bertahan, menyusun siasat, dan menang dengan kecerdikan, bukan kekuatan. Tema yang ditonjolkan: Wijaya mengalahkan dua musuh yang jauh lebih kuat dengan kesabaran dan sekutu.
 
-1. **Prolog: Utusan yang dihina (1289).** Adegan sinematik singkat di istana Singasari: Kertanegara menolak tunduk dan menghukum utusan Meng Qi. Pemain belum mengendalikan apa pun; adegan ini menanam benih konflik Mongol. Ditandai sebagai fakta bersumber (Yuan Shi).
-2. **Serangan dari utara (1292).** Pemain sebagai Wijaya memimpin pasukan menghadang pasukan Jayakatwang di utara. Tutorial pertarungan dan komando pasukan sederhana. Diakhiri kabar bahwa serangan utara hanyalah pengalih dan ibu kota telah jatuh.
-3. **Malam pelarian.** Misi menyelinap dan bertahan: Wijaya dan belasan pengikut (Ranggalawe, Nambi, Lembu Sora, Gajah Pagon yang terluka) melarikan diri lewat desa-desa, dibantu kepala desa Kudadu. Pemain memilih rute dan membagi perbekalan; pilihan tidak mengubah hasil sejarah, hanya kondisi pengikut. Ensiklopedia membuka Prasasti Kudadu.
-4. **Sumenep.** Misi dialog dan penjelajahan di kediaman Arya Wiraraja. Pemain menyusun rencana berpura-pura tunduk kepada Jayakatwang. Di sini pemain belajar politik: tunduk sebagai siasat, bukan kekalahan.
-5. **Membuka hutan Tarik.** Misi membangun: pemain memimpin orang Madura membuka hutan, mendirikan permukiman, dan mengatur pertahanan. Buah maja pahit muncul sebagai anekdot dan ditandai sebagai legenda dari Pararaton. Di akhir misi, kabar armada asing mendarat di Tuban.
-6. **Tamu dari utara (awal 1293).** Wijaya menemui Ike Mese dan menawarkan diri bergabung menyerang Daha. Dialog dengan pilihan nada, lalu pertempuran besar merebut Daha bersama pasukan Mongol. Jayakatwang menyerah.
-7. **Siasat terakhir.** Puncak bab: Wijaya memisahkan diri, menyergap pengawal Mongol di Majapahit, lalu memukul pasukan utama dalam perjalanan kembali ke pantai. Pertarungan berlapis dengan penyergapan di sawah dan tepi sungai. Diakhiri sinematik penobatan Kertarajasa Jayawardhana dan ringkasan apa yang terjadi selanjutnya.
+1. **Prolog: Utusan yang dihina (1289), sekitar 3 menit.** Adegan sinematik singkat di istana Singasari: Kertanegara menolak tunduk dan menghukum utusan Meng Qi. Pemain belum mengendalikan apa pun; adegan ini menanam benih konflik Mongol. Ditandai sebagai fakta bersumber (Yuan Shi).
+2. **Serangan dari utara (1292), 10 sampai 12 menit.** Pemain sebagai Wijaya memimpin pasukan menghadang pasukan Jayakatwang di utara. Tutorial pertarungan dan komando pasukan sederhana. Diakhiri kabar bahwa serangan utara hanyalah pengalih dan ibu kota telah jatuh.
+3. **Malam pelarian, 15 sampai 18 menit.** Misi menyelinap dan bertahan: Wijaya dan belasan pengikut (Ranggalawe, Nambi, Lembu Sora, Gajah Pagon yang terluka) melarikan diri lewat desa-desa, dibantu kepala desa Kudadu. Pemain memilih rute dan membagi perbekalan; pilihan tidak mengubah hasil sejarah, hanya kondisi pengikut. Ensiklopedia membuka Prasasti Kudadu.
+4. **Sumenep, 10 sampai 12 menit.** Misi dialog dan penjelajahan di kediaman Arya Wiraraja. Pemain menyusun rencana berpura-pura tunduk kepada Jayakatwang. Di sini pemain belajar politik: tunduk sebagai siasat, bukan kekalahan.
+5. **Membuka hutan Tarik, 12 sampai 15 menit.** Misi membangun: pemain memimpin orang Madura membuka hutan, mendirikan permukiman, dan mengatur pertahanan. Buah maja pahit muncul sebagai anekdot dan ditandai sebagai legenda dari Pararaton. Di akhir misi, kabar armada asing mendarat di Tuban.
+6. **Tamu dari utara (awal 1293), 12 sampai 15 menit.** Wijaya menemui Ike Mese dan menawarkan diri bergabung menyerang Daha. Dialog dengan pilihan nada, lalu pertempuran besar merebut Daha bersama pasukan Mongol. Jayakatwang menyerah.
+7. **Siasat terakhir, 15 sampai 18 menit.** Puncak bab: Wijaya memisahkan diri, menyergap pengawal Mongol di Majapahit, lalu memukul pasukan utama dalam perjalanan kembali ke pantai. Pertarungan berlapis dengan penyergapan di sawah dan tepi sungai. Diakhiri sinematik penobatan Kertarajasa Jayawardhana dan ringkasan apa yang terjadi selanjutnya.
+
+Tantangan berpikir: selain tantangan refleks (bertarung, menyelinap), setiap misi memuat satu tantangan keputusan yang berpijak pada peristiwa tercatat. Keputusan di misi awal terasa di misi akhir, sehingga tujuh misi terasa satu kesatuan. Ini juga yang membedakan Wijaya: ia menang dengan siasat.
+
+| Misi | Tantangan berpikir | Yang dipikirkan pemain | Terasa di |
+| --- | --- | --- | --- |
+| 2. Serangan dari utara | Komando medan: tiga regu (tahan, maju, sergap) melawan pasukan Jayakatwang yang berganti formasi | Kapan menahan, kapan menyergap; menang dengan banyak korban berarti pengikut lebih sedikit saat pelarian | Misi 3 |
+| 3. Malam pelarian | Manajemen rombongan: belasan pengikut, perbekalan terbatas, Gajah Pagon terluka; pilih rute sungai (cepat, patroli ketat) atau bukit (aman, melelahkan) | Meninggalkan Gajah Pagon di Kudadu seperti dicatat Pararaton atau membawanya terus dengan risiko; hasil sejarah tetap, kondisi rombongan berubah | Misi 4 (jumlah dan keadaan pengikut yang tiba di Sumenep) |
+| 4. Sumenep | Teka-teki politik: menyusun pesan tunduk kepada Jayakatwang dari potongan kalimat; Wiraraja menilai terlalu lemah (dicurigai) atau terlalu angkuh (ditolak) | Tunduk sebagai siasat; salah susun berarti mengulang dengan petunjuk, bukan game over | Misi 5 (luas lahan yang diizinkan) |
+| 5. Hutan Tarik | Tata permukiman: lahan terbatas, urutan bangun (lumbung atau pagar dulu), tenaga orang Madura dibagi antara membuka hutan dan berjaga | Trade-off yang nyata; pagar dan jalur yang dibangun menjadi medan penyergapan kelak | Misi 7 |
+| 6. Tamu dari utara | Perundingan: menebak apa yang Ike Mese inginkan (tunduk, pemandu, upeti) dari petunjuk yang muncul sebelumnya | Membaca lawan bicara, bukan memilih jawaban benar dari daftar | Misi 7 (seberapa waspada pengawal Mongol) |
+| 7. Siasat terakhir | Rencana penyergapan: memilih titik sergap di peta (sawah, tepi sungai, hutan) dan membagi pasukan sebelum bertempur, lalu memainkannya | Menggabungkan medan dari misi 5, komando dari misi 2, dan siasat dari misi 4 | Penutup bab |
+
+Tujuan pilihan: tiap area semi-terbuka memuat 2 sampai 3 tujuan pilihan (menolong warga, mencari jalur lain, menemukan pecahan relief yang membuka entri Kitab). Pemain yang menjelajah mendapat misi lebih panjang; yang bergegas tetap bisa menyelesaikan tujuan utama. Alasan main ulang: nilai per misi (tanpa ketahuan, tanpa luka, semua entri Kitab terbuka) dan kuis.
+
+Tingkat kesulitan: **Prajurit** (jendela tangkis lebih longgar, petunjuk siasat muncul saat pemain terhenti lama) untuk pelajar SMP, dan **Senapati** (tanpa petunjuk, lawan lebih tajam, perbekalan lebih ketat) untuk yang ingin ditantang. Keduanya mengakses isi yang sama.
 
 Benang Gayatri: putri-putri Kertanegara, termasuk Gayatri, tampil di prolog sebagai bagian keluarga istana, lalu dikabarkan tertawan di Daha pada akhir misi 2. Kabar ini memberi alasan pribadi bagi penyerbuan Daha di misi 6, yang ditutup dengan pembebasan mereka. Pernikahan dengan Wijaya dan peran besar Gayatri kelak diisyaratkan di epilog, bukan dimainkan di bab ini.
 
@@ -70,16 +85,20 @@ Aturan pilihan pemain: pilihan memengaruhi jalan menuju peristiwa (rute, nada di
 
 ## Rencana bab berikutnya
 
-Satu judul, *Nusantara: Rise of Majapahit*, berisi beberapa bab yang dirilis bertahap seperti episode. Bab 1 sengaja pendek (15 sampai 20 menit) karena fungsinya membuktikan alur produksi; bab berikutnya bisa lebih panjang karena sistem, lingkungan, dan karakter sudah ada. Pemain lama melanjutkan dari simpanan bab sebelumnya; pemain baru bisa mulai dari bab mana pun dengan ringkasan relief.
+Satu judul, *Nusantara: Rise of Majapahit*, berisi enam bab yang dirilis bertahap seperti episode, dari berdirinya Majapahit sampai puncaknya di masa Hayam Wuruk. Target satu judul lengkap adalah 9 sampai 12 jam; bab 1 sekitar 90 menit karena fungsinya membuktikan alur produksi, dan bab berikutnya bisa lebih panjang karena sistem, lingkungan, dan karakter sudah ada. Pemain lama melanjutkan dari simpanan bab sebelumnya; pemain baru bisa mulai dari bab mana pun dengan ringkasan relief.
 
 | Bab | Periode | Tokoh dimainkan | Inti cerita | Catatan |
 | --- | --- | --- | --- | --- |
 | 1 | 1292 sampai 1293 | Raden Wijaya | Runtuhnya Singasari, pelarian, siasat terhadap Jayakatwang dan Mongol, berdirinya Majapahit | Sedang dikerjakan |
 | 2 | 1295 sampai 1300 | Raden Wijaya | Pemberontakan Ranggalawe lalu Lembu Sora: sahabat seperjuangan dari pelarian menjadi lawan | Drama kuat karena pemain sudah kenal mereka; sumber utama Pararaton dan Kidung Ranggalawe, perlu ditandai sebagai interpretasi |
-| 3 | 1309 sampai 1319 | Nambi, lalu Gajah Mada | Masa Jayanegara, pemberontakan Nambi dan Kuti, Gajah Mada muncul sebagai bekel Bhayangkara menyelamatkan raja ke Badander | Pergantian tokoh dimainkan di tengah bab |
+| 3 | 1309 sampai 1319 | Nambi, lalu Gajah Mada | Masa Jayanegara: pemberontakan Nambi dan Kuti, Gajah Mada muda sebagai bekel Bhayangkara menyelamatkan raja ke Badander | Pergantian tokoh dimainkan di tengah bab; sistem jurus dirancang per tokoh |
 | 4 | 1328 sampai 1336 | Gajah Mada | Tribhuwana Tunggadewi naik takhta, pemberontakan Sadeng dan Keta, Sumpah Palapa | Gayatri sebagai penentu di balik takhta, menutup benang dari bab 1 |
+| 5 | 1343 sampai 1357 | Gajah Mada | Ekspansi ke Bali, Sumatra, dan Nusantara; ditutup tragedi Bubat yang memisahkan Gajah Mada dan Hayam Wuruk | Lebih banyak diplomasi dan pelayaran daripada pertempuran; Bubat sensitif (Jawa dan Sunda), sumbernya lemah (Kidung Sunda, Pararaton), wajib ditandai interpretasi dan dibaca pembaca Sunda sebelum rilis |
+| 6 | 1359 sampai 1389 | Hayam Wuruk | Puncak Majapahit: perjalanan keliling Jawa Timur yang dicatat Nagarakretagama (1359), kehidupan istana, wafatnya Gajah Mada (1364), ditutup wafatnya Hayam Wuruk (1389) | Bab penutup dan sorotan utama judul ini: Nagarakretagama sebagai sumber sezaman paling kaya; mekanik berpusat pada pemerintahan, upacara, dan perjalanan, bukan perang |
 
-Semua tabel di atas adalah rencana kasar dan belum diverifikasi ke sumber; tiap bab mendapat tabel sejarah dan daftar sumber sendiri seperti bab 1 sebelum naskahnya ditulis. Yang ditambah tiap bab: pohon skill sederhana mulai bab 2, jenis lawan baru, dan satu mekanik baru per bab (misalnya komando pasukan lebih dalam di bab 2, penyelidikan istana di bab 3).
+Masa kemunduran setelah 1389 (Perang Paregreg 1404 sampai 1406, raja-raja terakhir, jatuhnya ke Demak) tidak masuk judul ini; nadanya berbeda dan lebih cocok menjadi judul kedua seri Nusantara, misalnya *Nusantara: Senja Majapahit*.
+
+Semua tabel di atas adalah rencana kasar dan belum diverifikasi ke sumber; tiap bab mendapat tabel sejarah dan daftar sumber sendiri seperti bab 1 sebelum naskahnya ditulis. Yang ditambah tiap bab: pohon skill sederhana per tokoh mulai bab 2, jenis lawan baru, dan satu mekanik baru per bab (misalnya komando pasukan lebih dalam di bab 2, penyelidikan istana di bab 3, pelayaran dan diplomasi di bab 5, pemerintahan dan upacara di bab 6).
 
 ## Tokoh
 
@@ -248,13 +267,13 @@ Risiko teknis terbesar adalah performa di browser saat pertempuran dengan puluha
 
 ## Rencana kerja untuk pengembang solo
 
-Perkiraan 5 sampai 7 bulan kerja paruh waktu untuk bab 1, dengan satu syarat lolos di tiap tahap sebelum lanjut ke tahap berikutnya.
+Perkiraan 8 sampai 10 bulan kerja paruh waktu untuk bab 1 berdurasi 90 menit, dengan satu syarat lolos di tiap tahap sebelum lanjut ke tahap berikutnya.
 
 1. **Riset dan naskah (minggu 1 sampai 4).** Baca sumber, verifikasi tabel sejarah, tulis naskah tujuh misi dan 30 entri ensiklopedia pertama. Syarat lolos: naskah dibaca minimal satu orang yang paham sejarah Jawa dan tidak menemukan kesalahan fakta.
 2. **Prototipe tanpa aset (minggu 3 sampai 8).** Kapsul dan balok: gerak, kamera, pertarungan, dialog, dan satu misi utuh (misi 3, pelarian) dalam bentuk kasar. Syarat lolos: tiga orang memainkan misi 3 dan menyebut rasanya menyenangkan tanpa diminta.
 3. **Alur aset (minggu 7 sampai 12).** Satu lingkungan (desa dan sawah) dan satu karakter (Wijaya) sampai tuntas, termasuk animasi dan performa di browser. Syarat lolos: misi 3 jalan 30 fps di laptop biasa dengan aset jadi.
-4. **Produksi (bulan 4 sampai 6).** Tujuh misi, sisa karakter, ensiklopedia lengkap, audio. Satu misi per dua sampai tiga minggu.
-5. **Uji dan rilis (bulan 6 sampai 7).** Playtest dengan pelajar dan guru, perbaikan, rilis bab 1 di itch.io sebagai versi awal, kumpulkan umpan balik untuk bab berikutnya.
+4. **Produksi (bulan 4 sampai 9).** Tujuh misi, sisa karakter, ensiklopedia lengkap, audio. Satu misi per tiga sampai empat minggu, karena tiap misi kini memuat satu tantangan berpikir dan tujuan pilihan.
+5. **Uji dan rilis (bulan 9 sampai 10).** Playtest dengan pelajar dan guru, perbaikan, rilis bab 1 di itch.io sebagai versi awal, kumpulkan umpan balik untuk bab berikutnya.
 
 Pembagian kerja: Claude Code untuk kode dan skrip Blender, Fable untuk naskah, dialog, prompt gambar konsep, dan dokumen; Anda untuk arah kreatif, verifikasi sejarah, dan pengujian; alat AI 3D dan audio untuk aset.
 
