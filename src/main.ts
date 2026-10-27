@@ -6,7 +6,7 @@ import { Pemain } from './character/player';
 import { KameraOrangKetiga } from './character/camera';
 import { Hud } from './ui/hud';
 import { PertarunganPemain } from './combat/player-combat';
-import { BonekaLatihan } from './combat/dummy';
+import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
@@ -30,9 +30,7 @@ scene.add(pemain.grup);
 
 const tarung = new PertarunganPemain(pemain);
 
-// Boneka latihan sementara (tahap A) di utara titik awal; diganti lawan sungguhan di tahap B.
-const boneka = new BonekaLatihan(dunia.tabrakan, 0, 29);
-scene.add(boneka.grup);
+const lawan = new PengelolaLawan(dunia.tabrakan, scene);
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
@@ -59,10 +57,10 @@ renderer.setAnimationLoop(() => {
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
-  boneka.perbarui(dt, pemain, tarung);
+  lawan.perbarui(dt, pemain, tarung);
 
   // Kamera bertarung selama ada lawan dekat, bertahan sebentar setelah lawan menjauh.
-  const jarakLawan = boneka.posisi.distanceTo(pemain.posisi);
+  const jarakLawan = lawan.jarakTerdekat(pemain.posisi);
   if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
@@ -77,5 +75,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, boneka, input };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, input };
 }

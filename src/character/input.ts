@@ -22,7 +22,8 @@ export class Input {
     window.addEventListener('blur', () => this.lepasSemua());
 
     kanvas.addEventListener('click', () => {
-      if (!this.terkunci) kanvas.requestPointerLock();
+      // Beberapa lingkungan (mis. iframe) menolak pointer lock; abaikan penolakannya.
+      if (!this.terkunci) Promise.resolve(kanvas.requestPointerLock()).catch(() => undefined);
     });
     kanvas.addEventListener('contextmenu', (e) => e.preventDefault());
     document.addEventListener('mousedown', (e) => {
