@@ -1,0 +1,52 @@
+{
+  "entri": [
+    {
+      "id": "prasasti-kudadu",
+      "judul": "Prasasti Kudadu",
+      "jenis": "sumber",
+      "label": "fakta",
+      "ringkas": "TODO-SEJARAH: satu kalimat ringkas tentang Prasasti Kudadu untuk tooltip.",
+      "isi": ["TODO-SEJARAH: paragraf 1 Prasasti Kudadu.", "TODO-SEJARAH: paragraf 2 Prasasti Kudadu."],
+      "kutipan": { "teks": "TODO-SEJARAH: kutipan singkat dari prasasti.", "sumber": "Prasasti Kudadu (1294), terjemahan TODO-SEJARAH" },
+      "sumber": ["Prasasti Kudadu (1294)", "Pararaton"],
+      "terkait": ["jayakatwang", "desa-kudadu", "rakryan"],
+      "dibukaOleh": "dialog:kudadu-tiba"
+    },
+    {
+      "id": "jayakatwang",
+      "judul": "Jayakatwang",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "TODO-SEJARAH: satu kalimat ringkas tentang Jayakatwang.",
+      "isi": ["TODO-SEJARAH: paragraf 1 Jayakatwang.", "TODO-SEJARAH: paragraf 2 Jayakatwang."],
+      "kutipan": null,
+      "sumber": ["Pararaton", "Nagarakretagama"],
+      "terkait": ["prasasti-kudadu", "desa-kudadu"],
+      "dibukaOleh": "pertarungan-pertama"
+    },
+    {
+      "id": "desa-kudadu",
+      "judul": "Desa Kudadu",
+      "jenis": "tempat",
+      "label": "fakta",
+      "ringkas": "TODO-SEJARAH: satu kalimat ringkas tentang desa Kudadu.",
+      "isi": ["TODO-SEJARAH: paragraf 1 desa Kudadu.", "TODO-SEJARAH: paragraf 2 desa Kudadu."],
+      "kutipan": null,
+      "sumber": ["Prasasti Kudadu (1294)"],
+      "terkait": ["prasasti-kudadu", "jayakatwang"],
+      "dibukaOleh": "area:desa-kudadu"
+    },
+    {
+      "id": "rakryan",
+      "judul": "Rakryan",
+      "jenis": "istilah",
+      "label": "fakta",
+      "ringkas": "TODO-SEJARAH: arti gelar rakryan dalam satu kalimat.",
+      "isi": ["TODO-SEJARAH: paragraf tentang gelar rakryan."],
+      "kutipan": null,
+      "sumber": ["Prasasti Kudadu (1294)"],
+      "terkait": ["prasasti-kudadu"],
+      "dibukaOleh": "dialog:kudadu-tiba"
+    }
+  ]
+}

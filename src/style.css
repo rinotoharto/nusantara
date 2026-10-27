@@ -195,3 +195,162 @@ html, body {
 .layar-mati-tombol:hover {
   background: #ffe6bd;
 }
+
+/* Ukuran huruf teks bacaan (dialog, Kitab); diubah dari pengaturan */
+body.huruf-kecil { --skala-huruf: 0.85; }
+body.huruf-sedang { --skala-huruf: 1; }
+body.huruf-besar { --skala-huruf: 1.25; }
+
+/* Dialog */
+body.dialog-aktif .hud,
+body.dialog-aktif .hud-vignet {
+  display: none !important;
+}
+.dialog-lapis {
+  position: fixed;
+  inset: 0;
+  display: none;
+  cursor: pointer;
+  user-select: none;
+  color: #f4e9d4;
+}
+.dialog-lapis.tampil {
+  display: block;
+}
+.dialog-lapis::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 9vh;
+  background: linear-gradient(rgba(6, 3, 1, 0.9), rgba(6, 3, 1, 0));
+}
+.dialog-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 36px 12% 30px;
+  background: linear-gradient(rgba(6, 3, 1, 0), rgba(6, 3, 1, 0.88) 30%);
+}
+.dialog-nama {
+  color: #ffd79a;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dialog-teks {
+  font-size: calc(20px * var(--skala-huruf, 1));
+  line-height: 1.5;
+  min-height: 3em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+.istilah {
+  color: #ffe6bd;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+.istilah:hover {
+  color: #fff3c4;
+  text-decoration-style: solid;
+}
+.dialog-petunjuk {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.6;
+  white-space: pre;
+}
+.dialog-pilihan {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.dialog-pilihan.tampil {
+  display: flex;
+}
+.dialog-pilihan-tombol {
+  font: inherit;
+  font-size: calc(17px * var(--skala-huruf, 1));
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  text-align: left;
+  color: #f4e9d4;
+  background: rgba(30, 20, 12, 0.7);
+  border: 1px solid rgba(244, 233, 212, 0.25);
+  border-left: 4px solid var(--warna-nada);
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.dialog-pilihan-tombol:hover {
+  background: rgba(70, 46, 26, 0.85);
+}
+.nada-hormat {
+  --warna-nada: #e0b24a;
+}
+.nada-tegas {
+  --warna-nada: #d9472f;
+}
+.nada-licik {
+  --warna-nada: #9a6fd6;
+}
+.dialog-pilihan-tombol .nomor {
+  opacity: 0.6;
+  font-size: 13px;
+}
+.dialog-pilihan-tombol .ikon {
+  color: var(--warna-nada);
+}
+.dialog-pilihan-tombol .nada-nama {
+  color: var(--warna-nada);
+  min-width: 56px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.dialog-kartu {
+  position: absolute;
+  right: 12%;
+  bottom: 44%;
+  width: min(320px, 70vw);
+  display: none;
+  background: #efe3c6;
+  color: #2b1d12;
+  padding: 12px 14px;
+  border-radius: 4px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  cursor: auto;
+  font-size: calc(15px * var(--skala-huruf, 1));
+  line-height: 1.45;
+}
+.dialog-kartu.tampil {
+  display: block;
+}
+.dialog-kartu-judul {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.dialog-kartu-catatan {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.65;
+}
+.dialog-kartu-catatan:empty {
+  display: none;
+}
+.dialog-kartu-tutup {
+  font: inherit;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  background: #2b1d12;
+  color: #efe3c6;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}

@@ -12,6 +12,13 @@ import { KONFIG } from './combat/config';
 import { PengelolaSiluman } from './stealth/stealth-manager';
 import { HudSiluman } from './ui/stealth-hud';
 import { PengelolaPengikut } from './character/follower';
+import { StatusPermainan } from './mission/state';
+import { MesinDialog } from './dialog/engine';
+import { TOKOH_PEMAIN } from './dialog/config';
+import { validasiDialog } from './dialog/validator';
+import { validasiKitab } from './codex/config';
+import { poseBahu, type PoseKamera } from './dialog/sinematik';
+import { UiDialog } from './ui/dialog-ui';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -59,6 +66,31 @@ tarung.saatTikaman = (pertama) => {
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
 const hudSiluman = new HudSiluman();
+
+// Status permainan, dialog, dan Kitab.
+const status = new StatusPermainan();
+document.body.classList.add(`huruf-${status.pengaturan.ukuranHuruf}`);
+for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[data] ${pesan}`);
+const mesinDialog = new MesinDialog(status);
+const uiDialog = new UiDialog(mesinDialog, status);
+/** Mode UI: logika permainan hanya berjalan saat 'main'. */
+let modeUi: 'main' | 'dialog' = 'main';
+/** Titik kaki lawan bicara; sementara titik 2,5 m di depan pemain (NPC menyusul di Tahap B). */
+const posisiLawanBicara = new THREE.Vector3();
+const poseSinematik: PoseKamera = { posisi: new THREE.Vector3(), sasaran: new THREE.Vector3() };
+
+function mulaiDialog(id: string, lawanBicara: THREE.Vector3): void {
+  if (modeUi !== 'main') return;
+  posisiLawanBicara.copy(lawanBicara);
+  if (!uiDialog.mulai(id)) return;
+  modeUi = 'dialog';
+  if (document.pointerLockElement) document.exitPointerLock();
+  pemain.hadapKe(lawanBicara.x, lawanBicara.z);
+}
+mesinDialog.saatSelesai = () => {
+  modeUi = 'main';
+  kameraOrangKetiga.sinematik = null;
+};
 let sisaWaktuTarung = 0;
 let sudahSampai = false;
 const JARAK_SAMPAI = 2.5; // jarak ke tiang tujuan yang dianggap sampai
@@ -81,14 +113,34 @@ renderer.setAnimationLoop(() => {
   jam.update();
   const dtMentah = jam.getDelta();
   const dtNyata = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
-  tarung.perbaruiEfek(dtNyata);
-  const dt = dtNyata * tarung.skalaWaktu; // waktu permainan melambat sesaat setelah Tikaman Keris
+  let dt = 0;
+  if (modeUi === 'dialog') {
+    // Dunia membeku; hanya teks dan kamera sinematik yang bergerak.
+    uiDialog.perbarui(dtNyata);
+    if (mesinDialog.aktif) {
+      const pemainBicara = mesinDialog.pembicara === TOKOH_PEMAIN;
+      const pembicara = pemainBicara ? pemain.posisi : posisiLawanBicara;
+      const pendengar = pemainBicara ? posisiLawanBicara : pemain.posisi;
+      poseBahu(pendengar, pembicara, poseSinematik);
+      kameraOrangKetiga.sinematik = poseSinematik;
+    }
+  } else {
+    tarung.perbaruiEfek(dtNyata);
+    dt = dtNyata * tarung.skalaWaktu; // waktu permainan melambat sesaat setelah Tikaman Keris
 
-  const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
-  pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
-  siluman.perbarui(pemain, pengikut.daftar);
-  pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
-  lawan.perbarui(dt, pemain, tarung);
+    const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
+    pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
+    siluman.perbarui(pemain, pengikut.daftar);
+    pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
+    lawan.perbarui(dt, pemain, tarung);
+
+    // Sementara (Tahap A): tombol T memulai percakapan uji dengan lawan bicara 2,5 m di depan pemain.
+    if (input.baruDitekan('KeyT') && !tarung.mati) {
+      const depan = pemain.posisi.clone().add(new THREE.Vector3(Math.sin(pemain.hadap) * 2.5, 0, Math.cos(pemain.hadap) * 2.5));
+      depan.y = dunia.tinggiMedan(depan.x, depan.z);
+      mulaiDialog('kudadu-tiba', depan);
+    }
+  }
 
   // Kamera bertarung selama ada lawan dekat, bertahan sebentar setelah lawan menjauh.
   const jarakLawan = lawan.jarakTerdekat(pemain.posisi);
@@ -105,7 +157,7 @@ renderer.setAnimationLoop(() => {
 
   kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
   ikutkanMatahari();
-  hud.perbarui(dtMentah, input.terkunci || tarung.mati);
+  hud.perbarui(dtMentah, input.terkunci || tarung.mati || modeUi !== 'main');
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
   input.akhirFrame();
@@ -115,5 +167,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog };
 }

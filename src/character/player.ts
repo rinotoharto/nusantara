@@ -112,6 +112,13 @@ export class Pemain {
     this.kecepatanY = 0;
   }
 
+  /** Langsung menghadap titik (x, z), misalnya ke lawan bicara saat dialog mulai. */
+  hadapKe(x: number, z: number): void {
+    this.hadap = Math.atan2(x - this.posisi.x, z - this.posisi.z);
+    this.miring = 0;
+    this.badan.rotation.set(0, this.hadap, 0, 'YXZ');
+  }
+
   perbarui(dt: number, input: Input, yawKamera: number, perintah: Readonly<PerintahGerak> = PERINTAH_BEBAS): void {
     if (this.panjatKe && this.panjatDari) {
       this.perbaruiPanjat(dt);

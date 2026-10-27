@@ -1,0 +1,35 @@
+{
+  "kudadu-tiba": {
+    "judul": "Tiba di Kudadu",
+    "tokoh": { "wijaya": "Raden Wijaya", "kepala-desa": "Kepala desa Kudadu" },
+    "mulai": "n1",
+    "simpul": {
+      "n1": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: sapaan kepala desa saat rombongan tiba malam hari. Kalimat kedua placeholder. Kalimat ketiga placeholder supaya pemotongan halaman teruji.", "lanjut": "n2" },
+      "n2": {
+        "tokoh": "wijaya",
+        "pilihan": [
+          { "nada": "hormat", "teks": "TODO-SEJARAH: jawaban hormat.", "lanjut": "n3a" },
+          { "nada": "tegas", "teks": "TODO-SEJARAH: jawaban tegas.", "lanjut": "n3b" },
+          { "nada": "licik", "teks": "TODO-SEJARAH: jawaban licik.", "lanjut": "n3c" }
+        ]
+      },
+      "n3a": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: reaksi kepala desa atas nada hormat.", "tandai": "kudadu-nada-hormat", "lanjut": "n4" },
+      "n3b": { "tokoh": "kepala-desa", "teks": "[[Rakryan|rakryan]]... TODO-SEJARAH: reaksi kepala desa atas nada tegas, dengan istilah yang bisa diklik.", "tandai": "kudadu-nada-tegas", "lanjut": "n4" },
+      "n3c": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: kepala desa membongkar kebohongan.", "lanjut": "n3c2" },
+      "n3c2": { "tokoh": "wijaya", "teks": "TODO-SEJARAH: Wijaya mengaku jujur.", "tandai": "kudadu-nada-licik", "lanjut": "n3c3" },
+      "n3c3": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: kepala desa menerima pengakuan.", "lanjut": "n4" },
+      "n4": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: petunjuk tempat bermalam.", "lanjut": "n5" },
+      "n5": { "tokoh": "wijaya", "teks": "TODO-SEJARAH: Wijaya mengingatkan risiko bagi desa.", "lanjut": "n6" },
+      "n6": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: alasan kepala desa menolong; membuka entri desa Kudadu.", "bukaKitab": ["desa-kudadu"], "lanjut": "n7" },
+      "n7": { "tokoh": "wijaya", "teks": "TODO-SEJARAH: janji Wijaya; membuka entri Prasasti Kudadu dan rakryan.", "bukaKitab": ["prasasti-kudadu", "rakryan"], "selesai": true }
+    }
+  },
+  "kudadu-ulang": {
+    "judul": "Kudadu",
+    "tokoh": { "wijaya": "Raden Wijaya", "kepala-desa": "Kepala desa Kudadu" },
+    "mulai": "n1",
+    "simpul": {
+      "n1": { "tokoh": "kepala-desa", "teks": "TODO-SEJARAH: kalimat kepala desa saat diajak bicara lagi.", "selesai": true }
+    }
+  }
+}

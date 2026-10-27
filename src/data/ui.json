@@ -1,0 +1,32 @@
+{
+  "hud": {
+    "kunci": "Klik untuk mengendalikan",
+    "petunjuk": [
+      ["WASD", "jalan"],
+      ["Shift", "lari"],
+      ["C", "jongkok"],
+      ["Spasi", "lompat / panjat"],
+      ["Klik kiri", "serang, tahan: berat"],
+      ["Klik kanan", "tangkis"],
+      ["Ctrl", "hindar (atau klik tengah)"],
+      ["Mouse", "putar kamera"],
+      ["Esc", "lepas mouse"],
+      ["T", "uji dialog (sementara)"]
+    ]
+  },
+  "dialog": {
+    "hurufPerDetik": 45,
+    "maksKarakterHalaman": 150,
+    "lanjut": "Spasi atau klik untuk lanjut",
+    "halaman": "{a} / {b}",
+    "pilih": "Pilih dengan 1, 2, 3 atau klik",
+    "tutup": "Tutup",
+    "entriTakAda": "Entri Kitab tidak ditemukan.",
+    "entriTertutup": "Entri lengkap belum terbuka di Kitab."
+  },
+  "nada": {
+    "hormat": { "nama": "Hormat", "ikon": "❖" },
+    "tegas": { "nama": "Tegas", "ikon": "✶" },
+    "licik": { "nama": "Licik", "ikon": "◆" }
+  }
+}

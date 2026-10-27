@@ -1,3 +1,5 @@
+import { UI } from './config';
+
 /** HUD sederhana: penghitung fps di pojok kiri atas, petunjuk tombol di pojok kiri bawah. */
 export class Hud {
   private readonly fpsEl: HTMLDivElement;
@@ -13,21 +15,11 @@ export class Hud {
 
     this.petunjukEl = document.createElement('div');
     this.petunjukEl.className = 'hud hud-petunjuk';
-    this.petunjukEl.innerHTML = [
-      '<b>WASD</b> jalan',
-      '<b>Shift</b> lari',
-      '<b>C</b> jongkok',
-      '<b>Spasi</b> lompat / panjat',
-      '<b>Klik kiri</b> serang, tahan: berat',
-      '<b>Klik kanan</b> tangkis',
-      '<b>Ctrl</b> hindar (atau klik tengah)',
-      '<b>Mouse</b> putar kamera',
-      '<b>Esc</b> lepas mouse',
-    ].join('<br>');
+    this.petunjukEl.innerHTML = UI.hud.petunjuk.map(([tombol, teks]) => `<b>${tombol}</b> ${teks}`).join('<br>');
 
     this.kunciEl = document.createElement('div');
     this.kunciEl.className = 'hud hud-kunci';
-    this.kunciEl.textContent = 'Klik untuk mengendalikan';
+    this.kunciEl.textContent = UI.hud.kunci;
 
     document.body.append(this.fpsEl, this.petunjukEl, this.kunciEl);
   }
