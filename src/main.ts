@@ -20,6 +20,7 @@ import { validasiKitab } from './codex/config';
 import { poseBahu, type PoseKamera } from './dialog/sinematik';
 import { UiDialog } from './ui/dialog-ui';
 import { PengelolaNpc } from './mission/npc';
+import { PemicuMisi } from './mission/triggers';
 import { UI } from './ui/config';
 import { UiKitab } from './ui/codex-ui';
 import { PemberitahuanKitab } from './ui/notify';
@@ -67,7 +68,7 @@ function ulangiMisi(): void {
 }
 const hudTarung = new HudPertarungan(ulangiMisi);
 tarung.saatTikaman = (pertama) => {
-  if (pertama) hudTarung.umumkan('Tikaman Keris');
+  if (pertama) hudTarung.umumkan(UI.tarung.jurusTikaman);
 };
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
@@ -135,6 +136,8 @@ window.addEventListener('keydown', (e) => {
   }
 });
 const npc = new PengelolaNpc(scene, dunia.tabrakan);
+const pemicu = new PemicuMisi(status);
+for (const pesan of pemicu.validasi()) console.warn(`[data] ${pesan}`);
 /** Titik kaki lawan bicara selama dialog. */
 const posisiLawanBicara = new THREE.Vector3();
 const poseSinematik: PoseKamera = { posisi: new THREE.Vector3(), sasaran: new THREE.Vector3() };
@@ -198,8 +201,11 @@ renderer.setAnimationLoop(() => {
     pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
     lawan.perbarui(dt, pemain, tarung);
 
-    // NPC dekat: tampilkan "E: Bicara" dan mulai percakapan; tidak saat ada lawan bertarung di dekat pemain.
+    // Pemicu misi: masuk area atau pertarungan pertama membuka entri Kitab.
     const tenang = lawan.jarakTerdekat(pemain.posisi) >= KONFIG.kamera.jarakDeteksi;
+    pemicu.perbarui(pemain.posisi, !tenang);
+
+    // NPC dekat: tampilkan "E: Bicara" dan mulai percakapan; tidak saat ada lawan bertarung di dekat pemain.
     const npcDekat = tenang && !tarung.mati && pemain.diTanah ? npc.terdekat(pemain.posisi, UI.npc.jarak) : null;
     hud.tampilkanAksi(npcDekat ? UI.npc.bicara : null);
     if (npcDekat && input.baruDitekan('KeyE')) {
@@ -218,7 +224,7 @@ renderer.setAnimationLoop(() => {
   // Sampai di tiang tujuan area uji.
   if (!sudahSampai && Math.hypot(pemain.posisi.x - siluman.tujuan.x, pemain.posisi.z - siluman.tujuan.z) < JARAK_SAMPAI) {
     sudahSampai = true;
-    hudTarung.umumkan('Sampai di ujung utara');
+    hudTarung.umumkan(UI.tarung.sampaiUtara);
   }
 
   kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
@@ -234,5 +240,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu };
 }

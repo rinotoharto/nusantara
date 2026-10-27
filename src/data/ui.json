@@ -46,7 +46,9 @@
         "Esc",
         "lepas mouse, lalu menu jeda"
       ]
-    ]
+    ],
+    "fps": "fps: {n}",
+    "fpsKosong": "fps: --"
   },
   "dialog": {
     "hurufPerDetik": 45,
@@ -127,5 +129,19 @@
     "pengaturan": "Pengaturan",
     "ulangMisi": "Mulai ulang misi",
     "kembali": "Kembali"
+  },
+  "tarung": {
+    "namaPemain": "Raden Wijaya",
+    "nyawa": "{nama}  {sekarang} / {maks}",
+    "penanda": "▼",
+    "damage": "-{jumlah}",
+    "gugur": "Raden Wijaya gugur",
+    "ulangi": "Ulangi",
+    "jurusTikaman": "Tikaman Keris",
+    "sampaiUtara": "Sampai di ujung utara"
+  },
+  "siluman": {
+    "tersembunyi": "Tersembunyi",
+    "jongkokUntukSembunyi": "Jongkok (C) untuk bersembunyi"
   }
 }

@@ -4,9 +4,34 @@
     {
       "id": "kepala-desa",
       "nama": "Kepala desa Kudadu",
-      "posisi": [4, -33.5],
+      "posisi": [
+        4,
+        -33.5
+      ],
       "hadap": 1.57,
-      "percakapan": ["kudadu-tiba", "kudadu-ulang"]
+      "percakapan": [
+        "kudadu-tiba",
+        "kudadu-ulang"
+      ]
+    }
+  ],
+  "pemicu": [
+    {
+      "jenis": "area",
+      "pusat": [
+        0,
+        -5
+      ],
+      "jari": 30,
+      "bukaKitab": [
+        "desa-kudadu"
+      ]
+    },
+    {
+      "jenis": "pertarungan-pertama",
+      "bukaKitab": [
+        "jayakatwang"
+      ]
     }
   ]
 }

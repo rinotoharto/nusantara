@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Penjaga } from '../stealth/guard';
 import type { KeadaanPemain } from '../stealth/stealth-manager';
+import { UI } from './config';
 
 const JARAK_TANDA = 30; // tanda di atas kepala hanya tampil dalam jarak ini
 
@@ -26,7 +27,7 @@ export class HudSiluman {
     const posPemain = keadaan.posisi;
     // Di dalam semak: pinggiran layar gelap; teks memberi tahu apakah sudah tersembunyi.
     this.vignet.classList.toggle('tampil', keadaan.semak !== null);
-    const teks = keadaan.tersembunyi ? 'Tersembunyi' : keadaan.semak ? 'Jongkok (C) untuk bersembunyi' : '';
+    const teks = keadaan.tersembunyi ? UI.siluman.tersembunyi : keadaan.semak ? UI.siluman.jongkokUntukSembunyi : '';
     if (this.sembunyi.textContent !== teks) this.sembunyi.textContent = teks;
     this.sembunyi.classList.toggle('tersembunyi', keadaan.tersembunyi);
 

@@ -1,4 +1,4 @@
-import { UI } from './config';
+import { UI, isiPola } from './config';
 
 /** HUD sederhana: penghitung fps di pojok kiri atas, petunjuk tombol di pojok kiri bawah. */
 export class Hud {
@@ -12,7 +12,7 @@ export class Hud {
   constructor() {
     this.fpsEl = document.createElement('div');
     this.fpsEl.className = 'hud hud-fps';
-    this.fpsEl.textContent = 'fps: --';
+    this.fpsEl.textContent = UI.hud.fpsKosong;
 
     this.petunjukEl = document.createElement('div');
     this.petunjukEl.className = 'hud hud-petunjuk';
@@ -40,7 +40,7 @@ export class Hud {
     this.jumlahFrame += 1;
     if (this.akumulasi >= 0.5) {
       const fps = Math.round(this.jumlahFrame / this.akumulasi);
-      this.fpsEl.textContent = `fps: ${fps}`;
+      this.fpsEl.textContent = isiPola(UI.hud.fps, { n: fps });
       this.akumulasi = 0;
       this.jumlahFrame = 0;
     }

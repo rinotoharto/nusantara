@@ -3,6 +3,7 @@ import type { Pemain } from '../character/player';
 import type { Lawan } from '../combat/enemy';
 import { antreanAngkaDamage } from '../combat/health';
 import type { PertarunganPemain } from '../combat/player-combat';
+import { UI, isiPola } from './config';
 
 const JARAK_BILAH_LAWAN = 12; // bilah nyawa lawan hanya tampil dalam jarak ini
 const JARAK_PENANDA = 5; // penanda kunci hilang kalau sasaran lebih jauh dari ini
@@ -45,16 +46,16 @@ export class HudPertarungan {
 
     this.penanda = document.createElement('div');
     this.penanda.className = 'hud hud-penanda';
-    this.penanda.textContent = '▼';
+    this.penanda.textContent = UI.tarung.penanda;
 
     this.layarMati = document.createElement('div');
     this.layarMati.className = 'layar-mati';
     const judul = document.createElement('div');
     judul.className = 'layar-mati-judul';
-    judul.textContent = 'Raden Wijaya gugur';
+    judul.textContent = UI.tarung.gugur;
     const tombol = document.createElement('button');
     tombol.className = 'layar-mati-tombol';
-    tombol.textContent = 'Ulangi';
+    tombol.textContent = UI.tarung.ulangi;
     tombol.addEventListener('click', () => this.onUlangi());
     this.layarMati.append(judul, tombol);
 
@@ -74,7 +75,7 @@ export class HudPertarungan {
   perbarui(dt: number, pemain: Pemain, lawanSemua: Lawan[], tarung: PertarunganPemain, kamera: THREE.Camera): void {
     // Bilah nyawa pemain.
     this.nyawaIsi.style.width = `${tarung.nyawa.rasio * 100}%`;
-    this.nyawaTeks.textContent = `Raden Wijaya  ${Math.ceil(tarung.nyawa.sekarang)} / ${tarung.nyawa.maks}`;
+    this.nyawaTeks.textContent = isiPola(UI.tarung.nyawa, { nama: UI.tarung.namaPemain, sekarang: Math.ceil(tarung.nyawa.sekarang), maks: tarung.nyawa.maks });
 
     // Bilah nyawa lawan dekat dan penanda kunci.
     let penandaTampil = false;
@@ -110,7 +111,7 @@ export class HudPertarungan {
     for (const a of antreanAngkaDamage) {
       const el = document.createElement('div');
       el.className = a.keLawan ? 'hud angka-damage' : 'hud angka-damage angka-pemain';
-      el.textContent = `-${a.jumlah}`;
+      el.textContent = isiPola(UI.tarung.damage, { jumlah: a.jumlah });
       document.body.append(el);
       this.angka.push({ el, posisi: a.posisi, umur: 0 });
     }

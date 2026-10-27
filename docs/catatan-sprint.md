@@ -179,3 +179,72 @@ Angka akhir menyelinap (stealth.json):
 - Pengikut tidak menduplikasi tabrakan: memakai `dorongKeluar` dan `pisahkan` yang ada. Penempatan ulang dilakukan ke belakang kamera, bukan ke slot, supaya tidak muncul tiba-tiba di layar.
 - Kamera mode bertarung dan bilah nyawa lawan hanya menanggapi lawan yang `bertarung`, supaya penjaga yang lewat tidak membocorkan posisinya lewat HUD.
 - Titik awal pemain pindah ke area uji; lawan sprint 2 dibiarkan di tempatnya.
+
+## Sprint 4: dialog dan Kitab (27 Oktober 2026)
+
+Tujuan: sistem percakapan dari JSON dengan tiga pilihan nada, kepala desa Kudadu yang bisa diajak bicara, Kitab (ensiklopedia) dengan label dan kutipan, entri yang terbuka saat dialog dan saat peristiwa, menu jeda. Isi sejarah ditulis di luar sesi (`docs/isi/`); semua teks di `src/data` masih placeholder `TODO-SEJARAH`.
+
+### Yang sudah jalan
+
+- Data: `src/data/dialog.json` (percakapan), `codex.json` (entri Kitab), `misi3.json` (tokoh pemain, NPC, pemicu), `ui.json` (semua teks dan angka UI: petunjuk tombol, label nada, nama jenis dan label Kitab beserta penjelasannya, menu, pengaturan, teks HUD pertarungan dan menyelinap). Tidak ada teks UI yang tersisa di kode.
+- Mesin dialog (`src/dialog/`): `engine.ts` memegang simpul sekarang, menjalankan `bukaKitab` dan `tandai` saat simpul tampil, berpindah lewat `lanjut` atau `pilih`. `validator.ts` memeriksa saat mulai: simpul `mulai` dan `lanjut` ada, tokoh terdaftar, nada sah, id Kitab di `bukaKitab` dan di istilah `[[...|id]]` ada di codex; masalah dilaporkan ke konsol sebagai `[data] ...`. `teks.ts` memecah istilah dan memotong halaman per kalimat (maksimum 150 karakter terlihat per halaman, angka di ui.json).
+- Status permainan (`src/mission/state.ts`): tanda, entri Kitab terbuka (urut waktu), percakapan selesai, ukuran huruf; disimpan ke localStorage kunci `nusantara.status`. `ulangMisi()` menghapus tanda dan percakapan selesai tetapi mempertahankan entri Kitab; `reset()` menghapus semuanya (dari konsol: `nusantara.status.reset()`).
+- UI dialog (`src/ui/dialog-ui.ts`): panel bawah bergaya sinematik, nama tokoh, teks per huruf 45 huruf/detik (klik atau Spasi melewati), halaman, tiga pilihan nada dengan warna tetap (hormat emas, tegas merah, licik ungu) dan ikon, tombol 1 sampai 3. Istilah bergaris bawah; klik membuka kartu berisi `ringkas` tanpa menutup dialog, dengan catatan kalau entri lengkapnya belum terbuka. Selama dialog: pointer lock dilepas, pemain, lawan, pengikut, dan penjaga membeku, HUD disembunyikan.
+- Kamera dialog (`src/dialog/sinematik.ts`, `KameraOrangKetiga.sinematik`): pose di belakang bahu kanan pendengar memandang kepala pembicara (2,1 m ke belakang, 0,9 m ke samping, tinggi 1,8 m), berganti bahu saat pembicara berganti, peralihan masuk dan keluar 0,8 detik. Mouse diabaikan selama pose aktif.
+- NPC (`src/mission/npc.ts`): kapsul hijau kebiruan dari daftar `npc` di misi3.json, kotak tabrakan, tidak bertarung. Dalam 2,5 m muncul "E: Bicara" (tidak saat ada lawan bertarung di dekat pemain). E memulai percakapan pertama yang belum selesai; kalau semua selesai, percakapan terakhir diulang. Rumah di (4, -28) diperbesar 1,3 kali menjadi rumah kepala desa.
+- Kitab (`src/ui/codex-ui.ts`): tombol K atau dari menu jeda. Daftar per jenis di kiri ("???" untuk yang tertutup), isi di kanan: judul, lencana label berwarna dengan penjelasan saat disorot, paragraf, kotak kutipan dengan sumbernya, daftar sumber, tautan entri terkait (yang tertutup tampil "??? (jenis)"). Gaya kertas, huruf serif gelap. Ukuran huruf kecil, sedang, besar tersimpan dan berlaku juga untuk teks dialog.
+- Pemberitahuan (`src/ui/notify.ts`): "Kitab: Judul" di pojok kanan atas 3 detik, satu per satu, ditunda sampai dialog selesai.
+- Menu jeda (`src/ui/pause-menu.ts`): Esc saat pointer tidak terkunci. Lanjutkan, Kitab, Pengaturan (ukuran huruf, subtitle menyusul), Mulai ulang misi.
+- Pemicu (`src/mission/triggers.ts`): `area` (lingkaran pusat dan jari) dan `pertarungan-pertama` (pertama kali ada lawan bertarung dalam jarak deteksi kamera). Masuk desa membuka `desa-kudadu`, pertarungan pertama membuka `jayakatwang`.
+- Mode UI di `main.ts`: `main`, `dialog`, `kitab`, `jeda`. Logika permainan hanya berjalan di `main`; kamera tetap diperbarui dengan dt nyata.
+
+### Skema JSON final
+
+Sama persis dengan prompt sprint 4; tidak ada perubahan. Penegasan dari implementasi:
+
+- `tandai` boleh ada di simpul tokoh mana pun, dijalankan saat simpul tampil (sebelum teksnya selesai diketik). `bukaKitab` juga dijalankan saat simpul tampil; pemberitahuannya muncul setelah dialog selesai.
+- Simpul pilihan tidak butuh `teks`; kalau ada `teks` dan `pilihan` sekaligus, teksnya diketik dulu lalu pilihan muncul di halaman terakhir.
+- Istilah `[[istilah|id-kitab]]` boleh ada di `teks` simpul maupun di `teks` pilihan.
+- `dibukaOleh` di codex.json hanya catatan untuk penulis; pemicu sesungguhnya adalah `bukaKitab` di dialog.json dan daftar `pemicu` di misi3.json.
+- misi3.json (bukan bagian prompt, dibuat di sprint ini):
+
+```json
+{
+  "tokohPemain": "wijaya",
+  "npc": [
+    { "id": "kepala-desa", "nama": "Kepala desa Kudadu", "posisi": [4, -33.5], "hadap": 1.57,
+      "percakapan": ["kudadu-tiba", "kudadu-ulang"] }
+  ],
+  "pemicu": [
+    { "jenis": "area", "pusat": [0, -5], "jari": 30, "bukaKitab": ["desa-kudadu"] },
+    { "jenis": "pertarungan-pertama", "bukaKitab": ["jayakatwang"] }
+  ]
+}
+```
+
+Memasang isi sungguhan: salin `docs/isi/dialog.json` ke `src/data/dialog.json` dan `docs/isi/codex.json` ke `src/data/codex.json`, muat ulang, dan pastikan tidak ada peringatan `[data]` di konsol. Placeholder memakai id simpul dan id entri yang sama dengan berkas di `docs/isi`, jadi tidak ada kode yang perlu disentuh.
+
+### Hasil uji
+
+Diuji dari konsol browser (status direset, muat ulang) dan manual:
+
+- Permainan baru: Kitab menampilkan empat "???". Masuk desa: pemberitahuan "Kitab: Desa Kudadu". Mendekati prajurit di timur desa sampai bertarung: "Kitab: Jayakatwang". Bicara dengan kepala desa, tiap nada: tanda `kudadu-nada-hormat`, `-tegas`, `-licik` tersimpan; jalur licik melewati `n3c2` dan `n3c3`; istilah Rakryan di jalur tegas membuka kartu; tiga pemberitahuan berurutan setelah dialog. Percakapan kedua memakai `kudadu-ulang`.
+- Muat ulang halaman: entri terbuka, tanda, percakapan selesai, dan ukuran huruf tetap. Mulai ulang misi dari menu: tanda dan percakapan terhapus, entri Kitab tetap.
+- Tidak ada error di konsol maupun terminal; `tsc --noEmit` bersih.
+
+### Yang belum
+
+- Kamera sinematik tidak memeriksa tabrakan; kalau NPC berdiri rapat ke dinding, kamera bisa masuk ke dalam rumah. Posisi NPC sekarang aman.
+- Dialog tidak bisa dibatalkan di tengah jalan (sengaja, supaya `tandai` dan `bukaKitab` selalu konsisten).
+- Pemicu area dan pertarungan hanya "sekali per sesi" di memori; karena entri yang sudah terbuka tidak dibuka ulang, ini tidak terlihat, tetapi kalau nanti pemicu memberi efek lain (misalnya tanda), statusnya perlu disimpan.
+- Belum ada suara, subtitle, atau dukungan gamepad di UI dialog dan Kitab.
+- Esc saat pointer terkunci hanya melepas pointer (perilaku peramban); menu jeda butuh Esc kedua.
+- Belum ada uji dengan pemain selain pengembang; syarat lolos sprint ini (pemain membaca minimal satu entri tanpa disuruh) baru bisa dinilai saat playtest.
+
+### Keputusan yang diambil
+
+- Semua teks UI dipindah ke `ui.json` sejak tahap A, termasuk teks HUD sprint 2 dan 3, supaya subtitle dan ukuran huruf nanti tinggal membaca satu berkas.
+- Satu pendengar tombol di `main.ts` untuk Esc dan K; UI dialog mengurus tombolnya sendiri (Spasi, Enter, 1 sampai 3, Esc hanya menutup kartu istilah). Dengan begitu tidak ada dua pendengar yang bereaksi pada tombol yang sama.
+- Kitab dibuka dari menu jeda kembali ke menu, bukan ke permainan.
+- Mulai ulang misi mempertahankan entri Kitab karena ensiklopedia adalah kemajuan belajar lintas percobaan, bukan kemajuan misi.
+- NPC dan pemicu ditaruh di `misi3.json` meski prompt hanya meminta pemicu, supaya sprint 5 (misi 3 utuh) bisa menambah tokoh dan pemicu tanpa kode.
