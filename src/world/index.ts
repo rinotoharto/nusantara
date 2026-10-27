@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { buatMedan, tinggiMedan } from './terrain';
 import { buatSungai } from './river';
-import { buatDesa, type Rumah } from './village';
+import { buatDesa, buatDukuh, type Rumah, type TataLetakRumah } from './village';
 import { buatHutan, type Pohon } from './forest';
 import { buatTebing, type Tebing } from './cliff';
 import { pasangPencahayaan } from './lighting';
@@ -19,13 +19,19 @@ export interface Dunia {
   tinggiMedan: (x: number, z: number) => number;
 }
 
+/** Bagian dunia yang ditentukan data misi (misi3.json bagian `dunia`). */
+export interface TataLetakDunia {
+  /** Rumah dukuh Pandakan di utara sungai. */
+  pandakan: TataLetakRumah[];
+}
+
 /** Membangun seluruh dunia balok ke dalam scene. */
-export function buatDunia(scene: THREE.Scene): Dunia {
+export function buatDunia(scene: THREE.Scene, tataLetak: TataLetakDunia): Dunia {
   const medan = buatMedan();
   scene.add(medan);
   scene.add(buatSungai());
 
-  const rumah = buatDesa();
+  const rumah = [...buatDesa(), ...buatDukuh(tataLetak.pandakan)];
   for (const r of rumah) scene.add(r.grup);
 
   const hutan = buatHutan();

@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { tinggiMedan } from '../world/terrain';
-import type { DataTabrakan } from '../world/collision';
+import type { DataTabrakan, Padat } from '../world/collision';
 import type { StatusPermainan } from './state';
-import misi from '../data/misi3.json';
 
 const TINGGI_NPC = 1.65;
 const JARI_NPC = 0.35;
@@ -16,6 +15,8 @@ export interface DataNpc {
   hadap: number;
   /** Urutan percakapan: yang belum selesai dipakai dulu; kalau semua selesai, yang terakhir diulang. */
   percakapan: string[];
+  /** Tanda yang harus ada supaya NPC ini dipasang (dievaluasi saat segmennya mulai). */
+  syarat?: string;
 }
 
 /** Tokoh bukan pemain yang bisa diajak bicara. Tidak bertarung, tidak bergerak. */
@@ -24,6 +25,7 @@ export class Npc {
   readonly posisi = this.grup.position;
   readonly id: string;
   readonly nama: string;
+  readonly padat: Padat;
   private readonly percakapan: string[];
 
   constructor(data: DataNpc) {
@@ -46,6 +48,7 @@ export class Npc {
     );
     hidung.position.set(0, TINGGI_NPC - 0.35, JARI_NPC);
     this.grup.add(kapsul, hidung);
+    this.padat = { kotak: this.kotak, bisaDipanjat: false };
   }
 
   /** Kotak tabrakan supaya pemain tidak menembus NPC. */
@@ -68,17 +71,33 @@ export class Npc {
   }
 }
 
-/** Semua NPC misi dari src/data/misi3.json. */
+/** Semua NPC yang sedang terpasang; misi menambah dan mencabutnya per segmen. */
 export class PengelolaNpc {
   readonly daftar: Npc[] = [];
 
-  constructor(scene: THREE.Scene, tabrakan: DataTabrakan) {
-    for (const d of misi.npc as DataNpc[]) {
-      const npc = new Npc(d);
-      scene.add(npc.grup);
-      tabrakan.padat.push({ kotak: npc.kotak, bisaDipanjat: false });
-      this.daftar.push(npc);
-    }
+  constructor(
+    private readonly scene: THREE.Scene,
+    private readonly tabrakan: DataTabrakan,
+  ) {}
+
+  tambah(d: DataNpc): Npc {
+    const npc = new Npc(d);
+    this.scene.add(npc.grup);
+    this.tabrakan.padat.push(npc.padat);
+    this.daftar.push(npc);
+    return npc;
+  }
+
+  hapus(npc: Npc): void {
+    const i = this.daftar.indexOf(npc);
+    if (i >= 0) this.daftar.splice(i, 1);
+    const j = this.tabrakan.padat.indexOf(npc.padat);
+    if (j >= 0) this.tabrakan.padat.splice(j, 1);
+    this.scene.remove(npc.grup);
+  }
+
+  cari(id: string): Npc | null {
+    return this.daftar.find((n) => n.id === id) ?? null;
   }
 
   /** NPC terdekat dalam jarak datar `maks`, atau null. */

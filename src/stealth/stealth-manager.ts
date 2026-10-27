@@ -4,8 +4,8 @@ import type { Pengikut } from '../character/follower';
 import type { PengelolaLawan } from '../combat/enemy-manager';
 import type { Dunia } from '../world';
 import { tinggiMedan } from '../world/terrain';
-import { AREA_UJI, SILUMAN } from './config';
-import { Penjaga } from './guard';
+import { SILUMAN } from './config';
+import { Penjaga, type RutePatroli } from './guard';
 import { Semak, semakDi } from './bush';
 
 /** Keadaan pemain yang dinilai penjaga; diperbarui tiap frame sebelum lawan bergerak. */
@@ -33,12 +33,23 @@ export interface KonteksSiluman {
   semak: Semak[];
   /** Kotak semak yang menghalangi pandangan ke pemain: semua kecuali semak yang ditempatinya. */
   penghalangSemak: THREE.Box3[];
+  /** Dipanggil saat seorang penjaga melihat pemain sendiri dan mulai mengejar. */
+  saatKetahuan: ((penjaga: Penjaga) => void) | null;
+}
+
+/** Batu penghalang pandang dari data misi. */
+export interface DataBatu {
+  x: number;
+  z: number;
+  lebar: number;
+  tinggi: number;
+  dalam: number;
 }
 
 const bahanBatu = new THREE.MeshStandardMaterial({ color: 0x6f6a60, roughness: 1 });
 
 /**
- * Pengelola menyelinap: membangun area uji dari data (batu, penjaga, tiang tujuan),
+ * Pengelola menyelinap: memasang batu, semak, dan penjaga yang diminta misi,
  * menyusun keadaan pemain untuk penjaga, dan mendaftarkan penjaga ke pengelola lawan
  * supaya pertarungan berjalan dengan aturan yang sama.
  */
@@ -60,59 +71,59 @@ export class PengelolaSiluman {
     penjaga: this.penjaga,
     semak: this.semak,
     penghalangSemak: [],
+    saatKetahuan: null,
   };
-  readonly mulai = AREA_UJI.mulai;
-  readonly tujuan = AREA_UJI.tujuan;
   /** Pengali laju curiga dari rombongan; disalin ke keadaan pemain tiap frame. */
   pengaliCuriga = 1;
+  /** Dipanggil saat ada penjaga yang mulai mengejar sementara belum ada penjaga lain yang mengejar. */
+  saatKetahuan: (() => void) | null = null;
 
-  constructor(dunia: Dunia, scene: THREE.Scene, lawan: PengelolaLawan) {
-    // Batu penghalang pandang: balok padat, menghalangi gerak, pandangan, dan kamera.
-    for (const b of AREA_UJI.batu) {
-      const yTanah = tinggiMedan(b.x, b.z);
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.lebar, b.tinggi + 1, b.dalam), bahanBatu);
-      mesh.position.set(b.x, yTanah + b.tinggi / 2 - 0.5, b.z);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      mesh.name = 'batu';
-      mesh.updateMatrixWorld(true);
-      scene.add(mesh);
-      dunia.tabrakan.padat.push({ kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat: false });
-      dunia.penghalangKamera.push(mesh);
-    }
+  constructor(
+    private readonly dunia: Dunia,
+    private readonly scene: THREE.Scene,
+    private readonly lawan: PengelolaLawan,
+  ) {
+    this.konteks.saatKetahuan = (p) => {
+      // Satu kejadian ketahuan per episode: kalau sudah ada kawan yang mengejar, tidak dihitung lagi.
+      if (this.penjaga.some((q) => q !== p && q.mengejar)) return;
+      this.saatKetahuan?.();
+    };
+  }
 
-    // Tiang tujuan dengan cahaya di ujung utara.
-    const tiang = new THREE.Group();
-    const yTujuan = tinggiMedan(this.tujuan.x, this.tujuan.z);
-    tiang.position.set(this.tujuan.x, yTujuan, this.tujuan.z);
-    const batang = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.08, 0.1, 3, 8),
-      new THREE.MeshStandardMaterial({ color: 0x8a6a3a, roughness: 0.9 }),
-    );
-    batang.position.y = 1.5;
-    const lampu = new THREE.Mesh(
-      new THREE.SphereGeometry(0.22, 10, 8),
-      new THREE.MeshStandardMaterial({ color: 0xffc866, emissive: 0xffa030, emissiveIntensity: 2 }),
-    );
-    lampu.position.y = 3.1;
-    const cahaya = new THREE.PointLight(0xffb060, 8, 14, 1.5);
-    cahaya.position.y = 3.1;
-    tiang.add(batang, lampu, cahaya);
-    tiang.name = 'tiang-tujuan';
-    scene.add(tiang);
+  /** Batu padat: menghalangi gerak, pandangan, dan kamera. */
+  tambahBatu(b: DataBatu): void {
+    const yTanah = tinggiMedan(b.x, b.z);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.lebar, b.tinggi + 1, b.dalam), bahanBatu);
+    mesh.position.set(b.x, yTanah + b.tinggi / 2 - 0.5, b.z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    mesh.name = 'batu';
+    mesh.updateMatrixWorld(true);
+    this.scene.add(mesh);
+    this.dunia.tabrakan.padat.push({ kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat: false });
+    this.dunia.penghalangKamera.push(mesh);
+  }
 
-    for (const s of AREA_UJI.semak) {
-      const semak = new Semak(s.x, s.z);
-      scene.add(semak.mesh);
-      this.semak.push(semak);
-    }
+  tambahSemak(x: number, z: number): Semak {
+    const semak = new Semak(x, z);
+    this.scene.add(semak.mesh);
+    this.semak.push(semak);
+    return semak;
+  }
 
-    for (const rute of AREA_UJI.penjaga) {
-      const penjaga = new Penjaga(dunia.tabrakan, rute, this.konteks);
-      scene.add(penjaga.grup, penjaga.kerucut.mesh);
-      lawan.tambah(penjaga);
-      this.penjaga.push(penjaga);
-    }
+  tambahPenjaga(rute: RutePatroli): Penjaga {
+    const penjaga = new Penjaga(this.dunia.tabrakan, rute, this.konteks);
+    this.scene.add(penjaga.grup, penjaga.kerucut.mesh);
+    this.lawan.tambah(penjaga);
+    this.penjaga.push(penjaga);
+    return penjaga;
+  }
+
+  hapusPenjaga(penjaga: Penjaga): void {
+    const i = this.penjaga.indexOf(penjaga);
+    if (i >= 0) this.penjaga.splice(i, 1);
+    this.lawan.hapus(penjaga);
+    this.scene.remove(penjaga.grup, penjaga.kerucut.mesh);
   }
 
   /** Dipanggil tiap frame sebelum `lawan.perbarui`. */

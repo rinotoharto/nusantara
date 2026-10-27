@@ -137,8 +137,7 @@
     "damage": "-{jumlah}",
     "gugur": "Raden Wijaya gugur",
     "ulangi": "Ulangi",
-    "jurusTikaman": "Tikaman Keris",
-    "sampaiUtara": "Sampai di ujung utara"
+    "jurusTikaman": "Tikaman Keris"
   },
   "siluman": {
     "tersembunyi": "Tersembunyi",
@@ -149,5 +148,10 @@
     "perbekalan": "Perbekalan",
     "pagon": "Gajah Pagon",
     "lamaTeks": 3.5
+  },
+  "misi": {
+    "tujuan": "Tujuan",
+    "lanjut": "Klik atau Spasi untuk lanjut",
+    "selesaiSementara": "Misi 3 berlanjut di tahap berikutnya"
   }
 }

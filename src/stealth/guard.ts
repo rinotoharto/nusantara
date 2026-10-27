@@ -138,6 +138,8 @@ export class Penjaga extends Lawan {
   // --- Mengejar -------------------------------------------------------------------------
 
   private mulaiMengejar(berteriak: boolean): void {
+    // Melihat pemain sendiri (bukan karena teriakan kawan): lapor ke misi sebagai "ketahuan".
+    if (berteriak && !this.bertarung) this.konteks.saatKetahuan?.(this);
     this.curiga = 1;
     this.sejakTerlihat = 0;
     this.sedangMenoleh = false;

@@ -1,21 +1,13 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import type { Pemain } from '../character/player';
 import { JARI_PEMAIN } from '../character/player';
-import { pisahkan, type DataTabrakan } from '../world/collision';
+import { pisahkan } from '../world/collision';
 import { Lawan, JARI_LAWAN, type PemberiGiliran } from './enemy';
 import { dalamJangkauan } from './hit';
 import type { PertarunganPemain } from './player-combat';
 
 /** Jarak seruan: lawan yang waspada membangunkan kawan sejauh ini. */
 const JARAK_SERU = 10;
-
-/** Penempatan lawan untuk pengujian: tiga di tanah lapang timur desa, satu sendirian di barat. */
-const PENEMPATAN: { x: number; z: number }[] = [
-  { x: 42, z: 2 },
-  { x: 46, z: -2 },
-  { x: 45, z: 6 },
-  { x: -46, z: 0 },
-];
 
 /**
  * Mengelola semua lawan: pembaruan, tabrakan antar kapsul, serangan pemain yang mengenai lawan,
@@ -26,17 +18,19 @@ export class PengelolaLawan implements PemberiGiliran {
   private penyerang: Lawan | null = null;
   private readonly antrean: Lawan[] = [];
 
-  constructor(data: DataTabrakan, scene: THREE.Scene) {
-    for (const p of PENEMPATAN) {
-      const lawan = new Lawan(data, p.x, p.z);
-      scene.add(lawan.grup);
-      this.daftar.push(lawan);
-    }
-  }
+  /** Semua lawan dibuat modul lain (penjaga dari data misi) dan didaftarkan lewat `tambah`. */
+  constructor() {}
 
   /** Mendaftarkan lawan yang dibuat modul lain (misalnya penjaga) supaya ikut aturan yang sama. */
   tambah(lawan: Lawan): void {
     this.daftar.push(lawan);
+  }
+
+  /** Mencabut lawan dari pengelolaan (misalnya penjaga bersyarat saat misi diulang). */
+  hapus(lawan: Lawan): void {
+    const i = this.daftar.indexOf(lawan);
+    if (i >= 0) this.daftar.splice(i, 1);
+    this.lepasGiliran(lawan);
   }
 
   mintaGiliran(lawan: Lawan): boolean {

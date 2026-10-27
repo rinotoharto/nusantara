@@ -783,3 +783,70 @@ body.lapisan-aktif .hud-vignet {
 .rombongan-angka.turun, .rombongan-nasi.turun, .rombongan-pagon.turun {
   animation: rombongan-turun 0.9s ease-out;
 }
+
+/* HUD tujuan (kiri atas, di bawah fps) */
+.hud-tujuan {
+  top: 34px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 320px;
+}
+.hud-tujuan-label {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffd79a;
+  opacity: 0.85;
+}
+.hud-tujuan-teks {
+  font-size: 15px;
+}
+@keyframes tujuan-baru {
+  0% { opacity: 0; transform: translateX(-8px); }
+  30% { opacity: 1; transform: translateX(0); }
+  60% { color: #ffe7b8; }
+  100% { }
+}
+.hud-tujuan.baru {
+  animation: tujuan-baru 1.4s ease-out;
+}
+
+/* Panel naskah: layar gelap dengan teks */
+.panel-lapis {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px;
+  background: #090604;
+  color: #efe3c6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  user-select: none;
+  cursor: pointer;
+}
+.panel-lapis.tampil {
+  opacity: 1;
+  pointer-events: auto;
+}
+.panel-isi {
+  max-width: 640px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  line-height: 1.6;
+  text-align: center;
+}
+.panel-isi p {
+  margin: 0 0 18px;
+}
+.panel-petunjuk {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #b89a6a;
+}

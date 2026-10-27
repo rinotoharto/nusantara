@@ -1,4 +1,4 @@
-import { DIALOG, type Percakapan, type Simpul } from './config';
+import { DIALOG, TOKOH_PEMAIN, type Percakapan, type Simpul } from './config';
 import type { StatusPermainan } from '../mission/state';
 
 /**
@@ -37,6 +37,19 @@ export class MesinDialog {
 
   namaTokoh(id: string): string {
     return this.percakapan?.tokoh[id] ?? id;
+  }
+
+  /** Id tokoh bukan pemain yang pertama bicara di percakapan `id`, atau null kalau percakapan tidak ada. */
+  intip(id: string): string | null {
+    const p = DIALOG[id];
+    if (!p) return null;
+    let s = p.simpul[p.mulai];
+    for (let i = 0; i < 20 && s; i++) {
+      if (s.tokoh !== TOKOH_PEMAIN) return s.tokoh;
+      if (!s.lanjut) break;
+      s = p.simpul[s.lanjut];
+    }
+    return null;
   }
 
   /** Memulai percakapan; salah kalau id tidak ada. */

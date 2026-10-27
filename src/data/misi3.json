@@ -1,5 +1,12 @@
 {
+  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat` dipasang saat misi mulai; isi bersyarat dipasang saat segmennya mulai.",
   "tokohPemain": "wijaya",
+  "pengikutTokoh": {
+    "lawe": 0,
+    "nambi": 1,
+    "sora": 2,
+    "pagon": 3
+  },
   "aturan": {
     "keterangan": "Variabel rombongan (lihat docs/isi/misi3-naskah.md, tabel Variabel rombongan). Angka di sini bisa disetel tanpa mengubah kode.",
     "awal": {
@@ -66,21 +73,33 @@
       "maks": 5
     }
   },
-  "npc": [
-    {
-      "id": "kepala-desa",
-      "nama": "Kepala desa Kudadu",
-      "posisi": [
-        4,
-        -33.5
-      ],
-      "hadap": 1.57,
-      "percakapan": [
-        "kudadu-tiba",
-        "kudadu-ulang"
-      ]
-    }
-  ],
+  "teks": {
+    "pembuka": [
+      "Singasari jatuh. Sang Prabu gugur. Pasukan utara yang menang pulang ke ibu kota yang sudah terbakar.",
+      "Malam ini, Raden Wijaya dan dua belas pengikutnya melarikan diri ke utara, dikejar pasukan Daha.",
+      "TODO-SEJARAH: kutipan Prasasti Kudadu tentang pengejaran (TODO-VERIFIKASI teks kutipan)."
+    ],
+    "jeda": "Beberapa jam kemudian"
+  },
+  "dunia": {
+    "pandakan": [
+      {
+        "x": 44,
+        "z": 27,
+        "putar": 0.2
+      },
+      {
+        "x": 55,
+        "z": 31,
+        "putar": -1.3
+      },
+      {
+        "x": 49,
+        "z": 39,
+        "putar": 0.5
+      }
+    ]
+  },
   "pemicu": [
     {
       "jenis": "area",
@@ -98,6 +117,275 @@
       "bukaKitab": [
         "jayakatwang"
       ]
+    }
+  ],
+  "segmen": [
+    {
+      "id": "hutan",
+      "tujuan": "Seberangi sungai menuju dukuh Pandakan",
+      "mulai": {
+        "posisi": [
+          30,
+          92
+        ],
+        "hadap": 3.1416
+      },
+      "penanda": [
+        [
+          32,
+          56
+        ]
+      ],
+      "saatMulai": {
+        "panel": "pembuka",
+        "percakapan": "hutan-pembukaan"
+      },
+      "selesai": {
+        "area": {
+          "pusat": [
+            32,
+            44
+          ],
+          "jari": 6
+        }
+      }
+    },
+    {
+      "id": "pandakan",
+      "tujuan": "Temui kepala dukuh Pandakan di seberang",
+      "mulai": {
+        "posisi": [
+          32,
+          44
+        ],
+        "hadap": 3.1416
+      },
+      "penanda": [
+        [
+          49,
+          35
+        ]
+      ],
+      "penjaga": [
+        {
+          "nama": "tepi-barat",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": 12,
+              "z": 40
+            },
+            {
+              "x": 30,
+              "z": 38
+            }
+          ]
+        },
+        {
+          "nama": "tepi-timur",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": 36,
+              "z": 44
+            },
+            {
+              "x": 54,
+              "z": 46
+            }
+          ]
+        }
+      ],
+      "batu": [
+        {
+          "x": 24,
+          "z": 36,
+          "lebar": 3,
+          "tinggi": 2.4,
+          "dalam": 2.5
+        },
+        {
+          "x": 40,
+          "z": 40,
+          "lebar": 3.5,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        }
+      ],
+      "semak": [
+        {
+          "x": 30,
+          "z": 42
+        },
+        {
+          "x": 36,
+          "z": 36
+        },
+        {
+          "x": 44,
+          "z": 42
+        },
+        {
+          "x": 40,
+          "z": 33
+        }
+      ],
+      "npc": [
+        {
+          "id": "macan-kuping",
+          "nama": "Kepala dukuh Pandakan",
+          "posisi": [
+            49,
+            32
+          ],
+          "hadap": 2.3,
+          "percakapan": [
+            "pandakan-pagon"
+          ]
+        }
+      ],
+      "selesai": {
+        "percakapan": "pandakan-pagon"
+      }
+    },
+    {
+      "id": "kudadu",
+      "tujuan": "Menuju desa Kudadu di barat",
+      "mulai": {
+        "posisi": [
+          46,
+          34
+        ],
+        "hadap": -1.2
+      },
+      "penanda": [
+        [
+          8,
+          -36
+        ]
+      ],
+      "penjaga": [
+        {
+          "nama": "jalur-selatan",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": 34,
+              "z": 22
+            },
+            {
+              "x": 50,
+              "z": 14
+            }
+          ]
+        },
+        {
+          "nama": "jalur-tengah",
+          "mode": "melingkar",
+          "titik": [
+            {
+              "x": 26,
+              "z": -2
+            },
+            {
+              "x": 40,
+              "z": -4
+            },
+            {
+              "x": 40,
+              "z": -14
+            },
+            {
+              "x": 26,
+              "z": -14
+            }
+          ]
+        },
+        {
+          "nama": "jalur-utara",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": 14,
+              "z": -24
+            },
+            {
+              "x": 32,
+              "z": -30
+            }
+          ]
+        }
+      ],
+      "batu": [
+        {
+          "x": 42,
+          "z": 16,
+          "lebar": 3.5,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        },
+        {
+          "x": 30,
+          "z": 6,
+          "lebar": 2.5,
+          "tinggi": 2.2,
+          "dalam": 3
+        },
+        {
+          "x": 44,
+          "z": -10,
+          "lebar": 3,
+          "tinggi": 2.8,
+          "dalam": 3
+        },
+        {
+          "x": 24,
+          "z": -20,
+          "lebar": 4,
+          "tinggi": 2.4,
+          "dalam": 2.5
+        }
+      ],
+      "semak": [
+        {
+          "x": 38,
+          "z": 20
+        },
+        {
+          "x": 32,
+          "z": 12
+        },
+        {
+          "x": 34,
+          "z": -8
+        },
+        {
+          "x": 20,
+          "z": -8
+        },
+        {
+          "x": 20,
+          "z": -28
+        }
+      ],
+      "npc": [
+        {
+          "id": "kepala-desa",
+          "nama": "Kepala desa Kudadu",
+          "posisi": [
+            4,
+            -33.5
+          ],
+          "hadap": 1.57,
+          "percakapan": [
+            "kudadu-tiba",
+            "kudadu-ulang"
+          ]
+        }
+      ],
+      "selesai": {
+        "percakapan": "kudadu-tiba"
+      }
     }
   ]
 }

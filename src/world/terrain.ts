@@ -10,6 +10,10 @@ export const SEGMEN_MEDAN = 150;
 export const Z_SUNGAI = 55;
 export const LEBAR_SUNGAI = 14;
 export const PERMUKAAN_AIR = -1.0;
+// Tempat dangkal penyeberangan: dasar sungai terangkat di sekitar x ini sehingga pasirnya
+// terlihat dan pemain tidak melambat (kaki di atas PERMUKAAN_AIR - 0,3).
+export const X_DANGKAL = 32;
+export const LEBAR_DANGKAL = 16;
 
 function smoothstep(tepi0: number, tepi1: number, x: number): number {
   const t = Math.min(1, Math.max(0, (x - tepi0) / (tepi1 - tepi0)));
@@ -31,7 +35,10 @@ export function tinggiMedan(x: number, z: number): number {
   // Cekungan sungai berbentuk lonceng.
   const dz = z - Z_SUNGAI;
   const sigma = LEBAR_SUNGAI / 2.5;
-  const parit = Math.exp(-(dz * dz) / (2 * sigma * sigma)) * 2.6;
+  let parit = Math.exp(-(dz * dz) / (2 * sigma * sigma)) * 2.6;
+  // Di tempat dangkal, cekungan hanya separuh dalamnya.
+  const dangkal = 1 - smoothstep(0, 1, Math.abs(x - X_DANGKAL) / (LEBAR_DANGKAL / 2));
+  parit *= 1 - 0.7 * dangkal;
 
   return bukit + gelombang * faktorDesa - parit;
 }

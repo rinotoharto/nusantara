@@ -8,7 +8,7 @@ export interface Rumah {
 }
 
 // Posisi dan arah hadap 6 rumah desa Kudadu di tengah medan.
-const TATA_LETAK: { x: number; z: number; putar: number; skala?: number }[] = [
+const TATA_LETAK: TataLetakRumah[] = [
   { x: -18, z: -12, putar: 0.3 },
   { x: 14, z: -16, putar: -0.2 },
   { x: -8, z: 12, putar: 1.6 },
@@ -27,7 +27,15 @@ const bahanDinding = new THREE.MeshStandardMaterial({ color: 0x9a7b4f, roughness
 const bahanAtap = new THREE.MeshStandardMaterial({ color: 0x5a3b26, roughness: 1 });
 const bahanTiang = new THREE.MeshStandardMaterial({ color: 0x6b4a2e, roughness: 1 });
 
-function buatRumah(x: number, z: number, putar: number, skala = 1): Rumah {
+/** Tata letak satu rumah: posisi kaki, arah hadap, dan skala (rumah kepala desa 1,3). */
+export interface TataLetakRumah {
+  x: number;
+  z: number;
+  putar: number;
+  skala?: number;
+}
+
+export function buatRumah(x: number, z: number, putar: number, skala = 1): Rumah {
   const grup = new THREE.Group();
   const yTanah = tinggiMedan(x, z);
   grup.position.set(x, yTanah, z);
@@ -72,4 +80,9 @@ function buatRumah(x: number, z: number, putar: number, skala = 1): Rumah {
 /** Enam rumah desa Kudadu. */
 export function buatDesa(): Rumah[] {
   return TATA_LETAK.map((r) => buatRumah(r.x, r.z, r.putar, r.skala));
+}
+
+/** Dukuh kecil dari daftar tata letak di data misi (misalnya Pandakan). */
+export function buatDukuh(tataLetak: TataLetakRumah[]): Rumah[] {
+  return tataLetak.map((r) => buatRumah(r.x, r.z, r.putar, r.skala));
 }
