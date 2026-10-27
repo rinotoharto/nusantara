@@ -8,13 +8,13 @@ export interface Rumah {
 }
 
 // Posisi dan arah hadap 6 rumah desa Kudadu di tengah medan.
-const TATA_LETAK: { x: number; z: number; putar: number }[] = [
+const TATA_LETAK: { x: number; z: number; putar: number; skala?: number }[] = [
   { x: -18, z: -12, putar: 0.3 },
   { x: 14, z: -16, putar: -0.2 },
   { x: -8, z: 12, putar: 1.6 },
   { x: 20, z: 8, putar: 1.3 },
   { x: -26, z: 14, putar: -0.4 },
-  { x: 4, z: -28, putar: 0.1 },
+  { x: 4, z: -28, putar: 0.1, skala: 1.3 }, // rumah kepala desa, yang terbesar
 ];
 
 const LEBAR = 7;
@@ -27,11 +27,12 @@ const bahanDinding = new THREE.MeshStandardMaterial({ color: 0x9a7b4f, roughness
 const bahanAtap = new THREE.MeshStandardMaterial({ color: 0x5a3b26, roughness: 1 });
 const bahanTiang = new THREE.MeshStandardMaterial({ color: 0x6b4a2e, roughness: 1 });
 
-function buatRumah(x: number, z: number, putar: number): Rumah {
+function buatRumah(x: number, z: number, putar: number, skala = 1): Rumah {
   const grup = new THREE.Group();
   const yTanah = tinggiMedan(x, z);
   grup.position.set(x, yTanah, z);
   grup.rotation.y = putar;
+  grup.scale.setScalar(skala);
 
   // Badan rumah di atas tiang.
   const badan = new THREE.Mesh(new THREE.BoxGeometry(LEBAR, TINGGI_DINDING, DALAM), bahanDinding);
@@ -70,5 +71,5 @@ function buatRumah(x: number, z: number, putar: number): Rumah {
 
 /** Enam rumah desa Kudadu. */
 export function buatDesa(): Rumah[] {
-  return TATA_LETAK.map((r) => buatRumah(r.x, r.z, r.putar));
+  return TATA_LETAK.map((r) => buatRumah(r.x, r.z, r.putar, r.skala));
 }

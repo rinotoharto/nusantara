@@ -5,6 +5,7 @@ export class Hud {
   private readonly fpsEl: HTMLDivElement;
   private readonly petunjukEl: HTMLDivElement;
   private readonly kunciEl: HTMLDivElement;
+  private readonly aksiEl: HTMLDivElement;
   private akumulasi = 0;
   private jumlahFrame = 0;
 
@@ -21,7 +22,16 @@ export class Hud {
     this.kunciEl.className = 'hud hud-kunci';
     this.kunciEl.textContent = UI.hud.kunci;
 
-    document.body.append(this.fpsEl, this.petunjukEl, this.kunciEl);
+    this.aksiEl = document.createElement('div');
+    this.aksiEl.className = 'hud hud-aksi';
+
+    document.body.append(this.fpsEl, this.petunjukEl, this.kunciEl, this.aksiEl);
+  }
+
+  /** Petunjuk aksi di tengah bawah layar, misalnya "E: Bicara"; null menyembunyikannya. */
+  tampilkanAksi(teks: string | null): void {
+    this.aksiEl.style.display = teks ? 'block' : 'none';
+    if (teks && this.aksiEl.textContent !== teks) this.aksiEl.textContent = teks;
   }
 
   /** Dipanggil tiap frame; angka fps diperbarui tiap setengah detik. */

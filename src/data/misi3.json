@@ -1,3 +1,12 @@
 {
-  "tokohPemain": "wijaya"
+  "tokohPemain": "wijaya",
+  "npc": [
+    {
+      "id": "kepala-desa",
+      "nama": "Kepala desa Kudadu",
+      "posisi": [4, -33.5],
+      "hadap": 1.57,
+      "percakapan": ["kudadu-tiba", "kudadu-ulang"]
+    }
+  ]
 }

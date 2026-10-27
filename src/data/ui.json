@@ -2,16 +2,46 @@
   "hud": {
     "kunci": "Klik untuk mengendalikan",
     "petunjuk": [
-      ["WASD", "jalan"],
-      ["Shift", "lari"],
-      ["C", "jongkok"],
-      ["Spasi", "lompat / panjat"],
-      ["Klik kiri", "serang, tahan: berat"],
-      ["Klik kanan", "tangkis"],
-      ["Ctrl", "hindar (atau klik tengah)"],
-      ["Mouse", "putar kamera"],
-      ["Esc", "lepas mouse"],
-      ["T", "uji dialog (sementara)"]
+      [
+        "WASD",
+        "jalan"
+      ],
+      [
+        "Shift",
+        "lari"
+      ],
+      [
+        "C",
+        "jongkok"
+      ],
+      [
+        "Spasi",
+        "lompat / panjat"
+      ],
+      [
+        "E",
+        "bicara"
+      ],
+      [
+        "Klik kiri",
+        "serang, tahan: berat"
+      ],
+      [
+        "Klik kanan",
+        "tangkis"
+      ],
+      [
+        "Ctrl",
+        "hindar (atau klik tengah)"
+      ],
+      [
+        "Mouse",
+        "putar kamera"
+      ],
+      [
+        "Esc",
+        "lepas mouse"
+      ]
     ]
   },
   "dialog": {
@@ -25,8 +55,21 @@
     "entriTertutup": "Entri lengkap belum terbuka di Kitab."
   },
   "nada": {
-    "hormat": { "nama": "Hormat", "ikon": "❖" },
-    "tegas": { "nama": "Tegas", "ikon": "✶" },
-    "licik": { "nama": "Licik", "ikon": "◆" }
+    "hormat": {
+      "nama": "Hormat",
+      "ikon": "❖"
+    },
+    "tegas": {
+      "nama": "Tegas",
+      "ikon": "✶"
+    },
+    "licik": {
+      "nama": "Licik",
+      "ikon": "◆"
+    }
+  },
+  "npc": {
+    "bicara": "E: Bicara",
+    "jarak": 2.5
   }
 }

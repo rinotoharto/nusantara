@@ -69,12 +69,6 @@ export class MesinDialog {
     this.masukSimpul(pil.lanjut);
   }
 
-  /** Menghentikan percakapan sekarang tanpa menandainya selesai. */
-  batalkan(): void {
-    this.percakapan = null;
-    this.idSimpul = '';
-  }
-
   private masukSimpul(id: string): void {
     const p = this.percakapan;
     if (!p) return;
