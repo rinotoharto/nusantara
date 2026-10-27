@@ -248,3 +248,105 @@ Diuji dari konsol browser (status direset, muat ulang) dan manual:
 - Kitab dibuka dari menu jeda kembali ke menu, bukan ke permainan.
 - Mulai ulang misi mempertahankan entri Kitab karena ensiklopedia adalah kemajuan belajar lintas percobaan, bukan kemajuan misi.
 - NPC dan pemicu ditaruh di `misi3.json` meski prompt hanya meminta pemicu, supaya sprint 5 (misi 3 utuh) bisa menambah tokoh dan pemicu tanpa kode.
+
+## Sprint 5: misi 3 utuh (27 Oktober 2026)
+
+Tujuan: merangkai semuanya menjadi misi 3 yang bisa dimainkan dari layar awal sampai layar selesai: pembukaan di hutan, patroli, Pandakan dan keputusan Gajah Pagon, Kudadu dan keputusan menginap, tujuan pilihan lumbung, pilihan rute sungai atau bukit, muara dan penyeberangan, titik simpan, layar selesai. Isi dialog dan Kitab sudah sungguhan sejak awal sprint (`docs/isi/`), tidak diubah.
+
+### Yang sudah jalan
+
+- Misi dibangun seluruhnya dari `src/data/misi3.json` oleh `src/mission/mission.ts` (`PelaksanaMisi`). Kode hanya menjalankan daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada (begitulah rute sungai dan bukit bercabang). Tujuh segmen: hutan, pandakan, kudadu, rute, sungai, bukit, pantai.
+- Variabel rombongan (`src/mission/party.ts`): Pengikut 12, Perbekalan 1, Gajah Pagon ikut, Kewaspadaan Daha 0, KaliKetahuan 0. Tanda dialog mengubahnya lewat `aturan.tanda` di misi3.json; ketahuan patroli lewat `aturan.ketahuan` (satu kejadian per episode, tidak dihitung lagi selama kawan masih mengejar). Status hanya memanggil aturan untuk tanda yang baru, jadi dialog yang diulang tidak mengubah angka dua kali.
+- HUD rombongan kanan atas (`src/ui/party-hud.ts`): angka Pengikut, ikon nasi bungkus sejumlah Perbekalan, lencana Gajah Pagon; perubahan berkedip hijau atau merah dengan teks kecil dari JSON. HUD tujuan kiri atas (`src/ui/objective-hud.ts`), tanpa penanda di layar; penanda dunia berupa obor (`src/world/torch.ts`) per segmen.
+- Gajah Pagon: pengikut keempat warna zaitun, pincang (goyang dan turun tiap langkah), laju sendiri 4,4 m/s. Selama ia ikut, pemain dan pengikut lain dibatasi 4 m/s (Shift tidak mempercepat) dan meteran curiga penjaga 1,25 kali lebih cepat. Ditinggal berarti ia berdiri diam di tempatnya sebagai NPC.
+- Tata letak baru: titik awal di hutan selatan sungai (30, 92); tempat dangkal di x sekitar 32 (dasar sungai terangkat 70 persen, pasir terlihat, pemain tidak melambat); Pandakan tiga rumah dan Macan Kuping di (49, 32); dua patroli tepi utara sungai; tiga penjaga area uji sprint 3 digeser ke jalur Pandakan ke Kudadu; lumbung tua tanpa dinding di (42, -36) dengan satu penjaga tambahan dan prajurit di dalamnya; teluk muara di ujung barat sungai dengan perahu balok dan nelayan. Lawan uji sprint 2 dan `stealth-uji.json` dihapus.
+- Alur: panel pembuka (layar gelap, klik untuk lanjut) → `hutan-pembukaan` otomatis (kamera sinematik mengarah ke pengikut yang bicara lewat `pengikutTokoh`) → seberangi sungai → Pandakan, `pandakan-pagon` → Kudadu, `kudadu-tiba` lalu `kudadu-malam` otomatis lewat `rantai` → panel "Beberapa jam kemudian" 2 detik → kalau menginap: penjaga pagi di dalam desa dan cahaya 1,3 kali → `kudadu-rute` di gerbang utara (NPC kedua, dipasang saat segmen mulai dan dicabut setelahnya) → rute sungai (2 + Kewaspadaan penjaga, maksimal 5, dari daftar posisi) atau bukit (panjat tebing, tanpa penjaga; `bukit-tumbang` kalau Perbekalan kurang dari 1) → muara, satu penjaga terakhir hanya di rute sungai → `pantai-perahu` → sinematik perahu 4 detik → layar selesai.
+- Tujuan pilihan: warga Kudadu (`kudadu-warga-lumbung`) menunjuk lumbung; prajurit di lumbung (`lumbung-prajurit`) menambah Pengikut +1 dan hilang setelah bergabung (`hapusSetelahPercakapan`). Tidak ada tujuan di HUD.
+- Pengikut yang tertinggal di bawah tebing berpindah ke belakang kamera saat pemain selesai memanjat (`susulkanSetelahPanjat`), sesuai aturan tertinggal sprint 3.
+- Layar selesai (`src/ui/mission-end.ts`): ringkasan sejarah dan kutipan dari `teks.selesai`, ringkasan pemain (Pengikut tiba dari 12, Gajah Pagon, rute, kali ketahuan, entri Kitab dari 14, waktu), catatan bersumber dua versi menurut pilihan Pagon, tombol Buka Kitab dan Main lagi. Hasil disimpan ke status sebagai `hasilMisi3` (pengikutTiba, pagon, rute, kewaspadaanDaha, kaliKetahuan, waktu) untuk misi 4.
+- Titik simpan: di awal tiap segmen, status menyimpan segmen, variabel rombongan, tanda, percakapan selesai, dan waktu ke localStorage. Gugur memulihkan semuanya termasuk tanda. Layar awal (`src/ui/title-screen.ts`) punya Mulai baru, Lanjutkan (kalau ada simpanan), dan Kitab; Lanjutkan memulai segmen tersimpan tanpa panel dan percakapan pembukanya, Gajah Pagon yang ditinggal ditaruh di `aturan.pagonDitinggal.posisi`.
+- Mode UI di `main.ts`: `judul`, `main`, `dialog`, `kitab`, `jeda`, `panel`, `sinematik`, `selesai`. Satu fungsi `perbaruiPermainan(dt)` dipakai loop render dan pegangan uji `nusantara.langkah(dt)`.
+
+### Skema misi3.json final
+
+Bagian atas: `tokohPemain`, `pengikutTokoh` (id tokoh dialog ke indeks pengikut), `aturan` (lihat di bawah), `teks` (`pembuka` paragraf panel, `jeda`, `selesai` dengan `sejarah`, `kutipan`, `catatanPagonDitinggal`, `catatanPagonIkut`), `dunia` (`pandakan` daftar rumah, `lumbung`, `muara`, `perahu`), `pemicu` (pemicu Kitab lama: `area`, `pertarungan-pertama`), dan `segmen`.
+
+`aturan`: `awal` (nilai awal variabel), `tanda` (tanda → `pengikut`, `perbekalan`, `kewaspadaan`, `pagon`, `lajuLari`, `teks`), `ketahuan` (`kewaspadaan`, `kaliKetahuan`, `pengikutJikaPagon`, `maksPengikutJikaPagon`, `teks`), `pagonIkut` (`lajuMaks` 4, `lajuPagon` 4,4, `pengaliCuriga` 1,25), `pagonDitinggal.posisi`, `penjagaSungai` (`dasar` 2, `maks` 5).
+
+Satu segmen lengkap (segmen Kudadu, sebagaimana di berkas):
+
+```json
+{
+  "id": "kudadu",
+  "tujuan": "Menuju desa Kudadu di barat, temui kepala desa",
+  "mulai": { "posisi": [46, 34], "hadap": -1.2 },
+  "penanda": [[8, -36]],
+  "penjaga": [
+    { "nama": "jalur-selatan", "mode": "bolak-balik", "titik": [{ "x": 34, "z": 22 }, { "x": 50, "z": 14 }] },
+    { "nama": "jalur-tengah", "mode": "melingkar", "titik": [{ "x": 26, "z": -2 }, { "x": 40, "z": -4 }, { "x": 40, "z": -14 }, { "x": 26, "z": -14 }] },
+    { "nama": "jalur-utara", "mode": "bolak-balik", "titik": [{ "x": 14, "z": -24 }, { "x": 32, "z": -30 }] },
+    { "nama": "lumbung", "mode": "bolak-balik", "titik": [{ "x": 34, "z": -40 }, { "x": 50, "z": -42 }] }
+  ],
+  "batu": [{ "x": 42, "z": 16, "lebar": 3.5, "tinggi": 2.6, "dalam": 2.5 }, { "x": 30, "z": 6, "lebar": 2.5, "tinggi": 2.2, "dalam": 3 },
+           { "x": 44, "z": -10, "lebar": 3, "tinggi": 2.8, "dalam": 3 }, { "x": 24, "z": -20, "lebar": 4, "tinggi": 2.4, "dalam": 2.5 }],
+  "semak": [{ "x": 38, "z": 20 }, { "x": 32, "z": 12 }, { "x": 34, "z": -8 }, { "x": 20, "z": -8 }, { "x": 20, "z": -28 }, { "x": 38, "z": -30 }],
+  "npc": [
+    { "id": "kepala-desa", "nama": "Kepala desa Kudadu", "posisi": [4, -33.5], "hadap": 1.57, "percakapan": ["kudadu-tiba", "kudadu-ulang"] },
+    { "id": "warga", "nama": "Warga Kudadu", "posisi": [-6, -22], "hadap": 0.8, "percakapan": ["kudadu-warga-lumbung"] },
+    { "id": "prajurit", "nama": "Prajurit Singasari", "posisi": [42, -36], "hadap": 3.5, "percakapan": ["lumbung-prajurit"], "hapusSetelahPercakapan": true }
+  ],
+  "rantai": [{ "setelah": "kudadu-tiba", "percakapan": "kudadu-malam" }],
+  "selesai": { "percakapan": "kudadu-malam" }
+}
+```
+
+Anggota segmen lain yang dipakai segmen lain: `syarat` (tanda yang harus ada, kalau tidak segmen dilewati; seluruh isinya menjadi dinamis), `saatMulai` (`panel` kunci teks, `lamaPanel` detik atau 0 menunggu klik, `percakapan` otomatis), `cahaya` (`syarat`, `pengali`), `jumlahPenjagaDariAturan: "penjagaSungai"` (hanya n penjaga pertama dari daftar), `pemicu` (`jenis: "area"`, `pusat`, `jari`, `percakapan`, `bukaKitab`, `jika: { perbekalanKurangDari, tanda }`), `selesai.area` (`pusat`, `jari`) atau `selesai.tanda` (satu tanda atau daftar, salah satu cukup). Pada penjaga dan NPC: `syarat` (dipasang saat segmen mulai kalau tandanya ada) dan `dinamis: true` (dipasang saat segmen mulai; NPC dinamis dicabut saat segmen selesai). Isi tanpa keduanya dipasang sekali saat misi mulai, sehingga penjaga tepi sungai sudah terlihat dari seberang.
+
+### Placeholder TODO-SEJARAH yang perlu ditulis di luar sesi
+
+- `misi3.json` → `teks.pembuka[2]`: kutipan Prasasti Kudadu tentang pengejaran (dibacakan setelah dua paragraf pembuka).
+- `misi3.json` → `teks.selesai.kutipan`: kutipan Prasasti Kudadu tentang penyeberangan ke Madura.
+- Teks penutup `teks.selesai.sejarah`, `catatanPagonDitinggal`, dan `catatanPagonIkut` disalin dari naskah; `catatanPagonDitinggal` adalah versi turunan yang dibuat di sesi ini untuk pilihan "ditinggal", perlu dibaca ulang penulis.
+- Teks HUD di `aturan.tanda[*].teks` dan `aturan.ketahuan.teks` (misalnya "Wirot ditinggal di gubuk") adalah teks permainan yang ditulis di sesi ini, bukan isi sejarah; silakan ubah.
+- Yang sudah ada sebelumnya di `codex.json`: beberapa TODO-VERIFIKASI (edisi Brandes, Nagarakretagama pupuh 45, status Ranggalawe 1292) tidak disentuh.
+
+### Durasi tiap jalur
+
+Diukur dengan bot dari konsol (`nusantara.langkah`) yang berjalan lurus antar titik, berlari kalau boleh, tidak menyelinap; tiap kali penjaga mengejar dihitung sebagai pertarungan yang dimenangkan (+12 detik) dan penjaga dikembalikan. Lama dialog diperkirakan dari panjang teks (45 huruf per detik, 1,2 detik per simpul, 4 detik per pilihan). Angka ini batas bawah; pemain yang menyelinap sabar menambah sekitar 40 detik per kelompok penjaga (bot sabar sprint 3), ada tiga kelompok di jalur utama dan sampai lima penjaga di rute sungai.
+
+| Jalur | Jalan dan tarung (bot) | Dialog (perkiraan) | Total bot | Perkiraan pemain menyelinap |
+| --- | --- | --- | --- | --- |
+| (a) Pagon ditinggal, menginap, sungai, 4 kali ketahuan | 109 s | 125 s | 3,9 menit | 7 sampai 9 menit |
+| (b) Pagon ikut, menginap, bukit, tidak ketahuan | 103 s | 126 s | 3,8 menit | 6 sampai 8 menit |
+| (c) licik semua, lumbung, sebelum fajar, bukit, tumbang, 3 kali ketahuan | 131 s | 160 s | 4,9 menit | 8 sampai 11 menit |
+
+Catatan: bot jalur (a) memilih menginap karena rantai `kudadu-malam` memakai pilihan yang sama dengan `kudadu-tiba`; jalur sebelum fajar diuji di jalur (c). Target 8 sampai 12 menit belum dipastikan oleh pemain manusia; kalau playtest sprint 6 terlalu cepat, pelebar pertama: tambah semak dan jarak jalur Pandakan ke Kudadu, atau tambah satu tujuan pilihan.
+
+Hasil lain Tahap E:
+
+- Tidak ada jalan buntu: jalur (c) menghabiskan Perbekalan sampai 0, kehilangan dua pengikut, ketahuan tiga kali, dan tetap sampai layar selesai; Pengikut paling rendah yang mungkin sekitar 8 (Pagon ditinggal atau dua gugur, satu tumbang).
+- Tidak ada peringatan `[data]` di konsol; semua id dialog dan Kitab yang dipicu ada. Jalur (c) membuka 14 dari 14 entri.
+- Biaya logika per frame (pemain, 4 pengikut, 6 penjaga, NPC, pemicu, kamera) 0,016 ms di laptop pengembang; fps di HUD 60 saat pane terlihat. Belum diukur di laptop sekolah.
+
+### Yang belum
+
+- Belum ada uji pemain manusia; durasi di atas perkiraan. Syarat lolos "pemain menyebut satu keputusan yang ia pertimbangkan" baru bisa dinilai saat playtest.
+- Waktu di layar selesai hanya berjalan saat tab aktif (loop render), seperti semua logika permainan.
+- Rute sungai: pos penjaga terakhir berpatroli melintasi nelayan; pemain harus menunggunya menjauh atau menyergap. Bisa terasa menjengkelkan; angka posisinya di segmen `pantai`.
+- Gugur mengembalikan ke awal segmen: di rute sungai dan bukit itu berarti kembali ke gerbang utara Kudadu (jalan 150 sampai 200 m). Kalau terlalu keras, pecah rute menjadi dua segmen.
+- Sinematik perahu tidak memeriksa tabrakan kamera dan perahu hanya bergeser lurus; pengikut yang sedang ditinggal (Pagon) tidak ikut naik perahu, sesuai cerita.
+- Muat ulang halaman di tengah dialog atau panel menyimpan segmen, bukan posisi dialog; Lanjutkan mengulang segmen dari titik mulainya.
+- Isi dinamis segmen lama (penjaga pagi) tidak dipasang lagi setelah Lanjutkan; tidak terlihat karena pemain sudah lewat.
+- Tepian muara rendah (tanah −0,2 sampai −0,5 m, permukaan air −1 m): nelayan, obor, dan penjaga pantai berdiri di pasir yang hampir sejajar air; kalau terlihat janggal, naikkan tepian lewat `SIGMA_MUARA` di `terrain.ts`.
+
+### Keputusan yang diambil
+
+- Segmen adalah satuan misi, titik simpan, dan muat ulang saat gugur. Semua yang bergantung pilihan (rute, penjaga pagi, penjaga pantai, jumlah penjaga sungai) dinyatakan dengan `syarat` di data, bukan cabang di kode.
+- Isi statis dipasang saat misi mulai supaya penjaga segmen berikutnya terlihat lebih awal; isi dinamis dipasang saat segmennya mulai dan dicabut saat misi diulang (`cabutDinamis`), termasuk batu dan semak segmen bersyarat.
+- Saat Pagon ikut, pemain ikut dibatasi 4 m/s (bukan hanya pengikut) sesuai naskah "tidak bisa lari"; Pagon sendiri 4,4 m/s supaya bisa menyusul dari slot paling belakang.
+- Ambang `bukit-tumbang` dibuat bisa disetel (`jika.perbekalanKurangDari`) dan dipakai 1, karena dengan angka naskah Perbekalan tidak pernah negatif (paling rendah 0 lewat sebelum fajar + bukit).
+- Ketahuan dihitung saat penjaga melihat pemain sendiri (`mulaiMengejar(true)`), termasuk saat diserang dari belakang; teriakan kawan tidak menambah hitungan.
+- Dialog otomatis tanpa NPC memakai posisi pengikut sebagai lawan bicara; pemetaan tokoh ke pengikut ada di `pengikutTokoh`, bukan di kode.
+- Kepala desa di gerbang utara adalah NPC kedua, bukan NPC pertama yang berpindah, supaya `kudadu-ulang` tetap tersedia di rumahnya.
+- Titik simpan menyalin tanda dan percakapan selesai, sehingga gugur juga membatalkan tanda yang muncul setelah segmen mulai; Kitab tetap karena kemajuan belajar.
+- Memuat halaman menampilkan layar awal dengan dunia di belakangnya (`misi.siapkan()` memasang isi statis tanpa memulai), bukan langsung masuk misi.
