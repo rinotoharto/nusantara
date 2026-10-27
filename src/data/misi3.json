@@ -1,5 +1,5 @@
 {
-  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat` dipasang saat misi mulai; isi bersyarat dipasang saat segmennya mulai.",
+  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat`/`dinamis` dipasang saat misi mulai; isi dengan `syarat` atau `dinamis: true` dipasang saat segmennya mulai (NPC dinamis dicabut saat segmen selesai). `rantai` memulai percakapan lain begitu sebuah percakapan selesai. `selesai.tanda` boleh daftar (salah satu).",
   "tokohPemain": "wijaya",
   "pengikutTokoh": {
     "lawe": 0,
@@ -98,7 +98,12 @@
         "z": 39,
         "putar": 0.5
       }
-    ]
+    ],
+    "lumbung": {
+      "x": 42,
+      "z": -36,
+      "putar": 0.3
+    }
   },
   "pemicu": [
     {
@@ -250,7 +255,7 @@
     },
     {
       "id": "kudadu",
-      "tujuan": "Menuju desa Kudadu di barat",
+      "tujuan": "Menuju desa Kudadu di barat, temui kepala desa",
       "mulai": {
         "posisi": [
           46,
@@ -314,6 +319,20 @@
               "z": -30
             }
           ]
+        },
+        {
+          "nama": "lumbung",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": 34,
+              "z": -40
+            },
+            {
+              "x": 50,
+              "z": -42
+            }
+          ]
         }
       ],
       "batu": [
@@ -366,6 +385,10 @@
         {
           "x": 20,
           "z": -28
+        },
+        {
+          "x": 38,
+          "z": -30
         }
       ],
       "npc": [
@@ -381,10 +404,341 @@
             "kudadu-tiba",
             "kudadu-ulang"
           ]
+        },
+        {
+          "id": "warga",
+          "nama": "Warga Kudadu",
+          "posisi": [
+            -6,
+            -22
+          ],
+          "hadap": 0.8,
+          "percakapan": [
+            "kudadu-warga-lumbung"
+          ]
+        },
+        {
+          "id": "prajurit",
+          "nama": "Prajurit Singasari",
+          "posisi": [
+            42,
+            -36
+          ],
+          "hadap": 3.5,
+          "percakapan": [
+            "lumbung-prajurit"
+          ],
+          "hapusSetelahPercakapan": true
         }
       ],
       "selesai": {
-        "percakapan": "kudadu-tiba"
+        "percakapan": "kudadu-malam"
+      },
+      "rantai": [
+        {
+          "setelah": "kudadu-tiba",
+          "percakapan": "kudadu-malam"
+        }
+      ]
+    },
+    {
+      "id": "rute",
+      "tujuan": "Temui kepala desa di gerbang utara Kudadu",
+      "mulai": {
+        "posisi": [
+          4,
+          -37
+        ],
+        "hadap": 3.1416
+      },
+      "saatMulai": {
+        "panel": "jeda",
+        "lamaPanel": 2
+      },
+      "cahaya": {
+        "syarat": "kudadu-menginap",
+        "pengali": 1.3
+      },
+      "penanda": [
+        [
+          0,
+          -44
+        ]
+      ],
+      "penjaga": [
+        {
+          "nama": "patroli-pagi",
+          "mode": "bolak-balik",
+          "syarat": "kudadu-menginap",
+          "titik": [
+            {
+              "x": -10,
+              "z": -20
+            },
+            {
+              "x": 8,
+              "z": -22
+            },
+            {
+              "x": 10,
+              "z": -4
+            }
+          ]
+        }
+      ],
+      "npc": [
+        {
+          "id": "kepala-desa-gerbang",
+          "nama": "Kepala desa Kudadu",
+          "posisi": [
+            0,
+            -44
+          ],
+          "hadap": 0,
+          "percakapan": [
+            "kudadu-rute"
+          ],
+          "dinamis": true
+        }
+      ],
+      "selesai": {
+        "tanda": [
+          "rute-sungai",
+          "rute-bukit"
+        ]
+      }
+    },
+    {
+      "id": "sungai",
+      "syarat": "rute-sungai",
+      "tujuan": "Ikuti tepian sungai ke barat sampai muara",
+      "mulai": {
+        "posisi": [
+          0,
+          -46
+        ],
+        "hadap": -1.57
+      },
+      "penanda": [
+        [
+          -40,
+          20
+        ],
+        [
+          -80,
+          40
+        ],
+        [
+          -120,
+          44
+        ]
+      ],
+      "jumlahPenjagaDariAturan": "penjagaSungai",
+      "penjaga": [
+        {
+          "nama": "sungai-1",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -40,
+              "z": 30
+            },
+            {
+              "x": -56,
+              "z": 40
+            }
+          ]
+        },
+        {
+          "nama": "sungai-2",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -84,
+              "z": 36
+            },
+            {
+              "x": -100,
+              "z": 42
+            }
+          ]
+        },
+        {
+          "nama": "sungai-3",
+          "mode": "melingkar",
+          "titik": [
+            {
+              "x": -64,
+              "z": 26
+            },
+            {
+              "x": -76,
+              "z": 24
+            },
+            {
+              "x": -76,
+              "z": 34
+            },
+            {
+              "x": -64,
+              "z": 36
+            }
+          ]
+        },
+        {
+          "nama": "sungai-4",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -108,
+              "z": 30
+            },
+            {
+              "x": -122,
+              "z": 38
+            }
+          ]
+        },
+        {
+          "nama": "sungai-5",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -30,
+              "z": 6
+            },
+            {
+              "x": -44,
+              "z": 14
+            }
+          ]
+        }
+      ],
+      "batu": [
+        {
+          "x": -48,
+          "z": 34,
+          "lebar": 3.5,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        },
+        {
+          "x": -70,
+          "z": 40,
+          "lebar": 3,
+          "tinggi": 2.4,
+          "dalam": 3
+        },
+        {
+          "x": -92,
+          "z": 30,
+          "lebar": 3,
+          "tinggi": 2.8,
+          "dalam": 2.5
+        },
+        {
+          "x": -114,
+          "z": 42,
+          "lebar": 3.5,
+          "tinggi": 2.4,
+          "dalam": 2.5
+        }
+      ],
+      "semak": [
+        {
+          "x": -36,
+          "z": 22
+        },
+        {
+          "x": -52,
+          "z": 28
+        },
+        {
+          "x": -62,
+          "z": 42
+        },
+        {
+          "x": -80,
+          "z": 44
+        },
+        {
+          "x": -96,
+          "z": 38
+        },
+        {
+          "x": -104,
+          "z": 46
+        },
+        {
+          "x": -118,
+          "z": 34
+        }
+      ],
+      "selesai": {
+        "area": {
+          "pusat": [
+            -124,
+            44
+          ],
+          "jari": 7
+        }
+      }
+    },
+    {
+      "id": "bukit",
+      "syarat": "rute-bukit",
+      "tujuan": "Panjat tebing dan lewati bukit utara ke muara di barat",
+      "mulai": {
+        "posisi": [
+          0,
+          -46
+        ],
+        "hadap": 3.1416
+      },
+      "penanda": [
+        [
+          -15,
+          -50
+        ],
+        [
+          -50,
+          -74
+        ],
+        [
+          -95,
+          -50
+        ],
+        [
+          -120,
+          0
+        ],
+        [
+          -124,
+          40
+        ]
+      ],
+      "pemicu": [
+        {
+          "jenis": "area",
+          "pusat": [
+            -52,
+            -74
+          ],
+          "jari": 9,
+          "percakapan": "bukit-tumbang",
+          "jika": {
+            "perbekalanKurangDari": 1
+          }
+        }
+      ],
+      "selesai": {
+        "area": {
+          "pusat": [
+            -124,
+            44
+          ],
+          "jari": 7
+        }
       }
     }
   ]

@@ -17,6 +17,8 @@ export interface DataNpc {
   percakapan: string[];
   /** Tanda yang harus ada supaya NPC ini dipasang (dievaluasi saat segmennya mulai). */
   syarat?: string;
+  /** Dicabut begitu salah satu percakapannya selesai. */
+  hapusSetelahPercakapan?: boolean;
 }
 
 /** Tokoh bukan pemain yang bisa diajak bicara. Tidak bertarung, tidak bergerak. */
@@ -26,12 +28,14 @@ export class Npc {
   readonly id: string;
   readonly nama: string;
   readonly padat: Padat;
+  readonly hapusSetelahPercakapan: boolean;
   private readonly percakapan: string[];
 
   constructor(data: DataNpc) {
     this.id = data.id;
     this.nama = data.nama;
     this.percakapan = data.percakapan;
+    this.hapusSetelahPercakapan = data.hapusSetelahPercakapan ?? false;
     const [x, z] = data.posisi;
     this.posisi.set(x, tinggiMedan(x, z), z);
     this.grup.rotation.y = data.hadap;
@@ -62,6 +66,10 @@ export class Npc {
 
   hadapKe(x: number, z: number): void {
     this.grup.rotation.y = Math.atan2(x - this.posisi.x, z - this.posisi.z);
+  }
+
+  punyaPercakapan(id: string): boolean {
+    return this.percakapan.includes(id);
   }
 
   /** Id percakapan yang dipakai kalau pemain mengajak bicara sekarang. */

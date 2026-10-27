@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 /** Suasana sore: matahari rendah keemasan dengan bayangan, langit dan kabut hangat. */
-export function pasangPencahayaan(scene: THREE.Scene): THREE.DirectionalLight {
+export function pasangPencahayaan(scene: THREE.Scene): { matahari: THREE.DirectionalLight; ambien: THREE.HemisphereLight } {
   const warnaLangit = new THREE.Color(0xe8b47a);
   scene.background = warnaLangit;
   scene.fog = new THREE.Fog(warnaLangit, 120, 320);
@@ -25,5 +25,5 @@ export function pasangPencahayaan(scene: THREE.Scene): THREE.DirectionalLight {
   const ambien = new THREE.HemisphereLight(0xffc98a, 0x4a5a30, 0.9);
   scene.add(ambien);
 
-  return matahari;
+  return { matahari, ambien };
 }

@@ -86,3 +86,44 @@ export function buatDesa(): Rumah[] {
 export function buatDukuh(tataLetak: TataLetakRumah[]): Rumah[] {
   return tataLetak.map((r) => buatRumah(r.x, r.z, r.putar, r.skala));
 }
+
+/** Lumbung tua: lantai panggung, empat tiang, dan atap tanpa dinding, supaya pemain bisa masuk. */
+export function buatLumbung(x: number, z: number, putar: number): { grup: THREE.Group; kotak: THREE.Box3[] } {
+  const grup = new THREE.Group();
+  const yTanah = tinggiMedan(x, z);
+  grup.position.set(x, yTanah, z);
+  grup.rotation.y = putar;
+  const lebar = 6;
+  const dalam = 5;
+  const tinggiTiang = 3.2;
+  const lantai = new THREE.Mesh(new THREE.BoxGeometry(lebar, 0.2, dalam), bahanTiang);
+  lantai.position.y = 0.1;
+  lantai.receiveShadow = true;
+  grup.add(lantai);
+  const geoTiang = new THREE.BoxGeometry(0.3, tinggiTiang, 0.3);
+  const tiangMesh: THREE.Mesh[] = [];
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) {
+      const tiang = new THREE.Mesh(geoTiang, bahanTiang);
+      tiang.position.set(sx * (lebar / 2 - 0.3), tinggiTiang / 2, sz * (dalam / 2 - 0.3));
+      tiang.castShadow = true;
+      grup.add(tiang);
+      tiangMesh.push(tiang);
+    }
+  }
+  const jariAtap = Math.hypot(lebar / 2 + 0.8, dalam / 2 + 0.8);
+  const atap = new THREE.Mesh(new THREE.ConeGeometry(jariAtap, 2.2, 4), bahanAtap);
+  atap.rotation.y = Math.PI / 4;
+  atap.scale.set(1, 1, dalam / lebar);
+  atap.position.y = tinggiTiang + 1.1;
+  atap.castShadow = true;
+  grup.add(atap);
+  grup.updateMatrixWorld(true);
+  // Hanya tiang yang menghalangi gerak; bagian dalam lumbung bisa dimasuki.
+  const kotak = tiangMesh.map((t) => {
+    const k = new THREE.Box3().setFromObject(t);
+    k.min.y = yTanah - 1;
+    return k;
+  });
+  return { grup, kotak };
+}

@@ -75,6 +75,8 @@ export class Pemain {
   /** Batas kecepatan dari misi (m/s), misalnya saat membawa Gajah Pagon; null = normal. */
   batasLaju: number | null = null;
 
+  /** Benar hanya pada frame pemain selesai memanjat; pengikut yang tertinggal disusulkan. */
+  baruSelesaiMemanjat = false;
   private panjatDari: THREE.Vector3 | null = null;
   private panjatKe: THREE.Vector3 | null = null;
   private panjatWaktu = 0;
@@ -122,6 +124,7 @@ export class Pemain {
   }
 
   perbarui(dt: number, input: Input, yawKamera: number, perintah: Readonly<PerintahGerak> = PERINTAH_BEBAS): void {
+    this.baruSelesaiMemanjat = false;
     if (this.panjatKe && this.panjatDari) {
       this.perbaruiPanjat(dt);
       return;
@@ -213,6 +216,7 @@ export class Pemain {
       this.panjatDari = null;
       this.panjatKe = null;
       this.diTanah = true;
+      this.baruSelesaiMemanjat = true;
     }
   }
 

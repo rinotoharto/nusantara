@@ -42,8 +42,10 @@ export interface DataPenjaga {
   nama: string;
   mode: string;
   titik: TitikXZ[];
-  /** Tanda yang harus ada supaya penjaga ini dipasang. */
+  /** Tanda yang harus ada supaya penjaga ini dipasang (saat segmennya mulai). */
   syarat?: string;
+  /** Dipasang saat segmennya mulai walau tanpa syarat. */
+  dinamis?: boolean;
 }
 
 export interface DataBatuMisi {
@@ -61,6 +63,10 @@ export interface DataNpcMisi {
   hadap: number;
   percakapan: string[];
   syarat?: string;
+  /** Dipasang saat segmennya mulai dan dicabut saat segmen selesai. */
+  dinamis?: boolean;
+  /** Dicabut begitu percakapannya selesai (misalnya prajurit yang bergabung). */
+  hapusSetelahPercakapan?: boolean;
 }
 
 /** Syarat tambahan sebuah pemicu; semua anggota harus terpenuhi. */
@@ -82,7 +88,14 @@ export interface PemicuSegmen {
 export interface SyaratSelesai {
   percakapan?: string;
   area?: { pusat: [number, number]; jari: number };
-  tanda?: string;
+  /** Satu tanda, atau daftar yang salah satunya cukup. */
+  tanda?: string | string[];
+}
+
+/** Percakapan lanjutan yang otomatis dimulai setelah percakapan lain selesai. */
+export interface RantaiPercakapan {
+  setelah: string;
+  percakapan: string;
 }
 
 export interface Segmen {
@@ -104,6 +117,9 @@ export interface Segmen {
   /** Yang terjadi saat segmen mulai: panel teks (kunci di `teks`), lalu percakapan otomatis. */
   saatMulai?: { panel?: string; lamaPanel?: number; percakapan?: string };
   pemicu?: PemicuSegmen[];
+  rantai?: RantaiPercakapan[];
+  /** Pengali terang cahaya selama segmen (misalnya pagi setelah menginap), kalau syaratnya ada. */
+  cahaya?: { syarat?: string; pengali: number };
   selesai: SyaratSelesai;
 }
 

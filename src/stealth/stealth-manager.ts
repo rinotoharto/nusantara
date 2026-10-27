@@ -90,8 +90,8 @@ export class PengelolaSiluman {
     };
   }
 
-  /** Batu padat: menghalangi gerak, pandangan, dan kamera. */
-  tambahBatu(b: DataBatu): void {
+  /** Batu padat: menghalangi gerak, pandangan, dan kamera. Mengembalikan pencabutnya. */
+  tambahBatu(b: DataBatu): () => void {
     const yTanah = tinggiMedan(b.x, b.z);
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.lebar, b.tinggi + 1, b.dalam), bahanBatu);
     mesh.position.set(b.x, yTanah + b.tinggi / 2 - 0.5, b.z);
@@ -100,8 +100,16 @@ export class PengelolaSiluman {
     mesh.name = 'batu';
     mesh.updateMatrixWorld(true);
     this.scene.add(mesh);
-    this.dunia.tabrakan.padat.push({ kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat: false });
+    const padat = { kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat: false };
+    this.dunia.tabrakan.padat.push(padat);
     this.dunia.penghalangKamera.push(mesh);
+    return () => {
+      this.scene.remove(mesh);
+      const i = this.dunia.tabrakan.padat.indexOf(padat);
+      if (i >= 0) this.dunia.tabrakan.padat.splice(i, 1);
+      const j = this.dunia.penghalangKamera.indexOf(mesh);
+      if (j >= 0) this.dunia.penghalangKamera.splice(j, 1);
+    };
   }
 
   tambahSemak(x: number, z: number): Semak {
@@ -109,6 +117,12 @@ export class PengelolaSiluman {
     this.scene.add(semak.mesh);
     this.semak.push(semak);
     return semak;
+  }
+
+  hapusSemak(semak: Semak): void {
+    const i = this.semak.indexOf(semak);
+    if (i >= 0) this.semak.splice(i, 1);
+    this.scene.remove(semak.mesh);
   }
 
   tambahPenjaga(rute: RutePatroli): Penjaga {

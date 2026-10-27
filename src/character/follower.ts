@@ -327,6 +327,22 @@ export class PengelolaPengikut {
     }
   }
 
+  /**
+   * Pemain baru selesai memanjat: pengikut yang masih di bawah (lebih rendah 1 m dari pemain)
+   * berpindah ke titik tepat di belakang kamera, seperti aturan tertinggal sprint 3.
+   */
+  susulkanSetelahPanjat(pemain: Pemain, kamera: THREE.Camera): void {
+    const dx = kamera.position.x - pemain.posisi.x;
+    const dz = kamera.position.z - pemain.posisi.z;
+    const d = Math.hypot(dx, dz) || 1;
+    for (const p of this.aktif) {
+      if (pemain.posisi.y - p.posisi.y < 1) continue;
+      const jauh = d + 1.5 + p.indeks * 0.8;
+      p.taruhDi(pemain.posisi.x + (dx / d) * jauh, pemain.posisi.z + (dz / d) * jauh);
+      p.hadap = pemain.hadap;
+    }
+  }
+
   perbarui(dt: number, pemain: Pemain, keadaan: KeadaanPemain, lawanSemua: Lawan[], kamera: THREE.Camera): void {
     this.matriks.multiplyMatrices(kamera.projectionMatrix, kamera.matrixWorldInverse);
     this.frustum.setFromProjectionMatrix(this.matriks);

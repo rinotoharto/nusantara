@@ -180,6 +180,7 @@ const misi = new PelaksanaMisi({
   pemain,
   lawan,
   aturTujuan: (t) => hudTujuan.atur(t),
+  aturCahaya,
   bukaPanel,
   mulaiDialog,
   segarkanRombongan: () => hudRombongan.segarkan(),
@@ -210,6 +211,14 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+// Terang cahaya dunia bisa diubah misi (pagi setelah menginap).
+const terangMatahari = dunia.matahari.intensity;
+const terangAmbien = dunia.ambien.intensity;
+function aturCahaya(pengali: number): void {
+  dunia.matahari.intensity = terangMatahari * pengali;
+  dunia.ambien.intensity = terangAmbien * pengali;
+}
+
 // Bayangan mengikuti pemain supaya resolusinya terpakai di sekitar pemain saja.
 const geserMatahari = dunia.matahari.position.clone();
 function ikutkanMatahari(): void {
@@ -227,6 +236,7 @@ function perbaruiPermainan(dt: number): void {
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
+  if (pemain.baruSelesaiMemanjat) pengikut.susulkanSetelahPanjat(pemain, camera);
   siluman.perbarui(pemain, pengikut.aktif);
   pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
@@ -300,7 +310,7 @@ renderer.setAnimationLoop(() => {
 if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
-    npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel,
+    npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia,
     langkah: (dt: number) => {
       // Satu langkah logika permainan tanpa render, untuk bot uji; hanya berarti di mode 'main'.
       if (modeUi !== 'main') return;
