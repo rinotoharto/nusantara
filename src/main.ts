@@ -50,6 +50,7 @@ const hudTarung = new HudPertarungan(() => {
   pengikut.taruhDiBelakang(pemain);
   tarung.hidupkan();
   lawan.hidupkanSemua();
+  sudahSampai = false;
 });
 tarung.saatTikaman = (pertama) => {
   if (pertama) hudTarung.umumkan('Tikaman Keris');
@@ -59,6 +60,8 @@ const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
 const hudSiluman = new HudSiluman();
 let sisaWaktuTarung = 0;
+let sudahSampai = false;
+const JARAK_SAMPAI = 2.5; // jarak ke tiang tujuan yang dianggap sampai
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -93,6 +96,12 @@ renderer.setAnimationLoop(() => {
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
   kameraOrangKetiga.mendekat = KONFIG.pemain.tikaman.kameraMendekat * tarung.faktorKameraDekat;
+
+  // Sampai di tiang tujuan area uji.
+  if (!sudahSampai && Math.hypot(pemain.posisi.x - siluman.tujuan.x, pemain.posisi.z - siluman.tujuan.z) < JARAK_SAMPAI) {
+    sudahSampai = true;
+    hudTarung.umumkan('Sampai di ujung utara');
+  }
 
   kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
   ikutkanMatahari();

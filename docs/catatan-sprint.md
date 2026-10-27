@@ -101,3 +101,81 @@ Angka akhir (semua di combat.json):
 - Saat pemain gugur, AI dibekukan (bukan dihentikan) dan pointer lock dilepas agar tombol Ulangi bisa diklik.
 - Boneka latihan dari tahap A dihapus setelah lawan sungguhan ada; kalau butuh sasaran diam lagi, set status lawan ke `mundur` dengan jeda panjang dari konsol.
 - Belum ada pustaka fisika; Rapier tetap tidak diperlukan.
+
+## Sprint 3: menyelinap dan pengikut (27 Oktober 2026)
+
+Tujuan: Tikaman Keris sebagai jurus pertama, penjaga patroli dengan kerucut pandang, status curiga, mengejar, dan mencari, semak persembunyian, tiga pengikut, dan area uji di utara desa. Syarat lolos: pemain bisa melewati tiga penjaga tanpa bertarung; ketahuan memicu pertarungan yang adil; pengikut mengikuti tanpa mengganggu; fps mendekati 60.
+
+### Yang sudah jalan
+
+- Tikaman Keris (`src/combat/player-combat.ts`, status `tikaman`): kalau ada lawan terhuyung dalam 2,5 m di depan pemain dan serangan ringan dimulai (dari bebas, sambungan kombo, atau klik kiri saat menangkis), pemain melesat 0,15 detik sampai 1 m dari lawan lalu menusuk sekali dengan damage 60. Serangan ini bersasaran tunggal (`Serangan.sasaran`), pemain kebal dan tidak bisa diputus selama 0,3 detik. Umpan balik: waktu permainan 0,3 selama 0,25 detik (dihitung dalam waktu nyata di `main.ts`), kamera mendekat 1 m lewat `KameraOrangKetiga.mendekat`, lawan berkilat putih 0,3 detik dan terdorong 3 m sambil rebah. HUD menulis "Tikaman Keris" di tengah layar saat pertama kali berhasil (`HudPertarungan.umumkan`).
+- Lawan yang mati kini tetap terdorong oleh pukulan terakhirnya (sebelumnya dorongan hilang begitu mati).
+- Semua angka menyelinap di `src/data/stealth.json`; tata letak area uji (titik awal, tujuan, penjaga, batu, semak) di `src/data/stealth-uji.json`, dimuat lewat `src/stealth/config.ts`.
+- Penjaga (`src/stealth/guard.ts`): `Penjaga extends Lawan`, menambah status `patroli`, `curiga`, `mencari`, `kembali` tanpa menyalin kode pertarungan. Patroli bolak-balik atau melingkar antar titik jalan 1,6 m/s, berhenti 1 sampai 2 detik di tiap titik sambil menoleh 45 derajat. Mengejar berarti `masuk('mendekat')` milik Lawan, sehingga antrean satu penyerang dan mengelilingi berlaku sama. Lawan yang ingin masuk `diam` (pemain terlalu jauh) dialihkan ke `mencari`.
+- Pandangan (`src/stealth/vision.ts`): kerucut 70 derajat 14 m; garis pandang 2D terhadap kotak padat (rumah, tebing, batu) yang lebih tinggi dari mata 1,5 m, batang pohon, dan semak selain yang ditempati pemain. Kerucut digambar sebagai kipas 18 segmen di lantai yang mengikuti tinggi medan: hijau tenang, kuning saat meteran di atas 0,3, merah saat mengejar.
+- Meteran curiga: 0 ke 1 dalam 1,5 detik, dua kali lebih cepat dalam 6 m, 1,5 kali saat pemain berlari, langsung penuh dalam 2,5 m, turun ke 0 dalam 3 detik. Jongkok atau berdiri di semak memotong jarak pandang jadi setengah; jongkok di semak membuat pemain tak terlihat kecuali penjaga dalam 2 m. Saat pemain tersembunyi tapi seorang pengikut di luar semak terlihat, meteran naik setengah laju.
+- Alur ketahuan: curiga (berhenti, menghadap titik terakhir, tanda tanya) → mengejar (tanda seru, teriakan menarik penjaga lain dalam 15 m). Saat mengejar, pemain dianggap terlihat lewat kerucut 200 derajat sejauh 25 m atau terdengar dalam 3 m; 4 detik tanpa melihat atau jarak lebih dari 25 m → mencari ke titik terakhir (2,4 m/s), menoleh 3 detik, kembali ke titik jalan terdekat, patroli. Penjaga yang diserang saat lengah langsung mengejar.
+- Jongkok (tombol C, toggle): 2 m/s, Shift dan lompat diabaikan, kapsul memendek ke 0,65 lewat skala `pose`.
+- Semak (`src/stealth/bush.ts`): balok 2 x 2 x 1,2 m hijau gelap opasitas 0,6, tidak menghalangi gerak dan tidak masuk daftar penghalang kamera. HUD: pinggiran layar gelap di dalam semak, teks "Tersembunyi" atau "Jongkok (C) untuk bersembunyi".
+- Pengikut (`src/character/follower.ts`): tiga kapsul cokelat di slot formasi (2,2 m di belakang dengan geseran samping 1,6 m, dan 3,2 m di belakang), kecepatan sebanding jarak sampai 7,5 m/s, berhenti saat pemain berhenti dalam 4 m. Ikut jongkok, ikut ke slot di dalam semak yang sama, mundur sampai 6,5 m dari lawan terdekat saat ada lawan bertarung dalam 12 m dan menunggu (menyusul lagi kalau pemain lebih dari 10 m). Tabrakan memakai `dorongKeluar` dan `pisahkan` (dipindah ke `world/collision.ts`). Tertinggal lebih dari 15 m dan di luar frustum kamera → berpindah ke titik tepat di belakang kamera lalu berjalan masuk. Slot digeser keluar dari garis kamera-pemain 1,6 m dan pengikut memudar kalau lebih dekat dari 3,5 m ke kamera.
+- Area uji: jalur 80 m dari (14, -34) ke tiang tujuan bercahaya di (14, -114), di sebelah timur tebing. Penjaga selatan bolak-balik di z = -46, penjaga tengah melingkar di kotak x 6 sampai 22 dan z -60 sampai -72, penjaga utara bolak-balik dari (2, -86) ke (26, -90). Lima batu dan lima semak dari data. Pesan "Sampai di ujung utara" saat pemain dalam 2,5 m dari tiang. Titik awal pemain dan tombol Ulangi memakai titik awal ini; lawan sprint 2 di timur dan barat desa tetap ada.
+- HUD siluman (`src/ui/stealth-hud.ts`): tanda ? dan ! di atas kepala penjaga dalam 30 m. Bilah nyawa lawan dan kamera mode bertarung hanya menanggapi lawan yang sedang bertarung, bukan penjaga yang lewat.
+
+### Hasil penyetelan
+
+Diuji dengan bot dari konsol browser (langkah 1/60 detik, tanpa render), tiap skenario 2 sampai 3 kali:
+
+- Bot sabar (menunggu jongkok di semak sampai penjaga terdekat membelakangi dan lebih dari 5 m, lalu berjalan ke semak berikutnya): sampai tujuan 3 dari 3 kali tanpa ketahuan, 70 detik, 43 detik di antaranya menunggu.
+- Bot ceroboh (lari lurus ke utara): ketahuan penjaga selatan dalam 2 detik; dari tengah jalur ketahuan penjaga tengah dalam 1 detik. Dua penjaga ikut lewat teriakan.
+- 1 lawan 3 dipaksa (ketiga penjaga mengejar), bot tangkis pas dan hindar tanpa tikaman, memakai serangan berat saat lawan terhuyung: menang 2 dari 3 kali dalam 12 sampai 14 detik, nyawa sisa 50 sampai 75; sekali gugur. Setara hasil sprint 2.
+- 1 lawan 3 dengan tikaman setelah tiap tangkis pas: menang 2 dari 2 dalam 4 detik tanpa luka. Tikaman sengaja sekuat ini (menamatkan lawan biasa); bot menangkis dengan sempurna, manusia tidak. Kalau terasa terlalu murah: turunkan `tikaman.damage` ke 40 (dua tikaman per lawan) atau persempit `tangkis.jendelaPas`.
+- Biaya pembaruan logika (pemain, pengikut, penjaga, lawan, kamera) 0,011 ms per frame di laptop pengembang; fps di HUD 60 saat pane browser terlihat. Belum diukur di laptop sekolah.
+
+Angka akhir Tikaman Keris (combat.json, blok `pemain.tikaman`):
+
+| Bagian | Nilai |
+| --- | --- |
+| Jarak picu, sudut hadap | 2,5 m; 100 derajat |
+| Jarak henti, jangkauan kena | 1,0 m; 2,5 m |
+| Damage, dorong, lama dorong | 60; 3,0 m; 0,3 s |
+| Lesat, durasi (kebal) | 0,15 s; 0,3 s |
+| Kilatan lawan | 0,3 s |
+| Skala waktu, lama | 0,3; 0,25 s |
+| Kamera mendekat, lama | 1,0 m; 0,4 s |
+
+Angka akhir menyelinap (stealth.json):
+
+| Bagian | Nilai |
+| --- | --- |
+| Patroli: kecepatan, jeda titik, toleh | 1,6 m/s; 1 sampai 2 s; 45 derajat |
+| Pandang: sudut, jarak, tinggi mata | 70 derajat; 14 m; 1,5 m |
+| Curiga: waktu penuh, jarak dekat, pengali dekat, pengali lari | 1,5 s; 6 m; 2,0; 1,5 |
+| Curiga: langsung penuh, waktu turun, ambang | 2,5 m; 3 s; 0,3 |
+| Mengejar: seru, sudut, dengar, hilang, putus | 15 m; 200 derajat; 3 m; 4 s; 25 m |
+| Mencari: kecepatan, waktu, meteran awal | 2,4 m/s; 3 s; 0,6 |
+| Pemain: ambang lari, jongkok, skala jongkok | 5 m/s; 2 m/s; 0,65 |
+| Faktor jarak pandang: jongkok, semak | 0,5; 0,5 |
+| Semak: ukuran, jarak tembus | 2 x 2 x 1,2 m; 2 m |
+| Pengikut: jarak belakang, lebar, berhenti, longgar | 2,2 dan 3,2 m; 1,6 m; 0,5 m; 4 m |
+| Pengikut: kecepatan maks, pengali, tertinggal | 7,5 m/s; 2,5; 15 m |
+| Pengikut: jarak pertarungan, mundur, menyusul, faktor curiga | 12 m; 6 m; 10 m; 0,5 |
+
+### Yang belum
+
+- Belum diuji oleh pemain manusia selain pengembang. Bot sabar menunggu 43 detik; kalau pemain sekolah bosan, pelebar pertama: `jedaTitikMaks` lebih lama atau `jarakPandang` lebih pendek.
+- Penjaga tidak menghindari batu dan semak saat mengejar atau mencari; mereka bisa tersangkut sebentar di sisi batu (tidak ada pencarian jalur).
+- Kerucut pandang digambar penuh walau terpotong batu; hanya deteksinya yang benar. Kerucut yang menabrak tebing atau rumah tertutup mesh itu.
+- Pengikut bergerak lurus ke slot; di balik batu atau pohon mereka mengandalkan dorongan tabrakan dan, kalau tertinggal, penempatan ulang di belakang kamera.
+- Pengikut tidak bisa dilukai dan tidak punya kerucut deteksi sendiri; mereka hanya syarat tambahan saat pemain tersembunyi.
+- Bagian utara jalur ada di lereng bukit (naik dari z = -45); jalur datar sejajar tebing bisa dibuat hanya dengan mengubah stealth-uji.json.
+- Belum ada suara langkah atau isyarat suara saat penjaga curiga; tanda ? dan ! masih elemen DOM.
+
+### Keputusan yang diambil
+
+- Penjaga mewarisi `Lawan` dan hanya menambah status di luar pertarungan; beberapa anggota Lawan diubah menjadi `protected`. Mengejar sama dengan pertarungan sprint 2 supaya tidak ada dua mesin status.
+- Garis pandang diuji di bidang datar dengan kotak dan lingkaran, bukan raycast mesh, karena cukup untuk balok dan jauh lebih murah; semak diperlakukan sebagai penghalang pandang kecuali semak yang ditempati pemain.
+- Tikaman bersasaran tunggal dan dipicu dari pemulai serangan ringan, bukan tombol baru, sesuai prinsip satu tombol serang.
+- Waktu lambat Tikaman dihitung dalam waktu nyata dan kamera menerima dt nyata, supaya efeknya terasa sama di fps mana pun.
+- Pengikut tidak menduplikasi tabrakan: memakai `dorongKeluar` dan `pisahkan` yang ada. Penempatan ulang dilakukan ke belakang kamera, bukan ke slot, supaya tidak muncul tiba-tiba di layar.
+- Kamera mode bertarung dan bilah nyawa lawan hanya menanggapi lawan yang `bertarung`, supaya penjaga yang lewat tidak membocorkan posisinya lewat HUD.
+- Titik awal pemain pindah ke area uji; lawan sprint 2 dibiarkan di tempatnya.
