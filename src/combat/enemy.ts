@@ -3,6 +3,7 @@ import type { Pemain } from '../character/player';
 import { JARI_PEMAIN, TINGGI_PEMAIN } from '../character/player';
 import { tinggiLantai, dorongKeluar, type DataTabrakan } from '../world/collision';
 import { KONFIG } from './config';
+import { Nyawa, catatDamage } from './health';
 import { dalamJangkauan, menghadap, sudutKe } from './hit';
 import type { PertarunganPemain, Serangan } from './player-combat';
 
@@ -41,6 +42,7 @@ export class Lawan {
   private readonly bahan: THREE.MeshStandardMaterial;
   private readonly tombak = new THREE.Group();
   status: StatusLawan = 'diam';
+  readonly nyawa = new Nyawa(L.nyawa);
   /** Detik sejak masuk status sekarang. */
   private waktu = 0;
   hadap = 0;
@@ -102,7 +104,9 @@ export class Lawan {
   hidupkan(): void {
     this.posisi.set(this.asal.x, tinggiLantai(this.data, this.asal.x, this.asal.z, 1e9), this.asal.z);
     this.masuk('diam');
+    this.nyawa.pulihkan();
     this.grup.visible = true;
+    this.badan.rotation.set(0, this.hadap, 0);
     this.sisaKilat = 0;
     this.sisaDoronganKena = 0;
   }
@@ -119,8 +123,11 @@ export class Lawan {
   }
 
   perbarui(dt: number, pemain: Pemain, tarung: PertarunganPemain, giliran: PemberiGiliran): void {
-    if (this.status === 'mati') return;
     this.waktu += dt;
+    if (this.status === 'mati') {
+      this.perbaruiMati(dt);
+      return;
+    }
     const posPemain = pemain.posisi;
     const dx = posPemain.x - this.posisi.x;
     const dz = posPemain.z - this.posisi.z;
@@ -245,22 +252,39 @@ export class Lawan {
       return;
     }
     if (keadaan === 'biasa' && menghadapLawan) {
-      tarung.terkena(this.posisi, KONFIG.pemain.tangkis.dorongTerkena, true);
+      tarung.terkena(this.posisi, KONFIG.pemain.tangkis.dorongTerkena, true, 0);
       return;
     }
-    tarung.terkena(this.posisi, L.tombak.dorong, false);
+    tarung.terkena(this.posisi, L.tombak.dorong, false, L.tombak.damage);
   }
 
-  /** Lawan terkena serangan pemain dari posisi `dari`. Nyawa menyusul di tahap C. */
+  /** Lawan terkena serangan pemain dari posisi `dari`. */
   terkena(serangan: Serangan, dari: THREE.Vector3): void {
+    if (this.status === 'mati') return;
     this.sisaKilat = 0.12;
+    catatDamage(this.posisi, serangan.damage, true);
     const dx = this.posisi.x - dari.x;
     const dz = this.posisi.z - dari.z;
     const d = Math.hypot(dx, dz) || 1;
     const lama = 0.15;
     this.doronganKena.set((dx / d) * serangan.dorong / lama, 0, (dz / d) * serangan.dorong / lama);
     this.sisaDoronganKena = lama;
-    if (serangan.berat && this.status !== 'mati') this.masuk('terhuyung');
+    if (this.nyawa.kurangi(serangan.damage)) this.masuk('mati');
+    else if (serangan.berat) this.masuk('terhuyung');
+  }
+
+  /** Rebah ke belakang, lalu menghilang setelah beberapa detik. */
+  private perbaruiMati(dt: number): void {
+    const laju = Math.min(1, 5 * dt);
+    this.badan.rotation.x += (-1.5 - this.badan.rotation.x) * laju;
+    this.badan.rotation.z += (0 - this.badan.rotation.z) * laju;
+    if (this.sisaKilat > 0) {
+      this.sisaKilat -= dt;
+    } else {
+      this.bahan.emissive.setRGB(0, 0, 0);
+      this.bahan.emissiveIntensity = 0;
+    }
+    if (this.waktu >= L.hilangSetelahMati) this.grup.visible = false;
   }
 
   private perbaruiVisual(dt: number): void {

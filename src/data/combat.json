@@ -11,7 +11,10 @@
     },
     "seranganRingan": {
       "durasi": 0.36,
-      "jendelaKena": [0.1, 0.22],
+      "jendelaKena": [
+        0.1,
+        0.22
+      ],
       "majuPerPukulan": 0.5,
       "maksKombo": 3,
       "jedaKombo": 0.6,
@@ -20,7 +23,10 @@
     "seranganBerat": {
       "tahan": 0.5,
       "durasi": 0.75,
-      "jendelaKena": [0.32, 0.46],
+      "jendelaKena": [
+        0.32,
+        0.46
+      ],
       "maju": 1.0
     },
     "tangkis": {
@@ -38,6 +44,10 @@
     "terpukul": {
       "durasi": 0.25,
       "kilatan": 0.12
+    },
+    "kunci": {
+      "jarak": 3,
+      "mouseDiam": 0.15
     }
   },
   "lawan": {

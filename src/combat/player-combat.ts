@@ -8,6 +8,8 @@ import {
   type PerintahGerak,
 } from '../character/player';
 import { KONFIG } from './config';
+import { Nyawa, catatDamage } from './health';
+import { sudutKe } from './hit';
 
 const K = KONFIG.pemain;
 
@@ -19,7 +21,8 @@ export type StatusAksi =
   | 'serangBerat'
   | 'tangkis'
   | 'hindar'
-  | 'terpukul';
+  | 'terpukul'
+  | 'mati';
 
 /** Satu serangan yang siap diuji kena; dikeluarkan sekali per ayunan. */
 export interface Serangan {
@@ -31,6 +34,11 @@ export interface Serangan {
 }
 
 export type KeadaanTangkis = 'tidak' | 'pas' | 'biasa';
+
+/** Sasaran kunci ringan: cukup posisinya. */
+export interface Sasaran {
+  posisi: THREE.Vector3;
+}
 
 const WARNA_BADAN = new THREE.Color(0xc8402c);
 const WARNA_TANGKIS = new THREE.Color(0x4aa3ff);
@@ -54,6 +62,11 @@ function lerp(a: number, b: number, t: number): number {
  */
 export class PertarunganPemain {
   status: StatusAksi = 'bebas';
+  readonly nyawa = new Nyawa(K.nyawa);
+  /** Pencari lawan terdekat untuk kunci ringan; dipasang oleh main. */
+  pencariSasaran: ((pos: THREE.Vector3, maks: number) => Sasaran | null) | null = null;
+  /** Lawan yang sedang dikunci (menghadap otomatis), untuk penanda HUD. */
+  sasaranTerkunci: Sasaran | null = null;
   /** Detik sejak masuk status sekarang. */
   private waktu = 0;
   /** Pukulan ke berapa dalam kombo (0 sampai maksKombo - 1). */
@@ -95,6 +108,23 @@ export class PertarunganPemain {
     pemain.pose.add(this.keris);
   }
 
+  get mati(): boolean {
+    return this.status === 'mati';
+  }
+
+  /** Hidupkan kembali di tempat pemain berada sekarang. */
+  hidupkan(): void {
+    this.nyawa.pulihkan();
+    this.kombo = 0;
+    this.komboHabis = false;
+    this.seranganTertunda = false;
+    this.seranganSiap = null;
+    this.sasaranTerkunci = null;
+    this.sisaKilat = 0;
+    this.sisaDoronganLuar = 0;
+    this.masuk('bebas');
+  }
+
   /** Benar saat pemain tidak bisa dilukai (awal hindar). */
   get kebal(): boolean {
     return this.status === 'hindar' && this.waktu < K.hindar.kebal;
@@ -114,10 +144,11 @@ export class PertarunganPemain {
   }
 
   /**
-   * Pemain terkena serangan dari arah `dari`. Tahap A: hanya kilatan dan dorongan;
-   * nyawa menyusul di tahap C. `ditangkis` benar kalau serangan tertahan tangkisan biasa.
+   * Pemain terkena serangan dari arah `dari`. `ditangkis` benar kalau serangan tertahan
+   * tangkisan biasa: tanpa damage, hanya dorongan kecil.
    */
-  terkena(dari: THREE.Vector3, dorong: number, ditangkis: boolean): void {
+  terkena(dari: THREE.Vector3, dorong: number, ditangkis: boolean, damage: number): void {
+    if (this.mati) return;
     const pos = this.pemain.posisi;
     const dx = pos.x - dari.x;
     const dz = pos.z - dari.z;
@@ -126,7 +157,23 @@ export class PertarunganPemain {
     this.sisaDoronganLuar = 0.15;
     this.sisaKilat = K.terpukul.kilatan;
     this.warnaKilat.copy(ditangkis ? WARNA_TERTANGKIS : WARNA_KENA);
-    if (!ditangkis) this.masuk('terpukul');
+    if (ditangkis) return;
+    catatDamage(pos, damage, false);
+    if (this.nyawa.kurangi(damage)) this.masuk('mati');
+    else this.masuk('terpukul');
+  }
+
+  /**
+   * Kunci ringan: kalau mouse tidak digerakkan, menghadap lawan terdekat dalam jarak kunci.
+   * Mengembalikan arah hadap ke sasaran, atau null kalau tidak ada.
+   */
+  private kunciSasaran(input: Input): number | null {
+    this.sasaranTerkunci = null;
+    if (!this.pencariSasaran || input.sejakMouseBergerak() < K.kunci.mouseDiam) return null;
+    const sasaran = this.pencariSasaran(this.pemain.posisi, K.kunci.jarak);
+    if (!sasaran) return null;
+    this.sasaranTerkunci = sasaran;
+    return sudutKe(this.pemain.posisi, sasaran.posisi);
   }
 
   private masuk(status: StatusAksi): void {
@@ -136,10 +183,17 @@ export class PertarunganPemain {
   }
 
   private mulaiSerangan(berat: boolean, input: Input, yawKamera: number): void {
+    const kunci = this.kunciSasaran(input);
     const arah = arahInputRelatifKamera(input, yawKamera);
-    this.hadapAksi = arah.ada ? Math.atan2(arah.x, arah.z) : this.pemain.hadap;
+    this.hadapAksi = kunci ?? (arah.ada ? Math.atan2(arah.x, arah.z) : this.pemain.hadap);
     this.seranganTertunda = false;
     this.masuk(berat ? 'serangBerat' : 'serangRingan');
+  }
+
+  private mulaiTangkis(input: Input): void {
+    const kunci = this.kunciSasaran(input);
+    if (kunci !== null) this.pemain.hadap = kunci;
+    this.masuk('tangkis');
   }
 
   private mulaiHindar(input: Input, yawKamera: number): void {
@@ -157,6 +211,11 @@ export class PertarunganPemain {
   /** Dipanggil tiap frame sebelum `pemain.perbarui`. Mengembalikan perintah gerak untuk frame ini. */
   perbarui(dt: number, input: Input, yawKamera: number): Readonly<PerintahGerak> {
     this.waktu += dt;
+    if (this.mati) {
+      this.susunPerintah();
+      this.perbaruiVisual(dt);
+      return this.perintah;
+    }
     this.sejakSeranganTerakhir += dt;
     if (this.sejakSeranganTerakhir > K.seranganRingan.jedaKombo) {
       this.kombo = 0;
@@ -171,13 +230,13 @@ export class PertarunganPemain {
     switch (this.status) {
       case 'bebas':
         if (mintaHindar && this.pemain.diTanah) this.mulaiHindar(input, yawKamera);
-        else if (tahanTangkis && this.pemain.diTanah) this.masuk('tangkis');
+        else if (tahanTangkis && this.pemain.diTanah) this.mulaiTangkis(input);
         else if (mintaSerang && bisaSerangLagi && this.pemain.diTanah) this.masuk('mengisi');
         break;
 
       case 'mengisi':
         if (mintaHindar) this.mulaiHindar(input, yawKamera);
-        else if (tahanTangkis) this.masuk('tangkis');
+        else if (tahanTangkis) this.mulaiTangkis(input);
         else if (input.baruDilepas('Mouse0')) this.mulaiSerangan(false, input, yawKamera);
         else if (this.waktu >= K.seranganBerat.tahan) this.mulaiSerangan(true, input, yawKamera);
         break;
@@ -223,6 +282,9 @@ export class PertarunganPemain {
 
       case 'terpukul':
         if (this.waktu >= K.terpukul.durasi) this.masuk('bebas');
+        break;
+
+      case 'mati':
         break;
     }
 
@@ -299,7 +361,9 @@ export class PertarunganPemain {
       case 'tangkis':
         p.pengaliKecepatan = K.tangkis.pengaliKecepatan;
         p.bolehLompat = false;
-        p.hadapPaksa = this.pemain.hadap;
+        p.hadapPaksa = this.sasaranTerkunci
+          ? sudutKe(this.pemain.posisi, this.sasaranTerkunci.posisi)
+          : this.pemain.hadap;
         break;
       case 'hindar': {
         const h = K.hindar;
@@ -313,6 +377,7 @@ export class PertarunganPemain {
         break;
       }
       case 'terpukul':
+      case 'mati':
         p.kunciGerak = true;
         p.bolehLompat = false;
         break;
@@ -396,9 +461,14 @@ export class PertarunganPemain {
       case 'terpukul':
         condong = -0.25 * (1 - this.waktu / K.terpukul.durasi);
         break;
+      case 'mati':
+        // Rebah ke belakang perlahan.
+        condong = -1.4;
+        turun = -0.15;
+        break;
     }
 
-    const laju = langsung ? 1 : Math.min(1, 14 * dt);
+    const laju = langsung ? 1 : this.status === 'mati' ? Math.min(1, 4 * dt) : Math.min(1, 14 * dt);
     pose.rotation.x += (condong - pose.rotation.x) * laju;
     pose.rotation.z += (miringSamping - pose.rotation.z) * laju;
     pose.position.y += (turun - pose.position.y) * laju;

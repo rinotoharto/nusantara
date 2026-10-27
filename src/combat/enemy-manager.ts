@@ -89,7 +89,10 @@ export class PengelolaLawan implements PemberiGiliran {
 
   perbarui(dt: number, pemain: Pemain, tarung: PertarunganPemain): void {
     this.bangunkanKawan();
-    for (const l of this.daftar) l.perbarui(dt, pemain, tarung, this);
+    // Saat pemain gugur, AI dibekukan; lawan yang mati tetap menyelesaikan rebahnya.
+    for (const l of this.daftar) {
+      if (!tarung.mati || !l.hidup) l.perbarui(dt, pemain, tarung, this);
+    }
 
     // Giliran yang macet (pemegangnya mati, diam, atau terhuyung) dilepas.
     if (this.penyerang) {

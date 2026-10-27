@@ -5,6 +5,7 @@ import { Input } from './character/input';
 import { Pemain } from './character/player';
 import { KameraOrangKetiga } from './character/camera';
 import { Hud } from './ui/hud';
+import { HudPertarungan } from './ui/combat-hud';
 import { PertarunganPemain } from './combat/player-combat';
 import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
@@ -24,13 +25,22 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 const dunia = buatDunia(scene);
 const input = new Input(kanvas);
 
+const TITIK_AWAL = { x: 0, z: 34 }; // di selatan desa
 const pemain = new Pemain(dunia.tabrakan);
-pemain.taruhDi(0, 34); // di selatan desa, menghadap utara
+pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
 scene.add(pemain.grup);
 
 const tarung = new PertarunganPemain(pemain);
 
 const lawan = new PengelolaLawan(dunia.tabrakan, scene);
+tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
+
+const hudTarung = new HudPertarungan(() => {
+  // Ulangi: pemain kembali ke titik awal, semua lawan dihidupkan lagi.
+  pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
+  tarung.hidupkan();
+  lawan.hidupkanSemua();
+});
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
@@ -67,7 +77,8 @@ renderer.setAnimationLoop(() => {
 
   kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
   ikutkanMatahari();
-  hud.perbarui(dtMentah, input.terkunci);
+  hud.perbarui(dtMentah, input.terkunci || tarung.mati);
+  hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   input.akhirFrame();
 
   renderer.render(scene, camera);

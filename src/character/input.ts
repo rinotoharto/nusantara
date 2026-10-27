@@ -10,6 +10,7 @@ export class Input {
   private waktuTekan = new Map<string, number>();
   private mouseDX = 0;
   private mouseDY = 0;
+  private waktuMouseBergerak = 0;
   terkunci = false;
 
   constructor(private kanvas: HTMLCanvasElement) {
@@ -43,6 +44,7 @@ export class Input {
       if (!this.terkunci) return;
       this.mouseDX += e.movementX;
       this.mouseDY += e.movementY;
+      if (e.movementX !== 0 || e.movementY !== 0) this.waktuMouseBergerak = performance.now();
     });
   }
 
@@ -83,6 +85,11 @@ export class Input {
     const mulai = this.waktuTekan.get(kode);
     if (mulai === undefined || !this.ditekanSekarang.has(kode)) return 0;
     return (performance.now() - mulai) / 1000;
+  }
+
+  /** Detik sejak mouse terakhir bergerak. */
+  sejakMouseBergerak(): number {
+    return (performance.now() - this.waktuMouseBergerak) / 1000;
   }
 
   /** Mengambil gerak mouse sejak frame lalu, lalu mengosongkannya. */

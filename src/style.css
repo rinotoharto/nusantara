@@ -45,3 +45,98 @@ html, body {
   border-radius: 4px;
   font-size: 15px;
 }
+
+/* HUD pertarungan */
+.hud-nyawa {
+  left: 12px;
+  bottom: 186px;
+  width: 240px;
+}
+.hud-nyawa-teks {
+  font-size: 12px;
+  margin-bottom: 3px;
+  color: #ffd79a;
+}
+.bilah {
+  background: rgba(20, 12, 8, 0.65);
+  border: 1px solid rgba(244, 233, 212, 0.5);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bilah-pemain {
+  height: 12px;
+}
+.bilah-isi {
+  height: 100%;
+  background: #c8402c;
+  transition: width 0.12s ease-out;
+}
+.bilah-lawan {
+  top: 0;
+  left: 0;
+  width: 56px;
+  height: 6px;
+  will-change: transform;
+}
+.bilah-lawan .bilah-isi {
+  background: #e0b24a;
+}
+.hud-penanda {
+  top: 0;
+  left: 0;
+  color: #ffd79a;
+  font-size: 14px;
+  line-height: 1;
+  will-change: transform;
+}
+.angka-damage {
+  top: 0;
+  left: 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff3c4;
+  will-change: transform, opacity;
+}
+.angka-damage.angka-pemain {
+  color: #ff7a5c;
+  font-size: 17px;
+}
+
+/* Layar gugur */
+.layar-mati {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  background: rgba(8, 4, 2, 0);
+  color: #f4e9d4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease, background 1.2s ease;
+  user-select: none;
+}
+.layar-mati.tampil {
+  opacity: 1;
+  background: rgba(8, 4, 2, 0.82);
+  pointer-events: auto;
+}
+.layar-mati-judul {
+  font-size: 34px;
+  letter-spacing: 1px;
+}
+.layar-mati-tombol {
+  font: inherit;
+  font-size: 17px;
+  padding: 9px 28px;
+  color: #1a1410;
+  background: #ffd79a;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.layar-mati-tombol:hover {
+  background: #ffe6bd;
+}
