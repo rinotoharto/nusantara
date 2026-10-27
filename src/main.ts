@@ -4,6 +4,7 @@ import { buatDunia } from './world';
 import { Input } from './character/input';
 import { Pemain } from './character/player';
 import { KameraOrangKetiga } from './character/camera';
+import { Hud } from './ui/hud';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -25,6 +26,7 @@ pemain.taruhDi(0, 34); // di selatan desa, menghadap utara
 scene.add(pemain.grup);
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
+const hud = new Hud();
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -42,11 +44,13 @@ function ikutkanMatahari(): void {
 const jam = new THREE.Timer();
 renderer.setAnimationLoop(() => {
   jam.update();
-  const dt = Math.min(jam.getDelta(), 0.05);
+  const dtMentah = jam.getDelta();
+  const dt = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
 
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw);
   kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
   ikutkanMatahari();
+  hud.perbarui(dtMentah, input.terkunci);
   input.akhirFrame();
 
   renderer.render(scene, camera);
