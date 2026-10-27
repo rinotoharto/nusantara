@@ -73,6 +73,22 @@ export function dorongKeluar(data: DataTabrakan, pos: THREE.Vector3, jari: numbe
   }
 }
 
+/** Mendorong dua titik datar menjauh sampai berjarak `jarakMin`; `bagianA` = porsi geser untuk a. */
+export function pisahkan(a: THREE.Vector3, b: THREE.Vector3, jarakMin: number, bagianA: number): void {
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const d2 = dx * dx + dz * dz;
+  if (d2 >= jarakMin * jarakMin) return;
+  const d = Math.sqrt(d2) || 1e-6;
+  const kurang = jarakMin - d;
+  const nx = d2 > 1e-12 ? dx / d : 1;
+  const nz = d2 > 1e-12 ? dz / d : 0;
+  a.x -= nx * kurang * bagianA;
+  a.z -= nz * kurang * bagianA;
+  b.x += nx * kurang * (1 - bagianA);
+  b.z += nz * kurang * (1 - bagianA);
+}
+
 export interface TargetPanjat {
   tujuan: THREE.Vector3;
 }

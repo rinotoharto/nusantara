@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { Pemain } from '../character/player';
 import { JARI_PEMAIN } from '../character/player';
-import type { DataTabrakan } from '../world/collision';
+import { pisahkan, type DataTabrakan } from '../world/collision';
 import { Lawan, JARI_LAWAN, type PemberiGiliran } from './enemy';
 import { dalamJangkauan } from './hit';
 import type { PertarunganPemain } from './player-combat';
@@ -163,20 +163,4 @@ export class PengelolaLawan implements PemberiGiliran {
       pisahkan(hidup[i].posisi, pemain.posisi, JARI_LAWAN + JARI_PEMAIN, 0.75);
     }
   }
-}
-
-/** Mendorong dua titik datar menjauh sampai berjarak `jarakMin`; `bagianA` = porsi geser untuk a. */
-function pisahkan(a: THREE.Vector3, b: THREE.Vector3, jarakMin: number, bagianA: number): void {
-  const dx = b.x - a.x;
-  const dz = b.z - a.z;
-  const d2 = dx * dx + dz * dz;
-  if (d2 >= jarakMin * jarakMin) return;
-  const d = Math.sqrt(d2) || 1e-6;
-  const kurang = jarakMin - d;
-  const nx = d2 > 1e-12 ? dx / d : 1;
-  const nz = d2 > 1e-12 ? dz / d : 0;
-  a.x -= nx * kurang * bagianA;
-  a.z -= nz * kurang * bagianA;
-  b.x += nx * kurang * (1 - bagianA);
-  b.z += nz * kurang * (1 - bagianA);
 }

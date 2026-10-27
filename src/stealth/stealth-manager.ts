@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Pemain } from '../character/player';
+import type { Pengikut } from '../character/follower';
 import type { PengelolaLawan } from '../combat/enemy-manager';
 import type { Dunia } from '../world';
 import { tinggiMedan } from '../world/terrain';
@@ -24,6 +25,8 @@ export interface KeadaanPemain {
 
 export interface KonteksSiluman {
   pemain: KeadaanPemain;
+  /** Posisi pengikut yang berada di luar semak; hanya dinilai saat pemain tersembunyi. */
+  pengikutTerbuka: THREE.Vector3[];
   penjaga: Penjaga[];
   semak: Semak[];
   /** Kotak semak yang menghalangi pandangan ke pemain: semua kecuali semak yang ditempatinya. */
@@ -50,6 +53,7 @@ export class PengelolaSiluman {
       tersembunyi: false,
       jarakTembus: SILUMAN.semak.jarakTembus,
     },
+    pengikutTerbuka: [],
     penjaga: this.penjaga,
     semak: this.semak,
     penghalangSemak: [],
@@ -107,8 +111,11 @@ export class PengelolaSiluman {
   }
 
   /** Dipanggil tiap frame sebelum `lawan.perbarui`. */
-  perbarui(pemain: Pemain): void {
+  perbarui(pemain: Pemain, pengikut: readonly Pengikut[]): void {
     const k = this.konteks.pemain;
+    const terbuka = this.konteks.pengikutTerbuka;
+    terbuka.length = 0;
+    for (const p of pengikut) if (!semakDi(this.semak, p.posisi)) terbuka.push(p.posisi);
     k.posisi.copy(pemain.posisi);
     k.lari = pemain.laju > SILUMAN.pemain.lajuLari;
     k.jongkok = pemain.jongkok;

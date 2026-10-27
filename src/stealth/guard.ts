@@ -335,9 +335,22 @@ export class Penjaga extends Lawan {
         if (k.lari) laju *= P.pengaliLari;
         this.curiga = Math.min(1, this.curiga + laju * dt);
       }
+    } else if (k.tersembunyi && this.pengikutTerlihat(jarakPandang)) {
+      // Pemain bersembunyi tapi seorang pengikut masih di luar semak: meteran naik setengah laju.
+      this.curiga = Math.min(1, this.curiga + (SILUMAN.pengikut.faktorCuriga / P.waktuCuriga) * dt);
     } else if (this.status !== 'mencari') {
       this.curiga = Math.max(0, this.curiga - dt / P.waktuTurun);
     }
+  }
+
+  private pengikutTerlihat(jarakPandang: number): boolean {
+    for (const pos of this.konteks.pengikutTerbuka) {
+      if (ujiPandang(this.posisi, this.hadap, P.sudutPandang, jarakPandang, pos, this.data, P.tinggiMata, this.konteks.penghalangSemak).terlihat) {
+        this.titikTerakhir.copy(pos);
+        return true;
+      }
+    }
+    return false;
   }
 
   private perbaruiKerucut(): void {

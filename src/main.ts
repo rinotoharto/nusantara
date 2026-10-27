@@ -11,6 +11,7 @@ import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
 import { PengelolaSiluman } from './stealth/stealth-manager';
 import { HudSiluman } from './ui/stealth-hud';
+import { PengelolaPengikut } from './character/follower';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -36,12 +37,17 @@ const lawan = new PengelolaLawan(dunia.tabrakan, scene);
 const siluman = new PengelolaSiluman(dunia, scene, lawan);
 const TITIK_AWAL = siluman.mulai; // ujung selatan area uji menyelinap
 pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
+pemain.hadap = Math.PI; // menghadap utara
+const pengikut = new PengelolaPengikut(dunia.tabrakan, scene);
+pengikut.taruhDiBelakang(pemain);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
 tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
 
 const hudTarung = new HudPertarungan(() => {
   // Ulangi: pemain kembali ke titik awal, semua lawan dihidupkan lagi.
   pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
+  pemain.hadap = Math.PI;
+  pengikut.taruhDiBelakang(pemain);
   tarung.hidupkan();
   lawan.hidupkanSemua();
 });
@@ -77,7 +83,8 @@ renderer.setAnimationLoop(() => {
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
-  siluman.perbarui(pemain);
+  siluman.perbarui(pemain, pengikut.daftar);
+  pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
 
   // Kamera bertarung selama ada lawan dekat, bertahan sebentar setelah lawan menjauh.
@@ -99,5 +106,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, input };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input };
 }

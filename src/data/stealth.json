@@ -36,5 +36,20 @@
     "dalam": 2.0,
     "tinggi": 1.2,
     "jarakTembus": 2.0
+  },
+  "pengikut": {
+    "jumlah": 3,
+    "jarakBelakang": 2.2,
+    "jarakBelakangJauh": 3.2,
+    "lebarFormasi": 1.6,
+    "jarakBerhenti": 0.5,
+    "jarakLonggar": 4.0,
+    "kecepatanMaks": 7.5,
+    "pengaliKecepatan": 2.5,
+    "jarakTertinggal": 15,
+    "jarakPertarungan": 12,
+    "jarakMundur": 6,
+    "faktorCuriga": 0.5,
+    "jarakMenyusul": 10
   }
 }
