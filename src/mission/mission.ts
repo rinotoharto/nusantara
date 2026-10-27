@@ -8,9 +8,9 @@ import type { Semak } from '../stealth/bush';
 import { buatObor } from '../world/torch';
 import { DIALOG } from '../dialog/config';
 import { KITAB_PER_ID } from '../codex/config';
-import { SEGMEN, TEKS_MISI, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga } from './config';
-import type { StatusPermainan } from './state';
-import type { Rombongan, NilaiRombongan } from './party';
+import { ATURAN, SEGMEN, TEKS_MISI, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga } from './config';
+import type { StatusPermainan, TitikSimpan } from './state';
+import type { Rombongan } from './party';
 import { PengelolaNpc, type Npc } from './npc';
 
 /** Hal-hal di luar misi yang dipakai pelaksana: dunia, UI, dan cara memulai percakapan. */
@@ -55,15 +55,16 @@ export class PelaksanaMisi {
   selesai = false;
   /** Dipanggil saat segmen terakhir selesai. */
   saatSelesai: (() => void) | null = null;
-  /** Dipanggil tiap kali segmen baru dimulai (untuk titik simpan). */
-  saatSegmenMulai: ((segmen: Segmen) => void) | null = null;
+  /** Dipanggil tiap kali segmen baru dimulai dengan titik simpannya (waktu diisi pemanggil). */
+  saatSegmenMulai: ((titik: TitikSimpan) => void) | null = null;
+  /** Titik simpan segmen sekarang: dipakai saat gugur. */
+  private titik: TitikSimpan | null = null;
   private readonly obor: THREE.Group[] = [];
   private readonly dinamis: IsiDinamis = { penjaga: [], npc: [], semak: [], pencabutBatu: [] };
   /** NPC dinamis segmen sekarang; dicabut saat segmen selesai. */
   private npcSegmen: Npc[] = [];
   private readonly pemicuSudah = new Set<PemicuSegmen>();
   private isiGlobalTerpasang = false;
-  private simpananRombongan: NilaiRombongan | null = null;
 
   constructor(private readonly d: KetergantunganMisi) {}
 
@@ -96,34 +97,65 @@ export class PelaksanaMisi {
     return pesan;
   }
 
+  /** Memasang isi statis semua segmen dan menaruh pemain di awal misi, tanpa memulai (latar layar awal). */
+  siapkan(): void {
+    if (!this.isiGlobalTerpasang) {
+      for (const s of SEGMEN) if (!s.syarat) this.pasangIsi(s, false);
+      this.isiGlobalTerpasang = true;
+    }
+    this.taruhPemain(SEGMEN[0]);
+  }
+
   /** Misi dari awal: rombongan direset, isi dinamis dicabut, pemain ke titik awal segmen pertama. */
   mulai(dariSegmen = 0): void {
-    this.selesai = false;
-    this.pemicuSudah.clear();
-    this.cabutDinamis();
+    this.bersihkanUntukMulai();
     this.d.rombongan.reset();
     this.d.segarkanRombongan();
     this.d.pengikut.pagonIkut = this.d.rombongan.pagonIkut;
+    this.masukSegmen(dariSegmen, true, false);
+  }
+
+  /** Melanjutkan dari titik simpan: tanda, percakapan, dan rombongan dipulihkan, lalu segmen itu dimulai tanpa pembukanya. */
+  lanjutkan(titik: TitikSimpan): void {
+    this.bersihkanUntukMulai();
+    this.d.status.pulihkanDariTitik(titik);
+    this.pulihkanRombongan(titik);
+    const i = Math.max(0, SEGMEN.findIndex((s) => s.id === titik.segmen));
+    this.masukSegmen(i, true, true);
+  }
+
+  /** Gugur: kembali ke titik simpan segmen; rombongan, tanda, dan percakapan kembali ke saat segmen dimulai. */
+  muatUlangSegmen(): void {
+    const s = this.segmen;
+    if (!s) return;
+    if (this.titik) {
+      this.d.status.pulihkanDariTitik(this.titik);
+      this.pulihkanRombongan(this.titik);
+    }
+    this.d.lawan.hidupkanSemua();
+    this.taruhPemain(s);
+  }
+
+  private bersihkanUntukMulai(): void {
+    this.selesai = false;
+    this.pemicuSudah.clear();
+    this.cabutDinamis();
     this.d.lawan.hidupkanSemua();
     this.d.aturCahaya(1);
     if (!this.isiGlobalTerpasang) {
       for (const s of SEGMEN) if (!s.syarat) this.pasangIsi(s, false);
       this.isiGlobalTerpasang = true;
     }
-    this.masukSegmen(dariSegmen, true);
   }
 
-  /** Gugur: kembali ke titik simpan segmen; rombongan kembali ke nilai saat segmen dimulai. */
-  muatUlangSegmen(): void {
-    const s = this.segmen;
-    if (!s) return;
-    if (this.simpananRombongan) {
-      this.d.rombongan.pulihkan(this.simpananRombongan);
-      this.d.segarkanRombongan();
-      this.d.pengikut.pagonIkut = this.d.rombongan.pagonIkut;
+  private pulihkanRombongan(titik: TitikSimpan): void {
+    this.d.rombongan.pulihkan(titik.rombongan);
+    this.d.segarkanRombongan();
+    this.d.pengikut.pagonIkut = this.d.rombongan.pagonIkut;
+    if (!this.d.rombongan.pagonIkut) {
+      const [x, z] = ATURAN.pagonDitinggal.posisi;
+      this.d.pengikut.pagon.taruhDi(x, z);
     }
-    this.d.lawan.hidupkanSemua();
-    this.taruhPemain(s);
   }
 
   /** Dipanggil tiap frame permainan. */
@@ -160,11 +192,14 @@ export class PelaksanaMisi {
   private segmenBerikut(): void {
     for (const n of this.npcSegmen) this.d.npc.hapus(n);
     this.npcSegmen = [];
-    this.masukSegmen(this.indeks + 1, false);
+    this.masukSegmen(this.indeks + 1, false, false);
   }
 
-  /** Masuk ke segmen ke-`i` (atau yang berikutnya kalau syaratnya tidak terpenuhi). */
-  private masukSegmen(i: number, taruhPemain: boolean): void {
+  /**
+   * Masuk ke segmen ke-`i` (atau yang berikutnya kalau syaratnya tidak terpenuhi).
+   * `tanpaPembuka`: lewati panel dan percakapan `saatMulai` (saat melanjutkan dari titik simpan).
+   */
+  private masukSegmen(i: number, taruhPemain: boolean, tanpaPembuka: boolean): void {
     let j = i;
     while (j < SEGMEN.length && SEGMEN[j].syarat && !this.d.status.tanda.has(SEGMEN[j].syarat as string)) j++;
     this.bersihkanObor();
@@ -179,7 +214,13 @@ export class PelaksanaMisi {
     const s = SEGMEN[j];
     if (import.meta.env.DEV) console.log(`[misi] segmen ${j + 1}/${SEGMEN.length}: ${s.id}`);
     this.pasangIsi(s, true);
-    this.simpananRombongan = this.d.rombongan.salin();
+    this.titik = {
+      segmen: s.id,
+      rombongan: this.d.rombongan.salin(),
+      tanda: [...this.d.status.tanda],
+      percakapan: [...this.d.status.percakapanSelesai],
+      waktu: 0,
+    };
     this.d.aturTujuan(s.tujuan);
     this.d.aturCahaya(s.cahaya && (!s.cahaya.syarat || this.d.status.tanda.has(s.cahaya.syarat)) ? s.cahaya.pengali : 1);
     for (const [x, z] of s.penanda ?? []) {
@@ -188,10 +229,10 @@ export class PelaksanaMisi {
       this.obor.push(o);
     }
     if (taruhPemain) this.taruhPemain(s);
-    this.saatSegmenMulai?.(s);
+    this.saatSegmenMulai?.(this.titik);
 
     const mulai = s.saatMulai;
-    if (!mulai) return;
+    if (!mulai || tanpaPembuka) return;
     const percakapan = () => {
       if (mulai.percakapan) this.d.mulaiDialog(mulai.percakapan, null);
     };
@@ -243,6 +284,8 @@ export class PelaksanaMisi {
     for (const n of daftarNpc) {
       if (this.dinamisButir(s, n) !== saatSegmen) continue;
       if (n.syarat && !this.d.status.tanda.has(n.syarat)) continue;
+      // NPC sekali pakai yang percakapannya sudah selesai (misalnya sudah direkrut) tidak dipasang lagi.
+      if (n.hapusSetelahPercakapan && n.percakapan.every((id) => this.d.status.percakapanSelesai.has(id))) continue;
       const npc = this.d.npc.tambah(n);
       if (saatSegmen) {
         this.dinamis.npc.push(npc);

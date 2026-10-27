@@ -151,7 +151,29 @@
   },
   "misi": {
     "tujuan": "Tujuan",
-    "lanjut": "Klik atau Spasi untuk lanjut",
-    "selesaiSementara": "Misi 3 berlanjut di tahap berikutnya"
+    "lanjut": "Klik atau Spasi untuk lanjut"
+  },
+  "judul": {
+    "judul": "Nusantara: Rise of Majapahit",
+    "subjudul": "Misi 3: Malam pelarian",
+    "mulaiBaru": "Mulai baru",
+    "lanjutkan": "Lanjutkan",
+    "kitab": "Kitab",
+    "prototipe": "Prototipe tanpa aset"
+  },
+  "selesai": {
+    "judul": "Misi 3 selesai",
+    "pengikut": "Pengikut tiba di Madura: {n} dari {awal}",
+    "pagon": "Gajah Pagon: {nilai}",
+    "pagonDitinggal": "ditinggal di Pandakan",
+    "pagonIkut": "ikut sampai Madura",
+    "rute": "Rute: {nilai}",
+    "ruteSungai": "sungai",
+    "ruteBukit": "bukit",
+    "ketahuan": "Ketahuan patroli: {n} kali",
+    "kitab": "Entri Kitab terbuka: {n} dari {total}",
+    "waktu": "Waktu: {menit} menit {detik} detik",
+    "bukaKitab": "Buka Kitab",
+    "mainLagi": "Main lagi"
   }
 }

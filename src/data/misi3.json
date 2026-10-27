@@ -71,6 +71,13 @@
     "penjagaSungai": {
       "dasar": 2,
       "maks": 5
+    },
+    "pagonDitinggal": {
+      "keterangan": "Tempat Gajah Pagon berdiri kalau permainan dilanjutkan setelah ia ditinggal (dekat Macan Kuping).",
+      "posisi": [
+        47,
+        30
+      ]
     }
   },
   "teks": {
@@ -79,7 +86,13 @@
       "Malam ini, Raden Wijaya dan dua belas pengikutnya melarikan diri ke utara, dikejar pasukan Daha.",
       "TODO-SEJARAH: kutipan Prasasti Kudadu tentang pengejaran (TODO-VERIFIKASI teks kutipan)."
     ],
-    "jeda": "Beberapa jam kemudian"
+    "jeda": "Beberapa jam kemudian",
+    "selesai": {
+      "sejarah": "Menurut Prasasti Kudadu, Wijaya menyeberang ke Madura dan diterima Arya Wiraraja di Sumenep. Dari sana ia menyusun siasat yang dua tahun kemudian melahirkan Majapahit.",
+      "kutipan": "TODO-SEJARAH: kutipan Prasasti Kudadu tentang penyeberangan ke Madura (TODO-VERIFIKASI teks kutipan).",
+      "catatanPagonDitinggal": "Pararaton mencatat Gajah Pagon ditinggal di Pandakan karena luka di paha. Keputusan Anda sama dengan yang tercatat; Kitab menjelaskan sumbernya dan apa yang hanya tafsiran.",
+      "catatanPagonIkut": "Pararaton mencatat Gajah Pagon ditinggal di Pandakan karena luka di paha. Kalau Anda membawanya, itu pilihan Anda, bukan sejarah; Kitab menjelaskan bedanya."
+    }
   },
   "dunia": {
     "pandakan": [
@@ -103,6 +116,17 @@
       "x": 42,
       "z": -36,
       "putar": 0.3
+    },
+    "muara": {
+      "keterangan": "Teluk di ujung barat sungai: cekungan diperlebar mulai x ini ke barat.",
+      "x": -105,
+      "lebar": 25,
+      "sigma": 9
+    },
+    "perahu": {
+      "x": -128,
+      "z": 52,
+      "putar": 0.4
     }
   },
   "pemicu": [
@@ -529,8 +553,8 @@
           40
         ],
         [
-          -120,
-          44
+          -116,
+          36
         ]
       ],
       "jumlahPenjagaDariAturan": "penjagaSungai",
@@ -677,8 +701,8 @@
       "selesai": {
         "area": {
           "pusat": [
-            -124,
-            44
+            -116,
+            36
           ],
           "jari": 7
         }
@@ -713,8 +737,8 @@
           0
         ],
         [
-          -124,
-          40
+          -116,
+          36
         ]
       ],
       "pemicu": [
@@ -734,11 +758,62 @@
       "selesai": {
         "area": {
           "pusat": [
-            -124,
-            44
+            -116,
+            36
           ],
           "jari": 7
         }
+      }
+    },
+    {
+      "id": "pantai",
+      "tujuan": "Temui nelayan di muara",
+      "mulai": {
+        "posisi": [
+          -114,
+          34
+        ],
+        "hadap": -1.9
+      },
+      "penanda": [
+        [
+          -121,
+          40
+        ]
+      ],
+      "penjaga": [
+        {
+          "nama": "pantai",
+          "mode": "bolak-balik",
+          "syarat": "rute-sungai",
+          "titik": [
+            {
+              "x": -112,
+              "z": 44
+            },
+            {
+              "x": -124,
+              "z": 30
+            }
+          ]
+        }
+      ],
+      "npc": [
+        {
+          "id": "nelayan",
+          "nama": "Nelayan",
+          "posisi": [
+            -121,
+            41
+          ],
+          "hadap": 1.2,
+          "percakapan": [
+            "pantai-perahu"
+          ]
+        }
+      ],
+      "selesai": {
+        "percakapan": "pantai-perahu"
       }
     }
   ]

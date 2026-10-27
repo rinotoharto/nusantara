@@ -22,6 +22,8 @@ export interface AturanRombongan {
   ketahuan: { kewaspadaan: number; kaliKetahuan: number; pengikutJikaPagon: number; maksPengikutJikaPagon: number; teks: string };
   /** `lajuMaks` membatasi pemain dan pengikut lain; `lajuPagon` sedikit lebih tinggi supaya ia bisa menyusul. */
   pagonIkut: { lajuMaks: number; lajuPagon: number; pengaliCuriga: number };
+  /** Tempat Gajah Pagon berdiri saat permainan dilanjutkan setelah ia ditinggal. */
+  pagonDitinggal: { posisi: [number, number] };
   penjagaSungai: { dasar: number; maks: number };
 }
 
@@ -126,8 +128,11 @@ export interface Segmen {
 /** Daftar segmen misi berurutan. */
 export const SEGMEN: Segmen[] = data.segmen as unknown as Segmen[];
 
-/** Teks naskah misi: panel pembuka, jeda waktu, dan sebagainya. */
-export const TEKS_MISI: Record<string, string | string[]> = data.teks as Record<string, string | string[]>;
+/** Teks panel naskah (kunci dipakai `saatMulai.panel`): paragraf atau satu kalimat. */
+export const TEKS_MISI: Record<string, string | string[]> = { pembuka: data.teks.pembuka, jeda: data.teks.jeda };
+
+/** Teks layar misi selesai: ringkasan sejarah, kutipan, dan catatan bersumber dua versi. */
+export const TEKS_SELESAI = data.teks.selesai;
 
 /** Pemetaan id tokoh dialog ke indeks pengikut, untuk arah kamera sinematik. */
 export const PENGIKUT_TOKOH: Record<string, number> = data.pengikutTokoh;

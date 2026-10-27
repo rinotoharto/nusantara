@@ -32,6 +32,12 @@ import { HudRombongan } from './ui/party-hud';
 import { HudTujuan } from './ui/objective-hud';
 import { PanelNaskah } from './ui/panel';
 import { PelaksanaMisi } from './mission/mission';
+import { LayarJudul } from './ui/title-screen';
+import { LayarSelesai } from './ui/mission-end';
+import { KITAB_PER_ID } from './codex/config';
+import { TEKS_SELESAI } from './mission/config';
+import { isiPola } from './ui/config';
+import type { HasilMisi } from './mission/state';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -82,16 +88,23 @@ status.saatKitabTerbuka = (id) => pemberitahuan.tambah(id);
 const menuJeda = new MenuJeda(status);
 const hudTujuan = new HudTujuan();
 const panel = new PanelNaskah();
+const layarJudul = new LayarJudul();
+const layarSelesai = new LayarSelesai();
 /** Mode UI: logika permainan hanya berjalan saat 'main'. */
-let modeUi: 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' = 'main';
-/** Mode yang dikembalikan saat Kitab ditutup (dibuka dari permainan atau dari menu jeda). */
-let asalKitab: 'main' | 'jeda' = 'main';
+type ModeUi = 'judul' | 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' | 'sinematik' | 'selesai';
+let modeUi: ModeUi = 'judul';
+/** Mode yang dikembalikan saat Kitab ditutup (dibuka dari permainan, menu jeda, layar awal, atau layar selesai). */
+let asalKitab: 'main' | 'jeda' | 'judul' | 'selesai' = 'main';
+/** Detik permainan sejak misi mulai (berjalan di mode main, dialog, panel, sinematik). */
+let waktuMisi = 0;
 
-function bukaKitab(asal: 'main' | 'jeda'): void {
+function bukaKitab(asal: 'main' | 'jeda' | 'judul' | 'selesai'): void {
   asalKitab = asal;
   modeUi = 'kitab';
   if (document.pointerLockElement) document.exitPointerLock();
   menuJeda.tutup();
+  layarJudul.tutup();
+  layarSelesai.tutup();
   hud.tampilkanAksi(null);
   uiKitab.buka();
 }
@@ -99,6 +112,8 @@ function tutupKitab(): void {
   uiKitab.tutup();
   modeUi = asalKitab;
   if (modeUi === 'jeda') menuJeda.buka();
+  else if (modeUi === 'judul') layarJudul.buka(status.titikSimpan !== null);
+  else if (modeUi === 'selesai') layarSelesai.buka(isiSelesaiTerakhir);
 }
 function bukaMenu(): void {
   modeUi = 'jeda';
@@ -137,7 +152,7 @@ window.addEventListener('keydown', (e) => {
   } else if (e.code === 'KeyK') {
     if (modeUi === 'kitab') tutupKitab();
     else if (modeUi === 'main' && !tarung.mati) bukaKitab('main');
-    else if (modeUi === 'jeda') bukaKitab('jeda');
+    else if (modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai') bukaKitab(modeUi);
   }
 });
 const npc = new PengelolaNpc(scene, dunia.tabrakan);
@@ -186,7 +201,123 @@ const misi = new PelaksanaMisi({
   segarkanRombongan: () => hudRombongan.segarkan(),
 });
 for (const pesan of misi.validasi()) console.warn(`[data] ${pesan}`);
-misi.saatSelesai = () => hudTarung.umumkan(UI.misi.selesaiSementara);
+misi.saatSegmenMulai = (titik) => {
+  titik.waktu = waktuMisi;
+  status.simpanTitik(titik);
+};
+misi.saatSelesai = () => mulaiSinematikPerahu();
+
+// --- Layar awal, sinematik perahu, layar selesai --------------------------------------------
+
+/** Posisi dan arah perahu saat misi mulai, untuk dikembalikan saat main lagi. */
+const asalPerahu = { posisi: dunia.perahu.grup.position.clone(), putar: dunia.perahu.grup.rotation.y };
+/** Posisi kapsul di geladak perahu (koordinat lokal perahu): pemain di depan, pengikut di belakang. */
+const TEMPAT_DI_PERAHU = [
+  [1.6, 0.4],
+  [0.2, -0.5],
+  [-0.9, 0.5],
+  [-2.0, -0.4],
+  [-2.6, 0.5],
+];
+let sisaSinematik = 0;
+const LAMA_SINEMATIK = 4;
+const LAJU_PERAHU = 1.2; // m/s, bergerak pelan menjauh
+const poseSinematikPerahu: PoseKamera = { posisi: new THREE.Vector3(), sasaran: new THREE.Vector3() };
+let isiSelesaiTerakhir = { sejarah: '', kutipan: '', ringkasan: [] as string[], catatan: '' };
+
+function mulaiSinematikPerahu(): void {
+  modeUi = 'sinematik';
+  sisaSinematik = LAMA_SINEMATIK;
+  hud.tampilkanAksi(null);
+  if (document.pointerLockElement) document.exitPointerLock();
+  const perahu = dunia.perahu.grup;
+  // Kamera di tepian, agak tinggi, memandang perahu yang menjauh.
+  poseSinematikPerahu.posisi.set(perahu.position.x + 9, perahu.position.y + 4, perahu.position.z + 7);
+  taruhRombonganDiPerahu();
+}
+
+function taruhRombonganDiPerahu(): void {
+  const perahu = dunia.perahu;
+  const kapsul = [pemain.posisi, ...pengikut.aktif.map((p) => p.posisi)];
+  const titik = new THREE.Vector3();
+  kapsul.forEach((pos, i) => {
+    const t = TEMPAT_DI_PERAHU[Math.min(i, TEMPAT_DI_PERAHU.length - 1)];
+    titik.set(t[0], 0, t[1]);
+    perahu.grup.localToWorld(titik);
+    pos.set(titik.x, perahu.geladak, titik.z);
+  });
+  pemain.hadapKe(pemain.posisi.x - Math.cos(perahu.grup.rotation.y) * 10, pemain.posisi.z + Math.sin(perahu.grup.rotation.y) * 10);
+}
+
+function perbaruiSinematikPerahu(dt: number): void {
+  const perahu = dunia.perahu.grup;
+  perahu.position.x -= Math.cos(perahu.rotation.y) * LAJU_PERAHU * dt;
+  perahu.position.z += Math.sin(perahu.rotation.y) * LAJU_PERAHU * dt;
+  perahu.position.y = asalPerahu.posisi.y + Math.sin(waktuMisi * 1.7) * 0.05;
+  taruhRombonganDiPerahu();
+  poseSinematikPerahu.sasaran.set(perahu.position.x, perahu.position.y + 1.2, perahu.position.z);
+  kameraOrangKetiga.sinematik = poseSinematikPerahu;
+  sisaSinematik -= dt;
+  if (sisaSinematik <= 0) {
+    kameraOrangKetiga.sinematik = null;
+    bukaPanel([], 1.2, tampilkanSelesai);
+  }
+}
+
+function tampilkanSelesai(): void {
+  const n = rombongan.nilai;
+  const rute = status.tanda.has('rute-sungai') ? 'sungai' : status.tanda.has('rute-bukit') ? 'bukit' : null;
+  const hasil: HasilMisi = { pengikutTiba: n.pengikut, pagon: n.pagon, rute, kewaspadaanDaha: n.kewaspadaan, kaliKetahuan: n.kaliKetahuan, waktu: waktuMisi };
+  status.selesaikanMisi(hasil);
+  const teks = TEKS_SELESAI;
+  const S = UI.selesai;
+  isiSelesaiTerakhir = {
+    sejarah: teks.sejarah,
+    kutipan: teks.kutipan,
+    ringkasan: [
+      isiPola(S.pengikut, { n: n.pengikut, awal: ATURAN.awal.pengikut }),
+      isiPola(S.pagon, { nilai: n.pagon === 'ikut' ? S.pagonIkut : S.pagonDitinggal }),
+      isiPola(S.rute, { nilai: rute === 'sungai' ? S.ruteSungai : S.ruteBukit }),
+      isiPola(S.ketahuan, { n: n.kaliKetahuan }),
+      isiPola(S.kitab, { n: status.kitab.length, total: KITAB_PER_ID.size }),
+      isiPola(S.waktu, { menit: Math.floor(waktuMisi / 60), detik: Math.floor(waktuMisi % 60) }),
+    ],
+    catatan: n.pagon === 'ikut' ? teks.catatanPagonIkut : teks.catatanPagonDitinggal,
+  };
+  modeUi = 'selesai';
+  layarSelesai.buka(isiSelesaiTerakhir);
+}
+
+function kembaliKeJudul(): void {
+  layarSelesai.tutup();
+  menuJeda.tutup();
+  dunia.perahu.grup.position.copy(asalPerahu.posisi);
+  dunia.perahu.grup.rotation.y = asalPerahu.putar;
+  kameraOrangKetiga.sinematik = null;
+  tarung.hidupkan();
+  misi.siapkan();
+  modeUi = 'judul';
+  layarJudul.buka(status.titikSimpan !== null);
+}
+
+layarJudul.saatMulaiBaru = () => {
+  layarJudul.tutup();
+  status.ulangMisi();
+  waktuMisi = 0;
+  modeUi = 'main';
+  misi.mulai();
+};
+layarJudul.saatLanjutkan = () => {
+  const titik = status.titikSimpan;
+  if (!titik) return;
+  layarJudul.tutup();
+  waktuMisi = titik.waktu;
+  modeUi = 'main';
+  misi.lanjutkan(titik);
+};
+layarJudul.saatKitab = () => bukaKitab('judul');
+layarSelesai.saatKitab = () => bukaKitab('selesai');
+layarSelesai.saatMainLagi = kembaliKeJudul;
 
 /** Gugur: kembali ke titik simpan segmen. */
 function ulangiDariTitikSimpan(): void {
@@ -201,6 +332,7 @@ menuJeda.saatUlangMisi = () => {
   status.ulangMisi();
   tarung.hidupkan();
   tutupMenu();
+  waktuMisi = 0;
   misi.mulai();
 };
 let sisaWaktuTarung = 0;
@@ -255,9 +387,9 @@ function perbaruiPermainan(dt: number): void {
   }
 }
 
-// Sampai titik simpan ada (tahap D), memuat halaman selalu memulai misi baru; entri Kitab tetap.
-status.ulangMisi();
-misi.mulai();
+// Layar awal: dunia terpasang di belakangnya, misi mulai dari tombol.
+misi.siapkan();
+layarJudul.buka(status.titikSimpan !== null);
 
 const jam = new THREE.Timer();
 renderer.setAnimationLoop(() => {
@@ -266,10 +398,13 @@ renderer.setAnimationLoop(() => {
   const dtNyata = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
   let dt = 0;
   document.body.classList.toggle('lapisan-aktif', modeUi !== 'main');
-  if (modeUi === 'kitab' || modeUi === 'jeda') {
+  if (modeUi === 'main' || modeUi === 'dialog' || modeUi === 'panel' || modeUi === 'sinematik') waktuMisi += dtNyata;
+  if (modeUi === 'kitab' || modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai') {
     // Permainan berhenti; tidak ada yang bergerak.
   } else if (modeUi === 'panel') {
     panel.perbarui(dtNyata);
+  } else if (modeUi === 'sinematik') {
+    perbaruiSinematikPerahu(dtNyata);
   } else if (modeUi === 'dialog') {
     // Dunia membeku; hanya teks dan kamera sinematik yang bergerak.
     uiDialog.perbarui(dtNyata);
@@ -310,7 +445,11 @@ renderer.setAnimationLoop(() => {
 if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
-    npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia,
+    npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
+    perbaruiSinematikPerahu, tampilkanSelesai,
+    get waktuMisi() {
+      return waktuMisi;
+    },
     langkah: (dt: number) => {
       // Satu langkah logika permainan tanpa render, untuk bot uji; hanya berarti di mode 'main'.
       if (modeUi !== 'main') return;

@@ -14,6 +14,10 @@ export const PERMUKAAN_AIR = -1.0;
 // terlihat dan pemain tidak melambat (kaki di atas PERMUKAAN_AIR - 0,3).
 export const X_DANGKAL = 32;
 export const LEBAR_DANGKAL = 16;
+// Teluk muara di ujung barat: cekungan sungai melebar mulai X_MUARA ke barat.
+export const X_MUARA = -105;
+export const LEBAR_PERALIHAN_MUARA = 25;
+export const SIGMA_MUARA = 9;
 
 function smoothstep(tepi0: number, tepi1: number, x: number): number {
   const t = Math.min(1, Math.max(0, (x - tepi0) / (tepi1 - tepi0)));
@@ -39,6 +43,9 @@ export function tinggiMedan(x: number, z: number): number {
   // Di tempat dangkal, cekungan hanya separuh dalamnya.
   const dangkal = 1 - smoothstep(0, 1, Math.abs(x - X_DANGKAL) / (LEBAR_DANGKAL / 2));
   parit *= 1 - 0.7 * dangkal;
+  // Teluk muara: cekungan tambahan yang lebih lebar di ujung barat.
+  const teluk = smoothstep(0, 1, (X_MUARA - x) / LEBAR_PERALIHAN_MUARA);
+  parit += teluk * Math.exp(-(dz * dz) / (2 * SIGMA_MUARA * SIGMA_MUARA)) * 2.6;
 
   return bukit + gelombang * faktorDesa - parit;
 }

@@ -850,3 +850,94 @@ body.lapisan-aktif .hud-vignet {
   letter-spacing: 1px;
   color: #b89a6a;
 }
+
+/* Layar awal dan layar misi selesai */
+.judul-lapis,
+.selesai-lapis {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 4, 2, 0.72);
+  color: #efe3c6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  user-select: none;
+}
+.judul-lapis.tampil,
+.selesai-lapis.tampil {
+  opacity: 1;
+  pointer-events: auto;
+}
+.judul,
+.selesai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  max-width: 620px;
+  padding: 36px 44px;
+  background: rgba(20, 12, 8, 0.85);
+  border: 1px solid rgba(255, 215, 154, 0.35);
+  border-radius: 6px;
+  font-family: Georgia, 'Times New Roman', serif;
+  text-align: center;
+}
+.judul-utama {
+  font-size: 34px;
+  letter-spacing: 1px;
+  color: #ffd79a;
+}
+.judul-sub {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+.judul-catatan {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #b89a6a;
+  font-family: system-ui, sans-serif;
+}
+.judul-tombol {
+  min-width: 220px;
+}
+.selesai-judul {
+  font-size: 28px;
+  letter-spacing: 1px;
+  color: #ffd79a;
+}
+.selesai-sejarah {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.selesai-kutipan {
+  margin: 0;
+  padding: 8px 16px;
+  border-left: 3px solid #b8862b;
+  font-style: italic;
+  font-size: 14px;
+  color: #d9c9a0;
+  text-align: left;
+}
+.selesai-ringkasan {
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+  font-family: system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.selesai-catatan {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #d9c9a0;
+}
+.selesai-tombol {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}

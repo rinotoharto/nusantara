@@ -5,6 +5,7 @@ import { buatDesa, buatDukuh, buatLumbung, type Rumah, type TataLetakRumah } fro
 import { buatHutan, type Pohon } from './forest';
 import { buatTebing, type Tebing } from './cliff';
 import { pasangPencahayaan } from './lighting';
+import { buatPerahu, type Perahu } from './boat';
 import type { DataTabrakan } from './collision';
 
 export interface Dunia {
@@ -14,6 +15,7 @@ export interface Dunia {
   pohon: Pohon[];
   matahari: THREE.DirectionalLight;
   ambien: THREE.HemisphereLight;
+  perahu: Perahu;
   tabrakan: DataTabrakan;
   /** Mesh yang menghalangi kamera (selain medan, yang dicek lewat fungsi tinggi). */
   penghalangKamera: THREE.Object3D[];
@@ -26,6 +28,8 @@ export interface TataLetakDunia {
   pandakan: TataLetakRumah[];
   /** Lumbung tua di timur Kudadu. */
   lumbung: { x: number; z: number; putar: number };
+  /** Perahu nelayan di muara. */
+  perahu: { x: number; z: number; putar: number };
 }
 
 /** Membangun seluruh dunia balok ke dalam scene. */
@@ -46,6 +50,9 @@ export function buatDunia(scene: THREE.Scene, tataLetak: TataLetakDunia): Dunia 
   const lumbung = buatLumbung(tataLetak.lumbung.x, tataLetak.lumbung.z, tataLetak.lumbung.putar);
   scene.add(lumbung.grup);
 
+  const perahu = buatPerahu(tataLetak.perahu.x, tataLetak.perahu.z, tataLetak.perahu.putar);
+  scene.add(perahu.grup);
+
   const { matahari, ambien } = pasangPencahayaan(scene);
 
   const tabrakan: DataTabrakan = {
@@ -64,5 +71,5 @@ export function buatDunia(scene: THREE.Scene, tataLetak: TataLetakDunia): Dunia 
     });
   }
 
-  return { medan, rumah, tebing, pohon: hutan.pohon, matahari, ambien, tabrakan, penghalangKamera, tinggiMedan };
+  return { medan, rumah, tebing, pohon: hutan.pohon, matahari, ambien, perahu, tabrakan, penghalangKamera, tinggiMedan };
 }
