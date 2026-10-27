@@ -1,0 +1,166 @@
+import * as THREE from 'three';
+import type { Input } from './input';
+import { tinggiLantai, dorongKeluar, cariTebing, type DataTabrakan } from '../world/collision';
+import { PERMUKAAN_AIR, UKURAN_MEDAN } from '../world/terrain';
+
+export const TINGGI_PEMAIN = 1.7;
+export const JARI_PEMAIN = 0.35;
+
+const KECEPATAN_JALAN = 4;
+const KECEPATAN_LARI = 7.5;
+const PERCEPATAN = 30;
+const GRAVITASI = 22;
+const LOMPAT = 7; // tinggi lompat sekitar 1,1 m, tidak cukup untuk tebing 2 m
+const LAMA_PANJAT = 0.7;
+const MIRING_MAKS = 0.2; // radian, kapsul condong ke arah gerak
+
+/** Pemain berupa kapsul. `posisi` adalah titik kaki. */
+export class Pemain {
+  readonly grup = new THREE.Group();
+  readonly posisi = this.grup.position;
+  private readonly badan: THREE.Group;
+  private readonly kecepatan = new THREE.Vector3();
+  private kecepatanY = 0;
+  diTanah = false;
+  private hadap = 0;
+  private miring = 0;
+
+  private panjatDari: THREE.Vector3 | null = null;
+  private panjatKe: THREE.Vector3 | null = null;
+  private panjatWaktu = 0;
+
+  constructor(private data: DataTabrakan) {
+    this.badan = new THREE.Group();
+    const geometri = new THREE.CapsuleGeometry(JARI_PEMAIN, TINGGI_PEMAIN - 2 * JARI_PEMAIN, 6, 12);
+    const kapsul = new THREE.Mesh(geometri, new THREE.MeshStandardMaterial({ color: 0xc8402c, roughness: 0.7 }));
+    kapsul.position.y = TINGGI_PEMAIN / 2;
+    kapsul.castShadow = true;
+    this.badan.add(kapsul);
+
+    // Penanda arah hadap: balok kecil di "wajah" kapsul.
+    const hidung = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.14, 0.2),
+      new THREE.MeshStandardMaterial({ color: 0xf2e2c0 }),
+    );
+    hidung.position.set(0, TINGGI_PEMAIN - 0.35, JARI_PEMAIN);
+    this.badan.add(hidung);
+
+    this.grup.add(this.badan);
+  }
+
+  get sedangMemanjat(): boolean {
+    return this.panjatKe !== null;
+  }
+
+  /** Letakkan pemain di (x, z) tepat di atas tanah. */
+  taruhDi(x: number, z: number): void {
+    this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);
+  }
+
+  perbarui(dt: number, input: Input, yawKamera: number): void {
+    if (this.panjatKe && this.panjatDari) {
+      this.perbaruiPanjat(dt);
+      return;
+    }
+
+    // Arah gerak relatif kamera.
+    const depanX = -Math.sin(yawKamera);
+    const depanZ = -Math.cos(yawKamera);
+    const kananX = Math.cos(yawKamera);
+    const kananZ = -Math.sin(yawKamera);
+    let gx = 0;
+    let gz = 0;
+    if (input.ditekan('KeyW')) { gx += depanX; gz += depanZ; }
+    if (input.ditekan('KeyS')) { gx -= depanX; gz -= depanZ; }
+    if (input.ditekan('KeyD')) { gx += kananX; gz += kananZ; }
+    if (input.ditekan('KeyA')) { gx -= kananX; gz -= kananZ; }
+    const panjang = Math.hypot(gx, gz);
+    if (panjang > 0) { gx /= panjang; gz /= panjang; }
+
+    const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
+    let kecepatanMaks = input.ditekan('ShiftLeft') || input.ditekan('ShiftRight') ? KECEPATAN_LARI : KECEPATAN_JALAN;
+    if (diAir) kecepatanMaks *= 0.5;
+
+    // Percepatan halus menuju kecepatan tujuan.
+    const tujuanX = gx * kecepatanMaks;
+    const tujuanZ = gz * kecepatanMaks;
+    const faktor = Math.min(1, PERCEPATAN * dt / kecepatanMaks);
+    this.kecepatan.x += (tujuanX - this.kecepatan.x) * faktor;
+    this.kecepatan.z += (tujuanZ - this.kecepatan.z) * faktor;
+
+    // Memanjat atau melompat.
+    if (input.baruDitekan('Space') && this.diTanah) {
+      const tebing = cariTebing(this.data, this.posisi, JARI_PEMAIN);
+      if (tebing) {
+        this.mulaiPanjat(tebing.tujuan);
+        return;
+      }
+      this.kecepatanY = LOMPAT;
+      this.diTanah = false;
+    }
+
+    // Gravitasi dan gerak.
+    this.kecepatanY -= GRAVITASI * dt;
+    this.posisi.x += this.kecepatan.x * dt;
+    this.posisi.z += this.kecepatan.z * dt;
+    this.posisi.y += this.kecepatanY * dt;
+
+    // Batas medan.
+    const batas = UKURAN_MEDAN / 2 - 2;
+    this.posisi.x = Math.min(batas, Math.max(-batas, this.posisi.x));
+    this.posisi.z = Math.min(batas, Math.max(-batas, this.posisi.z));
+
+    // Tabrakan dengan rumah, tebing, dan pohon, lalu pijak lantai.
+    dorongKeluar(this.data, this.posisi, JARI_PEMAIN);
+    const lantai = tinggiLantai(this.data, this.posisi.x, this.posisi.z, this.posisi.y);
+    if (this.posisi.y <= lantai) {
+      this.posisi.y = lantai;
+      this.kecepatanY = 0;
+      this.diTanah = true;
+    } else {
+      this.diTanah = this.posisi.y - lantai < 0.05;
+    }
+
+    this.perbaruiBadan(dt);
+  }
+
+  private mulaiPanjat(tujuan: THREE.Vector3): void {
+    this.panjatDari = this.posisi.clone();
+    this.panjatKe = tujuan;
+    this.panjatWaktu = 0;
+    this.kecepatan.set(0, 0, 0);
+    this.kecepatanY = 0;
+    this.hadap = Math.atan2(tujuan.x - this.posisi.x, tujuan.z - this.posisi.z);
+  }
+
+  private perbaruiPanjat(dt: number): void {
+    if (!this.panjatKe || !this.panjatDari) return;
+    this.panjatWaktu += dt;
+    const t = Math.min(1, this.panjatWaktu / LAMA_PANJAT);
+    const halus = t * t * (3 - 2 * t);
+    // Naik dulu, baru maju: tinggi mengikuti kurva lebih cepat daripada posisi datar.
+    const tNaik = Math.min(1, t * 1.6);
+    this.posisi.x = this.panjatDari.x + (this.panjatKe.x - this.panjatDari.x) * halus;
+    this.posisi.z = this.panjatDari.z + (this.panjatKe.z - this.panjatDari.z) * halus;
+    this.posisi.y = this.panjatDari.y + (this.panjatKe.y - this.panjatDari.y) * tNaik;
+    this.badan.rotation.y = this.hadap;
+    if (t >= 1) {
+      this.panjatDari = null;
+      this.panjatKe = null;
+      this.diTanah = true;
+    }
+  }
+
+  private perbaruiBadan(dt: number): void {
+    const laju = Math.hypot(this.kecepatan.x, this.kecepatan.z);
+    if (laju > 0.3) {
+      const tujuanHadap = Math.atan2(this.kecepatan.x, this.kecepatan.z);
+      let selisih = tujuanHadap - this.hadap;
+      selisih = Math.atan2(Math.sin(selisih), Math.cos(selisih));
+      this.hadap += selisih * Math.min(1, 12 * dt);
+    }
+    const miringTujuan = (laju / KECEPATAN_LARI) * MIRING_MAKS;
+    this.miring += (miringTujuan - this.miring) * Math.min(1, 8 * dt);
+    this.badan.rotation.set(this.miring, this.hadap, 0, 'YXZ');
+  }
+}

@@ -12,10 +12,10 @@ export function pasangPencahayaan(scene: THREE.Scene): THREE.DirectionalLight {
   matahari.shadow.mapSize.set(2048, 2048);
   matahari.shadow.camera.near = 1;
   matahari.shadow.camera.far = 300;
-  matahari.shadow.camera.left = -90;
-  matahari.shadow.camera.right = 90;
-  matahari.shadow.camera.top = 90;
-  matahari.shadow.camera.bottom = -90;
+  matahari.shadow.camera.left = -60;
+  matahari.shadow.camera.right = 60;
+  matahari.shadow.camera.top = 60;
+  matahari.shadow.camera.bottom = -60;
   matahari.shadow.bias = -0.0008;
   matahari.shadow.normalBias = 0.5;
   scene.add(matahari);
