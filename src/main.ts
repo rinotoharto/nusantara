@@ -21,6 +21,10 @@ import { poseBahu, type PoseKamera } from './dialog/sinematik';
 import { UiDialog } from './ui/dialog-ui';
 import { PengelolaNpc } from './mission/npc';
 import { UI } from './ui/config';
+import { UiKitab } from './ui/codex-ui';
+import { PemberitahuanKitab } from './ui/notify';
+import { MenuJeda } from './ui/pause-menu';
+import { terapkanUkuranHuruf } from './ui/font-size';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -52,15 +56,16 @@ pengikut.taruhDiBelakang(pemain);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
 tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
 
-const hudTarung = new HudPertarungan(() => {
-  // Ulangi: pemain kembali ke titik awal, semua lawan dihidupkan lagi.
+/** Ulangi misi: pemain kembali ke titik awal, semua lawan dihidupkan lagi. */
+function ulangiMisi(): void {
   pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
   pemain.hadap = Math.PI;
   pengikut.taruhDiBelakang(pemain);
   tarung.hidupkan();
   lawan.hidupkanSemua();
   sudahSampai = false;
-});
+}
+const hudTarung = new HudPertarungan(ulangiMisi);
 tarung.saatTikaman = (pertama) => {
   if (pertama) hudTarung.umumkan('Tikaman Keris');
 };
@@ -71,12 +76,64 @@ const hudSiluman = new HudSiluman();
 
 // Status permainan, dialog, dan Kitab.
 const status = new StatusPermainan();
-document.body.classList.add(`huruf-${status.pengaturan.ukuranHuruf}`);
+terapkanUkuranHuruf(status.pengaturan.ukuranHuruf);
 for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[data] ${pesan}`);
 const mesinDialog = new MesinDialog(status);
 const uiDialog = new UiDialog(mesinDialog, status);
+const uiKitab = new UiKitab(status);
+const pemberitahuan = new PemberitahuanKitab();
+status.saatKitabTerbuka = (id) => pemberitahuan.tambah(id);
+const menuJeda = new MenuJeda(status);
 /** Mode UI: logika permainan hanya berjalan saat 'main'. */
-let modeUi: 'main' | 'dialog' = 'main';
+let modeUi: 'main' | 'dialog' | 'kitab' | 'jeda' = 'main';
+/** Mode yang dikembalikan saat Kitab ditutup (dibuka dari permainan atau dari menu jeda). */
+let asalKitab: 'main' | 'jeda' = 'main';
+
+function bukaKitab(asal: 'main' | 'jeda'): void {
+  asalKitab = asal;
+  modeUi = 'kitab';
+  if (document.pointerLockElement) document.exitPointerLock();
+  menuJeda.tutup();
+  hud.tampilkanAksi(null);
+  uiKitab.buka();
+}
+function tutupKitab(): void {
+  uiKitab.tutup();
+  modeUi = asalKitab;
+  if (modeUi === 'jeda') menuJeda.buka();
+}
+function bukaMenu(): void {
+  modeUi = 'jeda';
+  hud.tampilkanAksi(null);
+  menuJeda.buka();
+}
+function tutupMenu(): void {
+  menuJeda.tutup();
+  modeUi = 'main';
+}
+uiKitab.saatTutup = tutupKitab;
+menuJeda.saatLanjutkan = tutupMenu;
+menuJeda.saatKitab = () => bukaKitab('jeda');
+menuJeda.saatUlangMisi = () => {
+  status.ulangMisi();
+  ulangiMisi();
+  tutupMenu();
+};
+
+// Esc: menu jeda (saat pointer sudah lepas); K: Kitab. Dialog mengurus tombolnya sendiri.
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.code === 'Escape') {
+    if (document.pointerLockElement) return; // peramban sedang melepas pointer lock
+    if (modeUi === 'kitab') tutupKitab();
+    else if (modeUi === 'jeda') tutupMenu();
+    else if (modeUi === 'main' && !tarung.mati) bukaMenu();
+  } else if (e.code === 'KeyK') {
+    if (modeUi === 'kitab') tutupKitab();
+    else if (modeUi === 'main' && !tarung.mati) bukaKitab('main');
+    else if (modeUi === 'jeda') bukaKitab('jeda');
+  }
+});
 const npc = new PengelolaNpc(scene, dunia.tabrakan);
 /** Titik kaki lawan bicara selama dialog. */
 const posisiLawanBicara = new THREE.Vector3();
@@ -118,7 +175,10 @@ renderer.setAnimationLoop(() => {
   const dtMentah = jam.getDelta();
   const dtNyata = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
   let dt = 0;
-  if (modeUi === 'dialog') {
+  document.body.classList.toggle('lapisan-aktif', modeUi !== 'main');
+  if (modeUi === 'kitab' || modeUi === 'jeda') {
+    // Permainan berhenti; tidak ada yang bergerak.
+  } else if (modeUi === 'dialog') {
     // Dunia membeku; hanya teks dan kamera sinematik yang bergerak.
     uiDialog.perbarui(dtNyata);
     if (mesinDialog.aktif) {
@@ -164,6 +224,7 @@ renderer.setAnimationLoop(() => {
   kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati || modeUi !== 'main');
+  pemberitahuan.perbarui(dtNyata, modeUi === 'dialog');
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
   input.akhirFrame();
@@ -173,5 +234,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu };
 }

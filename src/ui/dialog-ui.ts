@@ -94,7 +94,6 @@ export class UiDialog {
     if (!this.mesin.mulai(id)) return false;
     this.tampil = true;
     this.lapis.classList.add('tampil');
-    document.body.classList.add('dialog-aktif');
     this.tampilkanSimpul();
     return true;
   }
@@ -268,7 +267,6 @@ export class UiDialog {
   private tutup(): void {
     this.tampil = false;
     this.lapis.classList.remove('tampil');
-    document.body.classList.remove('dialog-aktif');
     this.tutupKartu();
     this.sembunyikanPilihan();
   }

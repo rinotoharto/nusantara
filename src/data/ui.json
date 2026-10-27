@@ -23,6 +23,10 @@
         "bicara"
       ],
       [
+        "K",
+        "Kitab"
+      ],
+      [
         "Klik kiri",
         "serang, tahan: berat"
       ],
@@ -40,7 +44,7 @@
       ],
       [
         "Esc",
-        "lepas mouse"
+        "lepas mouse, lalu menu jeda"
       ]
     ]
   },
@@ -71,5 +75,57 @@
   "npc": {
     "bicara": "E: Bicara",
     "jarak": 2.5
+  },
+  "kitab": {
+    "judul": "Kitab",
+    "tutup": "Tutup",
+    "tertutup": "???",
+    "belumTerbuka": "Entri ini belum terbuka. Jelajahi dan bicaralah dengan orang-orang untuk membukanya.",
+    "kosong": "Belum ada entri yang terbuka. Jelajahi dan bicaralah dengan orang-orang untuk membukanya.",
+    "jenis": {
+      "peristiwa": "Peristiwa",
+      "tokoh": "Tokoh",
+      "tempat": "Tempat",
+      "benda": "Benda",
+      "sumber": "Sumber",
+      "istilah": "Istilah"
+    },
+    "label": {
+      "fakta": {
+        "nama": "Fakta",
+        "keterangan": "Didukung sumber sezaman."
+      },
+      "interpretasi": {
+        "nama": "Interpretasi",
+        "keterangan": "Tafsir dari sumber yang lebih muda atau sejarawan."
+      },
+      "legenda": {
+        "nama": "Legenda",
+        "keterangan": "Cerita tradisi, bukan catatan sejarah."
+      }
+    },
+    "kutipan": "Kutipan",
+    "sumber": "Sumber",
+    "terkait": "Entri terkait",
+    "pemberitahuan": "Kitab: {judul}",
+    "lamaPemberitahuan": 3
+  },
+  "pengaturan": {
+    "judul": "Pengaturan",
+    "ukuranHuruf": "Ukuran huruf",
+    "ukuran": {
+      "kecil": "Kecil",
+      "sedang": "Sedang",
+      "besar": "Besar"
+    },
+    "subtitle": "Subtitle: menyusul"
+  },
+  "menu": {
+    "judul": "Jeda",
+    "lanjutkan": "Lanjutkan",
+    "kitab": "Kitab",
+    "pengaturan": "Pengaturan",
+    "ulangMisi": "Mulai ulang misi",
+    "kembali": "Kembali"
   }
 }
