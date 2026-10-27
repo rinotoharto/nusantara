@@ -33,7 +33,7 @@ html, body {
 }
 .hud-petunjuk b {
   display: inline-block;
-  min-width: 48px;
+  min-width: 78px;
   color: #ffd79a;
 }
 .hud-kunci {

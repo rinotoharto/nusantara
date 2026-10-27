@@ -17,6 +17,9 @@ export class Hud {
       '<b>WASD</b> jalan',
       '<b>Shift</b> lari',
       '<b>Spasi</b> lompat / panjat',
+      '<b>Klik kiri</b> serang, tahan: berat',
+      '<b>Klik kanan</b> tangkis',
+      '<b>Ctrl</b> hindar (atau klik tengah)',
       '<b>Mouse</b> putar kamera',
       '<b>Esc</b> lepas mouse',
     ].join('<br>');

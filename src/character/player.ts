@@ -14,15 +14,58 @@ const LOMPAT = 7; // tinggi lompat sekitar 1,1 m, tidak cukup untuk tebing 2 m
 const LAMA_PANJAT = 0.7;
 const MIRING_MAKS = 0.2; // radian, kapsul condong ke arah gerak
 
+/** Perintah dari modul pertarungan yang mengubah cara pemain bergerak pada satu frame. */
+export interface PerintahGerak {
+  /** Abaikan WASD. */
+  kunciGerak: boolean;
+  /** Pengali kecepatan maksimum, 1 = normal. */
+  pengaliKecepatan: number;
+  /** Kecepatan datar paksa (m/s) untuk frame ini, misalnya luncuran hindar; null = tidak ada. */
+  dorongan: THREE.Vector3 | null;
+  /** Arah hadap yang dikunci (radian); null = ikut arah gerak. */
+  hadapPaksa: number | null;
+  bolehLompat: boolean;
+}
+
+export const PERINTAH_BEBAS: Readonly<PerintahGerak> = {
+  kunciGerak: false,
+  pengaliKecepatan: 1,
+  dorongan: null,
+  hadapPaksa: null,
+  bolehLompat: true,
+};
+
+/** Arah gerak dari WASD relatif terhadap yaw kamera, sudah dinormalkan. */
+export function arahInputRelatifKamera(input: Input, yawKamera: number): { x: number; z: number; ada: boolean } {
+  const depanX = -Math.sin(yawKamera);
+  const depanZ = -Math.cos(yawKamera);
+  const kananX = Math.cos(yawKamera);
+  const kananZ = -Math.sin(yawKamera);
+  let gx = 0;
+  let gz = 0;
+  if (input.ditekan('KeyW')) { gx += depanX; gz += depanZ; }
+  if (input.ditekan('KeyS')) { gx -= depanX; gz -= depanZ; }
+  if (input.ditekan('KeyD')) { gx += kananX; gz += kananZ; }
+  if (input.ditekan('KeyA')) { gx -= kananX; gz -= kananZ; }
+  const panjang = Math.hypot(gx, gz);
+  if (panjang > 0) return { x: gx / panjang, z: gz / panjang, ada: true };
+  return { x: 0, z: 0, ada: false };
+}
+
 /** Pemain berupa kapsul. `posisi` adalah titik kaki. */
 export class Pemain {
   readonly grup = new THREE.Group();
   readonly posisi = this.grup.position;
-  private readonly badan: THREE.Group;
+  /** Berputar ke arah hadap dan condong saat lari. */
+  readonly badan = new THREE.Group();
+  /** Anak `badan`; modul pertarungan memakai ini untuk condong, meluncur, dan memasang keris. */
+  readonly pose = new THREE.Group();
+  readonly kapsul: THREE.Mesh<THREE.CapsuleGeometry, THREE.MeshStandardMaterial>;
   private readonly kecepatan = new THREE.Vector3();
   private kecepatanY = 0;
   diTanah = false;
-  private hadap = 0;
+  /** Arah hadap (radian); 0 = menghadap +z (selatan). */
+  hadap = 0;
   private miring = 0;
 
   private panjatDari: THREE.Vector3 | null = null;
@@ -30,12 +73,11 @@ export class Pemain {
   private panjatWaktu = 0;
 
   constructor(private data: DataTabrakan) {
-    this.badan = new THREE.Group();
     const geometri = new THREE.CapsuleGeometry(JARI_PEMAIN, TINGGI_PEMAIN - 2 * JARI_PEMAIN, 6, 12);
-    const kapsul = new THREE.Mesh(geometri, new THREE.MeshStandardMaterial({ color: 0xc8402c, roughness: 0.7 }));
-    kapsul.position.y = TINGGI_PEMAIN / 2;
-    kapsul.castShadow = true;
-    this.badan.add(kapsul);
+    this.kapsul = new THREE.Mesh(geometri, new THREE.MeshStandardMaterial({ color: 0xc8402c, roughness: 0.7 }));
+    this.kapsul.position.y = TINGGI_PEMAIN / 2;
+    this.kapsul.castShadow = true;
+    this.pose.add(this.kapsul);
 
     // Penanda arah hadap: balok kecil di "wajah" kapsul.
     const hidung = new THREE.Mesh(
@@ -43,8 +85,9 @@ export class Pemain {
       new THREE.MeshStandardMaterial({ color: 0xf2e2c0 }),
     );
     hidung.position.set(0, TINGGI_PEMAIN - 0.35, JARI_PEMAIN);
-    this.badan.add(hidung);
+    this.pose.add(hidung);
 
+    this.badan.add(this.pose);
     this.grup.add(this.badan);
   }
 
@@ -52,44 +95,46 @@ export class Pemain {
     return this.panjatKe !== null;
   }
 
-  /** Letakkan pemain di (x, z) tepat di atas tanah. */
-  taruhDi(x: number, z: number): void {
-    this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);
+  /** Laju datar saat ini (m/s). */
+  get laju(): number {
+    return Math.hypot(this.kecepatan.x, this.kecepatan.z);
   }
 
-  perbarui(dt: number, input: Input, yawKamera: number): void {
+  /** Letakkan pemain di (x, z) tepat di atas tanah dan hentikan geraknya. */
+  taruhDi(x: number, z: number): void {
+    this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);
+    this.kecepatan.set(0, 0, 0);
+    this.kecepatanY = 0;
+  }
+
+  perbarui(dt: number, input: Input, yawKamera: number, perintah: Readonly<PerintahGerak> = PERINTAH_BEBAS): void {
     if (this.panjatKe && this.panjatDari) {
       this.perbaruiPanjat(dt);
       return;
     }
 
-    // Arah gerak relatif kamera.
-    const depanX = -Math.sin(yawKamera);
-    const depanZ = -Math.cos(yawKamera);
-    const kananX = Math.cos(yawKamera);
-    const kananZ = -Math.sin(yawKamera);
-    let gx = 0;
-    let gz = 0;
-    if (input.ditekan('KeyW')) { gx += depanX; gz += depanZ; }
-    if (input.ditekan('KeyS')) { gx -= depanX; gz -= depanZ; }
-    if (input.ditekan('KeyD')) { gx += kananX; gz += kananZ; }
-    if (input.ditekan('KeyA')) { gx -= kananX; gz -= kananZ; }
-    const panjang = Math.hypot(gx, gz);
-    if (panjang > 0) { gx /= panjang; gz /= panjang; }
+    const arah = arahInputRelatifKamera(input, yawKamera);
+    const gx = perintah.kunciGerak ? 0 : arah.x;
+    const gz = perintah.kunciGerak ? 0 : arah.z;
 
     const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
     let kecepatanMaks = input.ditekan('ShiftLeft') || input.ditekan('ShiftRight') ? KECEPATAN_LARI : KECEPATAN_JALAN;
     if (diAir) kecepatanMaks *= 0.5;
+    kecepatanMaks *= perintah.pengaliKecepatan;
 
     // Percepatan halus menuju kecepatan tujuan.
     const tujuanX = gx * kecepatanMaks;
     const tujuanZ = gz * kecepatanMaks;
-    const faktor = Math.min(1, PERCEPATAN * dt / kecepatanMaks);
+    const faktor = Math.min(1, PERCEPATAN * dt / Math.max(kecepatanMaks, 0.5));
     this.kecepatan.x += (tujuanX - this.kecepatan.x) * faktor;
     this.kecepatan.z += (tujuanZ - this.kecepatan.z) * faktor;
+    if (perintah.dorongan) {
+      this.kecepatan.x = perintah.dorongan.x;
+      this.kecepatan.z = perintah.dorongan.z;
+    }
 
     // Memanjat atau melompat.
-    if (input.baruDitekan('Space') && this.diTanah) {
+    if (perintah.bolehLompat && input.baruDitekan('Space') && this.diTanah) {
       const tebing = cariTebing(this.data, this.posisi, JARI_PEMAIN);
       if (tebing) {
         this.mulaiPanjat(tebing.tujuan);
@@ -121,7 +166,7 @@ export class Pemain {
       this.diTanah = this.posisi.y - lantai < 0.05;
     }
 
-    this.perbaruiBadan(dt);
+    this.perbaruiBadan(dt, perintah.hadapPaksa);
   }
 
   private mulaiPanjat(tujuan: THREE.Vector3): void {
@@ -151,15 +196,19 @@ export class Pemain {
     }
   }
 
-  private perbaruiBadan(dt: number): void {
-    const laju = Math.hypot(this.kecepatan.x, this.kecepatan.z);
-    if (laju > 0.3) {
+  private perbaruiBadan(dt: number, hadapPaksa: number | null): void {
+    const laju = this.laju;
+    if (hadapPaksa !== null) {
+      this.hadap = hadapPaksa;
+    } else if (laju > 0.3) {
       const tujuanHadap = Math.atan2(this.kecepatan.x, this.kecepatan.z);
       let selisih = tujuanHadap - this.hadap;
       selisih = Math.atan2(Math.sin(selisih), Math.cos(selisih));
       this.hadap += selisih * Math.min(1, 12 * dt);
     }
-    const miringTujuan = (laju / KECEPATAN_LARI) * MIRING_MAKS;
+    // Condong hanya dari gerak yang mengikuti arah hadap; luncuran hindar ditangani modul pertarungan.
+    const lajuHadap = hadapPaksa === null ? laju : 0;
+    const miringTujuan = Math.min(1, lajuHadap / KECEPATAN_LARI) * MIRING_MAKS;
     this.miring += (miringTujuan - this.miring) * Math.min(1, 8 * dt);
     this.badan.rotation.set(this.miring, this.hadap, 0, 'YXZ');
   }

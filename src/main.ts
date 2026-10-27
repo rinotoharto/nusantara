@@ -5,6 +5,9 @@ import { Input } from './character/input';
 import { Pemain } from './character/player';
 import { KameraOrangKetiga } from './character/camera';
 import { Hud } from './ui/hud';
+import { PertarunganPemain } from './combat/player-combat';
+import { BonekaLatihan } from './combat/dummy';
+import { KONFIG } from './combat/config';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -25,8 +28,15 @@ const pemain = new Pemain(dunia.tabrakan);
 pemain.taruhDi(0, 34); // di selatan desa, menghadap utara
 scene.add(pemain.grup);
 
+const tarung = new PertarunganPemain(pemain);
+
+// Boneka latihan sementara (tahap A) di utara titik awal; diganti lawan sungguhan di tahap B.
+const boneka = new BonekaLatihan(dunia.tabrakan, 0, 29);
+scene.add(boneka.grup);
+
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
+let sisaWaktuTarung = 0;
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -47,7 +57,16 @@ renderer.setAnimationLoop(() => {
   const dtMentah = jam.getDelta();
   const dt = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
 
-  pemain.perbarui(dt, input, kameraOrangKetiga.yaw);
+  const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
+  pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
+  boneka.perbarui(dt, pemain, tarung);
+
+  // Kamera bertarung selama ada lawan dekat, bertahan sebentar setelah lawan menjauh.
+  const jarakLawan = boneka.posisi.distanceTo(pemain.posisi);
+  if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
+  else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
+  kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
+
   kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci);
@@ -58,5 +77,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, boneka, input };
 }

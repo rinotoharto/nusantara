@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { Input } from './input';
 import { tinggiMedan } from '../world/terrain';
+import { KONFIG } from '../combat/config';
 
 const SENSITIVITAS = 0.0022;
 const JARAK = 5.5;
@@ -18,6 +19,9 @@ export class KameraOrangKetiga {
   private readonly sasaran = new THREE.Vector3();
   private readonly arah = new THREE.Vector3();
   private jarakSekarang = JARAK;
+  /** Saat bertarung kamera sedikit menjauh dan agak lebih tinggi supaya lawan terlihat. */
+  modeTarung = false;
+  private faktorTarung = 0;
 
   constructor(
     readonly kamera: THREE.PerspectiveCamera,
@@ -29,17 +33,23 @@ export class KameraOrangKetiga {
     this.yaw -= dx * SENSITIVITAS;
     this.pitch = Math.min(PITCH_MAKS, Math.max(PITCH_MIN, this.pitch + dy * SENSITIVITAS));
 
+    // Peralihan halus masuk dan keluar mode bertarung.
+    const tujuanTarung = this.modeTarung ? 1 : 0;
+    this.faktorTarung += (tujuanTarung - this.faktorTarung) * Math.min(1, 3 * dt);
+    const pitchEfektif = this.pitch + KONFIG.kamera.pitchTambahan * this.faktorTarung;
+    const jarakTujuan = JARAK + KONFIG.kamera.jarakTambahan * this.faktorTarung;
+
     this.sasaran.set(kakiPemain.x, kakiPemain.y + TINGGI_SASARAN, kakiPemain.z);
     this.arah.set(
-      Math.sin(this.yaw) * Math.cos(this.pitch),
-      Math.sin(this.pitch),
-      Math.cos(this.yaw) * Math.cos(this.pitch),
+      Math.sin(this.yaw) * Math.cos(pitchEfektif),
+      Math.sin(pitchEfektif),
+      Math.cos(this.yaw) * Math.cos(pitchEfektif),
     );
 
     // Jarak terdekat ke benda padat sepanjang garis sasaran ke kamera.
-    let jarak = JARAK;
+    let jarak = jarakTujuan;
     this.raycaster.set(this.sasaran, this.arah);
-    this.raycaster.far = JARAK;
+    this.raycaster.far = jarakTujuan;
     const kena = this.raycaster.intersectObjects(this.penghalang, false);
     if (kena.length > 0) jarak = Math.min(jarak, Math.max(0.8, kena[0].distance - JARAK_AMAN));
 

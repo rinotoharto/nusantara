@@ -1,0 +1,69 @@
+{
+  "pemain": {
+    "nyawa": 100,
+    "keris": {
+      "jangkauan": 1.5,
+      "sudutKena": 60,
+      "damageRingan": 20,
+      "damageBerat": 40,
+      "dorongRingan": 0.3,
+      "dorongBerat": 2.0
+    },
+    "seranganRingan": {
+      "durasi": 0.36,
+      "jendelaKena": [0.1, 0.22],
+      "majuPerPukulan": 0.5,
+      "maksKombo": 3,
+      "jedaKombo": 0.6,
+      "pemulihanSetelahKombo": 0.45
+    },
+    "seranganBerat": {
+      "tahan": 0.5,
+      "durasi": 0.75,
+      "jendelaKena": [0.32, 0.46],
+      "maju": 1.0
+    },
+    "tangkis": {
+      "jendelaPas": 0.2,
+      "sudutTangkis": 100,
+      "dorongTerkena": 0.6,
+      "pengaliKecepatan": 0.4,
+      "terhuyungLawan": 1.0
+    },
+    "hindar": {
+      "durasi": 0.4,
+      "kebal": 0.25,
+      "jarak": 2.6
+    },
+    "terpukul": {
+      "durasi": 0.25,
+      "kilatan": 0.12
+    }
+  },
+  "lawan": {
+    "nyawa": 60,
+    "tombak": {
+      "jangkauan": 2.2,
+      "sudutKena": 50,
+      "damage": 25,
+      "dorong": 0.8
+    },
+    "jarakDeteksi": 12,
+    "kecepatanMendekat": 3.2,
+    "kecepatanMengelilingi": 1.6,
+    "jarakMengelilingiMin": 3,
+    "jarakMengelilingiMaks": 4,
+    "isyarat": 0.5,
+    "durasiTusuk": 0.3,
+    "mundurMin": 1.0,
+    "mundurMaks": 2.0,
+    "terhuyung": 1.0,
+    "hilangSetelahMati": 3.0
+  },
+  "kamera": {
+    "jarakTambahan": 1.5,
+    "pitchTambahan": 0.12,
+    "jarakDeteksi": 10,
+    "waktuKembali": 2.0
+  }
+}
