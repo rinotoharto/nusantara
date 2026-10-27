@@ -1,5 +1,71 @@
 {
   "tokohPemain": "wijaya",
+  "aturan": {
+    "keterangan": "Variabel rombongan (lihat docs/isi/misi3-naskah.md, tabel Variabel rombongan). Angka di sini bisa disetel tanpa mengubah kode.",
+    "awal": {
+      "pengikut": 12,
+      "perbekalan": 1,
+      "pagon": "ikut",
+      "kewaspadaan": 0,
+      "kaliKetahuan": 0
+    },
+    "tanda": {
+      "pagon-ditinggal": {
+        "pengikut": -1,
+        "pagon": "ditinggal",
+        "teks": "Pengikut -1: Gajah Pagon dirawat di Pandakan"
+      },
+      "pagon-ikut": {
+        "pagon": "ikut",
+        "teks": "Gajah Pagon ikut: rombongan tidak bisa berlari"
+      },
+      "kudadu-menginap": {
+        "perbekalan": 3,
+        "kewaspadaan": 1,
+        "teks": "Perbekalan +3: bekal untuk tiga hari"
+      },
+      "kudadu-sebelum-fajar": {
+        "perbekalan": 1,
+        "teks": "Perbekalan +1: bekal untuk sehari"
+      },
+      "kudadu-nada-tegas": {
+        "kewaspadaan": 1
+      },
+      "rute-sungai": {
+        "perbekalan": -1,
+        "teks": "Perbekalan -1: jalan sungai"
+      },
+      "rute-bukit": {
+        "perbekalan": -2,
+        "teks": "Perbekalan -2: jalan bukit"
+      },
+      "prajurit-lumbung-ikut": {
+        "pengikut": 1,
+        "teks": "Pengikut +1: prajurit Singasari bergabung"
+      },
+      "bukit-tumbang": {
+        "pengikut": -1,
+        "lajuLari": 5,
+        "teks": "Pengikut -1: Wirot ditinggal di gubuk"
+      }
+    },
+    "ketahuan": {
+      "kewaspadaan": 1,
+      "kaliKetahuan": 1,
+      "pengikutJikaPagon": -1,
+      "maksPengikutJikaPagon": 2,
+      "teks": "Seorang pengikut gugur menahan pengejar"
+    },
+    "pagonIkut": {
+      "lajuMaks": 4,
+      "lajuPagon": 4.4,
+      "pengaliCuriga": 1.25
+    },
+    "penjagaSungai": {
+      "dasar": 2,
+      "maks": 5
+    }
+  },
   "npc": [
     {
       "id": "kepala-desa",

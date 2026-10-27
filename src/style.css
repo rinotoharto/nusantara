@@ -371,7 +371,7 @@ body.lapisan-aktif .hud-vignet {
 /* Pemberitahuan entri Kitab terbuka */
 .kitab-pemberitahuan {
   position: fixed;
-  top: 14px;
+  top: 112px; /* di bawah HUD rombongan */
   right: 14px;
   padding: 8px 14px;
   background: #efe3c6;
@@ -693,4 +693,93 @@ body.lapisan-aktif .hud-vignet {
 }
 .menu .pilihan-ukuran {
   justify-content: center;
+}
+
+/* HUD rombongan (kanan atas) */
+.hud-rombongan {
+  top: 10px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-size: 14px;
+}
+.rombongan-baris {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  background: rgba(20, 12, 8, 0.55);
+  border: 1px solid rgba(255, 215, 154, 0.35);
+  border-radius: 4px;
+}
+.rombongan-label {
+  color: #ffd79a;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+.rombongan-angka {
+  min-width: 22px;
+  text-align: right;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.rombongan-nasi {
+  display: inline-flex;
+  gap: 3px;
+  min-height: 17px;
+  align-items: center;
+}
+.nasi {
+  display: inline-block;
+  width: 13px;
+  height: 11px;
+  background: #efe3c6;
+  clip-path: polygon(50% 0, 100% 70%, 85% 100%, 15% 100%, 0 70%);
+}
+.nasi-kurang {
+  color: #ff7a5c;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.rombongan-pagon {
+  color: #d9d2b0;
+  font-size: 12px;
+}
+.pagon-ikon {
+  display: inline-block;
+  width: 9px;
+  height: 15px;
+  border-radius: 5px;
+  background: #8c8a56;
+  transform: rotate(14deg);
+}
+.rombongan-teks {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #ffe7b8;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.rombongan-teks.tampil {
+  opacity: 1;
+  transform: translateY(0);
+}
+@keyframes rombongan-naik {
+  0% { transform: scale(1); color: #9fe0a8; }
+  40% { transform: scale(1.35); color: #9fe0a8; }
+  100% { transform: scale(1); }
+}
+@keyframes rombongan-turun {
+  0% { transform: scale(1); color: #ff7a5c; }
+  40% { transform: scale(1.35); color: #ff7a5c; }
+  100% { transform: scale(1); }
+}
+.rombongan-angka.naik, .rombongan-nasi.naik, .rombongan-pagon.naik {
+  animation: rombongan-naik 0.9s ease-out;
+}
+.rombongan-angka.turun, .rombongan-nasi.turun, .rombongan-pagon.turun {
+  animation: rombongan-turun 0.9s ease-out;
 }

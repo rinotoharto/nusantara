@@ -72,6 +72,8 @@ export class Pemain {
   jongkok = false;
   /** Skala tinggi badan sekarang, 1 berdiri, menuju `skalaJongkok` saat jongkok; dipakai modul pertarungan. */
   skalaBadan = 1;
+  /** Batas kecepatan dari misi (m/s), misalnya saat membawa Gajah Pagon; null = normal. */
+  batasLaju: number | null = null;
 
   private panjatDari: THREE.Vector3 | null = null;
   private panjatKe: THREE.Vector3 | null = null;
@@ -136,6 +138,7 @@ export class Pemain {
     const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
     const lari = (input.ditekan('ShiftLeft') || input.ditekan('ShiftRight')) && !this.jongkok;
     let kecepatanMaks = this.jongkok ? SILUMAN.pemain.kecepatanJongkok : lari ? KECEPATAN_LARI : KECEPATAN_JALAN;
+    if (this.batasLaju !== null) kecepatanMaks = Math.min(kecepatanMaks, this.batasLaju);
     if (diAir) kecepatanMaks *= 0.5;
     kecepatanMaks *= perintah.pengaliKecepatan;
 

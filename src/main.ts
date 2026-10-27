@@ -26,6 +26,9 @@ import { UiKitab } from './ui/codex-ui';
 import { PemberitahuanKitab } from './ui/notify';
 import { MenuJeda } from './ui/pause-menu';
 import { terapkanUkuranHuruf } from './ui/font-size';
+import { Rombongan } from './mission/party';
+import { ATURAN } from './mission/config';
+import { HudRombongan } from './ui/party-hud';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -52,7 +55,7 @@ const siluman = new PengelolaSiluman(dunia, scene, lawan);
 const TITIK_AWAL = siluman.mulai; // ujung selatan area uji menyelinap
 pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
 pemain.hadap = Math.PI; // menghadap utara
-const pengikut = new PengelolaPengikut(dunia.tabrakan, scene);
+const pengikut = new PengelolaPengikut(dunia.tabrakan, scene, ATURAN.pagonIkut.lajuPagon);
 pengikut.taruhDiBelakang(pemain);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
 tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
@@ -61,6 +64,9 @@ tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks)
 function ulangiMisi(): void {
   pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
   pemain.hadap = Math.PI;
+  rombongan.reset();
+  hudRombongan.segarkan();
+  pengikut.pagonIkut = rombongan.pagonIkut;
   pengikut.taruhDiBelakang(pemain);
   tarung.hidupkan();
   lawan.hidupkanSemua();
@@ -78,6 +84,12 @@ const hudSiluman = new HudSiluman();
 // Status permainan, dialog, dan Kitab.
 const status = new StatusPermainan();
 terapkanUkuranHuruf(status.pengaturan.ukuranHuruf);
+// Rombongan: variabel misi yang berubah lewat tanda dialog (aturan di misi3.json).
+const rombongan = new Rombongan();
+for (const tanda of status.tanda) rombongan.terapkanTanda(tanda); // tanda dari sesi sebelumnya, tanpa pengumuman
+const hudRombongan = new HudRombongan(rombongan);
+rombongan.saatBerubah = (p) => hudRombongan.tampilkanPerubahan(p);
+status.saatTanda = (tanda) => rombongan.terapkanTanda(tanda);
 for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[data] ${pesan}`);
 const mesinDialog = new MesinDialog(status);
 const uiDialog = new UiDialog(mesinDialog, status);
@@ -195,9 +207,15 @@ renderer.setAnimationLoop(() => {
     tarung.perbaruiEfek(dtNyata);
     dt = dtNyata * tarung.skalaWaktu; // waktu permainan melambat sesaat setelah Tikaman Keris
 
+    // Rombongan membatasi laju (Gajah Pagon ikut, pengikut tumbang) dan mempercepat curiga penjaga.
+    pemain.batasLaju = rombongan.lajuMaks;
+    pengikut.batasLaju = rombongan.lajuMaks;
+    pengikut.pagonIkut = rombongan.pagonIkut;
+    siluman.pengaliCuriga = rombongan.pengaliCuriga;
+
     const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
     pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
-    siluman.perbarui(pemain, pengikut.daftar);
+    siluman.perbarui(pemain, pengikut.aktif);
     pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
     lawan.perbarui(dt, pemain, tarung);
 
@@ -231,6 +249,7 @@ renderer.setAnimationLoop(() => {
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati || modeUi !== 'main');
   pemberitahuan.perbarui(dtNyata, modeUi === 'dialog');
+  hudRombongan.perbarui(dtNyata, modeUi !== 'main');
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
   input.akhirFrame();
@@ -240,5 +259,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog, npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan };
 }

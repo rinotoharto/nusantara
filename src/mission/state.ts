@@ -22,6 +22,8 @@ export class StatusPermainan {
   pengaturan: { ukuranHuruf: UkuranHuruf } = { ukuranHuruf: 'sedang' };
   /** Dipanggil saat entri Kitab baru terbuka (untuk pemberitahuan). */
   saatKitabTerbuka: ((id: string) => void) | null = null;
+  /** Dipanggil saat tanda baru (belum pernah ada) disimpan; rombongan menerapkan aturannya. */
+  saatTanda: ((tanda: string) => void) | null = null;
 
   constructor() {
     this.muat();
@@ -41,9 +43,11 @@ export class StatusPermainan {
   }
 
   tandai(tanda: string): void {
+    const baru = !this.tanda.has(tanda);
     this.tanda.add(tanda);
     this.simpan();
     if (import.meta.env.DEV) console.log(`[status] tanda: ${tanda}`, [...this.tanda]);
+    if (baru) this.saatTanda?.(tanda);
   }
 
   selesaikanPercakapan(id: string): void {

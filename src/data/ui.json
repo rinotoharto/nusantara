@@ -143,5 +143,11 @@
   "siluman": {
     "tersembunyi": "Tersembunyi",
     "jongkokUntukSembunyi": "Jongkok (C) untuk bersembunyi"
+  },
+  "rombongan": {
+    "pengikut": "Pengikut",
+    "perbekalan": "Perbekalan",
+    "pagon": "Gajah Pagon",
+    "lamaTeks": 3.5
   }
 }

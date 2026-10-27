@@ -16,6 +16,8 @@ export interface KeadaanPemain {
   jongkok: boolean;
   /** Pengali jarak pandang penjaga terhadap pemain: 1 normal, 0,5 saat jongkok atau di semak. */
   faktorJarak: number;
+  /** Pengali laju meteran curiga, misalnya 1,25 saat rombongan membawa Gajah Pagon. */
+  pengaliCuriga: number;
   /** Semak yang sedang ditempati, atau null. */
   semak: Semak | null;
   /** Berjongkok di dalam semak: tidak terlihat kecuali penjaga lebih dekat dari `jarakTembus`. */
@@ -49,6 +51,7 @@ export class PengelolaSiluman {
       lari: false,
       jongkok: false,
       faktorJarak: 1,
+      pengaliCuriga: 1,
       semak: null,
       tersembunyi: false,
       jarakTembus: SILUMAN.semak.jarakTembus,
@@ -60,6 +63,8 @@ export class PengelolaSiluman {
   };
   readonly mulai = AREA_UJI.mulai;
   readonly tujuan = AREA_UJI.tujuan;
+  /** Pengali laju curiga dari rombongan; disalin ke keadaan pemain tiap frame. */
+  pengaliCuriga = 1;
 
   constructor(dunia: Dunia, scene: THREE.Scene, lawan: PengelolaLawan) {
     // Batu penghalang pandang: balok padat, menghalangi gerak, pandangan, dan kamera.
@@ -119,6 +124,7 @@ export class PengelolaSiluman {
     k.posisi.copy(pemain.posisi);
     k.lari = pemain.laju > SILUMAN.pemain.lajuLari;
     k.jongkok = pemain.jongkok;
+    k.pengaliCuriga = this.pengaliCuriga;
     k.semak = semakDi(this.semak, pemain.posisi);
     // Jongkok atau di dalam semak: hanya terlihat dari jarak setengah. Keduanya: tersembunyi.
     k.faktorJarak = k.semak ? SILUMAN.pemain.faktorJarakSemak : pemain.jongkok ? SILUMAN.pemain.faktorJarakJongkok : 1;

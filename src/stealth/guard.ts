@@ -330,14 +330,14 @@ export class Penjaga extends Lawan {
       if (hasil.jarak < P.jarakLangsung) {
         this.curiga = 1;
       } else {
-        let laju = 1 / P.waktuCuriga;
+        let laju = k.pengaliCuriga / P.waktuCuriga;
         if (hasil.jarak < P.jarakDekat) laju *= P.pengaliDekat;
         if (k.lari) laju *= P.pengaliLari;
         this.curiga = Math.min(1, this.curiga + laju * dt);
       }
     } else if (k.tersembunyi && this.pengikutTerlihat(jarakPandang)) {
       // Pemain bersembunyi tapi seorang pengikut masih di luar semak: meteran naik setengah laju.
-      this.curiga = Math.min(1, this.curiga + (SILUMAN.pengikut.faktorCuriga / P.waktuCuriga) * dt);
+      this.curiga = Math.min(1, this.curiga + (k.pengaliCuriga * SILUMAN.pengikut.faktorCuriga / P.waktuCuriga) * dt);
     } else if (this.status !== 'mencari') {
       this.curiga = Math.max(0, this.curiga - dt / P.waktuTurun);
     }

@@ -8,6 +8,9 @@ import type { KeadaanPemain } from '../stealth/stealth-manager';
 
 const F = SILUMAN.pengikut;
 const WARNA = [0x7a5a3a, 0x6e4f33, 0x85643f]; // cokelat, nanti Ranggalawe, Nambi, Lembu Sora
+const WARNA_PAGON = 0x8c8a56; // zaitun pudar: Gajah Pagon yang terluka
+const GOYANG_PINCANG = 0.14; // radian, goyangan kapsul ke samping saat berjalan pincang
+const TURUN_PINCANG = 0.07; // meter, badan turun tiap langkah kaki yang terluka
 const MIRING_MAKS = 0.18;
 const LEBAR_GARIS_KAMERA = 1.6; // pengikut digeser keluar dari garis kamera-pemain selebar ini
 const JARAK_PUDAR = 3.5; // pengikut memudar kalau lebih dekat dari ini ke kamera
@@ -17,13 +20,24 @@ const SLOT = [
   { belakang: F.jarakBelakang, samping: -F.lebarFormasi },
   { belakang: F.jarakBelakang, samping: F.lebarFormasi },
   { belakang: F.jarakBelakangJauh, samping: 0 },
+  { belakang: F.jarakBelakangJauh + 1.6, samping: 0.9 }, // Gajah Pagon, paling belakang
 ];
 /** Geseran slot di dalam semak relatif terhadap pusat semak. */
 const SLOT_SEMAK = [
   { x: -0.55, z: -0.55 },
   { x: 0.55, z: -0.55 },
   { x: 0, z: 0.6 },
+  { x: 0.7, z: 0.2 },
 ];
+
+/** Pilihan tampilan dan gerak satu pengikut. */
+export interface OpsiPengikut {
+  warna: number;
+  /** Kecepatan maksimum sendiri (m/s); Gajah Pagon lebih lambat. */
+  lajuMaks: number;
+  /** Berjalan pincang: kapsul bergoyang dan turun tiap langkah. */
+  pincang: boolean;
+}
 
 export interface KonteksPengikut {
   pemain: Pemain;
@@ -32,6 +46,8 @@ export interface KonteksPengikut {
   lawanBertarung: Lawan[];
   frustum: THREE.Frustum;
   posisiKamera: THREE.Vector3;
+  /** Batas kecepatan semua pengikut dari misi (m/s); null = normal. */
+  batasLaju: number | null;
 }
 
 /**
@@ -48,15 +64,21 @@ export class Pengikut {
   private adaTujuan = false;
   hadap = 0;
   jongkok = false;
+  /** Salah kalau pengikut ini ditinggal: berdiri diam di tempat sebagai NPC, tidak mengikuti. */
+  aktif = true;
   private skalaBadan = 1;
   private miring = 0;
+  private fasePincang = 0;
   private readonly sementara = new THREE.Vector3();
+  readonly opsi: OpsiPengikut;
 
   constructor(
     private data: DataTabrakan,
     readonly indeks: number,
+    opsi?: Partial<OpsiPengikut>,
   ) {
-    this.bahan = new THREE.MeshStandardMaterial({ color: WARNA[indeks % WARNA.length], roughness: 0.8, transparent: true });
+    this.opsi = { warna: WARNA[indeks % WARNA.length], lajuMaks: F.kecepatanMaks, pincang: false, ...opsi };
+    this.bahan = new THREE.MeshStandardMaterial({ color: this.opsi.warna, roughness: 0.8, transparent: true });
     const kapsul = new THREE.Mesh(
       new THREE.CapsuleGeometry(JARI_PEMAIN, TINGGI_PEMAIN - 2 * JARI_PEMAIN, 6, 12),
       this.bahan,
@@ -151,7 +173,9 @@ export class Pengikut {
       const dz = this.tujuan.z - this.posisi.z;
       const d = Math.hypot(dx, dz);
       if (d > F.jarakBerhenti) {
-        const laju = Math.min(F.kecepatanMaks, d * F.pengaliKecepatan);
+        // Batas misi berlaku untuk pengikut biasa; Gajah Pagon memakai lajunya sendiri supaya bisa menyusul.
+        const lajuMaks = this.opsi.pincang ? this.opsi.lajuMaks : Math.min(this.opsi.lajuMaks, ctx.batasLaju ?? Infinity);
+        const laju = Math.min(lajuMaks, d * F.pengaliKecepatan);
         tujuanX = (dx / d) * laju;
         tujuanZ = (dz / d) * laju;
       }
@@ -236,8 +260,18 @@ export class Pengikut {
     this.miring += (miringTujuan - this.miring) * Math.min(1, 8 * dt);
     const skalaTujuan = this.jongkok ? SILUMAN.pemain.skalaJongkok : 1;
     this.skalaBadan += (skalaTujuan - this.skalaBadan) * Math.min(1, 12 * dt);
-    this.badan.rotation.set(this.miring, this.hadap, 0, 'YXZ');
+    // Pincang: goyang ke samping dan turun tiap langkah, hanya saat berjalan.
+    let goyang = 0;
+    let turun = 0;
+    if (this.opsi.pincang) {
+      if (laju > 0.3) this.fasePincang += dt * (2.2 + laju * 1.2);
+      const kuat = Math.min(1, laju / 2);
+      goyang = Math.sin(this.fasePincang) * GOYANG_PINCANG * kuat;
+      turun = Math.max(0, -Math.sin(this.fasePincang)) * TURUN_PINCANG * kuat;
+    }
+    this.badan.rotation.set(this.miring, this.hadap, goyang, 'YXZ');
     this.badan.scale.y = this.skalaBadan;
+    this.badan.position.y = -turun;
   }
 
   /** Memudar saat terlalu dekat ke kamera supaya tidak menutupi layar. */
@@ -250,22 +284,43 @@ export class Pengikut {
 
 /** Mengelola para pengikut: pembaruan, tabrakan antar pengikut dan dengan pemain, penempatan ulang. */
 export class PengelolaPengikut {
+  /** Semua pengikut, termasuk Gajah Pagon (indeks terakhir) walau sedang ditinggal. */
   readonly daftar: Pengikut[] = [];
+  /** Gajah Pagon: pengikut keempat yang pincang dan lebih lambat. */
+  readonly pagon: Pengikut;
+  /** Batas kecepatan semua pengikut dari misi (m/s); null = normal. */
+  batasLaju: number | null = null;
   private readonly frustum = new THREE.Frustum();
   private readonly matriks = new THREE.Matrix4();
   private readonly sementara = new THREE.Vector3();
 
-  constructor(data: DataTabrakan, scene: THREE.Scene) {
+  constructor(data: DataTabrakan, scene: THREE.Scene, lajuPagon: number) {
     for (let i = 0; i < F.jumlah; i++) {
       const p = new Pengikut(data, i);
       scene.add(p.grup);
       this.daftar.push(p);
     }
+    this.pagon = new Pengikut(data, F.jumlah, { warna: WARNA_PAGON, lajuMaks: lajuPagon, pincang: true });
+    scene.add(this.pagon.grup);
+    this.daftar.push(this.pagon);
   }
 
-  /** Taruh semua pengikut di slot formasinya di belakang pemain. */
+  /** Pengikut yang sedang mengikuti pemain. */
+  get aktif(): Pengikut[] {
+    return this.daftar.filter((p) => p.aktif);
+  }
+
+  /** Gajah Pagon ikut atau ditinggal. Saat ditinggal ia berdiri diam di tempatnya sekarang. */
+  set pagonIkut(ikut: boolean) {
+    this.pagon.aktif = ikut;
+  }
+  get pagonIkut(): boolean {
+    return this.pagon.aktif;
+  }
+
+  /** Taruh semua pengikut aktif di slot formasinya di belakang pemain. */
   taruhDiBelakang(pemain: Pemain): void {
-    for (const p of this.daftar) {
+    for (const p of this.aktif) {
       const slot = p.slotFormasi(pemain, this.sementara);
       p.taruhDi(slot.x, slot.z);
       p.hadap = pemain.hadap;
@@ -281,18 +336,20 @@ export class PengelolaPengikut {
       lawanBertarung: lawanSemua.filter((l) => l.bertarung),
       frustum: this.frustum,
       posisiKamera: kamera.position,
+      batasLaju: this.batasLaju,
     };
-    for (const p of this.daftar) {
+    const aktif = this.aktif;
+    for (const p of aktif) {
       p.perbarui(dt, ctx);
       p.perbaruiPudar(kamera.position);
     }
 
     // Pengikut saling mendorong dan menjauh dari pemain supaya tidak menumpuk.
-    for (let i = 0; i < this.daftar.length; i++) {
-      for (let j = i + 1; j < this.daftar.length; j++) {
-        pisahkan(this.daftar[i].posisi, this.daftar[j].posisi, JARI_PEMAIN * 2 + 0.1, 0.5);
+    for (let i = 0; i < aktif.length; i++) {
+      for (let j = i + 1; j < aktif.length; j++) {
+        pisahkan(aktif[i].posisi, aktif[j].posisi, JARI_PEMAIN * 2 + 0.1, 0.5);
       }
-      pisahkan(this.daftar[i].posisi, pemain.posisi, JARI_PEMAIN * 2 + 0.1, 1);
+      pisahkan(aktif[i].posisi, pemain.posisi, JARI_PEMAIN * 2 + 0.1, 1);
     }
   }
 }
