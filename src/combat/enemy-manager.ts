@@ -60,11 +60,11 @@ export class PengelolaLawan implements PemberiGiliran {
     if (i >= 0) this.antrean.splice(i, 1);
   }
 
-  /** Jarak ke lawan hidup terdekat dari `pos`, atau Infinity. */
+  /** Jarak ke lawan terdekat yang sedang bertarung dari `pos`, atau Infinity. */
   jarakTerdekat(pos: THREE.Vector3): number {
     let terdekat = Infinity;
     for (const l of this.daftar) {
-      if (!l.hidup) continue;
+      if (!l.bertarung) continue;
       const d = Math.hypot(l.posisi.x - pos.x, l.posisi.z - pos.z);
       if (d < terdekat) terdekat = d;
     }
@@ -144,7 +144,7 @@ export class PengelolaLawan implements PemberiGiliran {
   /** Lawan yang sudah waspada membangunkan kawan yang masih diam dalam jarak JARAK_SERU. */
   private bangunkanKawan(): void {
     for (const waspada of this.daftar) {
-      if (!waspada.hidup || waspada.status === 'diam') continue;
+      if (!waspada.bertarung || waspada.status === 'diam') continue;
       for (const kawan of this.daftar) {
         if (kawan.status !== 'diam') continue;
         if (kawan.posisi.distanceTo(waspada.posisi) < JARAK_SERU) kawan.waspada();

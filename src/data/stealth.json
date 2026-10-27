@@ -14,11 +14,21 @@
     "pengaliDekat": 2.0,
     "pengaliLari": 1.5,
     "waktuTurun": 3.0,
-    "ambangCuriga": 0.3
+    "ambangCuriga": 0.3,
+    "jarakSeru": 15,
+    "sudutKejar": 200,
+    "jarakDengar": 3,
+    "waktuHilang": 4,
+    "jarakPutus": 25,
+    "kecepatanMencari": 2.4,
+    "waktuMencari": 3,
+    "curigaMencari": 0.6
   },
   "pemain": {
     "lajuLari": 5.0,
     "faktorJarakJongkok": 0.5,
-    "faktorJarakSemak": 0.5
+    "faktorJarakSemak": 0.5,
+    "kecepatanJongkok": 2,
+    "skalaJongkok": 0.65
   }
 }

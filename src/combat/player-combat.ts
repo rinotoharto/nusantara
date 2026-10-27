@@ -588,6 +588,7 @@ export class PertarunganPemain {
     }
 
     const laju = langsung ? 1 : this.status === 'mati' ? Math.min(1, 4 * dt) : Math.min(1, 14 * dt);
+    skalaY *= this.pemain.skalaBadan; // kapsul memendek saat berjongkok
     pose.rotation.x += (condong - pose.rotation.x) * laju;
     pose.rotation.z += (miringSamping - pose.rotation.z) * laju;
     pose.position.y += (turun - pose.position.y) * laju;

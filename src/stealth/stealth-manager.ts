@@ -11,12 +11,17 @@ export interface KeadaanPemain {
   posisi: THREE.Vector3;
   /** Sedang berlari (lebih cepat dari `lajuLari`). */
   lari: boolean;
+  jongkok: boolean;
   /** Pengali jarak pandang penjaga terhadap pemain: 1 normal, 0,5 saat jongkok atau di semak. */
   faktorJarak: number;
+  /** Berjongkok di dalam semak: tidak terlihat kecuali penjaga lebih dekat dari `jarakTembus`. */
+  tersembunyi: boolean;
+  jarakTembus: number;
 }
 
 export interface KonteksSiluman {
   pemain: KeadaanPemain;
+  penjaga: Penjaga[];
 }
 
 const bahanBatu = new THREE.MeshStandardMaterial({ color: 0x6f6a60, roughness: 1 });
@@ -29,7 +34,8 @@ const bahanBatu = new THREE.MeshStandardMaterial({ color: 0x6f6a60, roughness: 1
 export class PengelolaSiluman {
   readonly penjaga: Penjaga[] = [];
   readonly konteks: KonteksSiluman = {
-    pemain: { posisi: new THREE.Vector3(), lari: false, faktorJarak: 1 },
+    pemain: { posisi: new THREE.Vector3(), lari: false, jongkok: false, faktorJarak: 1, tersembunyi: false, jarakTembus: 2 },
+    penjaga: this.penjaga,
   };
   readonly mulai = AREA_UJI.mulai;
   readonly tujuan = AREA_UJI.tujuan;
@@ -82,6 +88,8 @@ export class PengelolaSiluman {
     const k = this.konteks.pemain;
     k.posisi.copy(pemain.posisi);
     k.lari = pemain.laju > SILUMAN.pemain.lajuLari;
-    k.faktorJarak = 1;
+    k.jongkok = pemain.jongkok;
+    k.faktorJarak = pemain.jongkok ? SILUMAN.pemain.faktorJarakJongkok : 1;
+    k.tersembunyi = false;
   }
 }

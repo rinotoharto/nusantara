@@ -102,6 +102,21 @@ html, body {
   font-size: 17px;
 }
 
+/* HUD menyelinap */
+.hud-tanda {
+  top: 0;
+  left: 0;
+  font-size: 22px;
+  font-weight: bold;
+  line-height: 1;
+  color: #ffd84a;
+  will-change: transform;
+}
+.hud-tanda.seru {
+  color: #ff5a3c;
+  font-size: 26px;
+}
+
 /* Pemberitahuan jurus */
 .hud-jurus {
   top: 30%;

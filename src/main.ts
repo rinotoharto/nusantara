@@ -10,6 +10,7 @@ import { PertarunganPemain } from './combat/player-combat';
 import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
 import { PengelolaSiluman } from './stealth/stealth-manager';
+import { HudSiluman } from './ui/stealth-hud';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -50,6 +51,7 @@ tarung.saatTikaman = (pertama) => {
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
+const hudSiluman = new HudSiluman();
 let sisaWaktuTarung = 0;
 
 window.addEventListener('resize', () => {
@@ -89,6 +91,7 @@ renderer.setAnimationLoop(() => {
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati);
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
+  hudSiluman.perbarui(siluman.penjaga, pemain.posisi, camera);
   input.akhirFrame();
 
   renderer.render(scene, camera);

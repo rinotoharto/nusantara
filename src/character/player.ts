@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { Input } from './input';
 import { tinggiLantai, dorongKeluar, cariTebing, type DataTabrakan } from '../world/collision';
 import { PERMUKAAN_AIR, UKURAN_MEDAN } from '../world/terrain';
+import { SILUMAN } from '../stealth/config';
 
 export const TINGGI_PEMAIN = 1.7;
 export const JARI_PEMAIN = 0.35;
@@ -67,6 +68,10 @@ export class Pemain {
   /** Arah hadap (radian); 0 = menghadap +z (selatan). */
   hadap = 0;
   private miring = 0;
+  /** Berjongkok (tombol C): lebih lambat, tidak bisa lari atau lompat, kapsul memendek. */
+  jongkok = false;
+  /** Skala tinggi badan sekarang, 1 berdiri, menuju `skalaJongkok` saat jongkok; dipakai modul pertarungan. */
+  skalaBadan = 1;
 
   private panjatDari: THREE.Vector3 | null = null;
   private panjatKe: THREE.Vector3 | null = null;
@@ -117,8 +122,13 @@ export class Pemain {
     const gx = perintah.kunciGerak ? 0 : arah.x;
     const gz = perintah.kunciGerak ? 0 : arah.z;
 
+    if (input.baruDitekan('KeyC') && this.diTanah) this.jongkok = !this.jongkok;
+    const skalaTujuan = this.jongkok ? SILUMAN.pemain.skalaJongkok : 1;
+    this.skalaBadan += (skalaTujuan - this.skalaBadan) * Math.min(1, 12 * dt);
+
     const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
-    let kecepatanMaks = input.ditekan('ShiftLeft') || input.ditekan('ShiftRight') ? KECEPATAN_LARI : KECEPATAN_JALAN;
+    const lari = (input.ditekan('ShiftLeft') || input.ditekan('ShiftRight')) && !this.jongkok;
+    let kecepatanMaks = this.jongkok ? SILUMAN.pemain.kecepatanJongkok : lari ? KECEPATAN_LARI : KECEPATAN_JALAN;
     if (diAir) kecepatanMaks *= 0.5;
     kecepatanMaks *= perintah.pengaliKecepatan;
 
@@ -134,7 +144,7 @@ export class Pemain {
     }
 
     // Memanjat atau melompat.
-    if (perintah.bolehLompat && input.baruDitekan('Space') && this.diTanah) {
+    if (perintah.bolehLompat && !this.jongkok && input.baruDitekan('Space') && this.diTanah) {
       const tebing = cariTebing(this.data, this.posisi, JARI_PEMAIN);
       if (tebing) {
         this.mulaiPanjat(tebing.tujuan);

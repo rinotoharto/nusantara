@@ -90,7 +90,7 @@ export class HudPertarungan {
         this.bilahLawan.set(lawan, el);
       }
       const jarak = Math.hypot(lawan.posisi.x - pemain.posisi.x, lawan.posisi.z - pemain.posisi.z);
-      const titik = lawan.hidup && jarak < JARAK_BILAH_LAWAN ? this.keLayar(lawan.posisi, 2.1, kamera) : null;
+      const titik = lawan.bertarung && jarak < JARAK_BILAH_LAWAN ? this.keLayar(lawan.posisi, 2.1, kamera) : null;
       if (!titik) {
         el.style.display = 'none';
         continue;

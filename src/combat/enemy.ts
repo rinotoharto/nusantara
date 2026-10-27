@@ -30,6 +30,9 @@ export type StatusLawan =
   | 'mencari'
   | 'kembali';
 
+/** Status penjaga di luar pertarungan. */
+const STATUS_SILUMAN: ReadonlySet<StatusLawan> = new Set<StatusLawan>(['patroli', 'curiga', 'mencari', 'kembali']);
+
 /** Pemberi giliran serangan: hanya satu lawan yang boleh menyerang pada satu waktu. */
 export interface PemberiGiliran {
   mintaGiliran(lawan: Lawan): boolean;
@@ -103,6 +106,11 @@ export class Lawan {
 
   get hidup(): boolean {
     return this.status !== 'mati';
+  }
+
+  /** Benar kalau hidup dan sedang dalam status pertarungan (bukan patroli atau mencari). */
+  get bertarung(): boolean {
+    return this.hidup && !STATUS_SILUMAN.has(this.status);
   }
 
   /** Kembalikan ke titik awal dalam keadaan hidup. */

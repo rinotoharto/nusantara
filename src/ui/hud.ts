@@ -16,6 +16,7 @@ export class Hud {
     this.petunjukEl.innerHTML = [
       '<b>WASD</b> jalan',
       '<b>Shift</b> lari',
+      '<b>C</b> jongkok',
       '<b>Spasi</b> lompat / panjat',
       '<b>Klik kiri</b> serang, tahan: berat',
       '<b>Klik kanan</b> tangkis',
