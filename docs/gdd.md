@@ -125,6 +125,16 @@ Empat mekanik, semuanya sederhana dan sudah terbukti di game lain; keunikan game
 
 Ditambah satu jurus pasukan di misi 2, 6, dan 7: komando "sergap" dibuat seperti jurus dengan adegan kamera dan efek bersama, sehingga momen paling megah bab 1 adalah Wijaya bersama pasukannya, sesuai sejarah.
 
+Inspirasi gerak jurus (interpretasi, sumber lemah; dipakai untuk animasi dan arahan visual, tidak masuk Kitab sebelum diverifikasi):
+
+- Tiga arah tikaman keris dari tradisi silat: lurus ke dada, dari bawah ke atas, dan ke leher. Dipakai sebagai tiga variasi animasi Tikaman Keris yang dipilih otomatis oleh situasi: lawan terhuyung tegak, Wijaya dalam posisi rendah setelah menghindar, atau lawan berzirah (prajurit Mongol, misi 7).
+- Tusuk, putar pergelangan, cabut: tanda khas visual setiap tikaman penamat.
+- Kuda-kuda rendah (depok): dasar animasi hindar dan Sergap, sejalan dengan kamera rendah saat menjelajah.
+- Pedang di tangan kanan dan keris di tangan kiri sebagai kemungkinan bentuk matang Wijaya di misi 6 dan 7 (senjata panjang membuka, keris menamatkan); belum diputuskan.
+- Besi berkadar nikel dari Luwu, Sulawesi, untuk pamor keris: sering disebut untuk era Majapahit, kaitannya dengan 1293 belum pasti. Calon entri Kitab tentang keris kalau terverifikasi.
+
+- [ ] Verifikasi klaim di atas ke sumber yang lebih kuat (misalnya buku Bambang Harsrinuksmo tentang keris dan penelitian metalurgi keris) sebelum dipakai di Kitab; bahan awalnya dari Quora, grup Facebook, dan artikel populer, yang hanya cukup untuk inspirasi.
+
 Keputusan: Tikaman Keris dibuat di prototipe karena logikanya sederhana; Sapuan Tombak dan Sergap dibuat di tahap aset karena nilainya ada di animasi dan kamera. Pohon skill yang lebih dalam baru dipertimbangkan di bab 2 ke atas, saat total durasi permainan sudah berjam-jam.
 
 Ukuran keberhasilan edukasi: setelah bermain, pemain bisa menceritakan urutan 1292 sampai 1293 dan menyebut minimal dua sumbernya. Ini diuji lewat playtest dengan pelajar.

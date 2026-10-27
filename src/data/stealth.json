@@ -1,0 +1,24 @@
+{
+  "penjaga": {
+    "kecepatanPatroli": 1.6,
+    "jedaTitikMin": 1.0,
+    "jedaTitikMaks": 2.0,
+    "tolehSudut": 45,
+    "tolehLaju": 1.3,
+    "sudutPandang": 70,
+    "jarakPandang": 14,
+    "tinggiMata": 1.5,
+    "jarakLangsung": 2.5,
+    "waktuCuriga": 1.5,
+    "jarakDekat": 6,
+    "pengaliDekat": 2.0,
+    "pengaliLari": 1.5,
+    "waktuTurun": 3.0,
+    "ambangCuriga": 0.3
+  },
+  "pemain": {
+    "lajuLari": 5.0,
+    "faktorJarakJongkok": 0.5,
+    "faktorJarakSemak": 0.5
+  }
+}

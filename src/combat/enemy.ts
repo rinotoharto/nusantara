@@ -23,7 +23,12 @@ export type StatusLawan =
   | 'menyerang'
   | 'mundur'
   | 'terhuyung'
-  | 'mati';
+  | 'mati'
+  // Status penjaga (src/stealth/guard.ts); Lawan sendiri tidak pernah memasukinya.
+  | 'patroli'
+  | 'curiga'
+  | 'mencari'
+  | 'kembali';
 
 /** Pemberi giliran serangan: hanya satu lawan yang boleh menyerang pada satu waktu. */
 export interface PemberiGiliran {
@@ -38,13 +43,13 @@ export interface PemberiGiliran {
 export class Lawan {
   readonly grup = new THREE.Group();
   readonly posisi = this.grup.position;
-  private readonly badan = new THREE.Group();
-  private readonly bahan: THREE.MeshStandardMaterial;
+  protected readonly badan = new THREE.Group();
+  protected readonly bahan: THREE.MeshStandardMaterial;
   private readonly tombak = new THREE.Group();
   status: StatusLawan = 'diam';
   readonly nyawa = new Nyawa(L.nyawa);
   /** Detik sejak masuk status sekarang. */
-  private waktu = 0;
+  protected waktu = 0;
   hadap = 0;
   private jedaMundur = 1.5;
   private sisaKilat = 0;
@@ -56,7 +61,7 @@ export class Lawan {
   private readonly doronganKena = new THREE.Vector3();
   private sisaDoronganKena = 0;
 
-  constructor(private data: DataTabrakan, x: number, z: number) {
+  constructor(protected data: DataTabrakan, x: number, z: number) {
     this.bahan = new THREE.MeshStandardMaterial({ color: WARNA, roughness: 0.8 });
     const kapsul = new THREE.Mesh(
       new THREE.CapsuleGeometry(JARI_LAWAN, TINGGI_PEMAIN - 2 * JARI_LAWAN, 6, 12),
@@ -116,7 +121,7 @@ export class Lawan {
     if (this.status === 'diam') this.masuk('mendekat');
   }
 
-  private masuk(status: StatusLawan): void {
+  protected masuk(status: StatusLawan): void {
     this.status = status;
     this.waktu = 0;
     this.tusukanSudahKeluar = false;
@@ -295,7 +300,7 @@ export class Lawan {
     if (this.waktu >= L.hilangSetelahMati) this.grup.visible = false;
   }
 
-  private perbaruiVisual(dt: number): void {
+  protected perbaruiVisual(dt: number): void {
     let condong = 0;
     let miring = 0;
     let tombakZ = 0;

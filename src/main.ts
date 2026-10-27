@@ -9,6 +9,7 @@ import { HudPertarungan } from './ui/combat-hud';
 import { PertarunganPemain } from './combat/player-combat';
 import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
+import { PengelolaSiluman } from './stealth/stealth-manager';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -25,14 +26,15 @@ const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerH
 const dunia = buatDunia(scene);
 const input = new Input(kanvas);
 
-const TITIK_AWAL = { x: 0, z: 34 }; // di selatan desa
 const pemain = new Pemain(dunia.tabrakan);
-pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
 scene.add(pemain.grup);
 
 const tarung = new PertarunganPemain(pemain);
 
 const lawan = new PengelolaLawan(dunia.tabrakan, scene);
+const siluman = new PengelolaSiluman(dunia, scene, lawan);
+const TITIK_AWAL = siluman.mulai; // ujung selatan area uji menyelinap
+pemain.taruhDi(TITIK_AWAL.x, TITIK_AWAL.z);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
 tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
 
@@ -73,6 +75,7 @@ renderer.setAnimationLoop(() => {
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
+  siluman.perbarui(pemain);
   lawan.perbarui(dt, pemain, tarung);
 
   // Kamera bertarung selama ada lawan dekat, bertahan sebentar setelah lawan menjauh.
@@ -93,5 +96,5 @@ renderer.setAnimationLoop(() => {
 
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
-  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, input };
+  (window as unknown as { nusantara: unknown }).nusantara = { pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, input };
 }

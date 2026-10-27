@@ -34,6 +34,11 @@ export class PengelolaLawan implements PemberiGiliran {
     }
   }
 
+  /** Mendaftarkan lawan yang dibuat modul lain (misalnya penjaga) supaya ikut aturan yang sama. */
+  tambah(lawan: Lawan): void {
+    this.daftar.push(lawan);
+  }
+
   mintaGiliran(lawan: Lawan): boolean {
     if (this.penyerang === lawan) return true;
     if (this.penyerang === null) {
@@ -109,10 +114,10 @@ export class PengelolaLawan implements PemberiGiliran {
       if (!tarung.mati || !l.hidup) l.perbarui(dt, pemain, tarung, this);
     }
 
-    // Giliran yang macet (pemegangnya mati, diam, atau terhuyung) dilepas.
+    // Giliran yang macet dilepas: hanya lawan yang sedang mendekat, mengelilingi, atau menyerang yang memegangnya.
     if (this.penyerang) {
       const s = this.penyerang.status;
-      if (s === 'mati' || s === 'diam' || s === 'terhuyung' || s === 'mundur') this.penyerang = null;
+      if (s !== 'mendekat' && s !== 'mengelilingi' && s !== 'bersiap' && s !== 'menyerang') this.penyerang = null;
     }
     // Giliran kosong diberikan ke antrean paling depan yang masih siap.
     while (this.penyerang === null && this.antrean.length > 0) {
