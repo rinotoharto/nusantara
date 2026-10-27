@@ -7,6 +7,7 @@ import type { PertarunganPemain } from '../combat/player-combat';
 const JARAK_BILAH_LAWAN = 12; // bilah nyawa lawan hanya tampil dalam jarak ini
 const JARAK_PENANDA = 5; // penanda kunci hilang kalau sasaran lebih jauh dari ini
 const UMUR_ANGKA = 0.9; // detik angka damage melayang
+const LAMA_PEMBERITAHUAN = 2.0; // detik nama jurus tampil di tengah layar
 
 interface AngkaMelayang {
   el: HTMLDivElement;
@@ -24,6 +25,8 @@ export class HudPertarungan {
   private readonly bilahLawan = new Map<Lawan, HTMLDivElement>();
   private readonly penanda: HTMLDivElement;
   private readonly layarMati: HTMLDivElement;
+  private readonly pemberitahuan: HTMLDivElement;
+  private sisaPemberitahuan = 0;
   private readonly angka: AngkaMelayang[] = [];
   private readonly proyeksi = new THREE.Vector3();
   private layarMatiTampil = false;
@@ -55,7 +58,17 @@ export class HudPertarungan {
     tombol.addEventListener('click', () => this.onUlangi());
     this.layarMati.append(judul, tombol);
 
-    document.body.append(nyawa, this.penanda, this.layarMati);
+    this.pemberitahuan = document.createElement('div');
+    this.pemberitahuan.className = 'hud hud-jurus';
+
+    document.body.append(nyawa, this.penanda, this.layarMati, this.pemberitahuan);
+  }
+
+  /** Menampilkan nama jurus sebentar di tengah layar, misalnya saat jurus pertama kali berhasil. */
+  umumkan(teks: string): void {
+    this.pemberitahuan.textContent = teks;
+    this.pemberitahuan.classList.add('tampil');
+    this.sisaPemberitahuan = LAMA_PEMBERITAHUAN;
   }
 
   perbarui(dt: number, pemain: Pemain, lawanSemua: Lawan[], tarung: PertarunganPemain, kamera: THREE.Camera): void {
@@ -113,6 +126,12 @@ export class HudPertarungan {
       }
       a.el.style.transform = `translate(${titik.x}px, ${titik.y}px) translate(-50%, -50%)`;
       a.el.style.opacity = `${1 - a.umur / UMUR_ANGKA}`;
+    }
+
+    // Pemberitahuan jurus memudar lewat CSS setelah waktunya habis.
+    if (this.sisaPemberitahuan > 0) {
+      this.sisaPemberitahuan -= dt;
+      if (this.sisaPemberitahuan <= 0) this.pemberitahuan.classList.remove('tampil');
     }
 
     // Layar gugur.

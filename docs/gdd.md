@@ -68,6 +68,19 @@ Epilog ensiklopedia: linimasa 1289 sampai 1293 dengan semua entri yang telah dib
 
 Aturan pilihan pemain: pilihan memengaruhi jalan menuju peristiwa (rute, nada dialog, kondisi pasukan), tidak pernah mengubah peristiwa itu sendiri. Kalau pemain gagal, misi diulang dari titik simpan; sejarah tidak punya cabang.
 
+## Rencana bab berikutnya
+
+Satu judul, *Nusantara: Rise of Majapahit*, berisi beberapa bab yang dirilis bertahap seperti episode. Bab 1 sengaja pendek (15 sampai 20 menit) karena fungsinya membuktikan alur produksi; bab berikutnya bisa lebih panjang karena sistem, lingkungan, dan karakter sudah ada. Pemain lama melanjutkan dari simpanan bab sebelumnya; pemain baru bisa mulai dari bab mana pun dengan ringkasan relief.
+
+| Bab | Periode | Tokoh dimainkan | Inti cerita | Catatan |
+| --- | --- | --- | --- | --- |
+| 1 | 1292 sampai 1293 | Raden Wijaya | Runtuhnya Singasari, pelarian, siasat terhadap Jayakatwang dan Mongol, berdirinya Majapahit | Sedang dikerjakan |
+| 2 | 1295 sampai 1300 | Raden Wijaya | Pemberontakan Ranggalawe lalu Lembu Sora: sahabat seperjuangan dari pelarian menjadi lawan | Drama kuat karena pemain sudah kenal mereka; sumber utama Pararaton dan Kidung Ranggalawe, perlu ditandai sebagai interpretasi |
+| 3 | 1309 sampai 1319 | Nambi, lalu Gajah Mada | Masa Jayanegara, pemberontakan Nambi dan Kuti, Gajah Mada muncul sebagai bekel Bhayangkara menyelamatkan raja ke Badander | Pergantian tokoh dimainkan di tengah bab |
+| 4 | 1328 sampai 1336 | Gajah Mada | Tribhuwana Tunggadewi naik takhta, pemberontakan Sadeng dan Keta, Sumpah Palapa | Gayatri sebagai penentu di balik takhta, menutup benang dari bab 1 |
+
+Semua tabel di atas adalah rencana kasar dan belum diverifikasi ke sumber; tiap bab mendapat tabel sejarah dan daftar sumber sendiri seperti bab 1 sebelum naskahnya ditulis. Yang ditambah tiap bab: pohon skill sederhana mulai bab 2, jenis lawan baru, dan satu mekanik baru per bab (misalnya komando pasukan lebih dalam di bab 2, penyelidikan istana di bab 3).
+
 ## Tokoh
 
 Semua tokoh utama adalah tokoh sejarah. Kolom "peran dalam game" menjelaskan fungsi dramatis; kolom "catatan sumber" mengingatkan apa yang sebenarnya diketahui tentang mereka.
@@ -101,6 +114,18 @@ Empat mekanik, semuanya sederhana dan sudah terbukti di game lain; keunikan game
 **Dialog.** Percakapan dengan pilihan nada (hormat, tegas, licik) yang mengubah reaksi lawan bicara dan beberapa kalimat berikutnya, bukan hasil peristiwa. Dialog dalam bahasa Indonesia; beberapa sapaan dan istilah Jawa Kuno dipakai dengan penjelasan di ensiklopedia.
 
 **Ensiklopedia (Kitab).** Setiap misi membuka entri baru: peristiwa, tokoh, tempat, benda, dan sumber. Setiap entri punya label fakta bersumber, interpretasi, atau legenda, serta kutipan singkat dari sumbernya. Entri bisa dibaca kapan saja dari menu jeda. Di akhir bab ada kuis ringan 5 pertanyaan yang opsional.
+
+**Jurus khas.** Tidak ada pohon skill atau poin skill di bab 1. Sebagai gantinya ada tiga jurus khas yang dibuka satu per misi besar, tanpa pilihan, supaya pemain merasa Wijaya makin hebat tanpa harus mengelola menu. Prinsipnya: Wijaya menang karena membaca lawan dan menghukum dengan telak, bukan karena kesaktian. Jurus harus memperkuat gambaran itu, bukan mengubahnya menjadi pendekar sakti.
+
+| Jurus | Dibuka | Cara pakai | Yang dikatakan tentang Wijaya |
+| --- | --- | --- | --- |
+| Tikaman Keris | Misi 2 | Setelah tangkis pas, tekan serang: hukuman cepat yang menamatkan lawan biasa, kamera mendekat sesaat | Membaca lawan lalu menghukum; hadiah langsung untuk mekanik tangkis pas |
+| Sapuan Tombak | Misi 6 | Tahan serangan berat dengan tombak: ayunan lebar yang mendorong semua lawan di depan dan membuka kepungan | Mengurai keroyokan dengan satu gerak, bukan dengan menekan serang terus |
+| Sergap | Misi 7 | Serangan dari semak atau dari belakang pada lawan yang tidak waspada: tamat seketika tanpa suara | Puncak bab: siasat terakhir terhadap Mongol adalah sergapan |
+
+Ditambah satu jurus pasukan di misi 2, 6, dan 7: komando "sergap" dibuat seperti jurus dengan adegan kamera dan efek bersama, sehingga momen paling megah bab 1 adalah Wijaya bersama pasukannya, sesuai sejarah.
+
+Keputusan: Tikaman Keris dibuat di prototipe karena logikanya sederhana; Sapuan Tombak dan Sergap dibuat di tahap aset karena nilainya ada di animasi dan kamera. Pohon skill yang lebih dalam baru dipertimbangkan di bab 2 ke atas, saat total durasi permainan sudah berjam-jam.
 
 Ukuran keberhasilan edukasi: setelah bermain, pemain bisa menceritakan urutan 1292 sampai 1293 dan menyebut minimal dua sumbernya. Ini diuji lewat playtest dengan pelajar.
 

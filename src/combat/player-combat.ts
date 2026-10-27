@@ -9,7 +9,7 @@ import {
 } from '../character/player';
 import { KONFIG } from './config';
 import { Nyawa, catatDamage } from './health';
-import { sudutKe } from './hit';
+import { menghadap, sudutKe } from './hit';
 
 const K = KONFIG.pemain;
 
@@ -22,6 +22,7 @@ export type StatusAksi =
   | 'tangkis'
   | 'hindar'
   | 'terpukul'
+  | 'tikaman' // Tikaman Keris: melesat lalu menusuk lawan yang terhuyung
   | 'mati';
 
 /** Satu serangan yang siap diuji kena; dikeluarkan sekali per ayunan. */
@@ -31,6 +32,9 @@ export interface Serangan {
   sudutKena: number;
   dorong: number;
   berat: boolean;
+  /** Kalau diisi, serangan hanya mengenai sasaran ini (Tikaman Keris). */
+  sasaran?: Sasaran | null;
+  tikaman?: boolean;
 }
 
 export type KeadaanTangkis = 'tidak' | 'pas' | 'biasa';
@@ -67,6 +71,15 @@ export class PertarunganPemain {
   pencariSasaran: ((pos: THREE.Vector3, maks: number) => Sasaran | null) | null = null;
   /** Lawan yang sedang dikunci (menghadap otomatis), untuk penanda HUD. */
   sasaranTerkunci: Sasaran | null = null;
+  /** Pencari lawan terhuyung terdekat untuk Tikaman Keris; dipasang oleh main. */
+  pencariTerhuyung: ((pos: THREE.Vector3, maks: number) => Sasaran | null) | null = null;
+  /** Dipanggil saat Tikaman Keris keluar; `pertama` benar pada tikaman pertama. */
+  saatTikaman: ((pertama: boolean) => void) | null = null;
+  /** Sisa efek Tikaman Keris, dihitung dalam waktu nyata: permainan melambat, kamera mendekat. */
+  sisaLambat = 0;
+  sisaKameraDekat = 0;
+  private sasaranTikaman: Sasaran | null = null;
+  private jumlahTikaman = 0;
   /** Detik sejak masuk status sekarang. */
   private waktu = 0;
   /** Pukulan ke berapa dalam kombo (0 sampai maksKombo - 1). */
@@ -120,14 +133,36 @@ export class PertarunganPemain {
     this.seranganTertunda = false;
     this.seranganSiap = null;
     this.sasaranTerkunci = null;
+    this.sasaranTikaman = null;
     this.sisaKilat = 0;
     this.sisaDoronganLuar = 0;
+    this.sisaLambat = 0;
+    this.sisaKameraDekat = 0;
     this.masuk('bebas');
   }
 
-  /** Benar saat pemain tidak bisa dilukai (awal hindar). */
+  /** Benar saat pemain tidak bisa dilukai: awal hindar, atau sepanjang Tikaman Keris. */
   get kebal(): boolean {
+    if (this.status === 'tikaman') return true;
     return this.status === 'hindar' && this.waktu < K.hindar.kebal;
+  }
+
+  /** Pengali kecepatan waktu permainan; di bawah 1 sesaat setelah Tikaman Keris mengenai. */
+  get skalaWaktu(): number {
+    return this.sisaLambat > 0 ? K.tikaman.skalaLambat : 1;
+  }
+
+  /** 0 sampai 1: seberapa dekat kamera harus mendekat karena Tikaman Keris. */
+  get faktorKameraDekat(): number {
+    if (this.sisaKameraDekat <= 0) return 0;
+    const t = 1 - this.sisaKameraDekat / K.tikaman.lamaKamera;
+    return Math.sin(Math.PI * t);
+  }
+
+  /** Dipanggil tiap frame dengan waktu nyata (sebelum diperlambat). */
+  perbaruiEfek(dtNyata: number): void {
+    this.sisaLambat = Math.max(0, this.sisaLambat - dtNyata);
+    this.sisaKameraDekat = Math.max(0, this.sisaKameraDekat - dtNyata);
   }
 
   /** Keadaan tangkis saat ini: 'pas' pada jendela awal, 'biasa' sesudahnya. */
@@ -148,7 +183,7 @@ export class PertarunganPemain {
    * tangkisan biasa: tanpa damage, hanya dorongan kecil.
    */
   terkena(dari: THREE.Vector3, dorong: number, ditangkis: boolean, damage: number): void {
-    if (this.mati) return;
+    if (this.mati || this.kebal) return;
     const pos = this.pemain.posisi;
     const dx = pos.x - dari.x;
     const dz = pos.z - dari.z;
@@ -182,7 +217,25 @@ export class PertarunganPemain {
     this.seranganSudahKeluar = false;
   }
 
+  /**
+   * Tikaman Keris: kalau ada lawan terhuyung di depan pemain dalam jarak tikaman,
+   * serangan ringan diganti tikaman. Mengembalikan benar kalau tikaman dimulai.
+   */
+  private cobaTikaman(): boolean {
+    if (!this.pencariTerhuyung || !this.pemain.diTanah) return false;
+    const T = K.tikaman;
+    const sasaran = this.pencariTerhuyung(this.pemain.posisi, T.jarak);
+    if (!sasaran || !menghadap(this.pemain.posisi, this.pemain.hadap, sasaran.posisi, T.sudut)) return false;
+    this.sasaranTikaman = sasaran;
+    this.sasaranTerkunci = sasaran;
+    this.hadapAksi = sudutKe(this.pemain.posisi, sasaran.posisi);
+    this.seranganTertunda = false;
+    this.masuk('tikaman');
+    return true;
+  }
+
   private mulaiSerangan(berat: boolean, input: Input, yawKamera: number): void {
+    if (!berat && this.cobaTikaman()) return;
     const kunci = this.kunciSasaran(input);
     const arah = arahInputRelatifKamera(input, yawKamera);
     this.hadapAksi = kunci ?? (arah.ada ? Math.atan2(arah.x, arah.z) : this.pemain.hadap);
@@ -273,8 +326,39 @@ export class PertarunganPemain {
 
       case 'tangkis':
         if (mintaHindar) this.mulaiHindar(input, yawKamera);
+        else if (mintaSerang && this.cobaTikaman()) break; // klik kiri saat menangkis: tikam lawan yang terhuyung
         else if (!tahanTangkis) this.masuk('bebas');
         break;
+
+      case 'tikaman': {
+        const T = K.tikaman;
+        // Tusukan keluar di akhir lesatan, sekali, hanya ke sasaran tikaman.
+        if (!this.seranganSudahKeluar && this.waktu >= T.lesat) {
+          this.seranganSudahKeluar = true;
+          this.seranganSiap = {
+            damage: T.damage,
+            jangkauan: T.jangkauanKena,
+            sudutKena: 180,
+            dorong: T.dorong,
+            berat: true,
+            sasaran: this.sasaranTikaman,
+            tikaman: true,
+          };
+          this.jumlahTikaman += 1;
+          this.sisaLambat = T.lamaLambat;
+          this.sisaKameraDekat = T.lamaKamera;
+          this.saatTikaman?.(this.jumlahTikaman === 1);
+        }
+        // Tidak bisa diputus: hindar dan tangkis diabaikan sampai selesai.
+        if (this.waktu >= T.durasi) {
+          this.sejakSeranganTerakhir = 0;
+          this.kombo = 0;
+          this.komboHabis = false;
+          this.sasaranTikaman = null;
+          this.masuk('bebas');
+        }
+        break;
+      }
 
       case 'hindar':
         if (this.waktu >= K.hindar.durasi) this.masuk('bebas');
@@ -376,6 +460,26 @@ export class PertarunganPemain {
         p.dorongan = this.dorongan.copy(this.arahHindar).multiplyScalar(laju);
         break;
       }
+      case 'tikaman': {
+        const T = K.tikaman;
+        p.kunciGerak = true;
+        p.bolehLompat = false;
+        p.hadapPaksa = this.hadapAksi;
+        // Melesat ke sasaran sampai berjarak `jarakHenti`, tepat selesai pada akhir lesatan.
+        if (this.waktu < T.lesat && this.sasaranTikaman) {
+          const s = this.sasaranTikaman.posisi;
+          const pos = this.pemain.posisi;
+          const dx = s.x - pos.x;
+          const dz = s.z - pos.z;
+          const d = Math.hypot(dx, dz) || 1e-6;
+          const sisa = Math.max(0, d - T.jarakHenti);
+          const laju = sisa / Math.max(T.lesat - this.waktu, 0.016);
+          p.dorongan = this.dorongan.set((dx / d) * laju, 0, (dz / d) * laju);
+        } else {
+          p.dorongan = this.dorongan.set(0, 0, 0);
+        }
+        break;
+      }
       case 'terpukul':
       case 'mati':
         p.kunciGerak = true;
@@ -455,6 +559,21 @@ export class PertarunganPemain {
         const samping = this.arahHindar.x * Math.cos(this.hadapAksi) - this.arahHindar.z * Math.sin(this.hadapAksi);
         condong = 0.45 * maju * lengkung;
         miringSamping = -0.45 * samping * lengkung;
+        langsung = true;
+        break;
+      }
+      case 'tikaman': {
+        const T = K.tikaman;
+        // Merunduk saat melesat, lalu condong jauh ke depan dengan keris menusuk lurus.
+        const tLesat = halus(this.waktu / T.lesat);
+        const tTusuk = halus((this.waktu - T.lesat) / 0.08);
+        condong = lerp(0.2, 0.6, tTusuk);
+        turun = -0.12 * tLesat;
+        kerisX = 0.1;
+        kerisY = 0;
+        kerisMaju = lerp(0.05, 0.75, tTusuk);
+        sinar = 0.5 * tTusuk;
+        sinarWarna.copy(WARNA_KENA);
         langsung = true;
         break;
       }

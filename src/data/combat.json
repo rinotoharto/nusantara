@@ -48,6 +48,22 @@
     "kunci": {
       "jarak": 3,
       "mouseDiam": 0.15
+    },
+    "tikaman": {
+      "jarak": 2.5,
+      "sudut": 100,
+      "jarakHenti": 1.0,
+      "jangkauanKena": 2.5,
+      "damage": 60,
+      "dorong": 3.0,
+      "lamaDorongLawan": 0.3,
+      "lesat": 0.15,
+      "durasi": 0.3,
+      "kilatanLawan": 0.3,
+      "skalaLambat": 0.3,
+      "lamaLambat": 0.25,
+      "kameraMendekat": 1.0,
+      "lamaKamera": 0.4
     }
   },
   "lawan": {

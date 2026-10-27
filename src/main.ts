@@ -34,6 +34,7 @@ const tarung = new PertarunganPemain(pemain);
 
 const lawan = new PengelolaLawan(dunia.tabrakan, scene);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
+tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
 
 const hudTarung = new HudPertarungan(() => {
   // Ulangi: pemain kembali ke titik awal, semua lawan dihidupkan lagi.
@@ -41,6 +42,9 @@ const hudTarung = new HudPertarungan(() => {
   tarung.hidupkan();
   lawan.hidupkanSemua();
 });
+tarung.saatTikaman = (pertama) => {
+  if (pertama) hudTarung.umumkan('Tikaman Keris');
+};
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
@@ -63,7 +67,9 @@ const jam = new THREE.Timer();
 renderer.setAnimationLoop(() => {
   jam.update();
   const dtMentah = jam.getDelta();
-  const dt = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
+  const dtNyata = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
+  tarung.perbaruiEfek(dtNyata);
+  const dt = dtNyata * tarung.skalaWaktu; // waktu permainan melambat sesaat setelah Tikaman Keris
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
@@ -74,8 +80,9 @@ renderer.setAnimationLoop(() => {
   if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
+  kameraOrangKetiga.mendekat = KONFIG.pemain.tikaman.kameraMendekat * tarung.faktorKameraDekat;
 
-  kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
+  kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati);
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);

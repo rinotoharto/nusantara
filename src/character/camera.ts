@@ -22,6 +22,8 @@ export class KameraOrangKetiga {
   /** Saat bertarung kamera sedikit menjauh dan agak lebih tinggi supaya lawan terlihat. */
   modeTarung = false;
   private faktorTarung = 0;
+  /** Pengurangan jarak sementara (meter), misalnya saat Tikaman Keris mengenai. */
+  mendekat = 0;
 
   constructor(
     readonly kamera: THREE.PerspectiveCamera,
@@ -37,7 +39,7 @@ export class KameraOrangKetiga {
     const tujuanTarung = this.modeTarung ? 1 : 0;
     this.faktorTarung += (tujuanTarung - this.faktorTarung) * Math.min(1, 3 * dt);
     const pitchEfektif = this.pitch + KONFIG.kamera.pitchTambahan * this.faktorTarung;
-    const jarakTujuan = JARAK + KONFIG.kamera.jarakTambahan * this.faktorTarung;
+    const jarakTujuan = Math.max(1.5, JARAK + KONFIG.kamera.jarakTambahan * this.faktorTarung - this.mendekat);
 
     this.sasaran.set(kakiPemain.x, kakiPemain.y + TINGGI_SASARAN, kakiPemain.z);
     this.arah.set(

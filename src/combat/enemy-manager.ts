@@ -81,6 +81,21 @@ export class PengelolaLawan implements PemberiGiliran {
     return terdekat;
   }
 
+  /** Lawan terhuyung terdekat dalam jarak `maks` dari `pos`, untuk Tikaman Keris. */
+  lawanTerhuyungTerdekat(pos: THREE.Vector3, maks: number): Lawan | null {
+    let terdekat: Lawan | null = null;
+    let jarakTerdekat = maks;
+    for (const l of this.daftar) {
+      if (l.status !== 'terhuyung') continue;
+      const d = Math.hypot(l.posisi.x - pos.x, l.posisi.z - pos.z) - JARI_LAWAN;
+      if (d < jarakTerdekat) {
+        jarakTerdekat = d;
+        terdekat = l;
+      }
+    }
+    return terdekat;
+  }
+
   hidupkanSemua(): void {
     for (const l of this.daftar) l.hidupkan();
     this.penyerang = null;
@@ -107,11 +122,13 @@ export class PengelolaLawan implements PemberiGiliran {
 
     this.pisahkanKapsul(pemain);
 
-    // Serangan pemain mengenai setiap lawan hidup di dalam kerucut keris.
+    // Serangan pemain mengenai setiap lawan hidup di dalam kerucut keris;
+    // serangan bersasaran (Tikaman Keris) hanya mengenai sasarannya.
     const serangan = tarung.ambilSerangan();
     if (serangan) {
       for (const l of this.daftar) {
         if (!l.hidup) continue;
+        if (serangan.sasaran && serangan.sasaran !== l) continue;
         if (dalamJangkauan(pemain.posisi, pemain.hadap, l.posisi, serangan.jangkauan, JARI_LAWAN, serangan.sudutKena)) {
           l.terkena(serangan, pemain.posisi);
         }

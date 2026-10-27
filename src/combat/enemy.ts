@@ -261,20 +261,28 @@ export class Lawan {
   /** Lawan terkena serangan pemain dari posisi `dari`. */
   terkena(serangan: Serangan, dari: THREE.Vector3): void {
     if (this.status === 'mati') return;
-    this.sisaKilat = 0.12;
+    this.sisaKilat = serangan.tikaman ? KONFIG.pemain.tikaman.kilatanLawan : 0.12;
     catatDamage(this.posisi, serangan.damage, true);
     const dx = this.posisi.x - dari.x;
     const dz = this.posisi.z - dari.z;
     const d = Math.hypot(dx, dz) || 1;
-    const lama = 0.15;
+    // Tikaman mendorong lebih lama supaya lawan rebah lebih jauh ke belakang.
+    const lama = serangan.tikaman ? KONFIG.pemain.tikaman.lamaDorongLawan : 0.15;
     this.doronganKena.set((dx / d) * serangan.dorong / lama, 0, (dz / d) * serangan.dorong / lama);
     this.sisaDoronganKena = lama;
     if (this.nyawa.kurangi(serangan.damage)) this.masuk('mati');
     else if (serangan.berat) this.masuk('terhuyung');
   }
 
-  /** Rebah ke belakang, lalu menghilang setelah beberapa detik. */
+  /** Rebah ke belakang (sambil terdorong sisa pukulan terakhir), lalu menghilang setelah beberapa detik. */
   private perbaruiMati(dt: number): void {
+    if (this.sisaDoronganKena > 0) {
+      this.sisaDoronganKena -= dt;
+      this.posisi.x += this.doronganKena.x * dt;
+      this.posisi.z += this.doronganKena.z * dt;
+      dorongKeluar(this.data, this.posisi, JARI_LAWAN);
+      this.posisi.y = tinggiLantai(this.data, this.posisi.x, this.posisi.z, this.posisi.y + 0.5);
+    }
     const laju = Math.min(1, 5 * dt);
     this.badan.rotation.x += (-1.5 - this.badan.rotation.x) * laju;
     this.badan.rotation.z += (0 - this.badan.rotation.z) * laju;

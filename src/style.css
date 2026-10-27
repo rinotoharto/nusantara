@@ -102,6 +102,23 @@ html, body {
   font-size: 17px;
 }
 
+/* Pemberitahuan jurus */
+.hud-jurus {
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  font-size: 30px;
+  letter-spacing: 2px;
+  color: #ffd79a;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.hud-jurus.tampil {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0.15s ease, transform 0.25s ease-out;
+}
+
 /* Layar gugur */
 .layar-mati {
   position: fixed;
