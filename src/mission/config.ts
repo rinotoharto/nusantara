@@ -126,6 +126,8 @@ export interface Segmen {
   penjaga?: DataPenjaga[];
   /** Hanya `n` penjaga pertama dari daftar yang dipasang, `n` dari aturan rombongan. */
   jumlahPenjagaDariAturan?: 'penjagaSungai';
+  /** Jumlah dari aturan dibagi ke beberapa segmen: bagian `ke` dari `dari` (bagian 0 mendapat sisa). */
+  bagianPenjaga?: { ke: number; dari: number };
   batu?: DataBatuMisi[];
   semak?: TitikXZ[];
   npc?: DataNpcMisi[];

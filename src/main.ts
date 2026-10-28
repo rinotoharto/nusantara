@@ -186,6 +186,12 @@ window.addEventListener('keydown', (e) => {
     else if (modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai') bukaKitab(modeUi);
   }
 });
+// Esc saat pointer terkunci: peramban melepas kunci lebih dulu; begitu lepas, langsung buka menu jeda
+// (satu kali Esc), kecuali pelepasan itu dilakukan kode (dialog, Kitab, peta: mode sudah bukan 'main').
+document.addEventListener('pointerlockchange', () => {
+  if (document.pointerLockElement) return;
+  if (modeUi === 'main' && !tarung.mati) bukaMenu();
+});
 const npc = new PengelolaNpc(scene, dunia.tabrakan);
 const pemicu = new PemicuMisi(status);
 for (const pesan of pemicu.validasi()) console.warn(`[data] ${pesan}`);

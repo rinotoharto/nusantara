@@ -156,12 +156,21 @@ export class PelaksanaMisi {
     this.masukSegmen(dariSegmen, true, false);
   }
 
-  /** Melanjutkan dari titik simpan: tanda, percakapan, dan rombongan dipulihkan, lalu segmen itu dimulai tanpa pembukanya. */
+  /**
+   * Melanjutkan dari titik simpan: tanda, percakapan, dan rombongan dipulihkan, isi dinamis segmen
+   * yang sudah lewat dipasang lagi sesuai tanda (misalnya penjaga pagi kalau menginap; NPC sekali
+   * pakai segmen tidak), lalu segmen itu dimulai tanpa pembukanya.
+   */
   lanjutkan(titik: TitikSimpan): void {
     this.bersihkanUntukMulai();
     this.d.status.pulihkanDariTitik(titik);
     this.pulihkanRombongan(titik);
     const i = Math.max(0, SEGMEN.findIndex((s) => s.id === titik.segmen));
+    for (let j = 0; j < i; j++) {
+      const s = SEGMEN[j];
+      if (s.syarat && !this.d.status.tanda.has(s.syarat)) continue;
+      this.pasangIsi(s, true, true);
+    }
     this.masukSegmen(i, true, true);
   }
 
@@ -320,8 +329,9 @@ export class PelaksanaMisi {
   /**
    * Memasang isi segmen. `saatSegmen` salah: hanya butir statis (saat misi mulai);
    * benar: hanya butir dinamis yang syaratnya terpenuhi (saat segmen mulai).
+   * `segmenLewat`: segmen yang sudah selesai (saat Lanjutkan): NPC dinamis segmen tidak dipasang.
    */
-  private pasangIsi(s: Segmen, saatSegmen: boolean): void {
+  private pasangIsi(s: Segmen, saatSegmen: boolean, segmenLewat = false): void {
     const segmenDinamis = Boolean(s.syarat);
     if (saatSegmen === segmenDinamis) {
       for (const b of s.batu ?? []) {
@@ -334,7 +344,12 @@ export class PelaksanaMisi {
       }
     }
     let daftarPenjaga: DataPenjaga[] = s.penjaga ?? [];
-    if (s.jumlahPenjagaDariAturan === 'penjagaSungai') daftarPenjaga = daftarPenjaga.slice(0, this.d.rombongan.jumlahPenjagaSungai);
+    if (s.jumlahPenjagaDariAturan === 'penjagaSungai') {
+      let n = this.d.rombongan.jumlahPenjagaSungai;
+      // Dibagi antar segmen: bagian ke-i dari k mendapat floor((n + k - 1 - i) / k).
+      if (s.bagianPenjaga) n = Math.floor((n + s.bagianPenjaga.dari - 1 - s.bagianPenjaga.ke) / s.bagianPenjaga.dari);
+      daftarPenjaga = daftarPenjaga.slice(0, n);
+    }
     for (const p of daftarPenjaga) {
       if (this.dinamisButir(s, p) !== saatSegmen) continue;
       if (p.syarat && !this.d.status.tanda.has(p.syarat)) continue;
@@ -345,6 +360,7 @@ export class PelaksanaMisi {
     for (const n of daftarNpc) {
       if (this.dinamisButir(s, n) !== saatSegmen) continue;
       if (n.syarat && !this.d.status.tanda.has(n.syarat)) continue;
+      if (segmenLewat && n.dinamis) continue;
       // NPC sekali pakai yang percakapannya sudah selesai (misalnya sudah direkrut) tidak dipasang lagi.
       if (n.hapusSetelahPercakapan && n.percakapan.every((id) => this.d.status.percakapanSelesai.has(id))) continue;
       const npc = this.d.npc.tambah(n);

@@ -1,5 +1,5 @@
 {
-  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat`/`dinamis` dipasang saat misi mulai; isi dengan `syarat` atau `dinamis: true` dipasang saat segmennya mulai (NPC dinamis dicabut saat segmen selesai). `rantai` memulai percakapan lain begitu sebuah percakapan selesai. `selesai.tanda` boleh daftar (salah satu). `tujuan` boleh string atau daftar langkah `{ teks, penanda: [x, z], selesai: { area } }`: HUD menampilkan langkah sekarang; obor dipasang di `penanda` langkah (kalau ada) atau `penanda` segmen. `pemandu` memilih gaya partikel pemandu (Tab): kunang (malam) atau daun (siang).",
+  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat`/`dinamis` dipasang saat misi mulai; isi dengan `syarat` atau `dinamis: true` dipasang saat segmennya mulai (NPC dinamis dicabut saat segmen selesai). `rantai` memulai percakapan lain begitu sebuah percakapan selesai. `selesai.tanda` boleh daftar (salah satu). `tujuan` boleh string atau daftar langkah `{ teks, penanda: [x, z], selesai: { area } }`: HUD menampilkan langkah sekarang; obor dipasang di `penanda` langkah (kalau ada) atau `penanda` segmen. `pemandu` memilih gaya partikel pemandu (Tab): kunang (malam) atau daun (siang). `bagianPenjaga: { ke, dari }` membagi jumlah penjaga dari aturan ke beberapa segmen (bagian ke-0 mendapat sisa pembagian).",
   "tokohPemain": "wijaya",
   "pengikutTokoh": {
     "lawe": 0,
@@ -767,15 +767,15 @@
           "hapusSetelahPercakapan": true
         }
       ],
-      "selesai": {
-        "percakapan": "kudadu-malam"
-      },
       "rantai": [
         {
           "setelah": "kudadu-tiba",
           "percakapan": "kudadu-malam"
         }
-      ]
+      ],
+      "selesai": {
+        "percakapan": "kudadu-malam"
+      }
     },
     {
       "id": "rute",
@@ -786,14 +786,6 @@
           -37
         ],
         "hadap": 3.1416
-      },
-      "saatMulai": {
-        "panel": "jeda",
-        "lamaPanel": 2
-      },
-      "cahaya": {
-        "syarat": "kudadu-menginap",
-        "pengali": 1.3
       },
       "penanda": [
         [
@@ -837,6 +829,14 @@
           "dinamis": true
         }
       ],
+      "saatMulai": {
+        "panel": "jeda",
+        "lamaPanel": 2
+      },
+      "cahaya": {
+        "syarat": "kudadu-menginap",
+        "pengali": 1.3
+      },
       "selesai": {
         "tanda": [
           "rute-sungai",
@@ -869,17 +869,129 @@
           "penanda": [
             -115,
             -15
-          ],
-          "selesai": {
-            "area": {
-              "pusat": [
-                -115,
-                -15
-              ],
-              "jari": 10
+          ]
+        }
+      ],
+      "mulai": {
+        "posisi": [
+          0,
+          -46
+        ],
+        "hadap": -1.57
+      },
+      "jumlahPenjagaDariAturan": "penjagaSungai",
+      "bagianPenjaga": {
+        "ke": 0,
+        "dari": 2
+      },
+      "penjaga": [
+        {
+          "nama": "sungai-1",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -72,
+              "z": 21
+            },
+            {
+              "x": -86,
+              "z": 10
             }
-          }
+          ]
         },
+        {
+          "nama": "sungai-3",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -106,
+              "z": -4
+            },
+            {
+              "x": -117,
+              "z": -17
+            }
+          ]
+        },
+        {
+          "nama": "sungai-5",
+          "mode": "bolak-balik",
+          "titik": [
+            {
+              "x": -93,
+              "z": 7
+            },
+            {
+              "x": -97,
+              "z": -4
+            }
+          ]
+        }
+      ],
+      "batu": [
+        {
+          "x": -82,
+          "z": 10,
+          "lebar": 3,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        },
+        {
+          "x": -114,
+          "z": -19,
+          "lebar": 3,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        }
+      ],
+      "semak": [
+        {
+          "x": -71,
+          "z": 28
+        },
+        {
+          "x": -91,
+          "z": 13
+        },
+        {
+          "x": -111,
+          "z": -2
+        },
+        {
+          "x": -128,
+          "z": -24
+        },
+        {
+          "x": -68,
+          "z": 16
+        },
+        {
+          "x": -88,
+          "z": 1
+        },
+        {
+          "x": -104,
+          "z": -11
+        },
+        {
+          "x": -120,
+          "z": -31
+        }
+      ],
+      "selesai": {
+        "area": {
+          "pusat": [
+            -115,
+            -15
+          ],
+          "jari": 10
+        }
+      }
+    },
+    {
+      "id": "sungai-2",
+      "syarat": "rute-sungai",
+      "tujuan": [
         {
           "teks": "Sungai berbelok; muara ada di balik tikungan terakhir",
           "penanda": [
@@ -906,27 +1018,17 @@
       ],
       "mulai": {
         "posisi": [
-          0,
-          -46
+          -115,
+          -15
         ],
-        "hadap": -1.57
+        "hadap": -0.6
       },
       "jumlahPenjagaDariAturan": "penjagaSungai",
+      "bagianPenjaga": {
+        "ke": 1,
+        "dari": 2
+      },
       "penjaga": [
-        {
-          "nama": "sungai-1",
-          "mode": "bolak-balik",
-          "titik": [
-            {
-              "x": -72,
-              "z": 21
-            },
-            {
-              "x": -86,
-              "z": 10
-            }
-          ]
-        },
         {
           "nama": "sungai-2",
           "mode": "melingkar",
@@ -950,20 +1052,6 @@
           ]
         },
         {
-          "nama": "sungai-3",
-          "mode": "bolak-balik",
-          "titik": [
-            {
-              "x": -106,
-              "z": -4
-            },
-            {
-              "x": -117,
-              "z": -17
-            }
-          ]
-        },
-        {
           "nama": "sungai-4",
           "mode": "bolak-balik",
           "titik": [
@@ -976,37 +1064,9 @@
               "z": -97
             }
           ]
-        },
-        {
-          "nama": "sungai-5",
-          "mode": "bolak-balik",
-          "titik": [
-            {
-              "x": -125,
-              "z": -26
-            },
-            {
-              "x": -130,
-              "z": -39
-            }
-          ]
         }
       ],
       "batu": [
-        {
-          "x": -82,
-          "z": 10,
-          "lebar": 3,
-          "tinggi": 2.6,
-          "dalam": 2.5
-        },
-        {
-          "x": -114,
-          "z": -19,
-          "lebar": 3,
-          "tinggi": 2.6,
-          "dalam": 2.5
-        },
         {
           "x": -152,
           "z": -65,
@@ -1024,22 +1084,6 @@
       ],
       "semak": [
         {
-          "x": -71,
-          "z": 28
-        },
-        {
-          "x": -91,
-          "z": 13
-        },
-        {
-          "x": -111,
-          "z": -2
-        },
-        {
-          "x": -128,
-          "z": -24
-        },
-        {
           "x": -148,
           "z": -48
         },
@@ -1050,22 +1094,6 @@
         {
           "x": -184,
           "z": -97
-        },
-        {
-          "x": -68,
-          "z": 16
-        },
-        {
-          "x": -88,
-          "z": 1
-        },
-        {
-          "x": -104,
-          "z": -11
-        },
-        {
-          "x": -120,
-          "z": -31
         },
         {
           "x": -138,
@@ -1127,17 +1155,44 @@
           "penanda": [
             -150,
             -148
+          ]
+        }
+      ],
+      "mulai": {
+        "posisi": [
+          0,
+          -46
+        ],
+        "hadap": 3.1416
+      },
+      "pemicu": [
+        {
+          "jenis": "area",
+          "pusat": [
+            -100,
+            -128
           ],
-          "selesai": {
-            "area": {
-              "pusat": [
-                -150,
-                -150
-              ],
-              "jari": 12
-            }
+          "jari": 9,
+          "percakapan": "bukit-tumbang",
+          "jika": {
+            "perbekalanKurangDari": 1
           }
-        },
+        }
+      ],
+      "selesai": {
+        "area": {
+          "pusat": [
+            -150,
+            -150
+          ],
+          "jari": 12
+        }
+      }
+    },
+    {
+      "id": "bukit-2",
+      "syarat": "rute-bukit",
+      "tujuan": [
         {
           "teks": "Turun lewat celah di ujung bukit; muara ada di bawah",
           "penanda": [
@@ -1164,25 +1219,11 @@
       ],
       "mulai": {
         "posisi": [
-          0,
-          -46
+          -150,
+          -150
         ],
-        "hadap": 3.1416
+        "hadap": -2.2
       },
-      "pemicu": [
-        {
-          "jenis": "area",
-          "pusat": [
-            -100,
-            -128
-          ],
-          "jari": 9,
-          "percakapan": "bukit-tumbang",
-          "jika": {
-            "perbekalanKurangDari": 1
-          }
-        }
-      ],
       "selesai": {
         "area": {
           "pusat": [
@@ -1226,6 +1267,12 @@
           "syarat": "rute-sungai"
         }
       ],
+      "semak": [
+        {
+          "x": -188,
+          "z": -116
+        }
+      ],
       "npc": [
         {
           "id": "nelayan",
@@ -1242,13 +1289,7 @@
       ],
       "selesai": {
         "percakapan": "pantai-perahu"
-      },
-      "semak": [
-        {
-          "x": -188,
-          "z": -116
-        }
-      ]
+      }
     }
   ]
 }
