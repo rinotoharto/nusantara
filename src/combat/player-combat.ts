@@ -145,6 +145,12 @@ export class PertarunganPemain {
     this.masuk('bebas');
   }
 
+  /** Benar saat pemain sedang mengayun keris atau baru saja mengayun (satu detik terakhir); percakapan penghadang ditunda. */
+  get sedangMenyerang(): boolean {
+    const s = this.status;
+    return s === 'mengisi' || s === 'serangRingan' || s === 'serangBerat' || s === 'tikaman' || this.sejakSeranganTerakhir < 1.0;
+  }
+
   /** Benar saat pemain tidak bisa dilukai: awal hindar, atau sepanjang Tikaman Keris. */
   get kebal(): boolean {
     if (this.status === 'tikaman') return true;

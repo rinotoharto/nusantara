@@ -27,6 +27,8 @@ export interface AturanRombongan {
   penjagaSungai: { dasar: number; maks: number };
   /** Obor di tangan: diberikan begitu salah satu tanda `dariTanda` muncul; `teks` diumumkan di HUD rombongan. */
   obor: { dariTanda: string[]; teks: string };
+  perampok: { jarakDialog: number; pengikutTanpaKabar: number };
+  desertir: { peluangSetia: number };
 }
 
 /** Seluruh data misi 3 dari src/data/misi3.json. */
@@ -103,6 +105,8 @@ export interface DataKejadian {
   jari: number;
   /** Tempat aktor muncul kalau bukan di `pusat` (misalnya harimau di balik pohon). */
   muncul?: [number, number];
+  /** Posisi tiap anggota untuk kejadian berkelompok (perampok). */
+  posisi?: [number, number][];
   syarat?: string[];
   peluang?: number;
   undian?: { kunci: string; dari: number; ke: number };

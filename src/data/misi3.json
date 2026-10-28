@@ -66,6 +66,27 @@
       },
       "harimau-mati": {
         "teks": "Harimau jawa tumbang"
+      },
+      "perampok-dibayar": {
+        "perbekalan": -2,
+        "teks": "Perbekalan -2: perampok dibayar"
+      },
+      "perampok-tegas": {
+        "teks": "Perampok minggir mendengar nama Wijaya"
+      },
+      "kabar-wijaya": {
+        "kewaspadaan": 1,
+        "teks": "Kewaspadaan Daha +1: kabar Wijaya tersebar"
+      },
+      "perampok-dikalahkan": {
+        "teks": "Perampok dikalahkan"
+      },
+      "desertir-ikut": {
+        "pengikut": 1,
+        "teks": "Pengikut +1: Jaran, prajurit Daha yang lari"
+      },
+      "desertir-khianat": {
+        "kewaspadaan": 1
       }
     },
     "ketahuan": {
@@ -98,6 +119,15 @@
         "kudadu-sebelum-fajar"
       ],
       "teks": "Kepala desa memberi obor: T untuk menyalakan"
+    },
+    "perampok": {
+      "keterangan": "Kejadian perampok: percakapan mulai dalam jarakDialog dari kepala perampok. Nada tegas selalu berhasil tanpa kabar ke Daha kalau Pengikut lebih dari pengikutTanpaKabar (prajurit lumbung ikut).",
+      "jarakDialog": 8,
+      "pengikutTanpaKabar": 12
+    },
+    "desertir": {
+      "keterangan": "Kesetiaan desertir yang ikut diundi di akhir misi dari benih misi: peluangSetia; kalau tidak setia, tanda desertir-khianat (Kewaspadaan +1).",
+      "peluangSetia": 0.5
     }
   },
   "teks": {
@@ -111,7 +141,11 @@
       "sejarah": "Menurut Prasasti Kudadu, Wijaya menyeberang ke Madura dan diterima Arya Wiraraja di Sumenep. Dari sana ia menyusun siasat yang dua tahun kemudian melahirkan Majapahit.",
       "kutipan": "TODO-SEJARAH: kutipan Prasasti Kudadu tentang penyeberangan ke Madura (TODO-VERIFIKASI teks kutipan).",
       "catatanPagonDitinggal": "Pararaton mencatat Gajah Pagon ditinggal di Pandakan karena luka di paha. Keputusan Anda sama dengan yang tercatat; Kitab menjelaskan sumbernya dan apa yang hanya tafsiran.",
-      "catatanPagonIkut": "Pararaton mencatat Gajah Pagon ditinggal di Pandakan karena luka di paha. Kalau Anda membawanya, itu pilihan Anda, bukan sejarah; Kitab menjelaskan bedanya."
+      "catatanPagonIkut": "Pararaton mencatat Gajah Pagon ditinggal di Pandakan karena luka di paha. Kalau Anda membawanya, itu pilihan Anda, bukan sejarah; Kitab menjelaskan bedanya.",
+      "desertir": {
+        "setia": "Jaran, prajurit Daha yang Anda bawa, tetap setia: pengetahuannya tentang jalur patroli ikut menyeberang ke Madura.",
+        "khianat": "Jaran, prajurit Daha yang Anda bawa, menghilang di tepi pantai. Kabar tentang jalan yang Anda tempuh sampai ke Daha lebih cepat dari yang Anda kira."
+      }
     }
   },
   "dunia": {
@@ -997,6 +1031,37 @@
           "z": -31
         }
       ],
+      "kejadian": [
+        {
+          "id": "perampok-sungai",
+          "jenis": "perampok",
+          "pusat": [
+            -40,
+            -3
+          ],
+          "jari": 14,
+          "posisi": [
+            [
+              -40,
+              -3
+            ],
+            [
+              -38.7,
+              -2.1
+            ],
+            [
+              -41.3,
+              -3.9
+            ]
+          ],
+          "syarat": [
+            "rute-sungai"
+          ],
+          "peluang": 1.0,
+          "percakapan": "perampok-hadang",
+          "sekaliPerMisi": true
+        }
+      ],
       "selesai": {
         "area": {
           "pusat": [
@@ -1123,6 +1188,32 @@
           "z": -70
         }
       ],
+      "kejadian": [
+        {
+          "id": "desertir-sungai",
+          "jenis": "desertir",
+          "pusat": [
+            -126,
+            -28
+          ],
+          "jari": 12,
+          "muncul": [
+            -124,
+            -24
+          ],
+          "syarat": [
+            "rute-sungai"
+          ],
+          "peluang": 1.0,
+          "undian": {
+            "kunci": "desertir",
+            "dari": 2,
+            "ke": 0
+          },
+          "percakapan": "desertir-kediri",
+          "sekaliPerMisi": true
+        }
+      ],
       "selesai": {
         "area": {
           "pusat": [
@@ -1196,6 +1287,32 @@
           "jika": {
             "perbekalanKurangDari": 1
           }
+        }
+      ],
+      "kejadian": [
+        {
+          "id": "desertir-bukit",
+          "jenis": "desertir",
+          "pusat": [
+            -80,
+            -120
+          ],
+          "jari": 12,
+          "muncul": [
+            -78,
+            -114
+          ],
+          "syarat": [
+            "rute-bukit"
+          ],
+          "peluang": 1.0,
+          "undian": {
+            "kunci": "desertir",
+            "dari": 2,
+            "ke": 1
+          },
+          "percakapan": "desertir-kediri",
+          "sekaliPerMisi": true
         }
       ],
       "selesai": {

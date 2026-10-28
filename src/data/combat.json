@@ -157,5 +157,37 @@
       "lamaMaks": 8
     },
     "hilangSetelahMati": 3.0
+  },
+  "perampok": {
+    "keterangan": "Perampok bergolok (sprint 7): menghadang jalan tanpa kerucut pandang. Dua tebasan beruntun dengan satu isyarat; tebasan kedua tanpa isyarat, jadi tangkis pas lebih sulit tapi hindar menjauh mudah. Dua perampok boleh menyerang hampir bersamaan dengan jeda jedaAntarPenyerang.",
+    "nyawa": 45,
+    "golok": {
+      "jangkauan": 1.3,
+      "sudutKena": 60,
+      "damage": 15,
+      "dorong": 0.6
+    },
+    "jarakDeteksi": 12,
+    "kecepatanMendekat": 3.4,
+    "kecepatanMengelilingi": 1.8,
+    "jarakMengelilingiMin": 2.5,
+    "jarakMengelilingiMaks": 3.5,
+    "isyarat": 0.35,
+    "tebasan": {
+      "pertama": 0.08,
+      "kedua": 0.38,
+      "durasi": 0.55
+    },
+    "mundurMin": 0.8,
+    "mundurMaks": 1.6,
+    "terhuyung": 1.0,
+    "terhuyungAwal": 1.5,
+    "jedaAntarPenyerang": 0.4,
+    "penyerangMaks": 2,
+    "pergi": {
+      "jarak": 25,
+      "kecepatan": 4.5
+    },
+    "hilangSetelahMati": 3.0
   }
 }

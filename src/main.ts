@@ -48,7 +48,7 @@ import { isiPola } from './ui/config';
 import type { HasilMisi } from './mission/state';
 import { CatatanPlaytest } from './mission/playtest';
 import { HudKejadian } from './ui/event-hud';
-import { PengelolaKejadian } from './mission/events';
+import { PengelolaKejadian, undi } from './mission/events';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -288,12 +288,14 @@ const kejadian = new PengelolaKejadian({
   siluman,
   status,
   rombongan,
+  npc,
   pemain,
   pengikut,
   hud: hudKejadian,
   umumkan: (teks) => hudTarung.umumkan(teks),
   mulaiDialog,
   gamepadTerakhir: () => input.gamepadTerakhir,
+  pemainMenyerang: () => tarung.sedangMenyerang,
 });
 
 // Misi: segmen dari misi3.json.
@@ -386,6 +388,13 @@ function perbaruiSinematikPerahu(dt: number): void {
 }
 
 function tampilkanSelesai(): void {
+  // Desertir yang ikut (sprint 7): kesetiaannya diundi dari benih misi; tidak setia = tanda desertir-khianat.
+  let catatanDesertir = '';
+  if (status.tanda.has('desertir-ikut')) {
+    const setia = undi(status.titikSimpan?.benih ?? 0, 'desertir-setia') < ATURAN.desertir.peluangSetia;
+    if (!setia) status.tandai('desertir-khianat');
+    catatanDesertir = setia ? TEKS_SELESAI.desertir.setia : TEKS_SELESAI.desertir.khianat;
+  }
   const n = rombongan.nilai;
   const rute = status.tanda.has('rute-sungai') ? 'sungai' : status.tanda.has('rute-bukit') ? 'bukit' : null;
   const hasil: HasilMisi = { pengikutTiba: n.pengikut, pagon: n.pagon, rute, kewaspadaanDaha: n.kewaspadaan, kaliKetahuan: n.kaliKetahuan, waktu: waktuMisi };
@@ -404,7 +413,7 @@ function tampilkanSelesai(): void {
       isiPola(S.kitab, { n: status.kitab.length, total: KITAB_PER_ID.size }),
       isiPola(S.waktu, { menit: Math.floor(waktuMisi / 60), detik: Math.floor(waktuMisi % 60) }),
     ],
-    catatan: n.pagon === 'ikut' ? teks.catatanPagonIkut : teks.catatanPagonDitinggal,
+    catatan: [n.pagon === 'ikut' ? teks.catatanPagonIkut : teks.catatanPagonDitinggal, catatanDesertir].filter(Boolean).join(' '),
   };
   modeUi = 'selesai';
   layarSelesai.tampilkanUnduh(catatan.aktif);

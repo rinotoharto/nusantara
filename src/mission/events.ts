@@ -9,7 +9,10 @@ import type { HudKejadian } from '../ui/event-hud';
 import type { DataKejadian, Segmen } from './config';
 import type { StatusPermainan } from './state';
 import type { Rombongan } from './party';
+import type { PengelolaNpc } from './npc';
 import { KejadianHarimau } from './event-tiger';
+import { KejadianPerampok } from './event-bandit';
+import { KejadianDesertir } from './event-desertir';
 
 /** Hal di luar kejadian yang dipakai aktornya: dunia, lawan, rombongan, pemain, UI. */
 export interface KetergantunganKejadian {
@@ -19,6 +22,7 @@ export interface KetergantunganKejadian {
   siluman: PengelolaSiluman;
   status: StatusPermainan;
   rombongan: Rombongan;
+  npc: PengelolaNpc;
   pemain: Pemain;
   pengikut: PengelolaPengikut;
   hud: HudKejadian;
@@ -26,6 +30,8 @@ export interface KetergantunganKejadian {
   umumkan: (teks: string) => void;
   mulaiDialog: (id: string, lawanBicara: THREE.Vector3 | null) => void;
   gamepadTerakhir: () => boolean;
+  /** Benar saat pemain sedang mengayun keris: percakapan penghadang ditunda, serangan yang kena memulai pertarungan. */
+  pemainMenyerang: () => boolean;
 }
 
 /** Satu kejadian yang sedang berjalan: harimau, perampok, buaya, dan seterusnya. */
@@ -135,6 +141,10 @@ export class PengelolaKejadian {
     switch (data.jenis) {
       case 'harimau':
         return new KejadianHarimau(data, this.d);
+      case 'perampok':
+        return new KejadianPerampok(data, this.d);
+      case 'desertir':
+        return new KejadianDesertir(data, this.d);
       default:
         // Jenis lain menyusul di tahap berikutnya: aktor kosong yang langsung selesai.
         console.warn(`[kejadian] jenis "${data.jenis}" belum ada`);
