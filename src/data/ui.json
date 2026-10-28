@@ -182,6 +182,7 @@
     "mulaiBaru": "Mulai baru",
     "lanjutkan": "Lanjutkan",
     "kitab": "Kitab",
+    "prolog": "Prolog",
     "prototipe": "Prototipe tanpa aset",
     "peringatanSentuh": "Versi ini untuk laptop dengan keyboard dan mouse atau gamepad. Di ponsel atau layar sentuh, kendali belum tersedia.",
     "mengerti": "Mengerti"
@@ -210,6 +211,11 @@
   },
   "playtest": {
     "lencana": "Mode playtest: catatan direkam"
+  },
+  "prolog": {
+    "lewati": "Lewati prolog",
+    "lanjut": "Klik atau Spasi untuk lanjut",
+    "placeholderGambar": "[{gaya}: {id}]"
   },
   "kejadian": {
     "lemparBekal": "E: Lempar bekal",

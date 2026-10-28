@@ -1,12 +1,13 @@
 import { UI } from './config';
 
-/** Layar awal: judul, nama misi, tombol Mulai baru, Lanjutkan (kalau ada simpanan), dan Kitab. */
+/** Layar awal: judul, nama misi, tombol Mulai baru, Lanjutkan (kalau ada simpanan), Prolog (putar ulang), dan Kitab. */
 export class LayarJudul {
   private readonly lapis: HTMLDivElement;
   private readonly tombolLanjutkan: HTMLButtonElement;
   saatMulaiBaru: (() => void) | null = null;
   saatLanjutkan: (() => void) | null = null;
   saatKitab: (() => void) | null = null;
+  saatProlog: (() => void) | null = null;
 
   constructor() {
     this.lapis = document.createElement('div');
@@ -28,6 +29,7 @@ export class LayarJudul {
       sub,
       this.tombol(UI.judul.mulaiBaru, () => this.saatMulaiBaru?.()),
       this.tombolLanjutkan,
+      this.tombol(UI.judul.prolog, () => this.saatProlog?.()),
       this.tombol(UI.judul.kitab, () => this.saatKitab?.()),
       catatan,
     );

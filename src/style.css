@@ -1114,3 +1114,121 @@ button.pad-fokus {
   font-size: 14px;
   padding: 6px 16px;
 }
+
+/* Prolog (misi 1): panel teks kasar dari misi1.json */
+.prolog-lapis {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a110a;
+  color: #efe3c6;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  user-select: none;
+  cursor: pointer;
+}
+.prolog-lapis.tampil {
+  opacity: 1;
+  pointer-events: auto;
+}
+.prolog-isi {
+  display: none;
+  flex-direction: column;
+  gap: 22px;
+  width: min(760px, 92vw);
+  max-height: 94vh;
+  padding: 0 16px;
+}
+.prolog-isi.tampil {
+  display: flex;
+}
+.prolog-gambar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  max-height: 38vh;
+  border: 1px solid rgba(239, 227, 198, 0.3);
+  border-radius: 3px;
+  background: #241810;
+  color: #8c7657;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.prolog-gambar[data-gaya='mongol'] {
+  background: #2a2420;
+  border-style: dashed;
+}
+.prolog-narasi {
+  min-height: 7.5em;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: calc(20px * var(--skala-huruf, 1));
+  line-height: 1.6;
+  text-align: left;
+}
+.prolog-kaki {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.prolog-petunjuk {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #b89a6a;
+}
+.prolog-sumber-kotak {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  max-width: 55%;
+}
+.prolog-sumber-kotak .lencana::after {
+  left: auto;
+  right: 0;
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.prolog-sumber {
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  color: #b89a6a;
+}
+.prolog-lewati {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  display: none;
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 14px;
+  color: #d9c9a0;
+  background: rgba(40, 26, 16, 0.8);
+  border: 1px solid rgba(255, 215, 154, 0.4);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.prolog-lewati.tampil {
+  display: block;
+}
+.prolog-lewati:hover {
+  background: #ffd79a;
+  color: #1a1410;
+}
+.prolog-penutup {
+  display: none;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 72px;
+  letter-spacing: 6px;
+  color: #ffd79a;
+}
+.prolog-penutup.tampil {
+  display: block;
+}

@@ -1,5 +1,6 @@
 import data from '../data/playtest.json';
 import type { HasilMisi } from './state';
+import type { HasilProlog } from './panels';
 
 const PLAYTEST = data as { parameter: string; kunciSimpan: string; namaBerkas: string; maksSesi: number; versi: number };
 
@@ -36,6 +37,8 @@ export interface SesiPlaytest {
   petunjukKejadian: (Kejadian & { jenis: 'kunang' | 'peta' | 'nambi' })[];
   /** Entri Kitab: kapan terbuka (detik misi) dan berapa detik dibaca di layar Kitab. */
   kitab: { id: string; terbukaPada: number | null; dibaca: number }[];
+  /** Prolog: lama (detik nyata), dilewati atau tidak, dan di panel ke berapa; null kalau tidak diputar di sesi ini. */
+  prolog: HasilProlog | null;
   hasil: HasilMisi | null;
 }
 
@@ -99,6 +102,7 @@ export class CatatanPlaytest {
       petunjuk: { kunang: 0, peta: 0, nambi: 0 },
       petunjukKejadian: [],
       kitab: [],
+      prolog: null,
       hasil: null,
     });
     while (this.simpanan.sesi.length > PLAYTEST.maksSesi) this.simpanan.sesi.shift();
@@ -174,6 +178,14 @@ export class CatatanPlaytest {
     if (!s || detik < 0.5) return;
     const e = this.entriKitab(s, id);
     e.dibaca = this.bulat(e.dibaca + detik);
+    this.simpan();
+  }
+
+  /** Prolog selesai atau dilewati (hanya sesi yang sedang berjalan). */
+  prolog(hasil: HasilProlog): void {
+    const s = this.sesi;
+    if (!s) return;
+    s.prolog = hasil;
     this.simpan();
   }
 

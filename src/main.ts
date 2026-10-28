@@ -49,6 +49,8 @@ import type { HasilMisi } from './mission/state';
 import { CatatanPlaytest } from './mission/playtest';
 import { HudKejadian } from './ui/event-hud';
 import { PengelolaKejadian, undi } from './mission/events';
+import { PemutarPanel } from './mission/panels';
+import { PROLOG, validasiProlog } from './mission/prolog-config';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -116,7 +118,7 @@ function ukurKualitasOtomatis(dt: number): void {
   if (import.meta.env.DEV) console.log(`[pengaturan] fps rata-rata ${fps.toFixed(0)}, kualitas otomatis: ${k}`);
   status.aturPengaturan({ kualitas: k });
 }
-for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[data] ${pesan}`);
+for (const pesan of [...validasiKitab(), ...validasiDialog(), ...validasiProlog()]) console.warn(`[data] ${pesan}`);
 // Rombongan: variabel misi yang berubah lewat tanda dialog (aturan di misi3.json).
 const rombongan = new Rombongan();
 const hudRombongan = new HudRombongan(rombongan);
@@ -154,8 +156,14 @@ const hudTujuan = new HudTujuan();
 const panel = new PanelNaskah();
 const layarJudul = new LayarJudul();
 const layarSelesai = new LayarSelesai();
+// Prolog (misi 1): panel teks dari misi1.json; entri Kitab tiap panel dibuka saat panel tampil,
+// pemberitahuannya baru muncul setelah kembali ke mode main.
+const prolog = new PemutarPanel();
+prolog.saatPanel = (p) => {
+  for (const id of p.bukaKitab) status.bukaKitab(id);
+};
 /** Mode UI: logika permainan hanya berjalan saat 'main'. */
-type ModeUi = 'judul' | 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' | 'sinematik' | 'selesai' | 'peta';
+type ModeUi = 'judul' | 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' | 'sinematik' | 'selesai' | 'peta' | 'prolog';
 let modeUi: ModeUi = 'judul';
 /** Mode yang dikembalikan saat Kitab ditutup (dibuka dari permainan, menu jeda, layar awal, atau layar selesai). */
 let asalKitab: 'main' | 'jeda' | 'judul' | 'selesai' = 'main';
@@ -438,14 +446,38 @@ function kembaliKeJudul(): void {
   layarJudul.buka(status.titikSimpan !== null);
 }
 
+/** Memutar prolog; `setelah` dipanggil begitu penutupnya selesai. Waktu prolog tidak dihitung ke waktuMisi. */
+function mulaiProlog(setelah: () => void): void {
+  modeUi = 'prolog';
+  hud.tampilkanAksi(null);
+  if (document.pointerLockElement) document.exitPointerLock();
+  prolog.mulai(PROLOG, (hasil) => {
+    status.selesaikanProlog();
+    catatan.prolog(hasil);
+    setelah();
+  });
+}
+/** Tujuan setelah prolog menurut `penutup.lanjutKe` (selama prototipe hanya misi 3). */
+function lanjutSetelahProlog(): void {
+  modeUi = 'main';
+  misi.mulai();
+}
+
 layarJudul.saatMulaiBaru = () => {
   layarJudul.tutup();
   status.ulangMisi();
   catatan.mulaiSesi();
   peta.reset();
   waktuMisi = 0;
-  modeUi = 'main';
-  misi.mulai();
+  mulaiProlog(lanjutSetelahProlog);
+};
+// Putar ulang prolog dari layar awal: kembali ke layar awal, simpanan tidak disentuh.
+layarJudul.saatProlog = () => {
+  layarJudul.tutup();
+  mulaiProlog(() => {
+    modeUi = 'judul';
+    layarJudul.buka(status.titikSimpan !== null);
+  });
 };
 layarJudul.saatLanjutkan = () => {
   const titik = status.titikSimpan;
@@ -547,6 +579,12 @@ function perbaruiGamepadUi(): void {
     if (modeUi === 'peta') tutupPeta();
     else if (modeUi === 'main' && !tarung.mati) bukaPeta('main');
     else if (modeUi === 'jeda') bukaPeta('jeda');
+    return;
+  }
+  if (modeUi === 'prolog') {
+    // A melengkapi ketikan atau lanjut; B melewati prolog kalau sudah boleh.
+    if (input.padBaru('dialogLanjut')) prolog.lanjut();
+    else if (input.padBaru('menuKembali')) prolog.lewati();
     return;
   }
   if (modeUi === 'dialog' || modeUi === 'panel') {
@@ -657,6 +695,8 @@ renderer.setAnimationLoop(() => {
     if (modeUi === 'peta') peta.perbarui(dtNyata, pemain.posisi, pemain.hadap, misi.penandaSekarang);
   } else if (modeUi === 'panel') {
     panel.perbarui(dtNyata);
+  } else if (modeUi === 'prolog') {
+    prolog.perbarui(dtNyata);
   } else if (modeUi === 'sinematik') {
     perbaruiSinematikPerahu(dtNyata);
   } else if (modeUi === 'dialog') {
@@ -701,7 +741,7 @@ if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
-    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan, kejadian, hudKejadian,
+    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan, kejadian, hudKejadian, prolog,
     get waktuMisi() {
       return waktuMisi;
     },

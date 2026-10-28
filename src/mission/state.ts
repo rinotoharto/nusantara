@@ -48,6 +48,7 @@ interface DataSimpanan {
   pengaturan: Partial<Pengaturan>;
   titikSimpan?: TitikSimpan | null;
   hasilMisi3?: HasilMisi | null;
+  prologSelesai?: boolean;
 }
 
 const KUNCI_SIMPAN = 'nusantara.status';
@@ -64,6 +65,8 @@ export class StatusPermainan {
   titikSimpan: TitikSimpan | null = null;
   /** Hasil misi 3 terakhir yang selesai, untuk misi 4. */
   hasilMisi3: HasilMisi | null = null;
+  /** Benar kalau prolog (misi 1) pernah selesai diputar atau dilewati; tetap setelah misi diulang. */
+  prologSelesai = false;
   /** Dipanggil saat entri Kitab baru terbuka (untuk pemberitahuan). */
   saatKitabTerbuka: ((id: string) => void) | null = null;
   /** Dipanggil saat tanda baru (belum pernah ada) disimpan; rombongan menerapkan aturannya. */
@@ -113,6 +116,11 @@ export class StatusPermainan {
     this.simpan();
   }
 
+  selesaikanProlog(): void {
+    this.prologSelesai = true;
+    this.simpan();
+  }
+
   /** Misi selesai: hasilnya disimpan sebagai tanda untuk misi berikutnya, titik simpan dihapus. */
   selesaikanMisi(hasil: HasilMisi): void {
     this.hasilMisi3 = hasil;
@@ -147,6 +155,7 @@ export class StatusPermainan {
     this.pengaturan = { ...PENGATURAN_AWAL };
     this.titikSimpan = null;
     this.hasilMisi3 = null;
+    this.prologSelesai = false;
     try {
       localStorage.removeItem(KUNCI_SIMPAN);
     } catch {
@@ -162,6 +171,7 @@ export class StatusPermainan {
       pengaturan: this.pengaturan,
       titikSimpan: this.titikSimpan,
       hasilMisi3: this.hasilMisi3,
+      prologSelesai: this.prologSelesai,
     };
     try {
       localStorage.setItem(KUNCI_SIMPAN, JSON.stringify(data));
@@ -192,6 +202,7 @@ export class StatusPermainan {
       if (pg.kualitas === 'rendah' || pg.kualitas === 'sedang' || pg.kualitas === 'tinggi') this.pengaturan.kualitas = pg.kualitas;
       if (data.titikSimpan && typeof data.titikSimpan.segmen === 'string') this.titikSimpan = data.titikSimpan;
       if (data.hasilMisi3) this.hasilMisi3 = data.hasilMisi3;
+      if (data.prologSelesai === true) this.prologSelesai = true;
     } catch {
       console.warn('[status] simpanan rusak, mulai dari kosong');
     }
