@@ -66,5 +66,9 @@
     "waktuPenuh": 1.5,
     "bagianPenuh": 0.6,
     "jarakTampilLingkaran": 20
+  },
+  "obor": {
+    "keterangan": "Obor di tangan: pemain tidak bisa tersembunyi, jarak pandang penjaga dikalikan faktorJarak.",
+    "faktorJarak": 1.5
   }
 }

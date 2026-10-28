@@ -81,6 +81,11 @@ export class Pemain {
   skalaBadan = 1;
   /** Batas kecepatan dari misi (m/s), misalnya saat membawa Gajah Pagon; null = normal. */
   batasLaju: number | null = null;
+  /** Punya obor (dari kepala desa Kudadu, sprint 7); diisi main dari tanda. */
+  punyaObor = false;
+  /** Obor menyala di tangan kiri: harimau menjauh, tapi penjaga melihat lebih jauh dan tidak bisa bersembunyi. */
+  oborMenyala = false;
+  private readonly obor = new THREE.Group();
 
   /** Benar hanya pada frame pemain selesai memanjat; pengikut yang tertinggal disusulkan. */
   baruSelesaiMemanjat = false;
@@ -103,6 +108,24 @@ export class Pemain {
     );
     hidung.position.set(0, TINGGI_PEMAIN - 0.35, JARI_PEMAIN);
     this.pose.add(hidung);
+
+    // Obor di tangan kiri: batang pendek, nyala, dan lampu titik; tampil hanya saat menyala.
+    const batangObor = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.05, 0.7, 6),
+      new THREE.MeshStandardMaterial({ color: 0x8a6a3a, roughness: 0.9 }),
+    );
+    const nyala = new THREE.Mesh(
+      new THREE.SphereGeometry(0.11, 8, 6),
+      new THREE.MeshStandardMaterial({ color: 0xffc866, emissive: 0xffa030, emissiveIntensity: 2.5 }),
+    );
+    nyala.position.y = 0.4;
+    const cahayaObor = new THREE.PointLight(0xffb060, 5, 9, 1.5);
+    cahayaObor.position.y = 0.45;
+    this.obor.add(batangObor, nyala, cahayaObor);
+    this.obor.position.set(-JARI_PEMAIN - 0.12, 1.15, 0.15);
+    this.obor.rotation.z = 0.35;
+    this.obor.visible = false;
+    this.pose.add(this.obor);
 
     this.badan.add(this.pose);
     this.grup.add(this.badan);
@@ -133,6 +156,9 @@ export class Pemain {
 
   perbarui(dt: number, input: Input, yawKamera: number, perintah: Readonly<PerintahGerak> = PERINTAH_BEBAS): void {
     this.baruSelesaiMemanjat = false;
+    if (!this.punyaObor) this.oborMenyala = false;
+    else if (input.aksiBaru('obor')) this.oborMenyala = !this.oborMenyala;
+    this.obor.visible = this.oborMenyala;
     if (this.panjatKe && this.panjatDari) {
       this.perbaruiPanjat(dt);
       return;

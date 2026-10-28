@@ -55,6 +55,17 @@
         "pengikut": -1,
         "lajuLari": 5,
         "teks": "Pengikut -1: Wirot ditinggal di gubuk"
+      },
+      "harimau-bekal": {
+        "perbekalan": -1,
+        "teks": "Perbekalan -1: bekal dilempar ke harimau"
+      },
+      "harimau-gagak": {
+        "pengikut": -1,
+        "teks": "Pengikut -1: Gagak diseret harimau"
+      },
+      "harimau-mati": {
+        "teks": "Harimau jawa tumbang"
       }
     },
     "ketahuan": {
@@ -79,6 +90,14 @@
         47,
         30
       ]
+    },
+    "obor": {
+      "keterangan": "Obor di tangan (T). Pemain mendapatkannya begitu salah satu tanda ini muncul (kepala desa Kudadu). Harimau menjaga jarak dari obor, tapi pemain tidak bisa menyelinap sambil memegangnya.",
+      "dariTanda": [
+        "kudadu-menginap",
+        "kudadu-sebelum-fajar"
+      ],
+      "teks": "Kepala desa memberi obor: T untuk menyalakan"
     }
   },
   "teks": {
@@ -1224,6 +1243,41 @@
         ],
         "hadap": -2.2
       },
+      "semak": [
+        {
+          "x": -163,
+          "z": -168
+        },
+        {
+          "x": -174,
+          "z": -175
+        },
+        {
+          "x": -186,
+          "z": -182
+        }
+      ],
+      "kejadian": [
+        {
+          "id": "harimau-bukit",
+          "jenis": "harimau",
+          "pusat": [
+            -178,
+            -167
+          ],
+          "jari": 18,
+          "muncul": [
+            -181,
+            -180
+          ],
+          "syarat": [
+            "rute-bukit"
+          ],
+          "peluang": 1.0,
+          "percakapan": "harimau-sora",
+          "sekaliPerMisi": true
+        }
+      ],
       "selesai": {
         "area": {
           "pusat": [

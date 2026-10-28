@@ -177,6 +177,11 @@ export class PengelolaSiluman {
     // Jongkok atau di dalam semak: hanya terlihat dari jarak setengah. Keduanya: tersembunyi.
     k.faktorJarak = k.semak ? SILUMAN.pemain.faktorJarakSemak : pemain.jongkok ? SILUMAN.pemain.faktorJarakJongkok : 1;
     k.tersembunyi = pemain.jongkok && k.semak !== null;
+    // Obor menyala (sprint 7): terlihat dari lebih jauh dan tidak pernah tersembunyi.
+    if (pemain.oborMenyala) {
+      k.faktorJarak = SILUMAN.obor.faktorJarak;
+      k.tersembunyi = false;
+    }
     const penghalang = this.konteks.penghalangSemak;
     penghalang.length = 0;
     for (const s of this.semak) if (s !== k.semak) penghalang.push(s.kotak);

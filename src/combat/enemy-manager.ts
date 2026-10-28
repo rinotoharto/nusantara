@@ -153,8 +153,8 @@ export class PengelolaLawan implements PemberiGiliran {
       for (let j = i + 1; j < hidup.length; j++) {
         pisahkan(hidup[i].posisi, hidup[j].posisi, JARI_LAWAN * 2, 0.5);
       }
-      // Pemain lebih "berat": lawan yang lebih banyak bergeser.
-      pisahkan(hidup[i].posisi, pemain.posisi, JARI_LAWAN + JARI_PEMAIN, 0.75);
+      // Pemain lebih "berat": lawan yang lebih banyak bergeser. Terkaman harimau dibiarkan menembus.
+      if (!hidup[i].menembus) pisahkan(hidup[i].posisi, pemain.posisi, JARI_LAWAN + JARI_PEMAIN, 0.75);
     }
   }
 }

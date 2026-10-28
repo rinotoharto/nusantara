@@ -67,6 +67,8 @@ export class Pengikut {
   jongkok = false;
   /** Salah kalau pengikut ini ditinggal: berdiri diam di tempat sebagai NPC, tidak mengikuti. */
   aktif = true;
+  /** Ditahan harimau (sprint 7): tidak bergerak sampai dilepas. */
+  tertahan = false;
   private skalaBadan = 1;
   private miring = 0;
   private fasePincang = 0;
@@ -103,6 +105,11 @@ export class Pengikut {
     return Math.hypot(this.kecepatan.x, this.kecepatan.z);
   }
 
+  /** Kecepatan datar saat ini, untuk mengantisipasi gerak (terkaman harimau). */
+  get kecepatanDatar(): Readonly<THREE.Vector3> {
+    return this.kecepatan;
+  }
+
   /** Letakkan di (x, z) di atas tanah dan hentikan geraknya. */
   taruhDi(x: number, z: number): void {
     this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);
@@ -135,6 +142,11 @@ export class Pengikut {
 
   perbarui(dt: number, ctx: KonteksPengikut): void {
     const pemain = ctx.pemain;
+    if (this.tertahan) {
+      this.kecepatan.set(0, 0, 0);
+      this.perbaruiBadan(dt, pemain);
+      return;
+    }
     const dxP = pemain.posisi.x - this.posisi.x;
     const dzP = pemain.posisi.z - this.posisi.z;
     const jarakPemain = Math.hypot(dxP, dzP);

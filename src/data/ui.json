@@ -35,6 +35,10 @@
         "peta"
       ],
       [
+        "T",
+        "obor (kalau ada)"
+      ],
+      [
         "Klik kiri",
         "serang, tahan: berat"
       ],
@@ -206,5 +210,12 @@
   },
   "playtest": {
     "lencana": "Mode playtest: catatan direkam"
+  },
+  "kejadian": {
+    "lemparBekal": "E: Lempar bekal",
+    "lemparBekalPad": "Y: Lempar bekal",
+    "geram": "...",
+    "lamaGeram": 1.6,
+    "pengikutDitangkap": "Harimau menyeret seorang pengikut! Serang atau lempar bekal"
   }
 }

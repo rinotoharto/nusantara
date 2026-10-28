@@ -22,6 +22,7 @@ export type StatusAksi =
   | 'tangkis'
   | 'hindar'
   | 'terpukul'
+  | 'terjatuh' // rebah karena terkaman harimau, serudukan babi, atau longsor; lamanya dari penyerang
   | 'tikaman' // Tikaman Keris: melesat lalu menusuk lawan yang terhuyung
   | 'mati';
 
@@ -92,6 +93,7 @@ export class PertarunganPemain {
   private seranganSudahKeluar = false;
   private seranganSiap: Serangan | null = null;
   private hadapAksi = 0;
+  private lamaJatuh = 1;
   private readonly arahHindar = new THREE.Vector3();
   private readonly dorongan = new THREE.Vector3();
   private readonly doronganLuar = new THREE.Vector3();
@@ -186,20 +188,42 @@ export class PertarunganPemain {
    */
   terkena(dari: THREE.Vector3, dorong: number, ditangkis: boolean, damage: number): void {
     if (this.mati || this.kebal) return;
+    this.pukul(dari, dorong, ditangkis ? WARNA_TERTANGKIS : WARNA_KENA, K.terpukul.kilatan);
+    if (ditangkis) return;
+    if (this.lukai(damage)) this.masuk('terpukul');
+  }
+
+  /** Pemain dijatuhkan (terkaman, serudukan, longsor): rebah selama `lama` detik, tidak bisa berbuat apa-apa. */
+  jatuhkan(dari: THREE.Vector3, dorong: number, damage: number, lama: number): void {
+    if (this.mati || this.kebal) return;
+    this.pukul(dari, dorong, WARNA_KENA, K.terjatuh.kilatan);
+    if (this.lukai(damage)) {
+      this.lamaJatuh = lama;
+      this.masuk('terjatuh');
+    }
+  }
+
+  /** Dorongan dan kilatan karena terkena; damage diurus `lukai`. */
+  private pukul(dari: THREE.Vector3, dorong: number, warna: THREE.Color, kilatan: number): void {
     const pos = this.pemain.posisi;
     const dx = pos.x - dari.x;
     const dz = pos.z - dari.z;
     const d = Math.hypot(dx, dz) || 1;
     this.doronganLuar.set((dx / d) * dorong, 0, (dz / d) * dorong);
     this.sisaDoronganLuar = 0.15;
-    this.sisaKilat = K.terpukul.kilatan;
-    this.warnaKilat.copy(ditangkis ? WARNA_TERTANGKIS : WARNA_KENA);
-    if (ditangkis) return;
-    catatDamage(pos, damage, false);
+    this.sisaKilat = kilatan;
+    this.warnaKilat.copy(warna);
+  }
+
+  /** Mengurangi nyawa; salah kalau pemain gugur karenanya (status mati sudah dimasuki). */
+  private lukai(damage: number): boolean {
+    catatDamage(this.pemain.posisi, damage, false);
     if (this.nyawa.kurangi(damage)) {
       this.masuk('mati');
       this.saatMati?.();
-    } else this.masuk('terpukul');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -372,6 +396,10 @@ export class PertarunganPemain {
         if (this.waktu >= K.terpukul.durasi) this.masuk('bebas');
         break;
 
+      case 'terjatuh':
+        if (this.waktu >= this.lamaJatuh) this.masuk('bebas');
+        break;
+
       case 'mati':
         break;
     }
@@ -485,6 +513,7 @@ export class PertarunganPemain {
         break;
       }
       case 'terpukul':
+      case 'terjatuh':
       case 'mati':
         p.kunciGerak = true;
         p.bolehLompat = false;
@@ -584,6 +613,14 @@ export class PertarunganPemain {
       case 'terpukul':
         condong = -0.25 * (1 - this.waktu / K.terpukul.durasi);
         break;
+      case 'terjatuh': {
+        // Rebah ke belakang, lalu bangun di bagian akhir.
+        const mulaiBangun = this.lamaJatuh * (1 - K.terjatuh.bagianBangun);
+        const bangun = halus((this.waktu - mulaiBangun) / (this.lamaJatuh - mulaiBangun));
+        condong = -1.1 * (1 - bangun);
+        turun = -0.25 * (1 - bangun);
+        break;
+      }
       case 'mati':
         // Rebah ke belakang perlahan.
         condong = -1.4;

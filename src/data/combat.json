@@ -64,6 +64,11 @@
       "lamaLambat": 0.25,
       "kameraMendekat": 1.0,
       "lamaKamera": 0.4
+    },
+    "terjatuh": {
+      "keterangan": "Terjatuh (diterkam, diseruduk, longsor): lamanya ditentukan penyerang; bangun = bagian akhir untuk berdiri lagi.",
+      "kilatan": 0.15,
+      "bagianBangun": 0.3
     }
   },
   "lawan": {
@@ -91,5 +96,66 @@
     "pitchTambahan": 0.12,
     "jarakDeteksi": 10,
     "waktuKembali": 2.0
+  },
+  "harimau": {
+    "keterangan": "Harimau jawa (sprint 7). Mengintai dari balik tutupan 10-15 m sambil menggeram, mengelilingi 6 m, bersiap (merunduk), menerkam 5 m dalam 0,3 detik, mundur 20 m setelah dua kali kena, kembali 8 detik kemudian. Bekal dilempar: makan lalu pergi selamanya. Obor menyala: menjaga jarak jarakMin dan memilih pengikut paling belakang.",
+    "nyawa": 70,
+    "mengintai": {
+      "jarakMin": 10,
+      "jarakMaks": 15,
+      "kecepatan": 2.5,
+      "lama": 8,
+      "lamaSetelahMundur": 3,
+      "diamDiTutupanMin": 1.0,
+      "diamDiTutupanMaks": 2.5,
+      "geramMin": 2.0,
+      "geramMaks": 4.0,
+      "jarakTerpergok": 7
+    },
+    "mengelilingi": {
+      "jarak": 6,
+      "kecepatan": 3.0,
+      "kecepatanMendekat": 3.5,
+      "lamaMin": 2.0,
+      "lamaMaks": 4.0,
+      "jarakSiapTerkam": 5.5
+    },
+    "bersiap": 0.6,
+    "terkam": {
+      "jarak": 5,
+      "durasi": 0.3,
+      "damage": 30,
+      "damageTertangkis": 10,
+      "dorong": 1.0,
+      "jatuh": 0.8,
+      "lebarKena": 0.9,
+      "jeda": 0.8,
+      "antisipasiPengikut": 0.5
+    },
+    "mundur": {
+      "setelahKena": 2,
+      "jarak": 20,
+      "kecepatan": 6.5,
+      "kembaliSetelah": 8
+    },
+    "terhuyung": 1.5,
+    "bekal": {
+      "kecepatan": 4.0,
+      "makan": 10,
+      "jarakLempar": 3,
+      "jarakMaks": 25
+    },
+    "obor": {
+      "jarakMin": 4,
+      "kecepatanMenjauh": 6.0
+    },
+    "pengikut": {
+      "waktuTolong": 6
+    },
+    "pergi": {
+      "jarak": 30,
+      "lamaMaks": 8
+    },
+    "hilangSetelahMati": 3.0
   }
 }

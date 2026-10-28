@@ -9,6 +9,7 @@
     "jongkok": ["KeyC"],
     "lompat": ["Space"],
     "bicara": ["KeyE"],
+    "obor": ["KeyT"],
     "serang": ["Mouse0"],
     "tangkis": ["Mouse2"],
     "hindar": ["ControlLeft", "ControlRight", "Mouse1"],
@@ -30,6 +31,7 @@
       "jeda": 9,
       "lari": 10,
       "pemandu": 12,
+      "obor": 15,
       "menuAtas": 12,
       "menuBawah": 13,
       "menuPilih": 0,
@@ -48,6 +50,7 @@
       ["LB", "tangkis"],
       ["B", "hindar"],
       ["D-pad atas", "pemandu arah"],
+      ["D-pad kanan", "obor (kalau ada)"],
       ["Select", "peta"],
       ["Start", "jeda"],
       ["Stik kanan", "putar kamera"]

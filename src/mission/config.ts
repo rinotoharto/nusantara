@@ -25,6 +25,8 @@ export interface AturanRombongan {
   /** Tempat Gajah Pagon berdiri saat permainan dilanjutkan setelah ia ditinggal. */
   pagonDitinggal: { posisi: [number, number] };
   penjagaSungai: { dasar: number; maks: number };
+  /** Obor di tangan: diberikan begitu salah satu tanda `dariTanda` muncul; `teks` diumumkan di HUD rombongan. */
+  obor: { dariTanda: string[]; teks: string };
 }
 
 /** Seluruh data misi 3 dari src/data/misi3.json. */
@@ -86,6 +88,29 @@ export interface PemicuSegmen {
   jika?: SyaratPemicu;
 }
 
+export type JenisKejadian = 'harimau' | 'perampok' | 'buaya' | 'longsor' | 'desertir' | 'babi';
+export const JENIS_KEJADIAN: readonly JenisKejadian[] = ['harimau', 'perampok', 'buaya', 'longsor', 'desertir', 'babi'];
+
+/**
+ * Kejadian di jalur (sprint 7): aktif saat pemain masuk `jari` dari `pusat` dan semua `syarat` ada.
+ * `peluang` di bawah 1 diundi sekali per misi dari benih titik simpan; `undian` memilih satu dari
+ * beberapa tempat dengan kunci yang sama (hasil `ke` dari `dari` kemungkinan).
+ */
+export interface DataKejadian {
+  id: string;
+  jenis: JenisKejadian;
+  pusat: [number, number];
+  jari: number;
+  /** Tempat aktor muncul kalau bukan di `pusat` (misalnya harimau di balik pohon). */
+  muncul?: [number, number];
+  syarat?: string[];
+  peluang?: number;
+  undian?: { kunci: string; dari: number; ke: number };
+  percakapan?: string;
+  /** Setelah selesai tidak aktif lagi di segmen ini (kecuali segmen dimuat ulang karena gugur). */
+  sekaliPerMisi?: boolean;
+}
+
 /** Satu langkah tujuan: teks HUD, penanda obor, dan area yang menyelesaikannya (langkah terakhir memakai `selesai` segmen). */
 export interface LangkahTujuan {
   teks: string;
@@ -131,6 +156,7 @@ export interface Segmen {
   batu?: DataBatuMisi[];
   semak?: TitikXZ[];
   npc?: DataNpcMisi[];
+  kejadian?: DataKejadian[];
   /** Yang terjadi saat segmen mulai: panel teks (kunci di `teks`), lalu percakapan otomatis. */
   saatMulai?: { panel?: string; lamaPanel?: number; percakapan?: string };
   pemicu?: PemicuSegmen[];

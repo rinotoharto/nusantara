@@ -88,6 +88,11 @@ export class HudRombongan {
     if (p.teks) this.antreanTeks.push(p.teks);
   }
 
+  /** Mengumumkan teks kecil tanpa perubahan nilai (misalnya obor diterima). */
+  umumkan(teks: string): void {
+    this.antreanTeks.push(teks);
+  }
+
   private kedip(el: HTMLElement, naik: boolean): void {
     el.classList.remove('naik', 'turun');
     void el.offsetWidth; // memaksa reflow supaya animasi diulang

@@ -8,7 +8,7 @@ import type { Semak } from '../stealth/bush';
 import { Obor } from '../world/torch';
 import { DIALOG } from '../dialog/config';
 import { KITAB_PER_ID } from '../codex/config';
-import { ATURAN, SEGMEN, TEKS_MISI, langkahSegmen, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga, type LangkahTujuan } from './config';
+import { ATURAN, SEGMEN, TEKS_MISI, JENIS_KEJADIAN, langkahSegmen, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga, type LangkahTujuan } from './config';
 import type { StatusPermainan, TitikSimpan } from './state';
 import type { Rombongan } from './party';
 import { PengelolaNpc, type Npc } from './npc';
@@ -33,6 +33,8 @@ export interface KetergantunganMisi {
   mulaiDialog: (id: string, lawanBicara: THREE.Vector3 | null) => void;
   /** Menyegarkan tampilan rombongan setelah nilainya dipulihkan. */
   segarkanRombongan: () => void;
+  /** Kejadian di jalur (sprint 7): diundi ulang tiap segmen mulai dari benih misi. */
+  kejadian: { mulaiSegmen(s: Segmen, benih: number): void; bersihkan(): void };
 }
 
 /** Isi segmen yang dipasang saat segmen mulai dan dicabut saat misi diulang. */
@@ -69,6 +71,8 @@ export class PelaksanaMisi {
   private npcSegmen: Npc[] = [];
   private readonly pemicuSudah = new Set<PemicuSegmen>();
   private isiGlobalTerpasang = false;
+  /** Benih undian kejadian, dibuat saat misi mulai dan disimpan di titik simpan. */
+  private benih = 0;
 
   constructor(private readonly d: KetergantunganMisi) {}
 
@@ -129,6 +133,11 @@ export class PelaksanaMisi {
         cekDialog(r.setelah, 'rantai.setelah');
         cekDialog(r.percakapan, 'rantai.percakapan');
       }
+      for (const k of s.kejadian ?? []) {
+        cekDialog(k.percakapan, `kejadian ${k.id}`);
+        if (!JENIS_KEJADIAN.includes(k.jenis)) pesan.push(`${nama}: kejadian "${k.id}" berjenis "${k.jenis}" yang tidak dikenal`);
+        if (k.undian && (k.undian.ke < 0 || k.undian.ke >= k.undian.dari)) pesan.push(`${nama}: kejadian "${k.id}" undian.ke di luar 0..dari-1`);
+      }
       if (!s.selesai) pesan.push(`${nama}: tidak punya syarat selesai`);
       const langkah = langkahSegmen(s);
       langkah.forEach((l, k) => {
@@ -150,6 +159,7 @@ export class PelaksanaMisi {
   /** Misi dari awal: rombongan direset, isi dinamis dicabut, pemain ke titik awal segmen pertama. */
   mulai(dariSegmen = 0): void {
     this.bersihkanUntukMulai();
+    this.benih = Date.now() >>> 0;
     this.d.rombongan.reset();
     this.d.segarkanRombongan();
     this.d.pengikut.pagonIkut = this.d.rombongan.pagonIkut;
@@ -163,6 +173,7 @@ export class PelaksanaMisi {
    */
   lanjutkan(titik: TitikSimpan): void {
     this.bersihkanUntukMulai();
+    this.benih = titik.benih ?? 0;
     this.d.status.pulihkanDariTitik(titik);
     this.pulihkanRombongan(titik);
     const i = Math.max(0, SEGMEN.findIndex((s) => s.id === titik.segmen));
@@ -183,6 +194,7 @@ export class PelaksanaMisi {
       this.pulihkanRombongan(this.titik);
     }
     this.d.lawan.hidupkanSemua();
+    this.d.kejadian.mulaiSegmen(s, this.benih);
     this.taruhPemain(s);
     this.mulaiLangkah(0);
   }
@@ -191,6 +203,7 @@ export class PelaksanaMisi {
     this.selesai = false;
     this.pemicuSudah.clear();
     this.cabutDinamis();
+    this.d.kejadian.bersihkan();
     this.d.lawan.hidupkanSemua();
     this.d.aturCahaya(1);
     if (!this.isiGlobalTerpasang) {
@@ -281,6 +294,7 @@ export class PelaksanaMisi {
     if (j >= SEGMEN.length) {
       this.selesai = true;
       this.indeks = SEGMEN.length;
+      this.d.kejadian.bersihkan();
       this.d.aturTujuan('');
       this.saatSelesai?.();
       return;
@@ -289,12 +303,14 @@ export class PelaksanaMisi {
     const s = SEGMEN[j];
     if (import.meta.env.DEV) console.log(`[misi] segmen ${j + 1}/${SEGMEN.length}: ${s.id}`);
     this.pasangIsi(s, true);
+    this.d.kejadian.mulaiSegmen(s, this.benih);
     this.titik = {
       segmen: s.id,
       rombongan: this.d.rombongan.salin(),
       tanda: [...this.d.status.tanda],
       percakapan: [...this.d.status.percakapanSelesai],
       waktu: 0,
+      benih: this.benih,
     };
     this.d.aturCahaya(s.cahaya && (!s.cahaya.syarat || this.d.status.tanda.has(s.cahaya.syarat)) ? s.cahaya.pengali : 1);
     if (taruhPemain) this.taruhPemain(s);

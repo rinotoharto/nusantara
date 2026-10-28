@@ -3,7 +3,7 @@ import { tinggiMedan, PERMUKAAN_AIR, titikTerdekatJalur, type TitikJalur } from 
 import { DUNIA, type Titik2 } from './world-config';
 
 // Pembangkit acak dengan benih tetap supaya tata letak hutan tidak berubah tiap muat.
-function acakBerbenih(benih: number): () => number {
+export function acakBerbenih(benih: number): () => number {
   let a = benih >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;

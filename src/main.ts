@@ -47,6 +47,8 @@ import { TEKS_SELESAI } from './mission/config';
 import { isiPola } from './ui/config';
 import type { HasilMisi } from './mission/state';
 import { CatatanPlaytest } from './mission/playtest';
+import { HudKejadian } from './ui/event-hud';
+import { PengelolaKejadian } from './mission/events';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -119,7 +121,11 @@ for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[da
 const rombongan = new Rombongan();
 const hudRombongan = new HudRombongan(rombongan);
 rombongan.saatBerubah = (p) => hudRombongan.tampilkanPerubahan(p);
-status.saatTanda = (tanda) => rombongan.terapkanTanda(tanda);
+status.saatTanda = (tanda) => {
+  rombongan.terapkanTanda(tanda);
+  // Obor dari kepala desa (sprint 7): diumumkan sekali saat tanda pemberinya muncul.
+  if (ATURAN.obor.dariTanda.includes(tanda) && !pemain.punyaObor) hudRombongan.umumkan(ATURAN.obor.teks);
+};
 siluman.saatKetahuan = () => {
   rombongan.ketahuan();
   catatan.ketahuan(pemain.posisi.x, pemain.posisi.z);
@@ -271,6 +277,25 @@ mesinDialog.saatSelesai = (id) => {
   misi.saatDialogSelesai(id);
 };
 
+const hudTarung = new HudPertarungan(() => ulangiDariTitikSimpan());
+
+// Kejadian di jalur (sprint 7): harimau, perampok, buaya, longsor, desertir, babi.
+const hudKejadian = new HudKejadian();
+const kejadian = new PengelolaKejadian({
+  scene,
+  tabrakan: dunia.tabrakan,
+  lawan,
+  siluman,
+  status,
+  rombongan,
+  pemain,
+  pengikut,
+  hud: hudKejadian,
+  umumkan: (teks) => hudTarung.umumkan(teks),
+  mulaiDialog,
+  gamepadTerakhir: () => input.gamepadTerakhir,
+});
+
 // Misi: segmen dari misi3.json.
 const misi = new PelaksanaMisi({
   scene,
@@ -286,6 +311,7 @@ const misi = new PelaksanaMisi({
   bukaPanel,
   mulaiDialog,
   segarkanRombongan: () => hudRombongan.segarkan(),
+  kejadian,
 });
 for (const pesan of misi.validasi()) console.warn(`[data] ${pesan}`);
 misi.saatSegmenMulai = (titik) => {
@@ -426,7 +452,6 @@ function ulangiDariTitikSimpan(): void {
   tarung.hidupkan();
   misi.muatUlangSegmen();
 }
-const hudTarung = new HudPertarungan(ulangiDariTitikSimpan);
 tarung.saatTikaman = (pertama) => {
   if (pertama) hudTarung.umumkan(UI.tarung.jurusTikaman);
 };
@@ -559,6 +584,7 @@ function perbaruiPermainan(dt: number): void {
   pengikut.batasLaju = rombongan.lajuMaks;
   pengikut.pagonIkut = rombongan.pagonIkut;
   siluman.pengaliCuriga = rombongan.pengaliCuriga;
+  pemain.punyaObor = ATURAN.obor.dariTanda.some((t) => status.tanda.has(t));
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
@@ -566,6 +592,7 @@ function perbaruiPermainan(dt: number): void {
   siluman.perbarui(pemain, pengikut.aktif, dt);
   pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
+  if (!tarung.mati) kejadian.perbarui(dt);
 
   // Pemicu Kitab dan pemicu segmen misi.
   const tenang = lawan.jarakTerdekat(pemain.posisi) >= KONFIG.kamera.jarakDeteksi;
@@ -582,11 +609,15 @@ function perbaruiPermainan(dt: number): void {
   peta.catatKunjungan(pemain.posisi.x, pemain.posisi.z);
 
   // NPC dekat: tampilkan "E: Bicara" dan mulai percakapan; tidak saat ada lawan bertarung di dekat pemain.
+  // Kalau tidak ada NPC, tombol yang sama dipakai kejadian di jalur (misalnya "E: Lempar bekal").
   const npcDekat = modeUi === 'main' && tenang && !tarung.mati && pemain.diTanah ? npc.terdekat(pemain.posisi, UI.npc.jarak) : null;
-  hud.tampilkanAksi(npcDekat ? (input.gamepadTerakhir ? UI.npc.bicaraPad : UI.npc.bicara) : null);
+  const petunjukKejadian = !tarung.mati ? kejadian.petunjuk() : null;
+  hud.tampilkanAksi(npcDekat ? (input.gamepadTerakhir ? UI.npc.bicaraPad : UI.npc.bicara) : petunjukKejadian);
   if (npcDekat && input.aksiBaru('bicara')) {
     npcDekat.hadapKe(pemain.posisi.x, pemain.posisi.z);
     mulaiDialog(npcDekat.percakapanBerikut(status), npcDekat.posisi);
+  } else if (petunjukKejadian && input.aksiBaru('bicara')) {
+    kejadian.tekanAksi();
   }
 }
 
@@ -644,6 +675,7 @@ renderer.setAnimationLoop(() => {
   hudRombongan.perbarui(dtNyata, modeUi !== 'main');
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
+  hudKejadian.perbarui(dtNyata, camera, modeUi !== 'main');
   input.akhirFrame();
 
   renderer.render(scene, camera);
@@ -654,7 +686,7 @@ if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
-    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan,
+    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan, kejadian, hudKejadian,
     get waktuMisi() {
       return waktuMisi;
     },

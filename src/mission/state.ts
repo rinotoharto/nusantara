@@ -27,6 +27,8 @@ export interface TitikSimpan {
   percakapan: string[];
   /** Detik permainan sejak misi mulai. */
   waktu: number;
+  /** Benih undian kejadian di jalur, dibuat saat misi mulai; tidak ada di simpanan lama. */
+  benih?: number;
 }
 
 /** Hasil misi 3 yang disimpan sebagai tanda untuk misi 4. */

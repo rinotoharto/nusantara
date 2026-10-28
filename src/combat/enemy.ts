@@ -28,10 +28,17 @@ export type StatusLawan =
   | 'patroli'
   | 'curiga'
   | 'mencari'
-  | 'kembali';
+  | 'kembali'
+  // Status harimau (src/combat/tiger.ts).
+  | 'mengintai'
+  | 'menerkam'
+  | 'jeda'
+  | 'menyeret'
+  | 'makan'
+  | 'pergi';
 
-/** Status penjaga di luar pertarungan. */
-const STATUS_SILUMAN: ReadonlySet<StatusLawan> = new Set<StatusLawan>(['patroli', 'curiga', 'mencari', 'kembali']);
+/** Status di luar pertarungan: penjaga yang belum sadar, harimau yang mengintai, makan, atau pergi. */
+const STATUS_TENANG: ReadonlySet<StatusLawan> = new Set<StatusLawan>(['patroli', 'curiga', 'mencari', 'kembali', 'mengintai', 'makan', 'pergi']);
 
 /** Pemberi giliran serangan: hanya satu lawan yang boleh menyerang pada satu waktu. */
 export interface PemberiGiliran {
@@ -48,27 +55,39 @@ export class Lawan {
   readonly posisi = this.grup.position;
   protected readonly badan = new THREE.Group();
   protected readonly bahan: THREE.MeshStandardMaterial;
-  private readonly tombak = new THREE.Group();
+  protected readonly tombak = new THREE.Group();
   status: StatusLawan = 'diam';
-  readonly nyawa = new Nyawa(L.nyawa);
+  readonly nyawa = new Nyawa(this.nyawaMaks());
   /** Detik sejak masuk status sekarang. */
   protected waktu = 0;
   hadap = 0;
   private jedaMundur = 1.5;
-  private sisaKilat = 0;
+  protected sisaKilat = 0;
   private tusukanSudahKeluar = false;
   /** Arah memutar saat mengelilingi: +1 searah jarum jam, -1 sebaliknya. */
   private arahKeliling = Math.random() < 0.5 ? 1 : -1;
   private sisaGantiArah = 3;
   private readonly asal: THREE.Vector3;
-  private readonly doronganKena = new THREE.Vector3();
-  private sisaDoronganKena = 0;
+  protected readonly doronganKena = new THREE.Vector3();
+  protected sisaDoronganKena = 0;
 
   constructor(protected data: DataTabrakan, x: number, z: number) {
-    this.bahan = new THREE.MeshStandardMaterial({ color: WARNA, roughness: 0.8 });
+    this.bahan = this.bangunBadan();
+    this.badan.rotation.order = 'YXZ';
+    this.grup.add(this.badan);
+    this.asal = new THREE.Vector3(x, 0, z);
+    this.hidupkan();
+  }
+
+  /**
+   * Membangun tubuh di `badan` dan mengembalikan bahan tubuh (untuk kilatan kena). Dipanggil dari
+   * konstruktor induk, jadi turunan tidak boleh mengandalkan anggota yang diisi sesudah `super()`.
+   */
+  protected bangunBadan(): THREE.MeshStandardMaterial {
+    const bahan = new THREE.MeshStandardMaterial({ color: WARNA, roughness: 0.8 });
     const kapsul = new THREE.Mesh(
       new THREE.CapsuleGeometry(JARI_LAWAN, TINGGI_PEMAIN - 2 * JARI_LAWAN, 6, 12),
-      this.bahan,
+      bahan,
     );
     kapsul.position.y = TINGGI_PEMAIN / 2;
     kapsul.castShadow = true;
@@ -97,20 +116,26 @@ export class Lawan {
     this.tombak.add(batang, mata);
     this.tombak.position.set(JARI_LAWAN + 0.08, 1.0, 0);
     this.badan.add(this.tombak);
-    this.badan.rotation.order = 'YXZ';
+    return bahan;
+  }
 
-    this.grup.add(this.badan);
-    this.asal = new THREE.Vector3(x, 0, z);
-    this.hidupkan();
+  /** Nyawa penuh jenis lawan ini; turunan (harimau, perampok) mengambilnya dari bagian combat.json miliknya. */
+  protected nyawaMaks(): number {
+    return L.nyawa;
   }
 
   get hidup(): boolean {
     return this.status !== 'mati';
   }
 
-  /** Benar kalau hidup dan sedang dalam status pertarungan (bukan patroli atau mencari). */
+  /** Benar kalau hidup dan sedang dalam status pertarungan (bukan patroli, mencari, atau mengintai). */
   get bertarung(): boolean {
-    return this.hidup && !STATUS_SILUMAN.has(this.status);
+    return this.hidup && !STATUS_TENANG.has(this.status);
+  }
+
+  /** Benar kalau kapsulnya boleh menembus pemain sesaat (terkaman harimau); pengelola tidak memisahkannya. */
+  get menembus(): boolean {
+    return false;
   }
 
   /** Kembalikan ke titik awal dalam keadaan hidup. */
@@ -288,7 +313,7 @@ export class Lawan {
   }
 
   /** Rebah ke belakang (sambil terdorong sisa pukulan terakhir), lalu menghilang setelah beberapa detik. */
-  private perbaruiMati(dt: number): void {
+  protected perbaruiMati(dt: number): void {
     if (this.sisaDoronganKena > 0) {
       this.sisaDoronganKena -= dt;
       this.posisi.x += this.doronganKena.x * dt;

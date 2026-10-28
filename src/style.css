@@ -163,6 +163,20 @@ html, body {
   opacity: 0;
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
+/* Geraman harimau: "..." di tepi layar ke arah sumber suara (sprint 7) */
+.hud-geram {
+  top: 0;
+  left: 0;
+  font-size: 34px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #f0d8a8;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.hud-geram.tampil {
+  opacity: 0.95;
+}
 .hud-jurus.tampil {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
