@@ -414,6 +414,10 @@ function tampilkanSelesai(): void {
       isiPola(S.ketahuan, { n: n.kaliKetahuan }),
       isiPola(S.kitab, { n: status.kitab.length, total: KITAB_PER_ID.size }),
       isiPola(S.waktu, { menit: Math.floor(waktuMisi / 60), detik: Math.floor(waktuMisi % 60) }),
+      // Kejadian di jalur (sprint 7): satu baris per tanda yang ada, urutan seperti di misi3.json.
+      ...Object.entries(teks.kejadian as Record<string, string>)
+        .filter(([tanda]) => tanda !== 'keterangan' && status.tanda.has(tanda))
+        .map(([, baris]) => baris),
     ],
     catatan: [n.pagon === 'ikut' ? teks.catatanPagonIkut : teks.catatanPagonDitinggal, catatanDesertir].filter(Boolean).join(' '),
   };

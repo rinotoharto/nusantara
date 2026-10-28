@@ -418,3 +418,71 @@ Sumbu: +x timur, −z utara; desa Kudadu di (0, 0); ukuran 600 × 600 m; lereng 
 - `base: './'` dipilih daripada `/nama-repo/` supaya build yang sama berjalan di GitHub Pages, `vite preview`, dan dibuka dari berkas.
 - Mode playtest aktif lewat parameter URL, bukan tombol di menu, supaya pemain tidak sengaja membukanya dan pengamat yang menyiapkannya.
 - Docs selain `catatan-sprint.md` dan `playtest-lembar.md` tidak di-commit dari sesi ini karena milik penulis.
+
+## Sprint 7: kejadian di jalur (28 Oktober 2026)
+
+Tujuan: mengisi kedua rute dengan kejadian (lawan baru, bahaya alam, keputusan) supaya perjalanan terasa, dengan dialog dan Kitab yang sudah ada dari penulis. Empat commit: "Harimau jawa", "Perampok dan desertir", "Buaya, longsor, babi hutan", "Sprint 7 selesai: kejadian di jalur".
+
+### Yang sudah jalan
+
+- **Pengelola kejadian** (`src/mission/events.ts`): tiap segmen boleh punya daftar `kejadian`. Saat segmen mulai (atau dimuat ulang karena gugur) semua kejadian diundi dari benih misi (`TitikSimpan.benih`, dibuat dari waktu mulai misi), lalu aktif saat pemain masuk `jari` dari `pusat` dan semua `syarat` ada. Aktor dibuat saat itu dan dibuang saat selesai atau segmen berganti. Undian `peluang` dan `undian` berkunci deterministik per benih (`undi(benih, kunci)` memakai FNV-1a dan `acakBerbenih` dari forest.ts), jadi setelah gugur hasil undiannya sama.
+- **Harimau jawa** (`src/combat/tiger.ts`, aktor `event-tiger.ts`): kapsul rebah jingga berloreng. Mengintai di balik semak atau pohon 10 sampai 15 m sambil menggeram ("..." di tepi layar ke arah sumber, `src/ui/event-hud.ts`), mengelilingi 6 m, bersiap merunduk 0,6 detik, menerkam 5 m dalam 0,3 detik (damage 30, pemain rebah 0,8 detik). Hindar ke samping lolos; tangkis pas membuatnya terhuyung 1,5 detik dan membuka Tikaman Keris; tangkis biasa kena 10 tanpa rebah. Dua kali kena: mundur 20 m, kembali 8 detik kemudian. E saat Perbekalan lebih dari 0: lempar bekal (tanda `harimau-bekal`, Perbekalan -1), harimau makan 10 detik lalu pergi selamanya. Obor menyala: menjaga jarak 4 m dan mengincar pengikut paling belakang (bukan Gajah Pagon); pengikut diseret 6 detik, kalau tidak ditolong (serang atau lempar bekal) tanda `harimau-gagak` (Pengikut -1) dan dialog `harimau-sora`. Kitab `harimau-jawa` terbuka pada geraman pertama.
+- **Obor di tangan** (`Pemain.oborMenyala`, aksi `obor` = T atau D-pad kanan): diberikan lewat `aturan.obor.dariTanda` (menginap atau sebelum fajar di Kudadu) dan diumumkan di HUD rombongan. Menyala: tidak bisa tersembunyi, penjaga melihat 1,5 kali lebih jauh (`stealth.json` `obor.faktorJarak`).
+- **Status pemain `terjatuh`** (`jatuhkan(dari, dorong, damage, lama)` di player-combat.ts): rebah selama waktu yang ditentukan penyerang (harimau 0,8; babi 0,6; buaya 0,6; longsor 0,8), tidak bisa berbuat apa-apa; `dorong` negatif berarti diseret ke penyerang (buaya).
+- **Perampok** (`src/combat/bandit.ts`, aktor `event-bandit.ts`): kapsul cokelat tua bergolok; tiga orang menghadang jalan tanpa kerucut pandang. `Gerombolan` menggantikan antrean satu penyerang: paling banyak dua yang menyerang bersamaan dengan jeda 0,4 detik antar awal serangan. Satu isyarat 0,35 detik lalu dua tebasan (0,08 dan 0,38 detik): tebasan kedua tanpa isyarat, jadi tangkis pas lebih sulit, hindar menjauh mudah. Dialog `perampok-hadang` mulai 8 m dari kepala perampok: hormat (tanda `perampok-dibayar`, Perbekalan -2) atau tegas (`perampok-tegas`) membuat mereka pergi; tegas dengan Pengikut 12 atau kurang menambah tanda `kabar-wijaya` (Kewaspadaan +1), dengan prajurit lumbung ikut (13) tidak. Licik: bertarung dengan kepala terhuyung 1,5 detik. Mengayun keris saat mendekat menunda dialog; serangan yang kena memulai pertarungan tanpa dialog. Semua kalah: `perampok-dikalahkan`.
+- **Desertir** (`event-desertir.ts`): NPC "Prajurit Daha" di gubuk kecil (lantai, dua dinding, atap) di tepi jalan, bicara dengan E, percakapan `desertir-kediri`. `desertir-ikut` memberi Pengikut +1. Di layar selesai kesetiaannya diundi dari benih (`aturan.desertir.peluangSetia` 0,5): tidak setia menambah tanda `desertir-khianat` (Kewaspadaan +1) dan kalimat `teks.selesai.desertir.khianat`, setia kalimat `setia`.
+- **Buaya** (`src/world/crocodile.ts`, aktor `event-crocodile.ts`): bukan lawan, tidak bisa dibunuh. Kapsul pipih hijau tua, saat menyelam hanya riak. Muncul 3 detik, menyelam 6 detik, hanyut pelan di air sekitar pusatnya. Pemain yang kakinya di air (lebih dari 0,1 m di bawah permukaan) dalam 3 m lebih dari 1 detik diterkam: damage 35, diseret 1 m, rebah 0,6 detik, lalu buaya menyelam 8 detik. Tangkis pas saat terkaman membatalkannya.
+- **Longsor** (`src/world/landslide.ts`, aktor `event-landslide.ts`): masuk jari memicu "Tanah bergeser!" dan getaran kapsul, 2 detik kemudian balok tumpukan (`tumpukan`, tidak bisa dipanjat) menutup jalan dan dua tangga tebing pendek (`tangga`, bisa dipanjat) muncul; pemain di zona tumpukan kena 20 dan rebah. Dengan Gajah Pagon, memanjat di tiap tangga dikunci (`Pemain.bolehPanjat`) sampai E ditahan 3 detik ("Tahan E: memikul Gajah Pagon"); dialog `longsor-pagon` sekali di tangga pertama. `tambahBatu` di pengelola siluman kini menerima `bisaDipanjat`.
+- **Babi hutan** (`src/combat/boar.ts`, aktor `event-boar.ts`): kapsul rendah kelabu di semak, keluar saat pemain dalam 5 m, menyeruduk lurus 8 m/s (damage 15, rebah 0,6 detik), berbalik pelan, menyeruduk lagi setelah 2 detik; lari setelah satu kali kena atau tiga serudukan. Tiap serudukan memanggil penjaga terdekat dalam 20 m ke tempat babi lewat `Penjaga.selidiki(x, z)` (status mencari tanpa mengejar); tanda `babi-mengamuk`.
+- **Layar selesai**: baris ringkasan per tanda kejadian dari `teks.selesai.kejadian` (misalnya "Harimau dialihkan dengan bekal", "Perampok dibayar", "Longsor menutup punggung bukit").
+- **Lawan**: `Lawan.bangunBadan()` dan `nyawaMaks()` bisa ditimpa turunan; status baru `mengintai`, `menerkam`, `jeda`, `menyeret`, `makan`, `pergi`; status tenang (bukan bertarung) kini patroli, curiga, mencari, kembali, mengintai, makan, pergi. `menembus` membuat kapsul terkaman tidak dipisahkan dari pemain.
+
+### Skema `kejadian` final (misi3.json, per segmen)
+
+```json
+{ "id": "harimau-bukit", "jenis": "harimau", "pusat": [-178, -167], "jari": 18, "muncul": [-181, -180],
+  "syarat": ["rute-bukit"], "peluang": 1.0, "percakapan": "harimau-sora", "sekaliPerMisi": true }
+```
+
+- `jenis`: harimau, perampok, buaya, longsor, desertir, babi. `muncul`: tempat aktor dibuat kalau bukan di `pusat`. `posisi`: daftar anggota untuk perampok. `tumpukan` dan `tangga`: balok longsor (format seperti `batu`). `undian: { kunci, dari, ke }`: satu angka diundi per kunci, kejadian aktif kalau hasilnya `ke`. `sekaliPerMisi` salah berarti bisa aktif lagi setelah selesai (buaya).
+- Aturan baru di `aturan`: `obor` (dariTanda, teks), `perampok` (jarakDialog 8, pengikutTanpaKabar 12), `desertir` (peluangSetia 0,5); tanda baru di `aturan.tanda`: harimau-bekal, harimau-gagak, harimau-mati, perampok-dibayar, perampok-tegas, kabar-wijaya, perampok-dikalahkan, desertir-ikut, desertir-khianat, longsor-terjadi, buaya-menerkam, babi-mengamuk. Teks baru: `teks.selesai.desertir` (setia, khianat) dan `teks.selesai.kejadian`, keduanya teks sementara yang perlu dibaca ulang penulis.
+
+### Angka di combat.json
+
+- `harimau`: nyawa 70; mengintai jarak 10 sampai 15, kecepatan 2,5, lama 8 (3 setelah mundur), geram tiap 2 sampai 4 detik, terpergok 7 m; mengelilingi jarak 6, kecepatan 3, mendekat 3,5, lama 2 sampai 4, siap terkam 5,5 m; bersiap 0,6; terkam jarak 5, durasi 0,3, damage 30, tertangkis 10, jatuh 0,8, lebar kena 0,9, jeda 0,8; mundur setelah 2 kena, 20 m, 6,5 m/s, kembali 8 detik; terhuyung 1,5; bekal makan 10 detik, lempar 3 m, jarak maks 25; obor jarak min 4, menjauh 6 m/s; waktu tolong pengikut 6; pergi 30 m.
+- `perampok`: nyawa 45; golok jangkauan 1,3, sudut 60, damage 15, dorong 0,6; deteksi 12; mendekat 3,4, mengelilingi 1,8 pada 2,5 sampai 3,5 m; isyarat 0,35; tebasan 0,08 dan 0,38, durasi 0,55; mundur 0,8 sampai 1,6; terhuyung 1 (awal 1,5); jeda antar penyerang 0,4, penyerang maks 2; pergi 25 m pada 4,5 m/s.
+- `buaya`: panjang 2,6; muncul 3, menyelam 6, hanyut 0,4 m/s dalam 6 m; kedalaman min 0,1; jarak terkam 3, waktu 1; terkam 9 m/s 0,45 detik, damage 35, seret 1, jatuh 0,6, lebar kena 1; menyelam setelah terkam 8.
+- `babi`: nyawa 30; keluar 5 m; bersiap 0,35; seruduk 8 m/s sejauh 9, damage 15, dorong 1,2, jatuh 0,6, lebar kena 0,8; jeda 2; putar 1,6 rad/s; maks 3 serudukan; radius suara 20; pergi 30 m pada 7 m/s.
+- `longsor`: jeda muncul 2, damage 20, jatuh 0,8, zona tambahan 1,5, getar 2,5, memikul 3.
+- `pemain.terjatuh`: kilatan 0,15, bagian bangun 0,3.
+
+### Penempatan dan dunia
+
+- Jalur bersama: babi di semak (11, 1) dekat jalan Kudadu, pusat (12, 0) jari 5, sekitar 14 m dari ring penjaga jalur-tengah (sengaja, supaya penjaga terpancing). Buaya di penyeberangan x 32 (pusat (32, 58), peluang 0,5, bisa aktif lagi).
+- Rute sungai: perampok di (−40, −3) (tiga orang melintang jalan; 34 m dari patroli pagi, 40 m dari sungai-1), buaya di tempat dangkal baru (pusat (−108, 16), muncul (−112, 20)), desertir di muara (gubuk (−189, −128), undian `desertir` ke 0; 29 m dari penjaga pantai).
+- Rute bukit: desertir di (−44, −104) (gubuk (−42, −108), undian ke 1), longsor pemicu (−112, −133) jari 8 dengan tumpukan tiga balok dari (−124, −139) menuruni lereng utara sampai (−112, −168) dan tangga di (−116,4, −138) tinggi 1,6 dan (−118,8, −138) tinggi 3,2, harimau pusat (−178, −167) jari 18 muncul (−181, −180) dengan tiga semak tutupan. Jarak antar kejadian 68 sampai 74 m.
+- Dunia: `dunia.sungai.dangkal` menjadi daftar `{ x, lebar, sisa }`: (32, 16, 0,3) dan tempat dangkal baru (−110, 36, 0,42). Jalan setapak rute sungai dibelokkan lewat air: (−100, 10), (−108, 18), (−114, 12); kedalaman di jalur paling dalam 0,7 m, jadi `deras.batasDalam` dinaikkan dari 0,5 ke 0,8. Penjaga sungai-3 digeser ke (−108, −10) sampai (−119, −23) supaya 26 m dari buaya.
+
+### Hasil bot (frame 1/60, lari terus, tangkis saat lawan bersiap)
+
+- Rute sungai dari gerbang Kudadu sampai layar selesai 96 detik: perampok dibayar, buaya aktif di penyeberangan tanpa menerkam (bot menunggu saat buaya muncul), desertir muara aktif tapi bot bicara dengan nelayan lebih dulu. Ketahuan 4 kali (bot tidak menyelinap), Pengikut 12 menjadi 10 karena aturan Pagon, nyawa tidak pernah turun.
+- Rute bukit 101 detik: longsor, memikul Pagon dua kali dengan dialog sekali, harimau dialihkan dengan bekal, layar selesai memuat dua baris kejadian, tanpa ketahuan.
+- Tanpa menangkis: bot mati melawan tiga perampok dalam 7 detik dan kena 30 per terkaman harimau; dengan tangkis saja tidak pernah kena. Tidak ada kejadian yang memotong Pengikut lebih dari 1.
+
+### Yang belum
+
+- Belum ada uji pemain manusia; target 4 sampai 6 menit per rute belum terukur (bot 1,6 sampai 1,7 menit karena lari terus dan tahu jalan).
+- Jalan memutar lewat lereng utara di luar tumpukan longsor masih mungkin tanpa memanjat, hanya lebih jauh.
+- Pengikut tidak memanjat tangga longsor; mereka berpindah ke belakang kamera lewat aturan tertinggal yang sudah ada, jadi "memikul" baru terasa lewat jeda dan dialog.
+- Desertir hanya muncul di satu rute per benih; separuh permainan tidak bertemu dia. Di muara ia berdiri dekat nelayan.
+- Buaya dan prajurit lumbung belum punya baris ringkasan sendiri selain tanda; babi di dalam 25 m dari penjaga dengan sengaja.
+- Teks sementara: `teks.selesai.desertir`, `teks.selesai.kejadian`, teks HUD rombongan untuk tanda baru, nama "Jaran" dan "Gagak" ikut dari dialog penulis.
+
+### Keputusan yang diambil
+
+- Dialog `harimau-sora` hanya tampil kalau pengikut benar-benar diseret, karena teksnya menyebut Gagak diambil.
+- Gajah Pagon tidak pernah jadi sasaran harimau.
+- Dialog perampok ditunda selama pemain mengayun keris atau satu detik sesudahnya, supaya "menyerang sebelum dialog" bisa terjadi walau jangkauan keris hanya 1,5 m.
+- Buaya tidak masuk pengelola lawan: serangan pemain tidak mengenainya, kamera dan pengikut tidak menganggapnya pertarungan.
+- Tempat dangkal kedua dan belokan jalan lewat air ditambahkan karena tata letak sprint 6 tidak pernah menyeberangi air di rute sungai.
+- Obor diberikan lewat tanda Kudadu yang sudah ada karena dialog tidak boleh diubah.

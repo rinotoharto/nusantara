@@ -227,7 +227,7 @@
     "jedaSeruduk": 2.0,
     "lajuPutar": 1.6,
     "jumlahSerudukMaks": 3,
-    "radiusSuara": 15,
+    "radiusSuara": 20,
     "pergi": {
       "jarak": 30,
       "kecepatan": 7
