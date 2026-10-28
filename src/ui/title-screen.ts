@@ -33,6 +33,40 @@ export class LayarJudul {
     );
     this.lapis.append(kotak);
     document.body.append(this.lapis);
+    this.pasangPeringatanSentuh();
+  }
+
+  /**
+   * Peringatan kecil sekali saja di perangkat layar sentuh tanpa penunjuk halus (ponsel, tablet):
+   * prototipe ini butuh keyboard dan mouse atau gamepad. Ditandai di localStorage supaya tidak muncul lagi.
+   */
+  private pasangPeringatanSentuh(): void {
+    // Penunjuk utama kasar (jari) atau tidak ada penunjuk halus sama sekali: ponsel dan tablet.
+    const sentuh = window.matchMedia('(pointer: coarse)').matches || !window.matchMedia('(pointer: fine)').matches;
+    let sudah = false;
+    try {
+      sudah = localStorage.getItem('nusantara.peringatanSentuh') === '1';
+    } catch {
+      /* localStorage tidak tersedia */
+    }
+    if (!sentuh || sudah) return;
+    const kotak = document.createElement('div');
+    kotak.className = 'peringatan-sentuh';
+    const teks = document.createElement('div');
+    teks.textContent = UI.judul.peringatanSentuh;
+    const tombol = document.createElement('button');
+    tombol.className = 'menu-tombol';
+    tombol.textContent = UI.judul.mengerti;
+    tombol.addEventListener('click', () => {
+      kotak.remove();
+      try {
+        localStorage.setItem('nusantara.peringatanSentuh', '1');
+      } catch {
+        /* abaikan */
+      }
+    });
+    kotak.append(teks, tombol);
+    this.lapis.append(kotak);
   }
 
   buka(adaSimpanan: boolean): void {

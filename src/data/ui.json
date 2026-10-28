@@ -178,7 +178,9 @@
     "mulaiBaru": "Mulai baru",
     "lanjutkan": "Lanjutkan",
     "kitab": "Kitab",
-    "prototipe": "Prototipe tanpa aset"
+    "prototipe": "Prototipe tanpa aset",
+    "peringatanSentuh": "Versi ini untuk laptop dengan keyboard dan mouse atau gamepad. Di ponsel atau layar sentuh, kendali belum tersedia.",
+    "mengerti": "Mengerti"
   },
   "selesai": {
     "judul": "Misi 3 selesai",

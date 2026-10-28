@@ -1059,3 +1059,28 @@ button.pad-fokus {
   outline: 2px solid #ffd79a;
   outline-offset: 2px;
 }
+
+/* Peringatan layar sentuh di layar awal */
+.peringatan-sentuh {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  max-width: min(420px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #efe3c6;
+  color: #2b1d12;
+  border-left: 4px solid #b8862b;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+.peringatan-sentuh .menu-tombol {
+  align-self: flex-end;
+  font-size: 14px;
+  padding: 6px 16px;
+}
