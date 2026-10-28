@@ -97,6 +97,11 @@ export class Pengikut {
     this.grup.name = `pengikut-${indeks}`;
   }
 
+  /** Laju datar saat ini (m/s), untuk suara langkah. */
+  get laju(): number {
+    return Math.hypot(this.kecepatan.x, this.kecepatan.z);
+  }
+
   /** Letakkan di (x, z) di atas tanah dan hentikan geraknya. */
   taruhDi(x: number, z: number): void {
     this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);

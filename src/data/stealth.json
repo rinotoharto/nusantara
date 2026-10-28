@@ -5,8 +5,11 @@
     "jedaTitikMaks": 2.0,
     "tolehSudut": 45,
     "tolehLaju": 1.3,
-    "sudutPandang": 70,
+    "sudutPandang": 110,
     "jarakPandang": 14,
+    "sudutTepi": 180,
+    "jarakTepi": 5,
+    "lajuTepi": 0.5,
     "tinggiMata": 1.5,
     "jarakLangsung": 2.5,
     "waktuCuriga": 1.5,
@@ -51,5 +54,17 @@
     "jarakMundur": 6,
     "faktorCuriga": 0.5,
     "jarakMenyusul": 10
+  },
+  "suara": {
+    "keterangan": "Pendengaran penjaga: radius suara langkah pemain menurut gerak (meter); pengikut memancarkan pengaliPengikut kali, Gajah Pagon pengaliPagon kali. Penjaga di dalam radius menjadi curiga dan menoleh; di dalam bagianPenuh kali radius selama waktuPenuh detik meterannya penuh.",
+    "jongkok": 2,
+    "jalan": 6,
+    "lari": 12,
+    "pengaliAir": 1.5,
+    "pengaliPengikut": 0.7,
+    "pengaliPagon": 1.0,
+    "waktuPenuh": 1.5,
+    "bagianPenuh": 0.6,
+    "jarakTampilLingkaran": 20
   }
 }

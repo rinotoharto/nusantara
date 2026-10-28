@@ -4,7 +4,7 @@ import { Lawan, JARI_LAWAN, type PemberiGiliran, type StatusLawan } from '../com
 import type { PertarunganPemain, Serangan } from '../combat/player-combat';
 import { tinggiLantai, dorongKeluar, type DataTabrakan } from '../world/collision';
 import { SILUMAN } from './config';
-import { KerucutPandang, ujiPandang } from './vision';
+import { KerucutPandang, ujiPandang, garisPandangBebas } from './vision';
 import type { KonteksSiluman } from './stealth-manager';
 
 const P = SILUMAN.penjaga;
@@ -33,6 +33,10 @@ const JARAK_SAMPAI = 0.5;
  */
 export class Penjaga extends Lawan {
   readonly kerucut = new KerucutPandang(P.sudutPandang, P.jarakPandang);
+  /** Pandangan tepi: lebih lebar tapi pendek, menaikkan meteran lebih lambat; digambar lebih tipis. */
+  readonly kerucutTepi = new KerucutPandang(P.sudutTepi, P.jarakTepi, 0.1);
+  /** Benar kalau pada frame ini penjaga mendengar langkah (tanpa melihat). */
+  mendengar = false;
   /** Meteran curiga 0 sampai 1. */
   curiga = 0;
   /** Benar kalau pemain terlihat pada frame ini. */
@@ -110,7 +114,7 @@ export class Penjaga extends Lawan {
         case 'patroli':
           this.perbaruiPatroli(dt);
           if (this.curiga >= 1) this.mulaiMengejar(true);
-          else if (this.terlihat && this.curiga >= P.ambangCuriga) this.masuk('curiga');
+          else if ((this.terlihat || this.mendengar) && this.curiga >= P.ambangCuriga) this.masuk('curiga');
           break;
         case 'curiga':
           // Berhenti dan menghadap ke arah pemain terakhir terlihat.
@@ -125,7 +129,7 @@ export class Penjaga extends Lawan {
         case 'kembali':
           this.perbaruiKembali(dt);
           if (this.curiga >= 1) this.mulaiMengejar(true);
-          else if (this.terlihat && this.curiga >= P.ambangCuriga) this.masuk('curiga');
+          else if ((this.terlihat || this.mendengar) && this.curiga >= P.ambangCuriga) this.masuk('curiga');
           break;
         default:
           break;
@@ -317,32 +321,72 @@ export class Penjaga extends Lawan {
   // --- Curiga ---------------------------------------------------------------------------
 
   /**
-   * Meteran curiga di luar pertarungan: naik saat pemain terlihat (lebih cepat kalau dekat atau
-   * berlari), langsung penuh kalau pemain tepat di depan hidung, turun pelan saat tidak terlihat.
-   * Saat mencari, meteran tidak turun supaya penjaga tetap waspada.
+   * Meteran curiga di luar pertarungan. Tiga cara pemain ketahuan:
+   * - Terlihat: kerucut utama (jauh, sempit) menaikkan meteran penuh laju; pandangan tepi (pendek,
+   *   180 derajat) menaikkannya `lajuTepi` kali. Lebih cepat kalau dekat atau berlari.
+   * - Terlalu dekat: dalam `jarakLangsung` dari sisi mana pun langsung penuh, kecuali bersembunyi
+   *   di semak (lalu berlaku `jarakTembus`).
+   * - Terdengar: di dalam radius suara langkah penjaga menoleh ke sumbernya dan curiga; di dalam
+   *   `bagianPenuh` kali radius selama `waktuPenuh` detik meteran penuh.
+   * Tidak ada yang terlihat atau terdengar: turun pelan, kecuali saat mencari.
    */
   private perbaruiCuriga(dt: number): void {
     const k = this.konteks.pemain;
+    const jarak = Math.hypot(k.posisi.x - this.posisi.x, k.posisi.z - this.posisi.z);
     const jarakPandang = P.jarakPandang * k.faktorJarak;
     let hasil = ujiPandang(this.posisi, this.hadap, P.sudutPandang, jarakPandang, k.posisi, this.data, P.tinggiMata, this.konteks.penghalangSemak);
+    let lajuPandang = 1;
+    if (!hasil.terlihat) {
+      // Pandangan tepi: pendek, hampir setengah lingkaran, laju lebih rendah.
+      hasil = ujiPandang(this.posisi, this.hadap, P.sudutTepi, P.jarakTepi * k.faktorJarak, k.posisi, this.data, P.tinggiMata, this.konteks.penghalangSemak);
+      lajuPandang = P.lajuTepi;
+    }
     if (k.tersembunyi && hasil.jarak >= k.jarakTembus) hasil = { terlihat: false, jarak: hasil.jarak };
-    this.terlihat = hasil.terlihat;
-    if (hasil.terlihat) {
+    // Terlalu dekat dari sisi mana pun (garis pandang tetap harus bebas dari batu dan rumah).
+    const terlaluDekat =
+      jarak < P.jarakLangsung &&
+      (!k.tersembunyi || jarak < k.jarakTembus) &&
+      garisPandangBebas(this.data, this.posisi, k.posisi, P.tinggiMata, this.konteks.penghalangSemak);
+    this.terlihat = hasil.terlihat || terlaluDekat;
+    this.mendengar = false;
+    if (this.terlihat) {
       this.titikTerakhir.copy(k.posisi);
-      if (hasil.jarak < P.jarakLangsung) {
+      if (terlaluDekat || hasil.jarak < P.jarakLangsung) {
         this.curiga = 1;
       } else {
-        let laju = k.pengaliCuriga / P.waktuCuriga;
+        let laju = (k.pengaliCuriga * lajuPandang) / P.waktuCuriga;
         if (hasil.jarak < P.jarakDekat) laju *= P.pengaliDekat;
         if (k.lari) laju *= P.pengaliLari;
         this.curiga = Math.min(1, this.curiga + laju * dt);
       }
-    } else if (k.tersembunyi && this.pengikutTerlihat(jarakPandang)) {
+      return;
+    }
+    if (this.perbaruiPendengaran(dt)) return;
+    if (k.tersembunyi && this.pengikutTerlihat(jarakPandang)) {
       // Pemain bersembunyi tapi seorang pengikut masih di luar semak: meteran naik setengah laju.
       this.curiga = Math.min(1, this.curiga + (k.pengaliCuriga * SILUMAN.pengikut.faktorCuriga / P.waktuCuriga) * dt);
     } else if (this.status !== 'mencari') {
       this.curiga = Math.max(0, this.curiga - dt / P.waktuTurun);
     }
+  }
+
+  /** Mendengar langkah: benar kalau ada sumber suara di dalam radiusnya; meteran dan titik terakhir disesuaikan. */
+  private perbaruiPendengaran(dt: number): boolean {
+    const S = SILUMAN.suara;
+    let terdekat: { x: number; z: number; bagian: number } | null = null;
+    for (const s of this.konteks.suara) {
+      const d = Math.hypot(s.x - this.posisi.x, s.z - this.posisi.z);
+      if (d >= s.radius) continue;
+      const bagian = d / s.radius;
+      if (!terdekat || bagian < terdekat.bagian) terdekat = { x: s.x, z: s.z, bagian };
+    }
+    if (!terdekat) return false;
+    this.mendengar = true;
+    this.titikTerakhir.set(terdekat.x, this.posisi.y, terdekat.z);
+    // Cukup curiga untuk berhenti dan menoleh; di bagian dalam radius meteran terus naik sampai penuh.
+    this.curiga = Math.max(this.curiga, P.ambangCuriga + 0.01);
+    if (terdekat.bagian < S.bagianPenuh) this.curiga = Math.min(1, this.curiga + (this.konteks.pemain.pengaliCuriga / S.waktuPenuh) * dt);
+    return true;
   }
 
   private pengikutTerlihat(jarakPandang: number): boolean {
@@ -357,6 +401,7 @@ export class Penjaga extends Lawan {
 
   private perbaruiKerucut(): void {
     this.kerucut.tampil = this.hidup;
+    this.kerucutTepi.tampil = this.hidup;
     if (!this.hidup) return;
     const warna = this.bertarung
       ? WARNA_MENGEJAR
@@ -364,5 +409,6 @@ export class Penjaga extends Lawan {
         ? WARNA_CURIGA
         : WARNA_TENANG;
     this.kerucut.perbarui(this.posisi, this.hadap, warna);
+    this.kerucutTepi.perbarui(this.posisi, this.hadap, warna);
   }
 }

@@ -3,7 +3,8 @@ import type { Pemain } from '../character/player';
 import type { Pengikut } from '../character/follower';
 import type { PengelolaLawan } from '../combat/enemy-manager';
 import type { Dunia } from '../world';
-import { tinggiMedan } from '../world/terrain';
+import { tinggiMedan, PERMUKAAN_AIR } from '../world/terrain';
+import { LingkaranSuara } from './sound-ring';
 import { SILUMAN } from './config';
 import { Penjaga, type RutePatroli } from './guard';
 import { Semak, semakDi } from './bush';
@@ -25,8 +26,17 @@ export interface KeadaanPemain {
   jarakTembus: number;
 }
 
+/** Satu sumber suara langkah pada frame ini: pusat dan radius dengarnya. */
+export interface SumberSuara {
+  x: number;
+  z: number;
+  radius: number;
+}
+
 export interface KonteksSiluman {
   pemain: KeadaanPemain;
+  /** Suara langkah pemain dan pengikut yang sedang bergerak pada frame ini. */
+  suara: SumberSuara[];
   /** Posisi pengikut yang berada di luar semak; hanya dinilai saat pemain tersembunyi. */
   pengikutTerbuka: THREE.Vector3[];
   penjaga: Penjaga[];
@@ -67,6 +77,7 @@ export class PengelolaSiluman {
       tersembunyi: false,
       jarakTembus: SILUMAN.semak.jarakTembus,
     },
+    suara: [],
     pengikutTerbuka: [],
     penjaga: this.penjaga,
     semak: this.semak,
@@ -75,6 +86,8 @@ export class PengelolaSiluman {
   };
   /** Pengali laju curiga dari rombongan; disalin ke keadaan pemain tiap frame. */
   pengaliCuriga = 1;
+  /** Lingkaran suara di sekitar pemain; tampil saat bergerak dekat penjaga. */
+  readonly lingkaranSuara = new LingkaranSuara();
   /** Dipanggil saat ada penjaga yang mulai mengejar sementara belum ada penjaga lain yang mengejar. */
   saatKetahuan: (() => void) | null = null;
 
@@ -83,6 +96,7 @@ export class PengelolaSiluman {
     private readonly scene: THREE.Scene,
     private readonly lawan: PengelolaLawan,
   ) {
+    this.scene.add(this.lingkaranSuara.garis);
     this.konteks.saatKetahuan = (p) => {
       // Satu kejadian ketahuan per episode: kalau sudah ada kawan yang mengejar, tidak dihitung lagi.
       if (this.penjaga.some((q) => q !== p && q.mengejar)) return;
@@ -127,7 +141,7 @@ export class PengelolaSiluman {
 
   tambahPenjaga(rute: RutePatroli): Penjaga {
     const penjaga = new Penjaga(this.dunia.tabrakan, rute, this.konteks);
-    this.scene.add(penjaga.grup, penjaga.kerucut.mesh);
+    this.scene.add(penjaga.grup, penjaga.kerucut.mesh, penjaga.kerucutTepi.mesh);
     this.lawan.tambah(penjaga);
     this.penjaga.push(penjaga);
     return penjaga;
@@ -137,11 +151,20 @@ export class PengelolaSiluman {
     const i = this.penjaga.indexOf(penjaga);
     if (i >= 0) this.penjaga.splice(i, 1);
     this.lawan.hapus(penjaga);
-    this.scene.remove(penjaga.grup, penjaga.kerucut.mesh);
+    this.scene.remove(penjaga.grup, penjaga.kerucut.mesh, penjaga.kerucutTepi.mesh);
+  }
+
+  /** Radius suara langkah untuk laju dan sikap tertentu; 0 kalau diam. */
+  private radiusSuara(laju: number, jongkok: boolean, lari: boolean, diAir: boolean): number {
+    const S = SILUMAN.suara;
+    if (laju < 0.3) return 0;
+    let r = jongkok ? S.jongkok : lari ? S.lari : S.jalan;
+    if (diAir) r *= S.pengaliAir;
+    return r;
   }
 
   /** Dipanggil tiap frame sebelum `lawan.perbarui`. */
-  perbarui(pemain: Pemain, pengikut: readonly Pengikut[]): void {
+  perbarui(pemain: Pemain, pengikut: readonly Pengikut[], dt = 0): void {
     const k = this.konteks.pemain;
     const terbuka = this.konteks.pengikutTerbuka;
     terbuka.length = 0;
@@ -157,5 +180,23 @@ export class PengelolaSiluman {
     const penghalang = this.konteks.penghalangSemak;
     penghalang.length = 0;
     for (const s of this.semak) if (s !== k.semak) penghalang.push(s.kotak);
+
+    // Suara langkah: pemain menurut geraknya, pengikut lebih pelan (Gajah Pagon tidak, karena pincang).
+    const S = SILUMAN.suara;
+    const suara = this.konteks.suara;
+    suara.length = 0;
+    const diAir = pemain.posisi.y < PERMUKAAN_AIR - 0.3;
+    const radiusPemain = this.radiusSuara(pemain.laju, pemain.jongkok, k.lari, diAir);
+    if (radiusPemain > 0) suara.push({ x: pemain.posisi.x, z: pemain.posisi.z, radius: radiusPemain });
+    for (const p of pengikut) {
+      const lajuP = p.laju;
+      const r = this.radiusSuara(lajuP, p.jongkok, lajuP > SILUMAN.pemain.lajuLari, p.posisi.y < PERMUKAAN_AIR - 0.3);
+      if (r > 0) suara.push({ x: p.posisi.x, z: p.posisi.z, radius: r * (p.opsi.pincang ? S.pengaliPagon : S.pengaliPengikut) });
+    }
+    // Lingkaran suara di lantai hanya saat ada penjaga hidup dalam jarak tampil.
+    const adaPenjagaDekat = this.penjaga.some(
+      (g) => g.hidup && Math.hypot(g.posisi.x - pemain.posisi.x, g.posisi.z - pemain.posisi.z) < S.jarakTampilLingkaran,
+    );
+    this.lingkaranSuara.perbarui(pemain.posisi.x, pemain.posisi.z, adaPenjagaDekat ? radiusPemain : 0, dt);
   }
 }

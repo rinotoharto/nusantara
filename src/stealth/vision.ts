@@ -110,6 +110,7 @@ export class KerucutPandang {
   constructor(
     private sudutDerajat: number,
     private jarak: number,
+    opasitas = 0.22,
   ) {
     const geometri = new THREE.BufferGeometry();
     this.posisiAtribut = new THREE.BufferAttribute(new Float32Array((SEGMEN + 2) * 3), 3);
@@ -121,7 +122,7 @@ export class KerucutPandang {
     this.bahan = new THREE.MeshBasicMaterial({
       color: 0x3fbf5a,
       transparent: true,
-      opacity: 0.22,
+      opacity: opasitas,
       depthWrite: false,
       side: THREE.DoubleSide,
     });

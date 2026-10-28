@@ -423,7 +423,7 @@ function perbaruiPermainan(dt: number): void {
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
   if (pemain.baruSelesaiMemanjat) pengikut.susulkanSetelahPanjat(pemain, camera);
-  siluman.perbarui(pemain, pengikut.aktif);
+  siluman.perbarui(pemain, pengikut.aktif, dt);
   pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
 
