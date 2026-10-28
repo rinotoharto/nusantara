@@ -2,7 +2,7 @@ import type { StatusPermainan } from '../mission/state';
 import { UI } from './config';
 import { buatPilihanUkuran } from './font-size';
 
-/** Menu jeda: Lanjutkan, Kitab, Pengaturan (ukuran huruf), Mulai ulang misi. */
+/** Menu jeda: Lanjutkan, Kitab, Peta, Pengaturan (ukuran huruf), Mulai ulang misi. */
 export class MenuJeda {
   private readonly lapis: HTMLDivElement;
   private readonly utama: HTMLDivElement;
@@ -10,6 +10,7 @@ export class MenuJeda {
   private tampil = false;
   saatLanjutkan: (() => void) | null = null;
   saatKitab: (() => void) | null = null;
+  saatPeta: (() => void) | null = null;
   saatUlangMisi: (() => void) | null = null;
 
   constructor(status: StatusPermainan) {
@@ -27,6 +28,7 @@ export class MenuJeda {
       judul,
       this.tombol(UI.menu.lanjutkan, () => this.saatLanjutkan?.()),
       this.tombol(UI.menu.kitab, () => this.saatKitab?.()),
+      this.tombol(UI.menu.peta, () => this.saatPeta?.()),
       this.tombol(UI.menu.pengaturan, () => this.tampilkanPengaturan(true)),
       this.tombol(UI.menu.ulangMisi, () => this.saatUlangMisi?.()),
     );

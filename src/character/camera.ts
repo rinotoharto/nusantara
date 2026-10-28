@@ -3,6 +3,7 @@ import type { Input } from './input';
 import { tinggiMedan } from '../world/terrain';
 import { KONFIG } from '../combat/config';
 import type { PoseKamera } from '../dialog/sinematik';
+import { PEMANDU } from '../world/guide-config';
 
 const SENSITIVITAS = 0.0022;
 const JARAK = 5.5;
@@ -16,6 +17,12 @@ const LAJU_SINEMATIK = 3; // seberapa cepat kamera mengejar pose sinematik yang 
 
 function smoothstep(t: number): number {
   return t * t * (3 - 2 * t);
+}
+
+/** Selisih sudut terpendek dari `dari` ke `ke`, dalam (-PI, PI]. */
+function selisihSudut(dari: number, ke: number): number {
+  const d = ke - dari;
+  return Math.atan2(Math.sin(d), Math.cos(d));
 }
 
 /** Kamera orang ketiga di belakang pemain. Tidak menembus medan maupun benda padat. */
@@ -38,11 +45,55 @@ export class KameraOrangKetiga {
   private campurSinematik = 0;
   private readonly posisiSinematik = new THREE.Vector3();
   private readonly sasaranSinematik = new THREE.Vector3();
+  /** Arahan: kamera menoleh halus ke titik ini (x, z) lalu kembali; batal begitu mouse bergerak. */
+  private arahanTitik: { x: number; z: number } | null = null;
+  private arahanWaktu = 0;
+  private yawSebelumArahan = 0;
 
   constructor(
     readonly kamera: THREE.PerspectiveCamera,
     private penghalang: THREE.Object3D[],
   ) {}
+
+  /**
+   * Arahan ke penanda: yaw berputar halus ke arah titik (fase putar), ditahan sampai `lama`,
+   * lalu kembali ke yaw semula. Kamera memandang dari belakang pemain, jadi yaw yang
+   * "melihat ke arah (dx, dz)" adalah atan2(-dx, -dz).
+   */
+  private perbaruiArahan(dt: number, kakiPemain: THREE.Vector3): void {
+    const A = PEMANDU.arahanKamera;
+    const t = this.arahanTitik as { x: number; z: number };
+    this.arahanWaktu += dt;
+    const yawKe = Math.atan2(-(t.x - kakiPemain.x), -(t.z - kakiPemain.z));
+    if (this.arahanWaktu <= A.lama) {
+      const k = Math.min(1, (A.lamaPutar > 0 ? dt / A.lamaPutar : 1) * 3);
+      this.yaw += selisihSudut(this.yaw, yawKe) * k;
+      return;
+    }
+    const sisa = this.arahanWaktu - A.lama;
+    const k = Math.min(1, (A.lamaPutar > 0 ? dt / A.lamaPutar : 1) * 3);
+    this.yaw += selisihSudut(this.yaw, this.yawSebelumArahan) * k;
+    if (sisa >= A.lamaPutar || Math.abs(selisihSudut(this.yaw, this.yawSebelumArahan)) < 0.01) {
+      this.yaw = this.yawSebelumArahan;
+      this.arahanTitik = null;
+    }
+  }
+
+  /** Benar selama arahan kamera ke penanda sedang berjalan. */
+  get sedangDiarahkan(): boolean {
+    return this.arahanTitik !== null;
+  }
+
+  /** Mulai arahan: menoleh ke arah (x, z) selama `lama` detik lalu kembali ke yaw semula. */
+  arahkanKe(x: number, z: number): void {
+    this.arahanTitik = { x, z };
+    this.arahanWaktu = 0;
+    this.yawSebelumArahan = this.yaw;
+  }
+
+  batalkanArahan(): void {
+    this.arahanTitik = null;
+  }
 
   perbarui(dt: number, input: Input, kakiPemain: THREE.Vector3): void {
     const { dx, dy } = input.ambilGerakMouse();
@@ -50,6 +101,8 @@ export class KameraOrangKetiga {
       this.yaw -= dx * SENSITIVITAS;
       this.pitch = Math.min(PITCH_MAKS, Math.max(PITCH_MIN, this.pitch + dy * SENSITIVITAS));
     }
+    if (this.arahanTitik && (dx !== 0 || dy !== 0 || this.sinematik)) this.arahanTitik = null;
+    if (this.arahanTitik) this.perbaruiArahan(dt, kakiPemain);
 
     // Peralihan halus masuk dan keluar mode bertarung.
     const tujuanTarung = this.modeTarung ? 1 : 0;

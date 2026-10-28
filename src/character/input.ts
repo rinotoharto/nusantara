@@ -17,7 +17,7 @@ export class Input {
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       this.tekan(e.code);
-      if (e.code === 'Space') e.preventDefault();
+      if (e.code === 'Space' || e.code === 'Tab') e.preventDefault(); // Tab: pemandu, jangan pindah fokus
     });
     window.addEventListener('keyup', (e) => this.lepas(e.code));
     window.addEventListener('blur', () => this.lepasSemua());

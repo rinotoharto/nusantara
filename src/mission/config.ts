@@ -86,6 +86,19 @@ export interface PemicuSegmen {
   jika?: SyaratPemicu;
 }
 
+/** Satu langkah tujuan: teks HUD, penanda obor, dan area yang menyelesaikannya (langkah terakhir memakai `selesai` segmen). */
+export interface LangkahTujuan {
+  teks: string;
+  /** Posisi obor penanda selama langkah ini; tanpa ini dipakai `penanda` segmen. */
+  penanda?: [number, number];
+  selesai?: { area: { pusat: [number, number]; jari: number } };
+}
+
+/** Daftar langkah sebuah segmen; tujuan berupa string menjadi satu langkah tanpa penanda sendiri. */
+export function langkahSegmen(s: Segmen): LangkahTujuan[] {
+  return typeof s.tujuan === 'string' ? [{ teks: s.tujuan }] : s.tujuan;
+}
+
 /** Kapan segmen dianggap selesai: percakapan tertentu berakhir, pemain masuk area, atau tanda muncul. */
 export interface SyaratSelesai {
   percakapan?: string;
@@ -102,8 +115,8 @@ export interface RantaiPercakapan {
 
 export interface Segmen {
   id: string;
-  /** Teks tujuan di HUD kiri atas. */
-  tujuan: string;
+  /** Teks tujuan di HUD kiri atas, atau daftar langkah yang berganti saat areanya tercapai. */
+  tujuan: string | LangkahTujuan[];
   /** Titik simpan: posisi pemain saat segmen dimuat ulang. */
   mulai: { posisi: [number, number]; hadap: number };
   /** Tanda yang harus ada; kalau tidak, segmen dilewati. */
@@ -139,3 +152,6 @@ export const PENGIKUT_TOKOH: Record<string, number> = data.pengikutTokoh;
 
 /** Tata letak dunia yang ditentukan data misi. */
 export const DUNIA_MISI = data.dunia;
+
+/** Gaya partikel pemandu (Tab) untuk misi ini: `kunang` malam, `daun` siang. */
+export const GAYA_PEMANDU = data.pemandu;

@@ -27,6 +27,14 @@
         "Kitab"
       ],
       [
+        "Tab",
+        "pemandu arah"
+      ],
+      [
+        "M",
+        "peta"
+      ],
+      [
         "Klik kiri",
         "serang, tahan: berat"
       ],
@@ -128,7 +136,8 @@
     "kitab": "Kitab",
     "pengaturan": "Pengaturan",
     "ulangMisi": "Mulai ulang misi",
-    "kembali": "Kembali"
+    "kembali": "Kembali",
+    "peta": "Peta"
   },
   "tarung": {
     "namaPemain": "Raden Wijaya",
@@ -175,5 +184,11 @@
     "waktu": "Waktu: {menit} menit {detik} detik",
     "bukaKitab": "Buka Kitab",
     "mainLagi": "Main lagi"
+  },
+  "peta": {
+    "judul": "Peta",
+    "tutup": "Tutup",
+    "petunjuk": "M atau Esc untuk menutup",
+    "keterangan": "Segitiga: Anda. Lingkaran berpendar: tujuan. Lebih terang: sudah dilalui."
   }
 }

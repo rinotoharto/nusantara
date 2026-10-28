@@ -5,10 +5,10 @@ import type { PengelolaLawan } from '../combat/enemy-manager';
 import type { PengelolaSiluman } from '../stealth/stealth-manager';
 import type { Penjaga } from '../stealth/guard';
 import type { Semak } from '../stealth/bush';
-import { buatObor } from '../world/torch';
+import { Obor } from '../world/torch';
 import { DIALOG } from '../dialog/config';
 import { KITAB_PER_ID } from '../codex/config';
-import { ATURAN, SEGMEN, TEKS_MISI, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga } from './config';
+import { ATURAN, SEGMEN, TEKS_MISI, langkahSegmen, type Segmen, type PemicuSegmen, type SyaratPemicu, type DataNpcMisi, type DataPenjaga, type LangkahTujuan } from './config';
 import type { StatusPermainan, TitikSimpan } from './state';
 import type { Rombongan } from './party';
 import { PengelolaNpc, type Npc } from './npc';
@@ -57,9 +57,13 @@ export class PelaksanaMisi {
   saatSelesai: (() => void) | null = null;
   /** Dipanggil tiap kali segmen baru dimulai dengan titik simpannya (waktu diisi pemanggil). */
   saatSegmenMulai: ((titik: TitikSimpan) => void) | null = null;
+  /** Dipanggil saat langkah tujuan baru muncul, dengan penanda yang bisa dituju kamera (null kalau tidak ada). */
+  saatLangkahBaru: ((penanda: [number, number] | null) => void) | null = null;
+  /** Indeks langkah tujuan sekarang di dalam segmen. */
+  indeksLangkah = 0;
   /** Titik simpan segmen sekarang: dipakai saat gugur. */
   private titik: TitikSimpan | null = null;
-  private readonly obor: THREE.Group[] = [];
+  private readonly obor: Obor[] = [];
   private readonly dinamis: IsiDinamis = { penjaga: [], npc: [], semak: [], pencabutBatu: [] };
   /** NPC dinamis segmen sekarang; dicabut saat segmen selesai. */
   private npcSegmen: Npc[] = [];
@@ -70,6 +74,39 @@ export class PelaksanaMisi {
 
   get segmen(): Segmen | null {
     return SEGMEN[this.indeks] ?? null;
+  }
+
+  /** Langkah tujuan sekarang, atau null di luar misi. */
+  get langkah(): LangkahTujuan | null {
+    const s = this.segmen;
+    return s ? langkahSegmen(s)[this.indeksLangkah] ?? null : null;
+  }
+
+  /** Penanda yang berlaku sekarang: penanda langkah kalau ada, kalau tidak penanda segmen. */
+  get penandaSekarang(): [number, number][] {
+    const s = this.segmen;
+    if (!s || this.selesai) return [];
+    const l = this.langkah;
+    return l?.penanda ? [l.penanda] : s.penanda ?? [];
+  }
+
+  /** Penanda terdekat dari posisi (x, z), atau null. */
+  penandaTerdekat(x: number, z: number): [number, number] | null {
+    let terbaik: [number, number] | null = null;
+    let jarak = Infinity;
+    for (const p of this.penandaSekarang) {
+      const d = Math.hypot(p[0] - x, p[1] - z);
+      if (d < jarak) {
+        jarak = d;
+        terbaik = p;
+      }
+    }
+    return terbaik;
+  }
+
+  /** Menggerakkan pendar dan asap obor penanda; dipanggil tiap frame dari loop render. */
+  perbaruiPenanda(dt: number, posisiKamera: THREE.Vector3): void {
+    for (const o of this.obor) o.perbarui(dt, posisiKamera);
   }
 
   /** Memeriksa misi3.json: id percakapan, Kitab, dan kunci teks harus ada. */
@@ -93,6 +130,10 @@ export class PelaksanaMisi {
         cekDialog(r.percakapan, 'rantai.percakapan');
       }
       if (!s.selesai) pesan.push(`${nama}: tidak punya syarat selesai`);
+      const langkah = langkahSegmen(s);
+      langkah.forEach((l, k) => {
+        if (k < langkah.length - 1 && !l.selesai?.area) pesan.push(`${nama}: langkah ${k + 1} bukan yang terakhir tapi tidak punya selesai.area`);
+      });
     });
     return pesan;
   }
@@ -134,6 +175,7 @@ export class PelaksanaMisi {
     }
     this.d.lawan.hidupkanSemua();
     this.taruhPemain(s);
+    this.mulaiLangkah(0);
   }
 
   private bersihkanUntukMulai(): void {
@@ -169,9 +211,33 @@ export class PelaksanaMisi {
       for (const k of p.bukaKitab ?? []) this.d.status.bukaKitab(k);
       if (p.percakapan) this.d.mulaiDialog(p.percakapan, null);
     }
+    // Langkah tujuan di dalam segmen: berganti saat areanya tercapai; langkah terakhir memakai syarat selesai segmen.
+    const langkah = langkahSegmen(s);
+    const l = langkah[this.indeksLangkah];
+    if (this.indeksLangkah < langkah.length - 1 && l?.selesai?.area && this.dalamArea(posisiPemain, l.selesai.area.pusat, l.selesai.area.jari)) {
+      this.mulaiLangkah(this.indeksLangkah + 1);
+      return;
+    }
     const akhir = s.selesai;
     if (akhir.area && this.dalamArea(posisiPemain, akhir.area.pusat, akhir.area.jari)) this.segmenBerikut();
     else if (akhir.tanda && this.adaTanda(akhir.tanda)) this.segmenBerikut();
+  }
+
+  /** Memulai langkah tujuan ke-`k` segmen sekarang: teks HUD, obor, dan arahan kamera. */
+  private mulaiLangkah(k: number): void {
+    const s = this.segmen;
+    if (!s) return;
+    const langkah = langkahSegmen(s);
+    this.indeksLangkah = Math.min(k, langkah.length - 1);
+    const l = langkah[this.indeksLangkah];
+    this.d.aturTujuan(l.teks);
+    this.bersihkanObor();
+    for (const [x, z] of this.penandaSekarang) {
+      const o = new Obor(x, z);
+      this.d.scene.add(o.grup);
+      this.obor.push(o);
+    }
+    this.saatLangkahBaru?.(this.penandaTerdekat(this.d.pemain.posisi.x, this.d.pemain.posisi.z));
   }
 
   /** Dipanggil saat sebuah percakapan berakhir: NPC sekali pakai dicabut, rantai dan syarat selesai diperiksa. */
@@ -221,14 +287,9 @@ export class PelaksanaMisi {
       percakapan: [...this.d.status.percakapanSelesai],
       waktu: 0,
     };
-    this.d.aturTujuan(s.tujuan);
     this.d.aturCahaya(s.cahaya && (!s.cahaya.syarat || this.d.status.tanda.has(s.cahaya.syarat)) ? s.cahaya.pengali : 1);
-    for (const [x, z] of s.penanda ?? []) {
-      const o = buatObor(x, z);
-      this.d.scene.add(o);
-      this.obor.push(o);
-    }
     if (taruhPemain) this.taruhPemain(s);
+    this.mulaiLangkah(0);
     this.saatSegmenMulai?.(this.titik);
 
     const mulai = s.saatMulai;
@@ -307,7 +368,10 @@ export class PelaksanaMisi {
   }
 
   private bersihkanObor(): void {
-    for (const o of this.obor) this.d.scene.remove(o);
+    for (const o of this.obor) {
+      this.d.scene.remove(o.grup);
+      o.buang();
+    }
     this.obor.length = 0;
   }
 

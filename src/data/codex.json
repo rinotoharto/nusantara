@@ -325,6 +325,69 @@
         "desa-kudadu"
       ],
       "dibukaOleh": "dialog:pandakan-pagon"
+    },
+    {
+      "id": "harimau-jawa",
+      "judul": "Harimau jawa",
+      "jenis": "benda",
+      "label": "fakta",
+      "ringkas": "Harimau yang dahulu hidup di seluruh Jawa, termasuk hutan Jawa Timur pada 1292; dinyatakan punah pada 1970-an.",
+      "isi": [
+        "Harimau jawa (Panthera tigris sondaica) adalah penghuni asli hutan Jawa. Pada masa Singasari dan Majapahit, hutan masih menutupi sebagian besar pulau, dan harimau adalah bahaya nyata bagi pejalan malam, penebang hutan, dan desa di tepi rimba. Relief candi dan sastra Jawa Kuno menyebut harimau (macan) sebagai lambang hutan yang belum dijinakkan.",
+        "Harimau jawa punah pada 1970-an karena hutannya habis dan diburu. Satu-satunya yang tersisa di Indonesia adalah harimau sumatera. Dalam game ini harimau mewakili hutan Tarik yang kelak dibuka Wijaya: pembukaan hutan adalah perebutan ruang dengan penghuni lamanya.",
+        "TODO-VERIFIKASI: sebutan harimau dalam Nagarakretagama atau Pararaton untuk kutipan."
+      ],
+      "sumber": [
+        "Seidensticker, J. (1987), Bearing witness: observations on the extinction of Panthera tigris balica and Panthera tigris sondaica",
+        "Relief Candi Jago dan Penataran"
+      ],
+      "terkait": [
+        "buaya-muara",
+        "prajurit-singasari"
+      ],
+      "dibukaOleh": "kejadian:harimau",
+      "kutipan": null
+    },
+    {
+      "id": "buaya-muara",
+      "judul": "Buaya muara",
+      "jenis": "benda",
+      "label": "fakta",
+      "ringkas": "Buaya besar yang hidup di muara dan sungai pesisir Jawa, termasuk muara Brantas; bahaya sungguhan bagi penyeberang.",
+      "isi": [
+        "Buaya muara (Crocodylus porosus) adalah reptil terbesar di dunia dan hidup di sungai pesisir, muara, dan rawa bakau di seluruh Nusantara. Pada abad ke-13, delta Brantas yang menjadi jalur Wijaya ke pantai adalah habitatnya. Menyeberangi sungai pada malam hari, di tempat yang tidak dikenal, adalah pertaruhan nyata.",
+        "Dalam tradisi Jawa, buaya sering dihormati sekaligus ditakuti, dan beberapa prasasti menyebut petugas penyeberangan sungai sebagai jabatan desa. TODO-VERIFIKASI: contoh prasasti yang menyebut penyeberangan (tambangan) dan hubungannya dengan buaya."
+      ],
+      "sumber": [
+        "Pengamatan sebaran buaya muara di Jawa (pustaka biologi)",
+        "Prasasti-prasasti Jawa kuno tentang tambangan (TODO-VERIFIKASI)"
+      ],
+      "terkait": [
+        "harimau-jawa",
+        "desa-kudadu"
+      ],
+      "dibukaOleh": "kejadian:buaya",
+      "kutipan": null
+    },
+    {
+      "id": "perampok",
+      "judul": "Perampok di masa kacau",
+      "jenis": "peristiwa",
+      "label": "interpretasi",
+      "ringkas": "Setelah ibu kota jatuh, jalan-jalan sepi menjadi milik siapa pun yang bersenjata; perampok di jalur Wijaya adalah rekaan yang masuk akal.",
+      "isi": [
+        "Tidak ada sumber yang mencatat Wijaya bertemu perampok dalam pelariannya. Namun masa setelah runtuhnya sebuah kerajaan selalu sama: prajurit tercerai-berai, desa kehilangan perlindungan, dan jalan di antara desa dijaga oleh siapa pun yang punya golok. Prasasti-prasasti Jawa kuno berulang kali menyebut kejahatan di jalan (misalnya dalam daftar larangan dan denda) sebagai masalah yang nyata.",
+        "Kejadian ini diberi label interpretasi: adegan rekaan yang menggambarkan keadaan, bukan peristiwa yang dicatat. Pilihan pemain di sini, membayar, mengancam dengan nama, atau bertarung, mencerminkan tiga cara Wijaya menghadapi dunia sepanjang bab ini."
+      ],
+      "sumber": [
+        "Daftar denda dan larangan dalam prasasti sima Jawa kuno (TODO-VERIFIKASI contoh)"
+      ],
+      "terkait": [
+        "prajurit-singasari",
+        "jayakatwang"
+      ],
+      "dibukaOleh": "kejadian:perampok",
+      "kutipan": null
     }
   ]
 }

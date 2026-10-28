@@ -1,5 +1,5 @@
 {
-  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat`/`dinamis` dipasang saat misi mulai; isi dengan `syarat` atau `dinamis: true` dipasang saat segmennya mulai (NPC dinamis dicabut saat segmen selesai). `rantai` memulai percakapan lain begitu sebuah percakapan selesai. `selesai.tanda` boleh daftar (salah satu).",
+  "keterangan": "Misi 3: Malam pelarian. Sumbu: +x timur, -z utara. Misi dibangun dari daftar `segmen` berurutan; segmen dengan `syarat` dilewati kalau tandanya tidak ada. Isi tanpa `syarat`/`dinamis` dipasang saat misi mulai; isi dengan `syarat` atau `dinamis: true` dipasang saat segmennya mulai (NPC dinamis dicabut saat segmen selesai). `rantai` memulai percakapan lain begitu sebuah percakapan selesai. `selesai.tanda` boleh daftar (salah satu). `tujuan` boleh string atau daftar langkah `{ teks, penanda: [x, z], selesai: { area } }`: HUD menampilkan langkah sekarang; obor dipasang di `penanda` langkah (kalau ada) atau `penanda` segmen. `pemandu` memilih gaya partikel pemandu (Tab): kunang (malam) atau daun (siang).",
   "tokohPemain": "wijaya",
   "pengikutTokoh": {
     "lawe": 0,
@@ -7,6 +7,7 @@
     "sora": 2,
     "pagon": 3
   },
+  "pemandu": "kunang",
   "aturan": {
     "keterangan": "Variabel rombongan (lihat docs/isi/misi3-naskah.md, tabel Variabel rombongan). Angka di sini bisa disetel tanpa mengubah kode.",
     "awal": {
@@ -151,7 +152,31 @@
   "segmen": [
     {
       "id": "hutan",
-      "tujuan": "Seberangi sungai menuju dukuh Pandakan",
+      "tujuan": [
+        {
+          "teks": "Ke utara menembus hutan sampai sungai",
+          "penanda": [
+            32,
+            66
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                32,
+                66
+              ],
+              "jari": 8
+            }
+          }
+        },
+        {
+          "teks": "Seberangi di tempat dangkal yang ditandai obor",
+          "penanda": [
+            32,
+            56
+          ]
+        }
+      ],
       "mulai": {
         "posisi": [
           30,
@@ -159,12 +184,6 @@
         ],
         "hadap": 3.1416
       },
-      "penanda": [
-        [
-          32,
-          56
-        ]
-      ],
       "saatMulai": {
         "panel": "pembuka",
         "percakapan": "hutan-pembukaan"
@@ -181,7 +200,7 @@
     },
     {
       "id": "pandakan",
-      "tujuan": "Temui kepala dukuh Pandakan di seberang",
+      "tujuan": "Dukuh Pandakan ada di timur laut dari penyeberangan; temui kepala dukuh di bawah obor",
       "mulai": {
         "posisi": [
           32,
@@ -279,7 +298,31 @@
     },
     {
       "id": "kudadu",
-      "tujuan": "Menuju desa Kudadu di barat, temui kepala desa",
+      "tujuan": [
+        {
+          "teks": "Desa Kudadu ada di barat laut, di lembah di bawah bukit; hindari patroli Daha",
+          "penanda": [
+            10,
+            -12
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                8,
+                -12
+              ],
+              "jari": 14
+            }
+          }
+        },
+        {
+          "teks": "Temui kepala desa di rumah terbesar, di bawah obor",
+          "penanda": [
+            8,
+            -36
+          ]
+        }
+      ],
       "mulai": {
         "posisi": [
           46,
@@ -287,12 +330,6 @@
         ],
         "hadap": -1.2
       },
-      "penanda": [
-        [
-          8,
-          -36
-        ]
-      ],
       "penjaga": [
         {
           "nama": "jalur-selatan",
@@ -467,7 +504,7 @@
     },
     {
       "id": "rute",
-      "tujuan": "Temui kepala desa di gerbang utara Kudadu",
+      "tujuan": "Temui kepala desa di gerbang utara Kudadu, di bawah obor",
       "mulai": {
         "posisi": [
           4,
@@ -535,7 +572,47 @@
     {
       "id": "sungai",
       "syarat": "rute-sungai",
-      "tujuan": "Ikuti tepian sungai ke barat sampai muara",
+      "tujuan": [
+        {
+          "teks": "Turun ke tepian sungai di barat daya; obor menandai jalan",
+          "penanda": [
+            -40,
+            20
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -40,
+                20
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
+          "teks": "Ikuti tepian sungai ke barat, lewati pos penjaga",
+          "penanda": [
+            -80,
+            40
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -80,
+                40
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
+          "teks": "Muara ada di ujung barat sungai",
+          "penanda": [
+            -116,
+            36
+          ]
+        }
+      ],
       "mulai": {
         "posisi": [
           0,
@@ -543,20 +620,6 @@
         ],
         "hadap": -1.57
       },
-      "penanda": [
-        [
-          -40,
-          20
-        ],
-        [
-          -80,
-          40
-        ],
-        [
-          -116,
-          36
-        ]
-      ],
       "jumlahPenjagaDariAturan": "penjagaSungai",
       "penjaga": [
         {
@@ -711,7 +774,63 @@
     {
       "id": "bukit",
       "syarat": "rute-bukit",
-      "tujuan": "Panjat tebing dan lewati bukit utara ke muara di barat",
+      "tujuan": [
+        {
+          "teks": "Panjat tebing di utara desa",
+          "penanda": [
+            -15,
+            -50
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -15,
+                -64
+              ],
+              "jari": 8
+            }
+          }
+        },
+        {
+          "teks": "Ikuti punggung bukit ke barat",
+          "penanda": [
+            -50,
+            -74
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -50,
+                -74
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
+          "teks": "Turun ke barat daya lewat celah bukit",
+          "penanda": [
+            -95,
+            -50
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -95,
+                -50
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
+          "teks": "Muara ada di bawah, di tepi air",
+          "penanda": [
+            -116,
+            36
+          ]
+        }
+      ],
       "mulai": {
         "posisi": [
           0,
@@ -719,28 +838,6 @@
         ],
         "hadap": 3.1416
       },
-      "penanda": [
-        [
-          -15,
-          -50
-        ],
-        [
-          -50,
-          -74
-        ],
-        [
-          -95,
-          -50
-        ],
-        [
-          -120,
-          0
-        ],
-        [
-          -116,
-          36
-        ]
-      ],
       "pemicu": [
         {
           "jenis": "area",
@@ -767,7 +864,7 @@
     },
     {
       "id": "pantai",
-      "tujuan": "Temui nelayan di muara",
+      "tujuan": "Temui nelayan di perahu, di tepi muara",
       "mulai": {
         "posisi": [
           -114,

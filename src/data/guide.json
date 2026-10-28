@@ -1,0 +1,54 @@
+{
+  "keterangan": "Angka pemandu arah (sprint 6 tahap A): arahan kamera, partikel pemandu (Tab), Nambi penunjuk jalan, peta (M). Teks di sini teks permainan, bukan isi sejarah.",
+  "arahanKamera": {
+    "lama": 2.0,
+    "lamaPutar": 0.7
+  },
+  "partikel": {
+    "jumlah": 80,
+    "jariMuncul": 3,
+    "laju": 6,
+    "umur": 4,
+    "jarakMaks": 25,
+    "kelok": 1.2,
+    "frekuensiKelok": 1.5,
+    "tinggiMin": 0.6,
+    "tinggiMaks": 2.2,
+    "ukuran": 0.32,
+    "gaya": {
+      "kunang": {
+        "warna": "#d8f070",
+        "kedip": 3.0,
+        "kedipDalam": 0.5,
+        "putar": 0,
+        "jatuh": 0
+      },
+      "daun": {
+        "warna": "#b89040",
+        "kedip": 0,
+        "kedipDalam": 0,
+        "putar": 4,
+        "jatuh": 0.4
+      }
+    }
+  },
+  "nambi": {
+    "tokoh": "nambi",
+    "nama": "Nambi",
+    "tanpaKemajuan": 20,
+    "toleransiKemajuan": 1.0,
+    "jeda": 40,
+    "jarakJalan": 4,
+    "lamaJalan": 3,
+    "lamaSubtitle": 2.5,
+    "baris": [
+      "Ke sana, Raden.",
+      "Lewat sini, Raden.",
+      "Arahnya ke sana, Raden."
+    ]
+  },
+  "peta": {
+    "ukuranSel": 5,
+    "pikselPerMeter": 2
+  }
+}

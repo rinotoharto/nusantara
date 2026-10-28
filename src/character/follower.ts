@@ -71,6 +71,8 @@ export class Pengikut {
   private fasePincang = 0;
   private readonly sementara = new THREE.Vector3();
   readonly opsi: OpsiPengikut;
+  /** Tugas sementara menunjuk jalan: berjalan ke titik ini lalu kembali ke formasi. */
+  private tugas: { x: number; z: number; sisa: number } | null = null;
 
   constructor(
     private data: DataTabrakan,
@@ -100,6 +102,14 @@ export class Pengikut {
     this.posisi.set(x, tinggiLantai(this.data, x, z, 1e9), z);
     this.kecepatan.set(0, 0, 0);
     this.adaTujuan = false;
+  }
+
+  /** Menunjuk jalan: berjalan `jarak` meter dari pemain ke arah `ke`, paling lama `lama` detik, lalu kembali. */
+  tunjukArah(dariPemain: THREE.Vector3, ke: [number, number], jarak: number, lama: number): void {
+    const dx = ke[0] - dariPemain.x;
+    const dz = ke[1] - dariPemain.z;
+    const d = Math.hypot(dx, dz) || 1;
+    this.tugas = { x: dariPemain.x + (dx / d) * jarak, z: dariPemain.z + (dz / d) * jarak, sisa: lama };
   }
 
   /** Slot formasi di belakang pemain untuk pengikut ini. */
@@ -137,6 +147,12 @@ export class Pengikut {
       } else {
         this.adaTujuan = false; // sudah cukup jauh: menunggu
       }
+    } else if (this.tugas) {
+      // Menunjuk jalan: ke titik tugas, selesai saat sampai atau waktunya habis.
+      this.tugas.sisa -= dt;
+      this.tujuan.set(this.tugas.x, 0, this.tugas.z);
+      this.adaTujuan = true;
+      if (this.tugas.sisa <= 0 || Math.hypot(this.tugas.x - this.posisi.x, this.tugas.z - this.posisi.z) < F.jarakBerhenti) this.tugas = null;
     } else if (ctx.keadaan.semak) {
       const s = SLOT_SEMAK[this.indeks % SLOT_SEMAK.length];
       const pusat = ctx.keadaan.semak.pusat;

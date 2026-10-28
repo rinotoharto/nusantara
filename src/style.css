@@ -61,7 +61,7 @@ html, body {
 /* HUD pertarungan */
 .hud-nyawa {
   left: 12px;
-  bottom: 186px;
+  bottom: 276px; /* di atas daftar petunjuk tombol yang kini 13 baris */
   width: 240px;
 }
 .hud-nyawa-teks {
@@ -940,4 +940,86 @@ body.lapisan-aktif .hud-vignet {
   display: flex;
   gap: 12px;
   margin-top: 8px;
+}
+
+/* Subtitle kecil (ucapan di luar dialog, misalnya Nambi menunjuk jalan) */
+.subtitle {
+  bottom: 150px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 60vw;
+  text-align: center;
+  font-size: calc(16px * var(--skala-huruf, 1));
+  color: #f4e9d4;
+  background: rgba(10, 6, 3, 0.55);
+  padding: 4px 12px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.subtitle.tampil {
+  opacity: 1;
+}
+.subtitle-nama {
+  color: #ffd79a;
+}
+
+/* Peta (M): kanvas lontar di tengah layar, permainan berhenti */
+.peta-lapis {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 4, 2, 0.7);
+  user-select: none;
+}
+.peta-lapis.tampil {
+  display: flex;
+}
+.peta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px 14px;
+  background:
+    repeating-linear-gradient(0deg, rgba(120, 90, 40, 0.035) 0 2px, transparent 2px 7px),
+    #efe3c6;
+  color: #2b1d12;
+  font-family: Georgia, 'Times New Roman', serif;
+  border-radius: 4px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.peta-kepala {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.peta-judul {
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+.peta-tutup {
+  font: inherit;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  padding: 5px 14px;
+  background: #2b1d12;
+  color: #efe3c6;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.peta-kanvas {
+  width: min(72vh, 80vw);
+  height: min(72vh, 80vw);
+  border: 1px solid rgba(43, 29, 18, 0.35);
+  image-rendering: auto;
+}
+.peta-keterangan {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  opacity: 0.7;
+  max-width: min(72vh, 80vw);
 }

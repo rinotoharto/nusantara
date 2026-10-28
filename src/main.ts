@@ -27,7 +27,12 @@ import { PemberitahuanKitab } from './ui/notify';
 import { MenuJeda } from './ui/pause-menu';
 import { terapkanUkuranHuruf } from './ui/font-size';
 import { Rombongan } from './mission/party';
-import { ATURAN, DUNIA_MISI, PENGIKUT_TOKOH } from './mission/config';
+import { ATURAN, DUNIA_MISI, PENGIKUT_TOKOH, GAYA_PEMANDU } from './mission/config';
+import { Pemandu } from './world/guide';
+import type { GayaPemandu } from './world/guide-config';
+import { Subtitle } from './ui/subtitle';
+import { PenunjukJalan } from './mission/guide-hint';
+import { Peta } from './ui/map';
 import { HudRombongan } from './ui/party-hud';
 import { HudTujuan } from './ui/objective-hud';
 import { PanelNaskah } from './ui/panel';
@@ -68,6 +73,10 @@ tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks)
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
 const hudSiluman = new HudSiluman();
+// Pemandu arah (sprint 6): partikel (Tab), Nambi penunjuk jalan dengan subtitle, peta (M).
+const pemandu = new Pemandu(scene, GAYA_PEMANDU as GayaPemandu);
+const subtitle = new Subtitle();
+const peta = new Peta(dunia);
 
 // Status permainan, dialog, dan Kitab.
 const status = new StatusPermainan();
@@ -91,10 +100,12 @@ const panel = new PanelNaskah();
 const layarJudul = new LayarJudul();
 const layarSelesai = new LayarSelesai();
 /** Mode UI: logika permainan hanya berjalan saat 'main'. */
-type ModeUi = 'judul' | 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' | 'sinematik' | 'selesai';
+type ModeUi = 'judul' | 'main' | 'dialog' | 'kitab' | 'jeda' | 'panel' | 'sinematik' | 'selesai' | 'peta';
 let modeUi: ModeUi = 'judul';
 /** Mode yang dikembalikan saat Kitab ditutup (dibuka dari permainan, menu jeda, layar awal, atau layar selesai). */
 let asalKitab: 'main' | 'jeda' | 'judul' | 'selesai' = 'main';
+/** Mode yang dikembalikan saat peta ditutup. */
+let asalPeta: 'main' | 'jeda' = 'main';
 /** Detik permainan sejak misi mulai (berjalan di mode main, dialog, panel, sinematik). */
 let waktuMisi = 0;
 
@@ -120,6 +131,19 @@ function bukaMenu(): void {
   hud.tampilkanAksi(null);
   menuJeda.buka();
 }
+function bukaPeta(asal: 'main' | 'jeda'): void {
+  asalPeta = asal;
+  modeUi = 'peta';
+  if (document.pointerLockElement) document.exitPointerLock();
+  menuJeda.tutup();
+  hud.tampilkanAksi(null);
+  peta.buka();
+}
+function tutupPeta(): void {
+  peta.tutup();
+  modeUi = asalPeta;
+  if (modeUi === 'jeda') menuJeda.buka();
+}
 function tutupMenu(): void {
   menuJeda.tutup();
   modeUi = 'main';
@@ -140,15 +164,22 @@ function bukaPanel(paragraf: string[], lama: number, selesai: () => void): void 
 uiKitab.saatTutup = tutupKitab;
 menuJeda.saatLanjutkan = tutupMenu;
 menuJeda.saatKitab = () => bukaKitab('jeda');
+menuJeda.saatPeta = () => bukaPeta('jeda');
+peta.saatTutup = tutupPeta;
 
-// Esc: menu jeda (saat pointer sudah lepas); K: Kitab. Dialog dan panel mengurus tombolnya sendiri.
+// Esc: menu jeda (saat pointer sudah lepas); K: Kitab; M: peta. Dialog dan panel mengurus tombolnya sendiri.
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   if (e.code === 'Escape') {
     if (document.pointerLockElement) return; // peramban sedang melepas pointer lock
     if (modeUi === 'kitab') tutupKitab();
+    else if (modeUi === 'peta') tutupPeta();
     else if (modeUi === 'jeda') tutupMenu();
     else if (modeUi === 'main' && !tarung.mati) bukaMenu();
+  } else if (e.code === 'KeyM') {
+    if (modeUi === 'peta') tutupPeta();
+    else if (modeUi === 'main' && !tarung.mati) bukaPeta('main');
+    else if (modeUi === 'jeda') bukaPeta('jeda');
   } else if (e.code === 'KeyK') {
     if (modeUi === 'kitab') tutupKitab();
     else if (modeUi === 'main' && !tarung.mati) bukaKitab('main');
@@ -205,6 +236,12 @@ misi.saatSegmenMulai = (titik) => {
   titik.waktu = waktuMisi;
   status.simpanTitik(titik);
 };
+/** Penanda langkah baru yang menunggu arahan kamera: dijalankan begitu permainan kembali ke mode main tanpa pertarungan. */
+let arahanTertunda: [number, number] | null = null;
+misi.saatLangkahBaru = (penanda) => {
+  arahanTertunda = penanda;
+};
+const penunjuk = new PenunjukJalan(pengikut, subtitle);
 misi.saatSelesai = () => mulaiSinematikPerahu();
 
 // --- Layar awal, sinematik perahu, layar selesai --------------------------------------------
@@ -303,6 +340,7 @@ function kembaliKeJudul(): void {
 layarJudul.saatMulaiBaru = () => {
   layarJudul.tutup();
   status.ulangMisi();
+  peta.reset();
   waktuMisi = 0;
   modeUi = 'main';
   misi.mulai();
@@ -332,6 +370,7 @@ menuJeda.saatUlangMisi = () => {
   status.ulangMisi();
   tarung.hidupkan();
   tutupMenu();
+  peta.reset();
   waktuMisi = 0;
   misi.mulai();
 };
@@ -358,6 +397,21 @@ function ikutkanMatahari(): void {
   dunia.matahari.position.copy(pemain.posisi).add(geserMatahari);
 }
 
+/** Kamera (termasuk arahan ke penanda langkah baru) dan efek pemandu: partikel, subtitle, pendar obor. */
+function perbaruiKameraDanPemandu(dt: number): void {
+  // Arahan kamera hanya saat bermain bebas: tidak bertarung, tidak dalam sinematik, tidak gugur.
+  if (arahanTertunda && modeUi === 'main' && sisaWaktuTarung <= 0 && !kameraOrangKetiga.sinematik && !tarung.mati) {
+    kameraOrangKetiga.arahkanKe(arahanTertunda[0], arahanTertunda[1]);
+    arahanTertunda = null;
+  }
+  kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
+  if (modeUi === 'main' || modeUi === 'dialog' || modeUi === 'panel' || modeUi === 'sinematik') {
+    pemandu.perbarui(dt);
+    subtitle.perbarui(dt);
+  }
+  misi.perbaruiPenanda(dt, camera.position);
+}
+
 /** Satu langkah logika permainan (mode 'main'): pemain, pengikut, penjaga, pemicu, NPC. */
 function perbaruiPermainan(dt: number): void {
   // Rombongan membatasi laju (Gajah Pagon ikut, pengikut tumbang) dan mempercepat curiga penjaga.
@@ -377,6 +431,12 @@ function perbaruiPermainan(dt: number): void {
   const tenang = lawan.jarakTerdekat(pemain.posisi) >= KONFIG.kamera.jarakDeteksi;
   pemicu.perbarui(pemain.posisi, !tenang);
   if (!tarung.mati) misi.perbarui(pemain.posisi);
+
+  // Pemandu arah: Tab memancarkan partikel ke penanda terdekat; Nambi menunjuk jalan kalau pemain lama tidak mendekat.
+  const penanda = misi.penandaTerdekat(pemain.posisi.x, pemain.posisi.z);
+  if (input.baruDitekan('Tab') && penanda && !tarung.mati) pemandu.pancarkan(pemain.posisi, penanda);
+  penunjuk.perbarui(dt, pemain.posisi, penanda, tenang && !tarung.mati && !siluman.konteks.pemain.tersembunyi);
+  peta.catatKunjungan(pemain.posisi.x, pemain.posisi.z);
 
   // NPC dekat: tampilkan "E: Bicara" dan mulai percakapan; tidak saat ada lawan bertarung di dekat pemain.
   const npcDekat = modeUi === 'main' && tenang && !tarung.mati && pemain.diTanah ? npc.terdekat(pemain.posisi, UI.npc.jarak) : null;
@@ -399,8 +459,9 @@ renderer.setAnimationLoop(() => {
   let dt = 0;
   document.body.classList.toggle('lapisan-aktif', modeUi !== 'main');
   if (modeUi === 'main' || modeUi === 'dialog' || modeUi === 'panel' || modeUi === 'sinematik') waktuMisi += dtNyata;
-  if (modeUi === 'kitab' || modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai') {
+  if (modeUi === 'kitab' || modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai' || modeUi === 'peta') {
     // Permainan berhenti; tidak ada yang bergerak.
+    if (modeUi === 'peta') peta.perbarui(dtNyata, pemain.posisi, pemain.hadap, misi.penandaSekarang);
   } else if (modeUi === 'panel') {
     panel.perbarui(dtNyata);
   } else if (modeUi === 'sinematik') {
@@ -429,7 +490,7 @@ renderer.setAnimationLoop(() => {
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
   kameraOrangKetiga.mendekat = KONFIG.pemain.tikaman.kameraMendekat * tarung.faktorKameraDekat;
 
-  kameraOrangKetiga.perbarui(dtNyata, input, pemain.posisi);
+  perbaruiKameraDanPemandu(dtNyata);
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati || modeUi !== 'main');
   pemberitahuan.perbarui(dtNyata, modeUi !== 'main');
@@ -446,7 +507,7 @@ if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
-    perbaruiSinematikPerahu, tampilkanSelesai,
+    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta,
     get waktuMisi() {
       return waktuMisi;
     },
@@ -455,7 +516,7 @@ if (import.meta.env.DEV) {
       if (modeUi !== 'main') return;
       tarung.perbaruiEfek(dt);
       perbaruiPermainan(dt);
-      kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
+      perbaruiKameraDanPemandu(dt);
       input.akhirFrame();
     },
     get modeUi() {
