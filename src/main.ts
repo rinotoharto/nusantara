@@ -33,6 +33,9 @@ import type { GayaPemandu } from './world/guide-config';
 import { Subtitle } from './ui/subtitle';
 import { PenunjukJalan } from './mission/guide-hint';
 import { Peta } from './ui/map';
+import { PENGATURAN, kualitasDariFps } from './ui/settings';
+import { INPUT } from './character/gamepad';
+import type { Pengaturan, Kualitas } from './mission/state';
 import { HudRombongan } from './ui/party-hud';
 import { HudTujuan } from './ui/objective-hud';
 import { PanelNaskah } from './ui/panel';
@@ -80,7 +83,36 @@ const peta = new Peta(dunia);
 
 // Status permainan, dialog, dan Kitab.
 const status = new StatusPermainan();
-terapkanUkuranHuruf(status.pengaturan.ukuranHuruf);
+/** Menerapkan pengaturan pemain ke huruf, kamera, dan kualitas render. */
+function terapkanKualitas(k: Kualitas): void {
+  const preset = PENGATURAN.kualitas[k];
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, preset.rasioPiksel));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  dunia.matahari.castShadow = preset.bayangan;
+}
+function terapkanPengaturan(p: Pengaturan): void {
+  terapkanUkuranHuruf(p.ukuranHuruf);
+  kameraOrangKetiga.kepekaanMouse = p.kepekaanMouse;
+  kameraOrangKetiga.kepekaanStik = p.kepekaanStik;
+  kameraOrangKetiga.balikY = p.balikY;
+  terapkanKualitas(p.kualitas ?? 'sedang');
+  document.dispatchEvent(new Event('pengaturan-berubah'));
+}
+status.saatPengaturan = terapkanPengaturan;
+terapkanPengaturan(status.pengaturan);
+// Kualitas dipilih otomatis sekali dari fps rata-rata beberapa detik render pertama yang terlihat.
+let ukurFrame = 0;
+let ukurDetik = 0;
+function ukurKualitasOtomatis(dt: number): void {
+  if (status.pengaturan.kualitas !== null || document.visibilityState !== 'visible' || dt > 0.1) return;
+  ukurFrame += 1;
+  ukurDetik += dt;
+  if (ukurDetik < PENGATURAN.otomatis.lamaUkur) return;
+  const fps = ukurFrame / ukurDetik;
+  const k = kualitasDariFps(fps);
+  if (import.meta.env.DEV) console.log(`[pengaturan] fps rata-rata ${fps.toFixed(0)}, kualitas otomatis: ${k}`);
+  status.aturPengaturan({ kualitas: k });
+}
 for (const pesan of [...validasiKitab(), ...validasiDialog()]) console.warn(`[data] ${pesan}`);
 // Rombongan: variabel misi yang berubah lewat tanda dialog (aturan di misi3.json).
 const rombongan = new Rombongan();
@@ -403,6 +435,80 @@ function ikutkanMatahari(): void {
   dunia.matahari.position.copy(pemain.posisi).add(geserMatahari);
 }
 
+// --- Gamepad di luar permainan: menu, dialog, panel ------------------------------------------
+
+/** Tombol yang terlihat di lapisan UI yang sedang aktif, untuk dijelajahi D-pad. */
+function tombolLapisanAktif(): HTMLButtonElement[] {
+  const pemilih =
+    modeUi === 'jeda' ? '.menu-lapis.tampil button'
+    : modeUi === 'judul' ? '.judul-lapis.tampil button'
+    : modeUi === 'selesai' ? '.selesai-lapis.tampil button'
+    : modeUi === 'peta' ? '.peta-lapis.tampil button'
+    : modeUi === 'main' && tarung.mati ? '.layar-mati.tampil button'
+    : null;
+  if (!pemilih) return [];
+  return [...document.querySelectorAll<HTMLButtonElement>(pemilih)].filter((b) => b.offsetParent !== null);
+}
+function geserFokusPad(arah: number): void {
+  const daftar = tombolLapisanAktif();
+  if (daftar.length === 0) return;
+  const sekarang = daftar.findIndex((b) => b.classList.contains('pad-fokus'));
+  const berikut = sekarang < 0 ? (arah > 0 ? 0 : daftar.length - 1) : (sekarang + arah + daftar.length) % daftar.length;
+  document.querySelectorAll('.pad-fokus').forEach((b) => b.classList.remove('pad-fokus'));
+  daftar[berikut].classList.add('pad-fokus');
+}
+function tekanTombolTerfokus(): void {
+  const daftar = tombolLapisanAktif();
+  const fokus = daftar.find((b) => b.classList.contains('pad-fokus')) ?? daftar[0];
+  if (fokus) fokus.click();
+  document.querySelectorAll('.pad-fokus').forEach((b) => b.classList.remove('pad-fokus'));
+}
+const kirimTombol = (code: string): void => {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
+};
+/** Dipanggil tiap frame: Start, Select, A, B, D-pad di menu, dialog, dan panel. */
+function perbaruiGamepadUi(): void {
+  if (!input.gamepadTersambung) return;
+  if (input.padBaru('jeda')) {
+    if (modeUi === 'main' && !tarung.mati) bukaMenu();
+    else if (modeUi === 'jeda') tutupMenu();
+    else if (modeUi === 'peta') tutupPeta();
+    else if (modeUi === 'kitab') tutupKitab();
+    return;
+  }
+  if (input.padBaru('peta')) {
+    if (modeUi === 'peta') tutupPeta();
+    else if (modeUi === 'main' && !tarung.mati) bukaPeta('main');
+    else if (modeUi === 'jeda') bukaPeta('jeda');
+    return;
+  }
+  if (modeUi === 'dialog' || modeUi === 'panel') {
+    if (input.padBaru('dialogLanjut')) kirimTombol('Space');
+    const pilihan = input.padPilihanDialog();
+    if (pilihan >= 0 && document.querySelector('.dialog-pilihan.tampil')) kirimTombol(`Digit${pilihan + 1}`);
+    return;
+  }
+  if (input.padBaru('menuKembali')) {
+    if (modeUi === 'jeda') {
+      if (menuJeda.diPengaturan) menuJeda.kembaliKeUtama();
+      else tutupMenu();
+    } else if (modeUi === 'peta') tutupPeta();
+    else if (modeUi === 'kitab') tutupKitab();
+    return;
+  }
+  if (input.padBaru('menuAtas')) geserFokusPad(-1);
+  else if (input.padBaru('menuBawah')) geserFokusPad(1);
+  else if (input.padBaru('menuPilih')) tekanTombolTerfokus();
+}
+
+/** Petunjuk tombol HUD mengikuti alat masukan yang terakhir dipakai. */
+let petunjukGamepad = false;
+function perbaruiPetunjuk(): void {
+  if (input.gamepadTerakhir === petunjukGamepad) return;
+  petunjukGamepad = input.gamepadTerakhir;
+  hud.aturPetunjuk(petunjukGamepad ? INPUT.gamepad.petunjuk : UI.hud.petunjuk);
+}
+
 /** Kamera (termasuk arahan ke penanda langkah baru) dan efek pemandu: partikel, subtitle, pendar obor. */
 function perbaruiKameraDanPemandu(dt: number): void {
   // Arahan kamera hanya saat bermain bebas: tidak bertarung, tidak dalam sinematik, tidak gugur.
@@ -441,14 +547,14 @@ function perbaruiPermainan(dt: number): void {
 
   // Pemandu arah: Tab memancarkan partikel ke penanda terdekat; Nambi menunjuk jalan kalau pemain lama tidak mendekat.
   const penanda = misi.penandaTerdekat(pemain.posisi.x, pemain.posisi.z);
-  if (input.baruDitekan('Tab') && penanda && !tarung.mati) pemandu.pancarkan(pemain.posisi, penanda);
+  if (input.aksiBaru('pemandu') && penanda && !tarung.mati) pemandu.pancarkan(pemain.posisi, penanda);
   penunjuk.perbarui(dt, pemain.posisi, penanda, tenang && !tarung.mati && !siluman.konteks.pemain.tersembunyi);
   peta.catatKunjungan(pemain.posisi.x, pemain.posisi.z);
 
   // NPC dekat: tampilkan "E: Bicara" dan mulai percakapan; tidak saat ada lawan bertarung di dekat pemain.
   const npcDekat = modeUi === 'main' && tenang && !tarung.mati && pemain.diTanah ? npc.terdekat(pemain.posisi, UI.npc.jarak) : null;
-  hud.tampilkanAksi(npcDekat ? UI.npc.bicara : null);
-  if (npcDekat && input.baruDitekan('KeyE')) {
+  hud.tampilkanAksi(npcDekat ? (input.gamepadTerakhir ? UI.npc.bicaraPad : UI.npc.bicara) : null);
+  if (npcDekat && input.aksiBaru('bicara')) {
     npcDekat.hadapKe(pemain.posisi.x, pemain.posisi.z);
     mulaiDialog(npcDekat.percakapanBerikut(status), npcDekat.posisi);
   }
@@ -464,6 +570,10 @@ renderer.setAnimationLoop(() => {
   const dtMentah = jam.getDelta();
   const dtNyata = Math.min(dtMentah, 0.05); // dibatasi supaya tidak melompat jauh saat tab tidak aktif
   let dt = 0;
+  input.perbaruiGamepad();
+  perbaruiGamepadUi();
+  perbaruiPetunjuk();
+  ukurKualitasOtomatis(dtMentah);
   document.body.classList.toggle('lapisan-aktif', modeUi !== 'main');
   if (modeUi === 'main' || modeUi === 'dialog' || modeUi === 'panel' || modeUi === 'sinematik') waktuMisi += dtNyata;
   if (modeUi === 'kitab' || modeUi === 'jeda' || modeUi === 'judul' || modeUi === 'selesai' || modeUi === 'peta') {
@@ -514,7 +624,7 @@ if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
-    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta,
+    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas,
     get waktuMisi() {
       return waktuMisi;
     },

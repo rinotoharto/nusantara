@@ -16,7 +16,7 @@ export class Hud {
 
     this.petunjukEl = document.createElement('div');
     this.petunjukEl.className = 'hud hud-petunjuk';
-    this.petunjukEl.innerHTML = UI.hud.petunjuk.map(([tombol, teks]) => `<b>${tombol}</b> ${teks}`).join('<br>');
+    this.aturPetunjuk(UI.hud.petunjuk);
 
     this.kunciEl = document.createElement('div');
     this.kunciEl.className = 'hud hud-kunci';
@@ -26,6 +26,11 @@ export class Hud {
     this.aksiEl.className = 'hud hud-aksi';
 
     document.body.append(this.fpsEl, this.petunjukEl, this.kunciEl, this.aksiEl);
+  }
+
+  /** Mengganti daftar petunjuk tombol (keyboard atau gamepad). */
+  aturPetunjuk(daftar: string[][]): void {
+    this.petunjukEl.innerHTML = daftar.map(([tombol, teks]) => `<b>${tombol}</b> ${teks}`).join('<br>');
   }
 
   /** Petunjuk aksi di tengah bawah layar, misalnya "E: Bicara"; null menyembunyikannya. */

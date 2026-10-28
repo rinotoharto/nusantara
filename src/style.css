@@ -1023,3 +1023,39 @@ body.lapisan-aktif .hud-vignet {
   opacity: 0.7;
   max-width: min(72vh, 80vw);
 }
+
+/* Halaman pengaturan di menu jeda */
+.pengaturan {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.pengaturan-baris {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pengaturan-label {
+  min-width: 120px;
+}
+.pengaturan-nilai {
+  min-width: 36px;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+.pengaturan input[type='range'] {
+  flex: 1;
+  accent-color: #ffd79a;
+}
+.pengaturan input[type='checkbox'] {
+  accent-color: #ffd79a;
+  width: 16px;
+  height: 16px;
+}
+
+/* Fokus tombol lewat gamepad (D-pad) */
+button.pad-fokus {
+  outline: 2px solid #ffd79a;
+  outline-offset: 2px;
+}

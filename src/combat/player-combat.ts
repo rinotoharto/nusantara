@@ -204,7 +204,7 @@ export class PertarunganPemain {
    */
   private kunciSasaran(input: Input): number | null {
     this.sasaranTerkunci = null;
-    if (!this.pencariSasaran || input.sejakMouseBergerak() < K.kunci.mouseDiam) return null;
+    if (!this.pencariSasaran || input.sejakKameraDigerakkan() < K.kunci.mouseDiam) return null;
     const sasaran = this.pencariSasaran(this.pemain.posisi, K.kunci.jarak);
     if (!sasaran) return null;
     this.sasaranTerkunci = sasaran;
@@ -275,9 +275,9 @@ export class PertarunganPemain {
       this.komboHabis = false;
     }
 
-    const mintaHindar = input.baruDitekan('ControlLeft') || input.baruDitekan('ControlRight') || input.baruDitekan('Mouse1');
-    const mintaSerang = input.baruDitekan('Mouse0');
-    const tahanTangkis = input.ditekan('Mouse2');
+    const mintaHindar = input.aksiBaru('hindar');
+    const mintaSerang = input.aksiBaru('serang');
+    const tahanTangkis = input.aksiDitekan('tangkis');
     const bisaSerangLagi = !this.komboHabis || this.sejakSeranganTerakhir > K.seranganRingan.pemulihanSetelahKombo;
 
     switch (this.status) {
@@ -290,7 +290,7 @@ export class PertarunganPemain {
       case 'mengisi':
         if (mintaHindar) this.mulaiHindar(input, yawKamera);
         else if (tahanTangkis) this.mulaiTangkis(input);
-        else if (input.baruDilepas('Mouse0')) this.mulaiSerangan(false, input, yawKamera);
+        else if (input.aksiLepas('serang')) this.mulaiSerangan(false, input, yawKamera);
         else if (this.waktu >= K.seranganBerat.tahan) this.mulaiSerangan(true, input, yawKamera);
         break;
 

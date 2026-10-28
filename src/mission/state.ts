@@ -7,6 +7,17 @@ import type { NilaiRombongan } from './party';
 import type { StatusPagon } from './config';
 
 export type UkuranHuruf = 'kecil' | 'sedang' | 'besar';
+export type Kualitas = 'rendah' | 'sedang' | 'tinggi';
+
+/** Pengaturan pemain, tersimpan di localStorage. `kualitas` null berarti belum dipilih (otomatis dari fps). */
+export interface Pengaturan {
+  ukuranHuruf: UkuranHuruf;
+  kepekaanMouse: number;
+  kepekaanStik: number;
+  balikY: boolean;
+  kualitas: Kualitas | null;
+}
+export const PENGATURAN_AWAL: Pengaturan = { ukuranHuruf: 'sedang', kepekaanMouse: 1, kepekaanStik: 1, balikY: false, kualitas: null };
 
 /** Titik simpan di awal segmen: cukup untuk memulai ulang segmen itu dengan keadaan yang sama. */
 export interface TitikSimpan {
@@ -32,7 +43,7 @@ interface DataSimpanan {
   tanda: string[];
   kitab: string[];
   percakapan: string[];
-  pengaturan: { ukuranHuruf: UkuranHuruf };
+  pengaturan: Partial<Pengaturan>;
   titikSimpan?: TitikSimpan | null;
   hasilMisi3?: HasilMisi | null;
 }
@@ -44,7 +55,9 @@ export class StatusPermainan {
   /** Id entri Kitab yang terbuka, urut sesuai waktu terbuka. */
   readonly kitab: string[] = [];
   readonly percakapanSelesai = new Set<string>();
-  pengaturan: { ukuranHuruf: UkuranHuruf } = { ukuranHuruf: 'sedang' };
+  pengaturan: Pengaturan = { ...PENGATURAN_AWAL };
+  /** Dipanggil setelah pengaturan berubah (kamera, kualitas, huruf menerapkannya). */
+  saatPengaturan: ((p: Pengaturan) => void) | null = null;
   /** Titik simpan segmen terakhir; null kalau tidak ada misi yang sedang berjalan. */
   titikSimpan: TitikSimpan | null = null;
   /** Hasil misi 3 terakhir yang selesai, untuk misi 4. */
@@ -106,8 +119,14 @@ export class StatusPermainan {
   }
 
   aturUkuranHuruf(ukuran: UkuranHuruf): void {
-    this.pengaturan.ukuranHuruf = ukuran;
+    this.aturPengaturan({ ukuranHuruf: ukuran });
+  }
+
+  /** Mengubah sebagian pengaturan, menyimpan, dan memberi tahu pendengar. */
+  aturPengaturan(ubah: Partial<Pengaturan>): void {
+    Object.assign(this.pengaturan, ubah);
     this.simpan();
+    this.saatPengaturan?.(this.pengaturan);
   }
 
   /** Mengulang misi: tanda, percakapan, dan titik simpan dihapus; entri Kitab, hasil misi, dan pengaturan tetap. */
@@ -123,7 +142,7 @@ export class StatusPermainan {
     this.tanda.clear();
     this.kitab.length = 0;
     this.percakapanSelesai.clear();
-    this.pengaturan = { ukuranHuruf: 'sedang' };
+    this.pengaturan = { ...PENGATURAN_AWAL };
     this.titikSimpan = null;
     this.hasilMisi3 = null;
     try {
@@ -164,6 +183,11 @@ export class StatusPermainan {
       for (const p of data.percakapan ?? []) this.percakapanSelesai.add(p);
       const u = data.pengaturan?.ukuranHuruf;
       if (u === 'kecil' || u === 'sedang' || u === 'besar') this.pengaturan.ukuranHuruf = u;
+      const pg = data.pengaturan ?? {};
+      if (typeof pg.kepekaanMouse === 'number') this.pengaturan.kepekaanMouse = pg.kepekaanMouse;
+      if (typeof pg.kepekaanStik === 'number') this.pengaturan.kepekaanStik = pg.kepekaanStik;
+      if (typeof pg.balikY === 'boolean') this.pengaturan.balikY = pg.balikY;
+      if (pg.kualitas === 'rendah' || pg.kualitas === 'sedang' || pg.kualitas === 'tinggi') this.pengaturan.kualitas = pg.kualitas;
       if (data.titikSimpan && typeof data.titikSimpan.segmen === 'string') this.titikSimpan = data.titikSimpan;
       if (data.hasilMisi3) this.hasilMisi3 = data.hasilMisi3;
     } catch {

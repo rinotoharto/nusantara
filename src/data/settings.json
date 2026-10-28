@@ -1,0 +1,10 @@
+{
+  "keterangan": "Pengaturan yang bisa diubah pemain di menu jeda. Kualitas: bayangan hidup/mati dan rasio piksel (dibatasi devicePixelRatio). `otomatis`: kualitas dipilih pertama kali dari fps rata-rata selama lamaUkur detik render pertama.",
+  "kualitas": {
+    "rendah": { "bayangan": false, "rasioPiksel": 0.75 },
+    "sedang": { "bayangan": true, "rasioPiksel": 1.5 },
+    "tinggi": { "bayangan": true, "rasioPiksel": 2 }
+  },
+  "otomatis": { "lamaUkur": 5, "fpsRendah": 40, "fpsTinggi": 55 },
+  "kepekaan": { "min": 0.3, "maks": 2.5, "langkah": 0.1 }
+}

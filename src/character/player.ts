@@ -36,21 +36,28 @@ export const PERINTAH_BEBAS: Readonly<PerintahGerak> = {
   bolehLompat: true,
 };
 
-/** Arah gerak dari WASD relatif terhadap yaw kamera, sudah dinormalkan. */
-export function arahInputRelatifKamera(input: Input, yawKamera: number): { x: number; z: number; ada: boolean } {
+/**
+ * Arah gerak dari WASD atau stik kiri relatif terhadap yaw kamera, sudah dinormalkan.
+ * `kekuatan` 0 sampai 1: seberapa jauh stik didorong (tombol selalu 1), untuk berjalan pelan.
+ */
+export function arahInputRelatifKamera(input: Input, yawKamera: number): { x: number; z: number; ada: boolean; kekuatan: number } {
   const depanX = -Math.sin(yawKamera);
   const depanZ = -Math.cos(yawKamera);
   const kananX = Math.cos(yawKamera);
   const kananZ = -Math.sin(yawKamera);
-  let gx = 0;
-  let gz = 0;
-  if (input.ditekan('KeyW')) { gx += depanX; gz += depanZ; }
-  if (input.ditekan('KeyS')) { gx -= depanX; gz -= depanZ; }
-  if (input.ditekan('KeyD')) { gx += kananX; gz += kananZ; }
-  if (input.ditekan('KeyA')) { gx -= kananX; gz -= kananZ; }
+  let maju = 0;
+  let samping = 0;
+  if (input.aksiDitekan('maju')) maju += 1;
+  if (input.aksiDitekan('mundur')) maju -= 1;
+  if (input.aksiDitekan('kanan')) samping += 1;
+  if (input.aksiDitekan('kiri')) samping -= 1;
+  maju -= input.stikGerak.y; // stik ke atas = nilai negatif = maju
+  samping += input.stikGerak.x;
+  const gx = depanX * maju + kananX * samping;
+  const gz = depanZ * maju + kananZ * samping;
   const panjang = Math.hypot(gx, gz);
-  if (panjang > 0) return { x: gx / panjang, z: gz / panjang, ada: true };
-  return { x: 0, z: 0, ada: false };
+  if (panjang > 1e-3) return { x: gx / panjang, z: gz / panjang, ada: true, kekuatan: Math.min(1, panjang) };
+  return { x: 0, z: 0, ada: false, kekuatan: 0 };
 }
 
 /** Pemain berupa kapsul. `posisi` adalah titik kaki. */
@@ -135,13 +142,14 @@ export class Pemain {
     const gx = perintah.kunciGerak ? 0 : arah.x;
     const gz = perintah.kunciGerak ? 0 : arah.z;
 
-    if (input.baruDitekan('KeyC') && this.diTanah) this.jongkok = !this.jongkok;
+    if (input.aksiBaru('jongkok') && this.diTanah) this.jongkok = !this.jongkok;
     const skalaTujuan = this.jongkok ? SILUMAN.pemain.skalaJongkok : 1;
     this.skalaBadan += (skalaTujuan - this.skalaBadan) * Math.min(1, 12 * dt);
 
     const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
-    const lari = (input.ditekan('ShiftLeft') || input.ditekan('ShiftRight')) && !this.jongkok;
+    const lari = input.aksiDitekan('lari') && !this.jongkok;
     let kecepatanMaks = this.jongkok ? SILUMAN.pemain.kecepatanJongkok : lari ? KECEPATAN_LARI : KECEPATAN_JALAN;
+    kecepatanMaks *= Math.max(arah.kekuatan, perintah.kunciGerak ? 1 : 0.0001); // stik setengah = jalan pelan
     if (this.batasLaju !== null) kecepatanMaks = Math.min(kecepatanMaks, this.batasLaju);
     if (diAir) kecepatanMaks *= 0.5;
     kecepatanMaks *= perintah.pengaliKecepatan;
@@ -158,7 +166,7 @@ export class Pemain {
     }
 
     // Memanjat atau melompat.
-    if (perintah.bolehLompat && !this.jongkok && input.baruDitekan('Space') && this.diTanah) {
+    if (perintah.bolehLompat && !this.jongkok && input.aksiBaru('lompat') && this.diTanah) {
       const tebing = cariTebing(this.data, this.posisi, JARI_PEMAIN);
       if (tebing) {
         this.mulaiPanjat(tebing.tujuan);

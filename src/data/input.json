@@ -1,0 +1,56 @@
+{
+  "keterangan": "Pemetaan tombol. `aksi`: nama aksi ke daftar kode keyboard/mouse (KeyboardEvent.code; Mouse0 kiri, Mouse1 tengah, Mouse2 kanan). `gamepad.tombol`: nama aksi ke indeks tombol pemetaan standar Gamepad API (0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 8 Select, 9 Start, 10 L3, 12 D-pad atas). Sumbu 0-1 stik kiri, 2-3 stik kanan.",
+  "aksi": {
+    "maju": ["KeyW"],
+    "mundur": ["KeyS"],
+    "kiri": ["KeyA"],
+    "kanan": ["KeyD"],
+    "lari": ["ShiftLeft", "ShiftRight"],
+    "jongkok": ["KeyC"],
+    "lompat": ["Space"],
+    "bicara": ["KeyE"],
+    "serang": ["Mouse0"],
+    "tangkis": ["Mouse2"],
+    "hindar": ["ControlLeft", "ControlRight", "Mouse1"],
+    "pemandu": ["Tab"],
+    "peta": ["KeyM"],
+    "kitab": ["KeyK"],
+    "jeda": ["Escape"]
+  },
+  "gamepad": {
+    "sumbu": { "gerakX": 0, "gerakY": 1, "kameraX": 2, "kameraY": 3, "zonaMati": 0.18 },
+    "tombol": {
+      "lompat": 0,
+      "hindar": 1,
+      "serang": 2,
+      "bicara": 3,
+      "tangkis": 4,
+      "jongkok": 5,
+      "peta": 8,
+      "jeda": 9,
+      "lari": 10,
+      "pemandu": 12,
+      "menuAtas": 12,
+      "menuBawah": 13,
+      "menuPilih": 0,
+      "menuKembali": 1,
+      "dialogLanjut": 0,
+      "dialogPilihan": [2, 3, 1]
+    },
+    "kepekaanKamera": 2.2,
+    "petunjuk": [
+      ["Stik kiri", "jalan"],
+      ["L3", "lari"],
+      ["RB", "jongkok"],
+      ["A", "lompat / panjat"],
+      ["Y", "bicara"],
+      ["X", "serang, tahan: berat"],
+      ["LB", "tangkis"],
+      ["B", "hindar"],
+      ["D-pad atas", "pemandu arah"],
+      ["Select", "peta"],
+      ["Start", "jeda"],
+      ["Stik kanan", "putar kamera"]
+    ]
+  }
+}

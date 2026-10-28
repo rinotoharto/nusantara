@@ -84,7 +84,8 @@
   },
   "npc": {
     "bicara": "E: Bicara",
-    "jarak": 2.5
+    "jarak": 2.5,
+    "bicaraPad": "Y: Bicara"
   },
   "kitab": {
     "judul": "Kitab",
@@ -128,7 +129,16 @@
       "sedang": "Sedang",
       "besar": "Besar"
     },
-    "subtitle": "Subtitle: menyusul"
+    "kepekaanMouse": "Kepekaan mouse",
+    "kepekaanStik": "Kepekaan stik",
+    "balikY": "Balik sumbu Y",
+    "kualitas": "Kualitas",
+    "kualitasPilihan": {
+      "rendah": "Rendah",
+      "sedang": "Sedang",
+      "tinggi": "Tinggi"
+    },
+    "kualitasOtomatis": "Dipilih otomatis dari fps saat pertama dibuka; bisa diubah di sini."
   },
   "menu": {
     "judul": "Jeda",

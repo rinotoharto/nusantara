@@ -4,6 +4,7 @@ import { tinggiMedan } from '../world/terrain';
 import { KONFIG } from '../combat/config';
 import type { PoseKamera } from '../dialog/sinematik';
 import { PEMANDU } from '../world/guide-config';
+import { INPUT } from './gamepad';
 
 const SENSITIVITAS = 0.0022;
 const JARAK = 5.5;
@@ -45,6 +46,10 @@ export class KameraOrangKetiga {
   private campurSinematik = 0;
   private readonly posisiSinematik = new THREE.Vector3();
   private readonly sasaranSinematik = new THREE.Vector3();
+  /** Pengaturan pemain: pengali kepekaan mouse dan stik, balik sumbu Y. */
+  kepekaanMouse = 1;
+  kepekaanStik = 1;
+  balikY = false;
   /** Arahan: kamera menoleh halus ke titik ini (x, z) lalu kembali; batal begitu mouse bergerak. */
   private arahanTitik: { x: number; z: number } | null = null;
   private arahanWaktu = 0;
@@ -96,10 +101,14 @@ export class KameraOrangKetiga {
   }
 
   perbarui(dt: number, input: Input, kakiPemain: THREE.Vector3): void {
-    const { dx, dy } = input.ambilGerakMouse();
+    const mouse = input.ambilGerakMouse();
+    const arahY = this.balikY ? -1 : 1;
+    // Mouse dalam piksel; stik kanan dalam radian per detik penuh (INPUT.gamepad.kepekaanKamera).
+    const dx = mouse.dx * SENSITIVITAS * this.kepekaanMouse + input.stikKamera.x * INPUT.gamepad.kepekaanKamera * this.kepekaanStik * dt;
+    const dy = (mouse.dy * SENSITIVITAS * this.kepekaanMouse + input.stikKamera.y * INPUT.gamepad.kepekaanKamera * this.kepekaanStik * dt) * arahY;
     if (!this.sinematik) {
-      this.yaw -= dx * SENSITIVITAS;
-      this.pitch = Math.min(PITCH_MAKS, Math.max(PITCH_MIN, this.pitch + dy * SENSITIVITAS));
+      this.yaw -= dx;
+      this.pitch = Math.min(PITCH_MAKS, Math.max(PITCH_MIN, this.pitch + dy));
     }
     if (this.arahanTitik && (dx !== 0 || dy !== 0 || this.sinematik)) this.arahanTitik = null;
     if (this.arahanTitik) this.perbaruiArahan(dt, kakiPemain);

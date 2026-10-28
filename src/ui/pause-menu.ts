@@ -1,8 +1,8 @@
 import type { StatusPermainan } from '../mission/state';
 import { UI } from './config';
-import { buatPilihanUkuran } from './font-size';
+import { buatPengaturan } from './settings';
 
-/** Menu jeda: Lanjutkan, Kitab, Peta, Pengaturan (ukuran huruf), Mulai ulang misi. */
+/** Menu jeda: Lanjutkan, Kitab, Peta, Pengaturan (huruf, kepekaan, balik Y, kualitas), Mulai ulang misi. */
 export class MenuJeda {
   private readonly lapis: HTMLDivElement;
   private readonly utama: HTMLDivElement;
@@ -39,15 +39,7 @@ export class MenuJeda {
     const judulPengaturan = document.createElement('div');
     judulPengaturan.className = 'menu-judul';
     judulPengaturan.textContent = UI.pengaturan.judul;
-    const subtitle = document.createElement('div');
-    subtitle.className = 'menu-catatan';
-    subtitle.textContent = UI.pengaturan.subtitle;
-    this.pengaturan.append(
-      judulPengaturan,
-      buatPilihanUkuran(status),
-      subtitle,
-      this.tombol(UI.menu.kembali, () => this.tampilkanPengaturan(false)),
-    );
+    this.pengaturan.append(judulPengaturan, buatPengaturan(status), this.tombol(UI.menu.kembali, () => this.tampilkanPengaturan(false)));
 
     kotak.append(this.utama, this.pengaturan);
     this.lapis.append(kotak);
@@ -56,6 +48,15 @@ export class MenuJeda {
 
   get aktif(): boolean {
     return this.tampil;
+  }
+
+  /** Benar kalau halaman pengaturan sedang tampil (tombol Kembali gamepad menutupnya dulu). */
+  get diPengaturan(): boolean {
+    return this.pengaturan.style.display !== 'none';
+  }
+
+  kembaliKeUtama(): void {
+    this.tampilkanPengaturan(false);
   }
 
   buka(): void {
