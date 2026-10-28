@@ -96,6 +96,287 @@
     }
   },
   "dunia": {
+    "keterangan": "Tata letak dunia 600 x 600 m (sumbu: +x timur, -z utara). Desa Kudadu di (0,0). Sungai lurus di timur lalu berbelok ke barat laut menuju muara; punggung bukit di utara dengan tebing curam di sisi selatannya (x dari curam.xMulai sampai curam.xSelesai), landai di dekat desa dan di celah dekat muara. Hutan: kotak [xMin, zMin, xMaks, zMaks] atau pita di satu sisi sungai. Jalan setapak: jalur tanah lebih terang.",
+    "ukuran": 600,
+    "lerengMaksDerajat": 42,
+    "sungai": {
+      "jalur": [
+        [
+          320,
+          55
+        ],
+        [
+          -60,
+          55
+        ],
+        [
+          -120,
+          10
+        ],
+        [
+          -170,
+          -50
+        ],
+        [
+          -210,
+          -110
+        ],
+        [
+          -240,
+          -150
+        ],
+        [
+          -320,
+          -200
+        ]
+      ],
+      "lebar": 14,
+      "dalam": 2.6,
+      "permukaanAir": -1.0,
+      "dangkal": {
+        "x": 32,
+        "lebar": 16
+      },
+      "deras": {
+        "keterangan": "Di barat xMulai sungai lebih lebar dan dalam; pemain yang masuk lebih dalam dari batasDalam di bawah permukaan terseret ke tepi.",
+        "xMulai": -75,
+        "peralihan": 20,
+        "lebarTambahan": 6,
+        "dalamTambahan": 1.2,
+        "batasDalam": 0.5,
+        "dorong": 5
+      }
+    },
+    "muara": {
+      "x": -222,
+      "z": -132,
+      "sigma": 15,
+      "dalam": 2.6,
+      "keterangan": "Teluk muara: cekungan bundar tambahan pada jalur sungai; pantai di sisi timur lautnya."
+    },
+    "bukit": {
+      "jalur": [
+        [
+          70,
+          -100
+        ],
+        [
+          -30,
+          -105
+        ],
+        [
+          -90,
+          -120
+        ],
+        [
+          -150,
+          -150
+        ],
+        [
+          -200,
+          -180
+        ],
+        [
+          -260,
+          -220
+        ]
+      ],
+      "tinggi": 24,
+      "lebarPuncak": 8,
+      "lerengUtara": 70,
+      "lerengLandai": 56,
+      "lerengCuram": 12,
+      "curam": {
+        "xMulai": -45,
+        "xSelesai": -195,
+        "peralihan": 18
+      }
+    },
+    "hutan": {
+      "petak": 75,
+      "jarakLod": 150,
+      "area": [
+        {
+          "nama": "rimba-selatan",
+          "jenis": "rimba",
+          "kotak": [
+            -140,
+            72,
+            150,
+            230
+          ],
+          "jarak": 7.5
+        },
+        {
+          "nama": "jati-tepi-utara",
+          "jenis": "jati",
+          "pita": {
+            "sisi": "timur-laut",
+            "dariJarak": 30,
+            "sampaiJarak": 46,
+            "xMulai": -215,
+            "xSelesai": -72
+          },
+          "jarak": 1.6
+        },
+        {
+          "nama": "jati-dinding-timur",
+          "jenis": "jati",
+          "kotak": [
+            -84,
+            -118,
+            -68,
+            12
+          ],
+          "jarak": 1.6
+        },
+        {
+          "nama": "jati-tepi-selatan",
+          "jenis": "jati",
+          "pita": {
+            "sisi": "barat-daya",
+            "dariJarak": 9,
+            "sampaiJarak": 25,
+            "xMulai": -250,
+            "xSelesai": -70
+          },
+          "jarak": 1.6
+        },
+        {
+          "nama": "rumpun-tepian",
+          "jenis": "rimba",
+          "kotak": [
+            -215,
+            -130,
+            -60,
+            45
+          ],
+          "jarak": 13
+        },
+        {
+          "nama": "rumpun-bukit",
+          "jenis": "rimba",
+          "kotak": [
+            -230,
+            -230,
+            40,
+            -90
+          ],
+          "jarak": 16
+        }
+      ],
+      "hindari": {
+        "desa": 48,
+        "jalan": 3,
+        "air": 0.2,
+        "lerengMaks": 0.7
+      }
+    },
+    "jalan": {
+      "lebar": 2.6,
+      "jalur": [
+        [
+          [
+            0,
+            -44
+          ],
+          [
+            -28,
+            -22
+          ],
+          [
+            -46,
+            6
+          ],
+          [
+            -58,
+            32
+          ],
+          [
+            -78,
+            16
+          ],
+          [
+            -98,
+            2
+          ],
+          [
+            -115,
+            -15
+          ],
+          [
+            -135,
+            -39
+          ],
+          [
+            -155,
+            -63
+          ],
+          [
+            -173,
+            -91
+          ],
+          [
+            -188,
+            -114
+          ],
+          [
+            -198,
+            -127
+          ]
+        ],
+        [
+          [
+            0,
+            -44
+          ],
+          [
+            -15,
+            -52
+          ],
+          [
+            -15,
+            -66
+          ],
+          [
+            -28,
+            -96
+          ],
+          [
+            -60,
+            -112
+          ],
+          [
+            -100,
+            -128
+          ],
+          [
+            -150,
+            -150
+          ],
+          [
+            -198,
+            -180
+          ],
+          [
+            -216,
+            -190
+          ],
+          [
+            -220,
+            -152
+          ],
+          [
+            -213,
+            -138
+          ],
+          [
+            -198,
+            -127
+          ]
+        ]
+      ]
+    },
     "pandakan": [
       {
         "x": 44,
@@ -118,16 +399,10 @@
       "z": -36,
       "putar": 0.3
     },
-    "muara": {
-      "keterangan": "Teluk di ujung barat sungai: cekungan diperlebar mulai x ini ke barat.",
-      "x": -105,
-      "lebar": 25,
-      "sigma": 9
-    },
     "perahu": {
-      "x": -128,
-      "z": 52,
-      "putar": 0.4
+      "x": -203.2,
+      "z": -123.4,
+      "putar": 0.64
     }
   },
   "pemicu": [
@@ -576,40 +851,56 @@
         {
           "teks": "Turun ke tepian sungai di barat daya; obor menandai jalan",
           "penanda": [
-            -40,
-            20
+            -58,
+            32
           ],
           "selesai": {
             "area": {
               "pusat": [
-                -40,
-                20
+                -58,
+                32
               ],
               "jari": 10
             }
           }
         },
         {
-          "teks": "Ikuti tepian sungai ke barat, lewati pos penjaga",
+          "teks": "Ikuti tepian ke barat laut, lewati pos-pos penjaga",
           "penanda": [
-            -80,
-            40
+            -115,
+            -15
           ],
           "selesai": {
             "area": {
               "pusat": [
-                -80,
-                40
+                -115,
+                -15
               ],
               "jari": 10
             }
           }
         },
         {
-          "teks": "Muara ada di ujung barat sungai",
+          "teks": "Sungai berbelok; muara ada di balik tikungan terakhir",
           "penanda": [
-            -116,
-            36
+            -163,
+            -76
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -163,
+                -76
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
+          "teks": "Muara di ujung tepian; temui nelayan di perahu",
+          "penanda": [
+            -197,
+            -124
           ]
         }
       ],
@@ -627,48 +918,48 @@
           "mode": "bolak-balik",
           "titik": [
             {
-              "x": -40,
-              "z": 30
+              "x": -72,
+              "z": 21
             },
             {
-              "x": -56,
-              "z": 40
+              "x": -86,
+              "z": 10
             }
           ]
         },
         {
           "nama": "sungai-2",
-          "mode": "bolak-balik",
+          "mode": "melingkar",
           "titik": [
             {
-              "x": -84,
-              "z": 36
+              "x": -142,
+              "z": -41
             },
             {
-              "x": -100,
-              "z": 42
+              "x": -154,
+              "z": -55
+            },
+            {
+              "x": -145,
+              "z": -62
+            },
+            {
+              "x": -133,
+              "z": -48
             }
           ]
         },
         {
           "nama": "sungai-3",
-          "mode": "melingkar",
+          "mode": "bolak-balik",
           "titik": [
             {
-              "x": -64,
-              "z": 26
+              "x": -106,
+              "z": -4
             },
             {
-              "x": -76,
-              "z": 24
-            },
-            {
-              "x": -76,
-              "z": 34
-            },
-            {
-              "x": -64,
-              "z": 36
+              "x": -117,
+              "z": -17
             }
           ]
         },
@@ -677,12 +968,12 @@
           "mode": "bolak-balik",
           "titik": [
             {
-              "x": -108,
-              "z": 30
+              "x": -165,
+              "z": -79
             },
             {
-              "x": -122,
-              "z": 38
+              "x": -177,
+              "z": -97
             }
           ]
         },
@@ -691,83 +982,107 @@
           "mode": "bolak-balik",
           "titik": [
             {
-              "x": -30,
-              "z": 6
+              "x": -125,
+              "z": -26
             },
             {
-              "x": -44,
-              "z": 14
+              "x": -130,
+              "z": -39
             }
           ]
         }
       ],
       "batu": [
         {
-          "x": -48,
-          "z": 34,
-          "lebar": 3.5,
+          "x": -82,
+          "z": 10,
+          "lebar": 3,
           "tinggi": 2.6,
           "dalam": 2.5
         },
         {
-          "x": -70,
-          "z": 40,
+          "x": -114,
+          "z": -19,
           "lebar": 3,
-          "tinggi": 2.4,
-          "dalam": 3
-        },
-        {
-          "x": -92,
-          "z": 30,
-          "lebar": 3,
-          "tinggi": 2.8,
+          "tinggi": 2.6,
           "dalam": 2.5
         },
         {
-          "x": -114,
-          "z": 42,
-          "lebar": 3.5,
-          "tinggi": 2.4,
+          "x": -152,
+          "z": -65,
+          "lebar": 3,
+          "tinggi": 2.6,
+          "dalam": 2.5
+        },
+        {
+          "x": -173,
+          "z": -96,
+          "lebar": 3,
+          "tinggi": 2.6,
           "dalam": 2.5
         }
       ],
       "semak": [
         {
-          "x": -36,
-          "z": 22
-        },
-        {
-          "x": -52,
+          "x": -71,
           "z": 28
         },
         {
-          "x": -62,
-          "z": 42
+          "x": -91,
+          "z": 13
         },
         {
-          "x": -80,
-          "z": 44
+          "x": -111,
+          "z": -2
         },
         {
-          "x": -96,
-          "z": 38
+          "x": -128,
+          "z": -24
+        },
+        {
+          "x": -148,
+          "z": -48
+        },
+        {
+          "x": -168,
+          "z": -73
+        },
+        {
+          "x": -184,
+          "z": -97
+        },
+        {
+          "x": -68,
+          "z": 16
+        },
+        {
+          "x": -88,
+          "z": 1
         },
         {
           "x": -104,
-          "z": 46
+          "z": -11
         },
         {
-          "x": -118,
-          "z": 34
+          "x": -120,
+          "z": -31
+        },
+        {
+          "x": -138,
+          "z": -52
+        },
+        {
+          "x": -152,
+          "z": -70
         }
       ],
       "selesai": {
         "area": {
           "pusat": [
-            -116,
-            36
+            -198,
+            -127
           ],
-          "jari": 7
+          "jari": 8
         }
       }
     },
@@ -792,42 +1107,58 @@
           }
         },
         {
+          "teks": "Daki lereng ke puncak bukit",
+          "penanda": [
+            -30,
+            -98
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -30,
+                -100
+              ],
+              "jari": 10
+            }
+          }
+        },
+        {
           "teks": "Ikuti punggung bukit ke barat",
           "penanda": [
-            -50,
-            -74
+            -150,
+            -148
           ],
           "selesai": {
             "area": {
               "pusat": [
-                -50,
-                -74
+                -150,
+                -150
+              ],
+              "jari": 12
+            }
+          }
+        },
+        {
+          "teks": "Turun lewat celah di ujung bukit; muara ada di bawah",
+          "penanda": [
+            -216,
+            -188
+          ],
+          "selesai": {
+            "area": {
+              "pusat": [
+                -216,
+                -190
               ],
               "jari": 10
             }
           }
         },
         {
-          "teks": "Turun ke barat daya lewat celah bukit",
+          "teks": "Muara ada di bawah, di tepi air; temui nelayan di perahu",
           "penanda": [
-            -95,
-            -50
-          ],
-          "selesai": {
-            "area": {
-              "pusat": [
-                -95,
-                -50
-              ],
-              "jari": 10
-            }
-          }
-        },
-        {
-          "teks": "Muara ada di bawah, di tepi air",
-          "penanda": [
-            -116,
-            36
+            -197,
+            -124
           ]
         }
       ],
@@ -842,8 +1173,8 @@
         {
           "jenis": "area",
           "pusat": [
-            -52,
-            -74
+            -100,
+            -128
           ],
           "jari": 9,
           "percakapan": "bukit-tumbang",
@@ -855,10 +1186,10 @@
       "selesai": {
         "area": {
           "pusat": [
-            -116,
-            36
+            -198,
+            -127
           ],
-          "jari": 7
+          "jari": 8
         }
       }
     },
@@ -867,32 +1198,32 @@
       "tujuan": "Temui nelayan di perahu, di tepi muara",
       "mulai": {
         "posisi": [
-          -114,
-          34
+          -195,
+          -124
         ],
-        "hadap": -1.9
+        "hadap": -2.3
       },
       "penanda": [
         [
-          -121,
-          40
+          -197,
+          -124
         ]
       ],
       "penjaga": [
         {
           "nama": "pantai",
           "mode": "bolak-balik",
-          "syarat": "rute-sungai",
           "titik": [
             {
-              "x": -112,
-              "z": 44
+              "x": -178,
+              "z": -101
             },
             {
-              "x": -124,
-              "z": 30
+              "x": -168,
+              "z": -86
             }
-          ]
+          ],
+          "syarat": "rute-sungai"
         }
       ],
       "npc": [
@@ -900,10 +1231,10 @@
           "id": "nelayan",
           "nama": "Nelayan",
           "posisi": [
-            -121,
-            41
+            -199,
+            -127
           ],
-          "hadap": 1.2,
+          "hadap": 2.2,
           "percakapan": [
             "pantai-perahu"
           ]
@@ -911,7 +1242,13 @@
       ],
       "selesai": {
         "percakapan": "pantai-perahu"
-      }
+      },
+      "semak": [
+        {
+          "x": -188,
+          "z": -116
+        }
+      ]
     }
   ]
 }

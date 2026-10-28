@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { buatMedan, tinggiMedan } from './terrain';
 import { buatSungai } from './river';
 import { buatDesa, buatDukuh, buatLumbung, type Rumah, type TataLetakRumah } from './village';
-import { buatHutan, type Pohon } from './forest';
+import { buatHutan, type Pohon, type Hutan } from './forest';
 import { buatTebing, type Tebing } from './cliff';
 import { pasangPencahayaan } from './lighting';
 import { buatPerahu, type Perahu } from './boat';
@@ -13,6 +13,7 @@ export interface Dunia {
   rumah: Rumah[];
   tebing: Tebing;
   pohon: Pohon[];
+  hutan: Hutan;
   matahari: THREE.DirectionalLight;
   ambien: THREE.HemisphereLight;
   perahu: Perahu;
@@ -62,6 +63,7 @@ export function buatDunia(scene: THREE.Scene, tataLetak: TataLetakDunia): Dunia 
       { kotak: tebing.kotak, bisaDipanjat: true },
     ],
     pohon: hutan.pohon,
+    indeksPohon: hutan.indeks,
   };
 
   const penghalangKamera: THREE.Object3D[] = [tebing.mesh];
@@ -71,5 +73,5 @@ export function buatDunia(scene: THREE.Scene, tataLetak: TataLetakDunia): Dunia 
     });
   }
 
-  return { medan, rumah, tebing, pohon: hutan.pohon, matahari, ambien, perahu, tabrakan, penghalangKamera, tinggiMedan };
+  return { medan, rumah, tebing, pohon: hutan.pohon, hutan, matahari, ambien, perahu, tabrakan, penghalangKamera, tinggiMedan };
 }

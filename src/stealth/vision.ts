@@ -62,10 +62,20 @@ export function garisPandangBebas(
   for (const k of kotakTambahan) {
     if (ruasMemotongKotak(dari.x, dari.z, ke.x, ke.z, k)) return false;
   }
-  for (const t of data.pohon) {
-    if (ruasMemotongLingkaran(dari.x, dari.z, ke.x, ke.z, t.x, t.z, t.jari + 0.2)) return false;
-  }
-  return true;
+  let terhalang = false;
+  data.indeksPohon.dalamKotak(
+    Math.min(dari.x, ke.x) - 1,
+    Math.min(dari.z, ke.z) - 1,
+    Math.max(dari.x, ke.x) + 1,
+    Math.max(dari.z, ke.z) + 1,
+    (t) => {
+      if (ruasMemotongLingkaran(dari.x, dari.z, ke.x, ke.z, t.x, t.z, t.jari + 0.2)) {
+        terhalang = true;
+        return true;
+      }
+    },
+  );
+  return !terhalang;
 }
 
 export interface HasilPandang {

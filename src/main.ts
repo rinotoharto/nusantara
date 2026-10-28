@@ -405,6 +405,7 @@ function perbaruiKameraDanPemandu(dt: number): void {
     arahanTertunda = null;
   }
   kameraOrangKetiga.perbarui(dt, input, pemain.posisi);
+  dunia.hutan.perbaruiLod(camera.position);
   if (modeUi === 'main' || modeUi === 'dialog' || modeUi === 'panel' || modeUi === 'sinematik') {
     pemandu.perbarui(dt);
     subtitle.perbarui(dt);

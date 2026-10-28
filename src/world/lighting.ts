@@ -4,7 +4,8 @@ import * as THREE from 'three';
 export function pasangPencahayaan(scene: THREE.Scene): { matahari: THREE.DirectionalLight; ambien: THREE.HemisphereLight } {
   const warnaLangit = new THREE.Color(0xe8b47a);
   scene.background = warnaLangit;
-  scene.fog = new THREE.Fog(warnaLangit, 120, 320);
+  // Kabut rapat sekitar 120 m: tujuan baru terlihat setelah sebagian besar jalur ditempuh; pendar obor tembus kabut.
+  scene.fog = new THREE.Fog(warnaLangit, 45, 125);
 
   const matahari = new THREE.DirectionalLight(0xffd29a, 2.6);
   matahari.position.set(-80, 45, 30); // sore: matahari rendah di barat

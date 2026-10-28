@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { tinggiMedan } from './terrain';
-import type { Pohon } from './forest';
+import type { Pohon, IndeksPohon } from './forest';
 
 /** Benda padat berbentuk kotak sejajar sumbu: rumah dan tebing. */
 export interface Padat {
@@ -11,6 +11,8 @@ export interface Padat {
 export interface DataTabrakan {
   padat: Padat[];
   pohon: Pohon[];
+  /** Indeks sel pohon untuk pencarian cepat. */
+  indeksPohon: IndeksPohon;
 }
 
 const TOLERANSI_PIJAK = 0.35; // kaki boleh sedikit di bawah permukaan atas dan tetap dianggap berdiri di atasnya
@@ -61,16 +63,17 @@ export function dorongKeluar(data: DataTabrakan, pos: THREE.Vector3, jari: numbe
     }
   }
 
-  for (const t of data.pohon) {
+  const r = jari + 1;
+  data.indeksPohon.dalamKotak(pos.x - r, pos.z - r, pos.x + r, pos.z + r, (t) => {
     const jarakMin = jari + t.jari;
     const dx = pos.x - t.x;
     const dz = pos.z - t.z;
     const d2 = dx * dx + dz * dz;
-    if (d2 >= jarakMin * jarakMin) continue;
+    if (d2 >= jarakMin * jarakMin) return;
     const d = Math.sqrt(d2) || 1e-6;
     pos.x = t.x + (dx / d) * jarakMin;
     pos.z = t.z + (dz / d) * jarakMin;
-  }
+  });
 }
 
 /** Mendorong dua titik datar menjauh sampai berjarak `jarakMin`; `bagianA` = porsi geser untuk a. */

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { Input } from './input';
 import { tinggiLantai, dorongKeluar, cariTebing, type DataTabrakan } from '../world/collision';
-import { PERMUKAAN_AIR, UKURAN_MEDAN } from '../world/terrain';
+import { PERMUKAAN_AIR, UKURAN_MEDAN, LERENG_MAKS, arusSungai, tinggiMedan } from '../world/terrain';
 import { SILUMAN } from '../stealth/config';
 
 export const TINGGI_PEMAIN = 1.7;
@@ -80,6 +80,7 @@ export class Pemain {
   private panjatDari: THREE.Vector3 | null = null;
   private panjatKe: THREE.Vector3 | null = null;
   private panjatWaktu = 0;
+  private readonly arus = new THREE.Vector3();
 
   constructor(private data: DataTabrakan) {
     const geometri = new THREE.CapsuleGeometry(JARI_PEMAIN, TINGGI_PEMAIN - 2 * JARI_PEMAIN, 6, 12);
@@ -167,10 +168,28 @@ export class Pemain {
       this.diTanah = false;
     }
 
-    // Gravitasi dan gerak.
+    // Arus deras di bagian barat sungai: terseret ke tepi, kendali gerak diabaikan.
+    const arus = arusSungai(this.posisi.x, this.posisi.z, this.posisi.y, this.arus);
+    if (arus) {
+      this.kecepatan.x = arus.x;
+      this.kecepatan.z = arus.z;
+    }
+
+    // Gravitasi dan gerak. Lereng lebih curam dari 40 derajat (naik maupun turun) tidak bisa dilalui:
+    // gerak datar dibatalkan, pemain tergelincir di tempat.
     this.kecepatanY -= GRAVITASI * dt;
-    this.posisi.x += this.kecepatan.x * dt;
-    this.posisi.z += this.kecepatan.z * dt;
+    const xBaru = this.posisi.x + this.kecepatan.x * dt;
+    const zBaru = this.posisi.z + this.kecepatan.z * dt;
+    const jarakDatar = Math.hypot(xBaru - this.posisi.x, zBaru - this.posisi.z);
+    if (jarakDatar > 1e-4) {
+      const selisihTanah = tinggiMedan(xBaru, zBaru) - tinggiMedan(this.posisi.x, this.posisi.z);
+      if (Math.abs(selisihTanah) / jarakDatar > LERENG_MAKS) {
+        this.kecepatan.set(0, 0, 0);
+      } else {
+        this.posisi.x = xBaru;
+        this.posisi.z = zBaru;
+      }
+    }
     this.posisi.y += this.kecepatanY * dt;
 
     // Batas medan.

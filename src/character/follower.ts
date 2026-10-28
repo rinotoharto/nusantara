@@ -4,6 +4,7 @@ import type { Pemain } from './player';
 import { JARI_PEMAIN, TINGGI_PEMAIN } from './player';
 import { tinggiLantai, dorongKeluar, pisahkan, type DataTabrakan } from '../world/collision';
 import { SILUMAN } from '../stealth/config';
+import { arusSungai, tinggiMedan, LERENG_MAKS } from '../world/terrain';
 import type { KeadaanPemain } from '../stealth/stealth-manager';
 
 const F = SILUMAN.pengikut;
@@ -204,8 +205,23 @@ export class Pengikut {
     const faktor = Math.min(1, 10 * dt);
     this.kecepatan.x += (tujuanX - this.kecepatan.x) * faktor;
     this.kecepatan.z += (tujuanZ - this.kecepatan.z) * faktor;
-    this.posisi.x += this.kecepatan.x * dt;
-    this.posisi.z += this.kecepatan.z * dt;
+    // Arus deras menyeret ke tepi; lereng curam tidak bisa dilalui (sama dengan pemain).
+    const arus = arusSungai(this.posisi.x, this.posisi.z, this.posisi.y, this.sementara);
+    if (arus) {
+      this.kecepatan.x = arus.x;
+      this.kecepatan.z = arus.z;
+    }
+    const xBaru = this.posisi.x + this.kecepatan.x * dt;
+    const zBaru = this.posisi.z + this.kecepatan.z * dt;
+    const jarakDatar = Math.hypot(xBaru - this.posisi.x, zBaru - this.posisi.z);
+    if (jarakDatar > 1e-4) {
+      const selisihTanah = tinggiMedan(xBaru, zBaru) - tinggiMedan(this.posisi.x, this.posisi.z);
+      if (Math.abs(selisihTanah) / jarakDatar > LERENG_MAKS) this.kecepatan.set(0, 0, 0);
+      else {
+        this.posisi.x = xBaru;
+        this.posisi.z = zBaru;
+      }
+    }
 
     // Tabrakan dengan rumah, batu, pohon, dan lawan; lalu pijak tanah.
     dorongKeluar(this.data, this.posisi, JARI_PEMAIN);

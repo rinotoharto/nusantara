@@ -1,5 +1,5 @@
 import type { Dunia } from '../world';
-import { UKURAN_MEDAN, PERMUKAAN_AIR, Z_SUNGAI, LEBAR_SUNGAI, X_MUARA } from '../world/terrain';
+import { UKURAN_MEDAN, PERMUKAAN_AIR, diJalurAir } from '../world/terrain';
 import { PEMANDU } from '../world/guide-config';
 import { UI } from './config';
 
@@ -183,8 +183,7 @@ export class Peta {
         const x = i / s - UKURAN_MEDAN / 2;
         const z = j / s - UKURAN_MEDAN / 2;
         // Air hanya di jalur sungai dan teluk muara (sesuai bidang air di river.ts), bukan tiap cekungan rendah.
-        const diJalurAir = Math.abs(z - Z_SUNGAI) < LEBAR_SUNGAI / 2 + 3 || (x < X_MUARA + 10 && Math.abs(z - Z_SUNGAI) < 23);
-        if (diJalurAir && y < PERMUKAAN_AIR + 0.15) {
+        if (y < PERMUKAAN_AIR + 0.15 && diJalurAir(x, z)) {
           [r, g, b] = WARNA_AIR;
         } else {
           const t = Math.min(1, Math.max(0, (y - PERMUKAAN_AIR) / rentang));
