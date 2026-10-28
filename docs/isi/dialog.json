@@ -9,7 +9,7 @@
     "simpul": {
       "n1": {
         "tokoh": "kepala-desa",
-        "teks": "Siapa yang datang malam-malam begini dengan orang terluka sebanyak itu? Anjing-anjing sudah ribut sejak tadi.",
+        "teks": "Siapa itu? Jangan mendekat dulu. Anjing-anjing sudah ribut dari tadi, dan sekarang hamba lihat kenapa... banyak sekali kalian, dan itu yang di belakang dipapah. Ada apa ini?",
         "lanjut": "n2"
       },
       "n2": {
@@ -17,62 +17,62 @@
         "pilihan": [
           {
             "nada": "hormat",
-            "teks": "Maafkan kami mengganggu, Ki. Kami orang Singasari yang kalah perang. Kami hanya minta air dan tempat berteduh semalam; besok kami pergi.",
+            "teks": "Maaf, Ki, kami mengganggu malam-malam begini. Kami orang Singasari. Kami kalah, dan kami cuma minta air dan tempat berteduh sampai pagi. Besok kami pergi.",
             "lanjut": "n3a"
           },
           {
             "nada": "tegas",
-            "teks": "Aku Wijaya, menantu Sang Prabu Kertanagara. Orang-orangku lapar dan terluka. Kudadu akan melindungi kami malam ini.",
+            "teks": "Aku Wijaya, menantu Sang Prabu Kertanagara. Orang-orangku lapar dan ada yang terluka. Malam ini mereka tidur di Kudadu, dan Kudadu yang menjaga mereka.",
             "lanjut": "n3b"
           },
           {
             "nada": "licik",
-            "teks": "Kami pedagang dari Tuban yang dirampok di jalan. Kalau Ki berbaik hati memberi makan, kami takkan lupa membalasnya.",
+            "teks": "Kami pedagang dari Tuban, Ki. Dirampok di jalan, barang habis, dua orang kena bacok. Kalau Ki bisa kasih makan sedikit saja, kami tidak akan lupa.",
             "lanjut": "n3c"
           }
         ]
       },
       "n3a": {
         "tokoh": "kepala-desa",
-        "teks": "Orang Singasari... Jadi benar kabar itu. Ibu kota sudah jatuh dan Sang Prabu gugur. Masuklah. Tak ada orang di desa ini yang akan menutup pintu untuk orang yang bicara sejujur itu.",
+        "teks": "Orang Singasari... Jadi kabar yang dibawa orang Daha kemarin itu benar. Ibu kota jatuh, Sang Prabu gugur. Ya sudah, masuk, masuk semua. Orang yang mau bilang terus terang bahwa dia kalah, itu bukan orang jahat.",
         "tandai": "kudadu-nada-hormat",
         "lanjut": "n4"
       },
       "n3b": {
         "tokoh": "kepala-desa",
-        "teks": "[[Rakryan|rakryan]]... Ampun, hamba tidak tahu. Tapi dengarkan hamba: nama itu jangan diucapkan lagi di sini. Prajurit Daha lewat tiap pagi, dan di desa ini ada telinga yang bisa dibeli dengan beras.",
+        "teks": "[[Rakryan|rakryan]]... ampun, hamba tidak tahu siapa yang hamba hadapi. Tapi dengar dulu, Tuan, hamba mohon: nama itu jangan diucapkan keras-keras lagi di sini. Prajurit Daha lewat tiap pagi, dan di desa sekecil ini pun ada telinga yang bisa dibeli dengan sekarung beras.",
         "tandai": "kudadu-nada-tegas",
         "lanjut": "n4"
       },
       "n3c": {
         "tokoh": "kepala-desa",
-        "teks": "Pedagang dari Tuban tidak membawa keris berpamor seperti yang di pinggang Tuan, dan tidak dijaga orang-orang yang berdiri seperti prajurit. Hamba sudah tua, tapi mata hamba belum. Katakan yang sebenarnya, atau pergi.",
+        "teks": "Pedagang dari Tuban, ya. Hamba memang orang desa, Tuan, tapi hamba belum buta. Pedagang tidak bawa keris berpamor seperti yang di pinggang Tuan itu, dan pedagang tidak dikawal orang-orang yang berdiri tegak begitu walaupun lelah. Katakan saja yang sebenarnya, atau silakan jalan terus.",
         "lanjut": "n3c2"
       },
       "n3c2": {
         "tokoh": "wijaya",
-        "teks": "Baik. Aku Wijaya dari Singasari. Kalau kau mau menyerahkan kami ke Daha, ini saatnya.",
+        "teks": "...Baik. Aku Wijaya, dari Singasari. Kau mau menyerahkan kami ke Daha, sekarang saatnya. Kami tidak akan melawan.",
         "tandai": "kudadu-nada-licik",
         "lanjut": "n3c3"
       },
       "n3c3": {
         "tokoh": "kepala-desa",
-        "teks": "Kalau hamba mau, Tuan sudah terikat sejak tadi. Masuklah. Lain kali, percayalah pada orang desa sebelum berbohong padanya.",
+        "teks": "Kalau hamba mau begitu, Tuan sudah diikat sejak Tuan bilang Tuban. Masuklah. Lain kali, kalau mau minta tolong sama orang desa, jangan mulai dengan bohong. Itu saja.",
         "lanjut": "n4"
       },
       "n4": {
         "tokoh": "kepala-desa",
-        "teks": "Tidurlah di lumbung, jangan di rumah; kalau prajurit datang, lumbung yang mereka periksa terakhir. Yang terluka biar diurus istri hamba. Makanan ada, meski hanya nasi dan ikan asin.",
+        "teks": "Tidurnya di lumbung, ya, bukan di rumah. Kalau prajurit datang, lumbung itu yang paling akhir mereka periksa. Yang terluka biar istri hamba yang urus; dia biasa mengobati orang jatuh dari pohon. Makanan ada, cuma nasi sama ikan asin, jangan berharap lebih.",
         "lanjut": "n5"
       },
       "n5": {
         "tokoh": "wijaya",
-        "teks": "Ki, kau tahu apa yang kau pertaruhkan? Kalau Daha tahu, bukan hanya kau yang dihukum. Seluruh desa.",
+        "teks": "Ki, kau tahu apa yang kau pertaruhkan? Kalau Daha tahu kami pernah di sini, bukan cuma kau yang dihukum. Satu desa.",
         "lanjut": "n6"
       },
       "n6": {
         "tokoh": "kepala-desa",
-        "teks": "Hamba tahu. Tapi hamba juga tahu raja mana yang membangun bendungan di hulu sungai kami, dan raja mana yang baru saja membakar ibu kotanya sendiri. Beristirahatlah. Sebelum fajar hamba antar Tuan ke jalan ke utara.",
+        "teks": "Tahu, Tuan. Hamba sudah tua, hamba tahu. Tapi hamba juga tahu raja mana yang dulu membangun bendungan di hulu sungai kami, dan raja mana yang baru saja membakar ibu kotanya sendiri. Sudah, istirahat. Sebelum fajar hamba antar Tuan ke jalan yang ke utara.",
         "bukaKitab": [
           "desa-kudadu"
         ],
@@ -80,7 +80,7 @@
       },
       "n7": {
         "tokoh": "wijaya",
-        "teks": "Aku tidak akan melupakan malam ini, Ki. Kalau aku hidup, Kudadu akan tahu apa artinya menolong Wijaya.",
+        "teks": "Aku tidak akan lupa malam ini, Ki. Kalau aku masih hidup nanti, Kudadu akan tahu apa artinya pernah menolong Wijaya.",
         "bukaKitab": [
           "prasasti-kudadu",
           "rakryan"
@@ -99,7 +99,7 @@
     "simpul": {
       "n1": {
         "tokoh": "kepala-desa",
-        "teks": "Istirahatlah selagi bisa, Tuan. Jalan ke utara masih panjang, dan prajurit Daha tidak tidur.",
+        "teks": "Istirahat dulu selagi bisa, Tuan. Jalan ke utara masih jauh, dan prajurit Daha itu tidak tidur.",
         "selesai": true
       }
     }
@@ -116,17 +116,17 @@
     "simpul": {
       "n1": {
         "tokoh": "nambi",
-        "teks": "Dua belas orang, Raden. Dari lima ratus yang berangkat ke utara. Sisanya gugur, tercerai, atau pulang ke desanya.",
+        "teks": "Dua belas, Raden. Sudah kuhitung tiga kali, tetap dua belas. Dari lima ratus yang berangkat ke utara kemarin. Yang lain gugur, atau tercerai di hutan, atau... ya, pulang ke desanya. Aku tidak bisa menyalahkan.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "lawe",
-        "teks": "Dan pasukan Daha setengah hari di belakang kita. Kalau kita terus berhenti menghitung, mereka yang akan menghitung kita.",
+        "teks": "Dan orang Daha itu paling-paling setengah hari di belakang kita. Kalau kita terus berhenti untuk menghitung, Nambi, nanti mereka yang menghitung kita.",
         "lanjut": "n3"
       },
       "n3": {
         "tokoh": "sora",
-        "teks": "Gajah Pagon tidak bisa lari, Lawe. Pahanya tertusuk tombak. Kita jalan secepat orang yang paling lambat, atau kita bukan lagi pasukan.",
+        "teks": "Pelan-pelan, Lawe. Pagon tidak bisa lari, pahanya kena tombak. Kita jalan secepat orang yang paling lambat. Kalau tidak begitu, kita ini bukan pasukan lagi, cuma orang-orang yang kebetulan lari ke arah yang sama.",
         "lanjut": "n4"
       },
       "n4": {
@@ -134,39 +134,39 @@
         "pilihan": [
           {
             "nada": "hormat",
-            "teks": "Kalian semua benar, dan kalian semua lelah. Kita bergerak sekarang, pelan tapi bersama. Nambi, kau di depan.",
+            "teks": "Kalian bertiga benar semua, dan kalian bertiga sudah tidak tidur dua hari. Kita jalan sekarang, pelan, tapi tidak ada yang tertinggal. Nambi, kau di depan.",
             "lanjut": "n5a"
           },
           {
             "nada": "tegas",
-            "teks": "Cukup. Kita menyeberangi sungai sebelum bulan tinggi. Siapa yang tertinggal, aku sendiri yang kembali menjemput.",
+            "teks": "Cukup. Sungai harus sudah di belakang kita sebelum bulan tinggi. Siapa yang tertinggal, aku sendiri yang balik menjemput. Jalan.",
             "lanjut": "n5b"
           },
           {
             "nada": "licik",
-            "teks": "Daha mencari pasukan, bukan rombongan petani yang pulang dari sawah. Lepas ikat kepala kalian. Mulai sekarang kita bukan prajurit.",
+            "teks": "Daha mencari pasukan, bukan rombongan petani yang pulang kemalaman. Lepas ikat kepala kalian, sembunyikan tombak di bawah kain. Mulai sekarang kita bukan prajurit.",
             "lanjut": "n5c"
           }
         ]
       },
       "n5a": {
         "tokoh": "nambi",
-        "teks": "Baik, Raden. Di seberang sungai ada dukuh kecil, Pandakan. Kita bisa minta air di sana.",
+        "teks": "Baik, Raden. Di seberang sungai ada dukuh kecil, Pandakan namanya. Orang-orangnya dulu sering jual kelapa ke pasar Singasari; mudah-mudahan masih ingat.",
         "lanjut": "n6"
       },
       "n5b": {
         "tokoh": "lawe",
-        "teks": "Itu baru Raden Wijaya yang kukenal. Di seberang sungai ada dukuh Pandakan. Kita minta air, lalu terus.",
+        "teks": "Nah, itu baru Raden Wijaya yang kukenal. Di seberang sungai ada dukuh, Pandakan. Kita minta air di situ, terus jalan lagi.",
         "lanjut": "n6"
       },
       "n5c": {
         "tokoh": "sora",
-        "teks": "Petani dengan keris di pinggang dan luka tombak di paha... Tapi baik, Raden. Di seberang sungai ada dukuh Pandakan.",
+        "teks": "Petani, ya. Petani dengan keris di pinggang dan luka tombak di paha. Ya sudah, Raden, terserah. Di seberang sungai ada dukuh, Pandakan. Kita coba ke sana dulu.",
         "lanjut": "n6"
       },
       "n6": {
         "tokoh": "wijaya",
-        "teks": "Menyeberang di tempat dangkal, satu-satu. Kalau ada obor di tepian, itu bukan nelayan.",
+        "teks": "Menyeberangnya di tempat dangkal, satu-satu, jangan berebut. Dan kalau ada obor di tepian seberang, itu bukan nelayan.",
         "selesai": true,
         "bukaKitab": [
           "nambi",
@@ -188,17 +188,17 @@
     "simpul": {
       "n1": {
         "tokoh": "pagon",
-        "teks": "Raden, jangan pura-pura tidak melihat. Setiap langkahku memperlambat sebelas orang. Tinggalkan aku di sini.",
+        "teks": "Raden, sudahlah, jangan pura-pura tidak lihat. Tiap langkahku, sebelas orang ikut lambat. Tinggalkan aku di sini. Aku tidak marah, sungguh.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "sora",
-        "teks": "Kita tidak meninggalkan orang kita, Pagon. Tidak di Singasari, tidak di sini.",
+        "teks": "Kita tidak meninggalkan orang kita, Pagon. Tidak di Singasari, tidak di sini. Sudah, jangan bicara lagi, simpan tenagamu.",
         "lanjut": "n3"
       },
       "n3": {
         "tokoh": "macan",
-        "teks": "Dukuh ini kecil, Tuan, tapi punya dukun luka yang baik. Kalau Tuan percaya, biar dia tinggal. Kalau prajurit Daha datang, dia saudara saya yang jatuh dari pohon kelapa.",
+        "teks": "Dukuh ini kecil, Tuan, tapi ada dukun luka yang lumayan. Kalau Tuan percaya sama hamba, biar dia tinggal di sini. Kalau prajurit Daha datang tanya-tanya, ya hamba bilang dia saudara hamba yang jatuh dari pohon kelapa. Sudah sering ada yang begitu di sini.",
         "lanjut": "n4"
       },
       "n4": {
@@ -206,24 +206,24 @@
         "pilihan": [
           {
             "nada": "hormat",
-            "teks": "Pagon, kau sudah cukup berkorban. Sembuhlah di sini. Kalau aku hidup, aku kembali menjemputmu dengan pasukan, bukan dengan sebelas orang lelah.",
+            "teks": "Pagon, kau sudah cukup. Sembuh dulu di sini. Kalau aku masih hidup nanti, aku kembali menjemputmu, dan bukan dengan sebelas orang lelah, tapi dengan pasukan.",
             "lanjut": "n5a"
           },
           {
             "nada": "tegas",
-            "teks": "Tidak ada yang ditinggal. Sora, kau dan Lawe memikulnya bergantian. Kita jalan lebih lambat, dan kita jalan bersama.",
+            "teks": "Tidak ada yang ditinggal. Sora, kau dan Lawe pikul dia bergantian. Kita memang jadi lebih lambat, ya sudah. Kita jalan bersama.",
             "lanjut": "n5b"
           },
           {
             "nada": "licik",
-            "teks": "Kepala dukuh, dia bukan saudaramu yang jatuh dari pohon. Dia anakmu yang bisu, dan tidak pernah ada tamu malam ini. Ingat itu kalau Daha bertanya.",
+            "teks": "Kepala dukuh, dia bukan saudaramu yang jatuh dari pohon. Dia anakmu yang bisu sejak lahir, dan malam ini tidak pernah ada tamu di Pandakan. Ingat itu baik-baik kalau Daha bertanya.",
             "lanjut": "n5c"
           }
         ]
       },
       "n5a": {
         "tokoh": "pagon",
-        "teks": "Dengan pasukan, Raden. Aku pegang kata-kata itu.",
+        "teks": "Dengan pasukan, ya. Aku pegang kata-kata itu, Raden. Sekarang jalan, jangan lihat ke belakang.",
         "tandai": "pagon-ditinggal",
         "bukaKitab": [
           "gajah-pagon",
@@ -234,7 +234,7 @@
       },
       "n5b": {
         "tokoh": "pagon",
-        "teks": "Kalau begitu jangan salahkan aku kalau kita tertangkap karena kakiku, Raden.",
+        "teks": "Baik. Tapi nanti kalau kita tertangkap gara-gara kakiku, Raden, jangan bilang aku tidak pernah bilang.",
         "tandai": "pagon-ikut",
         "bukaKitab": [
           "gajah-pagon",
@@ -245,13 +245,13 @@
       },
       "n5c": {
         "tokoh": "macan",
-        "teks": "Anak bisu. Saya mengerti, Tuan. Jalanlah; makin lama Tuan di sini, makin sulit cerita itu dipercaya.",
+        "teks": "Anak bisu... baik, Tuan, hamba mengerti. Sekarang jalanlah. Makin lama Tuan di sini, makin susah cerita itu dipercaya orang.",
         "tandai": "pagon-ditinggal",
         "lanjut": "n6c"
       },
       "n6c": {
         "tokoh": "pagon",
-        "teks": "Bisu. Setidaknya tidak perlu berbohong dengan mulutku sendiri. Pergilah, Raden.",
+        "teks": "Bisu. Ya, setidaknya aku tidak perlu bohong pakai mulutku sendiri. Pergi, Raden. Pergi.",
         "tandai": "pandakan-disamarkan",
         "bukaKitab": [
           "gajah-pagon",
@@ -272,7 +272,7 @@
     "simpul": {
       "n1": {
         "tokoh": "nambi",
-        "teks": "Kepala desa menawarkan kita tidur sampai pagi. Orang-orang butuh itu, Raden. Tapi patroli Daha lewat tiap pagi, dan dua belas orang asing tidak mudah disembunyikan di lumbung.",
+        "teks": "Kepala desa menawarkan kita tidur sampai pagi, Raden. Orang-orang butuh itu, aku tidak bohong; Sora tadi hampir jatuh waktu duduk. Tapi patroli Daha lewat sini tiap pagi, dan dua belas orang asing di lumbung itu bukan sesuatu yang gampang disembunyikan.",
         "lanjut": "n2"
       },
       "n2": {
@@ -280,30 +280,30 @@
         "pilihan": [
           {
             "nada": "hormat",
-            "teks": "Biarkan mereka tidur. Orang yang tidak tidur tiga hari tidak bisa menyelinap. Kita pergi setelah patroli pagi lewat.",
+            "teks": "Biarkan mereka tidur. Orang yang tiga hari tidak tidur tidak bisa menyelinap, Nambi, dia cuma bisa tersandung. Kita pergi setelah patroli pagi lewat.",
             "lanjut": "n3a"
           },
           {
             "nada": "tegas",
-            "teks": "Dua jam. Lalu kita bawa apa yang bisa dibawa dan pergi sebelum fajar. Lebih baik lelah daripada terkepung.",
+            "teks": "Dua jam. Setelah itu bangunkan semua, bawa apa yang bisa dibawa, dan kita pergi sebelum fajar. Lebih baik lelah di jalan daripada segar di dalam kepungan.",
             "lanjut": "n3b"
           },
           {
             "nada": "licik",
-            "teks": "Kita tidur, tapi tidak di lumbung. Di sawah, di antara jerami, di tempat yang tidak masuk akal untuk diperiksa. Dan kita pergi begitu ayam berkokok.",
+            "teks": "Kita tidur, tapi bukan di lumbung. Di sawah, di antara tumpukan jerami, di tempat yang tidak akan terpikir untuk diperiksa. Dan begitu ayam berkokok, kita sudah tidak di sini.",
             "lanjut": "n3b"
           }
         ]
       },
       "n3a": {
         "tokoh": "nambi",
-        "teks": "Baik. Kepala desa bilang istrinya akan membungkus nasi untuk tiga hari. Semoga pagi datang pelan.",
+        "teks": "Baik, Raden. Kata kepala desa, istrinya mau membungkuskan nasi untuk tiga hari. Semoga paginya datang pelan-pelan.",
         "tandai": "kudadu-menginap",
         "selesai": true
       },
       "n3b": {
         "tokoh": "nambi",
-        "teks": "Baik. Hanya cukup nasi untuk sehari, tapi kita membawa semua orang. Aku bangunkan mereka sebelum fajar.",
+        "teks": "Baik. Nasinya cuma cukup untuk sehari kalau begitu, tapi semua orang ikut dan tidak ada yang terkepung. Aku bangunkan mereka sebelum fajar.",
         "tandai": "kudadu-sebelum-fajar",
         "bukaKitab": [
           "sima"
@@ -324,17 +324,17 @@
     "simpul": {
       "n1": {
         "tokoh": "kepala-desa",
-        "teks": "Dua jalan ke pantai, Tuan. Ikuti sungai ke barat: setengah hari, tapi Daha menjaga penyeberangan dan tepiannya. Atau lewat bukit di utara: sehari penuh, tanpa penjaga, tanpa air sampai pantai.",
+        "teks": "Ke pantai ada dua jalan, Tuan. Yang satu ikut sungai ke barat, setengah hari sampai, tapi orang Daha jaga di penyeberangan dan di beberapa tempat sepanjang tepian. Yang satu lagi naik bukit di utara itu, sehari penuh, tidak ada yang jaga, tapi juga tidak ada air sampai Tuan turun di pantai.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "lawe",
-        "teks": "Sungai. Setiap jam kita di darat, Daha makin dekat. Penjaga bisa dilewati, waktu tidak.",
+        "teks": "Sungai, Raden. Tiap jam kita masih di darat, Daha makin dekat. Penjaga bisa kita lewati, kalau perlu kita habisi. Waktu tidak bisa.",
         "lanjut": "n3"
       },
       "n3": {
         "tokoh": "nambi",
-        "teks": "Bukit. Kita sudah kehilangan cukup orang karena berani. Lelah bisa diobati di Madura; tombak tidak.",
+        "teks": "Bukit. Lawe, kita sudah kehilangan cukup orang karena berani. Orang lelah masih bisa diobati di Madura. Orang kena tombak tidak.",
         "lanjut": "n4"
       },
       "n4": {
@@ -342,25 +342,25 @@
         "pilihan": [
           {
             "nada": "tegas",
-            "teks": "Sungai. Lawe benar, waktu adalah musuh yang tidak bisa ditangkis.",
+            "teks": "Sungai. Lawe benar, Nambi. Kita bisa sembunyi dari penjaga, tapi tidak dari pagi.",
             "lanjut": "n5a"
           },
           {
             "nada": "hormat",
-            "teks": "Bukit. Nambi benar, aku tidak mau mengubur orang lagi sebelum laut.",
+            "teks": "Bukit. Nambi benar, Lawe. Aku tidak mau mengubur orang lagi sebelum kita lihat laut.",
             "lanjut": "n5b"
           }
         ]
       },
       "n5a": {
         "tokoh": "nambi",
-        "teks": "Kalau begitu aku yang di depan, Raden. Kalau ada obor, kita berhenti sebelum mereka melihat kita.",
+        "teks": "Kalau begitu aku di depan, Raden. Kalau aku lihat obor, kita berhenti dulu sebelum mereka lihat kita.",
         "tandai": "rute-sungai",
         "selesai": true
       },
       "n5b": {
         "tokoh": "lawe",
-        "teks": "Bukit. Baik. Tapi kalau ada yang tumbang di atas sana, Raden, itu bukan karena kurang berani.",
+        "teks": "Bukit. Ya sudah. Tapi kalau nanti ada yang tumbang di atas sana, Raden, jangan bilang itu karena kurang berani.",
         "tandai": "rute-bukit",
         "selesai": true
       }
@@ -376,12 +376,12 @@
     "simpul": {
       "n1": {
         "tokoh": "sora",
-        "teks": "Raden, Wirot tidak bisa berdiri lagi. Tanpa air dua hari, kakinya tidak mau. Ada gubuk penyadap di bawah sana. Aku tinggalkan dia dengan sisa nasi.",
+        "teks": "Raden... Wirot tidak bisa berdiri lagi. Dua hari tanpa air, kakinya sudah tidak mau diajak. Di bawah sana ada gubuk penyadap. Aku tinggalkan dia di situ dengan sisa nasi; tidak ada jalan lain.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "wijaya",
-        "teks": "Tinggalkan juga kerisku padanya. Supaya dia tahu kita kembali untuk mengambilnya.",
+        "teks": "Tinggalkan juga kerisku padanya. Supaya dia tahu kita pasti kembali, paling tidak untuk mengambil keris itu.",
         "tandai": "bukit-tumbang",
         "selesai": true
       }
@@ -397,7 +397,7 @@
     "simpul": {
       "n1": {
         "tokoh": "nelayan",
-        "teks": "Sebelas orang? Perahu ini untuk ikan, Tuan, bukan untuk orang yang dicari Daha. Kalau mereka tahu saya yang menyeberangkan...",
+        "teks": "Sebelas orang? Tuan, ini perahu ikan, bukan perahu orang. Apalagi orang yang dicari Daha. Kalau mereka tahu saya yang menyeberangkan... saya ini punya anak, Tuan.",
         "lanjut": "n2"
       },
       "n2": {
@@ -405,39 +405,39 @@
         "pilihan": [
           {
             "nada": "hormat",
-            "teks": "Aku tidak bisa menjanjikan apa-apa selain ini: kalau aku kembali ke Jawa, aku kembali sebagai orang yang mengingat nama penyeberangnya.",
+            "teks": "Aku tidak bisa menjanjikan apa-apa, Pak. Cuma ini: kalau aku kembali ke Jawa, aku kembali sebagai orang yang ingat nama orang yang menyeberangkannya.",
             "lanjut": "n3a"
           },
           {
             "nada": "tegas",
-            "teks": "Daha tidak akan tahu, karena yang tahu hanya kau, aku, dan laut. Dayung.",
+            "teks": "Daha tidak akan tahu, karena yang tahu cuma kau, aku, dan laut. Sekarang dayung.",
             "lanjut": "n3b"
           },
           {
             "nada": "licik",
-            "teks": "Kau benar, ini perahu ikan. Jadi kami ikanmu. Tutup kami dengan jala, dan kalau ada yang bertanya, tangkapanmu malam ini luar biasa.",
+            "teks": "Betul, ini perahu ikan. Jadi anggap saja kami ikanmu. Tutup kami dengan jala, dan kalau ada yang tanya, bilang tangkapanmu malam ini luar biasa.",
             "lanjut": "n3c"
           }
         ]
       },
       "n3a": {
         "tokoh": "nelayan",
-        "teks": "Nama saya Sarba, Tuan. Naiklah. Angin ke Madura baik malam ini.",
+        "teks": "...Sarba, Tuan. Nama saya Sarba. Naiklah, pelan-pelan. Anginnya ke Madura lagi bagus malam ini.",
         "lanjut": "n4"
       },
       "n3b": {
         "tokoh": "nelayan",
-        "teks": "...Baik, Tuan. Naik. Dan jangan ada yang berdiri, perahu ini tidak suka orang berani.",
+        "teks": "...Ya, Tuan. Ya. Naik. Tapi tolong jangan ada yang berdiri, perahu ini tidak suka orang berani.",
         "lanjut": "n4"
       },
       "n3c": {
         "tokoh": "nelayan",
-        "teks": "Tangkapan luar biasa. Baik, Tuan. Tapi kalau ikan-ikan ini muntah di perahu saya, itu urusan mereka.",
+        "teks": "Tangkapan luar biasa... Ya sudah, Tuan. Tapi kalau ikan-ikan ini mabuk laut dan muntah di perahu saya, itu urusan mereka sendiri.",
         "lanjut": "n4"
       },
       "n4": {
         "tokoh": "wijaya",
-        "teks": "Ke Sumenep. Ke [[Arya Wiraraja|madura-wiraraja]]. Kalau dia masih mengingat Singasari, kita punya harapan. Kalau tidak, setidaknya kita punya laut di antara kita dan Daha.",
+        "teks": "Ke Sumenep. Ke [[Arya Wiraraja|madura-wiraraja]]. Kalau dia masih ingat Singasari, kita masih punya harapan. Kalau tidak... paling tidak ada laut di antara kita dan Daha.",
         "bukaKitab": [
           "madura-wiraraja",
           "raden-wijaya"
@@ -456,12 +456,12 @@
     "simpul": {
       "n1": {
         "tokoh": "warga",
-        "teks": "Tuan dari Singasari? Ada satu lagi orang Tuan. Bersembunyi di lumbung tua di timur desa sejak kemarin, tidak mau keluar. Prajurit Daha sempat memeriksa sekitar situ.",
+        "teks": "Tuan dari Singasari, kan? Begini, ada satu lagi orang Tuan, kayaknya. Sembunyi di lumbung tua di timur desa sejak kemarin, tidak mau keluar, tidak mau makan. Prajurit Daha sempat lewat dekat situ, untung tidak masuk.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "wijaya",
-        "teks": "Terima kasih. Aku akan menjemputnya sendiri.",
+        "teks": "Terima kasih. Biar aku sendiri yang menjemputnya.",
         "tandai": "lumbung-diketahui",
         "selesai": true
       }
@@ -477,16 +477,179 @@
     "simpul": {
       "n1": {
         "tokoh": "prajurit",
-        "teks": "Jangan mendekat! Aku... Raden? Raden Wijaya? Kukira semua sudah mati. Kukira hanya aku yang lari.",
+        "teks": "Jangan mendekat! Aku... tunggu. Raden? Raden Wijaya? Kukira semua sudah mati. Kukira cuma aku yang lari, Raden, cuma aku.",
         "lanjut": "n2"
       },
       "n2": {
         "tokoh": "wijaya",
-        "teks": "Semua lari. Yang membedakan kita dengan yang mati hanya arahnya. Ikut aku; ke utara masih ada Singasari, meski cuma dua belas orang.",
+        "teks": "Semua lari. Yang mati itu yang larinya ke arah yang salah. Ayo ikut; Singasari masih ada di utara, walaupun sekarang cuma dua belas orang.",
         "tandai": "prajurit-lumbung-ikut",
         "bukaKitab": [
           "prajurit-singasari"
         ],
+        "selesai": true
+      }
+    }
+  },
+  "perampok-hadang": {
+    "judul": "Penghadang di jalan",
+    "tokoh": {
+      "wijaya": "Raden Wijaya",
+      "perampok": "Kepala perampok",
+      "lawe": "Ranggalawe"
+    },
+    "mulai": "n1",
+    "simpul": {
+      "n1": {
+        "tokoh": "perampok",
+        "teks": "Wah, wah. Malam-malam begini, dua belas orang lewat jalan kami tanpa permisi. Raja sudah tidak ada, kawan, jadi jalan ini sekarang punya siapa yang jaga. Tinggalkan bekal kalian, atau tinggalkan darah. Pilih sendiri.",
+        "lanjut": "n2"
+      },
+      "n2": {
+        "tokoh": "lawe",
+        "teks": "Tiga orang bergolok, menghadang dua belas prajurit. Raden, izinkan aku, sebentar saja.",
+        "lanjut": "n3"
+      },
+      "n3": {
+        "tokoh": "wijaya",
+        "pilihan": [
+          {
+            "nada": "hormat",
+            "teks": "Kami tidak cari perkara. Ambil sebagian bekal kami, dan biarkan kami lewat. Malam ini sudah cukup banyak orang yang mati.",
+            "lanjut": "n4a"
+          },
+          {
+            "nada": "tegas",
+            "teks": "Raja sudah tidak ada, katamu? Aku Wijaya, menantu Kertanagara. Kalau kalian memang mau mati malam ini, akulah yang kalian cari. Kalau tidak, minggir.",
+            "lanjut": "n4b"
+          },
+          {
+            "nada": "licik",
+            "teks": "Bekalnya di keranjang paling belakang. Ambil sendiri, orang-orangku capek. (Lawe. Yang paling depan. Sekarang.)",
+            "lanjut": "n4c"
+          }
+        ]
+      },
+      "n4a": {
+        "tokoh": "perampok",
+        "teks": "Orang yang masih bisa bayar, itu orang yang masih bisa hidup. Lewat. Dan kalau kalian lari dari Daha, larinya yang lebih cepat; orang-orangnya lewat sini baru kemarin.",
+        "tandai": "perampok-dibayar",
+        "selesai": true
+      },
+      "n4b": {
+        "tokoh": "perampok",
+        "teks": "...Wijaya. Jadi kabar itu benar. Lewat, Raden, lewat. Kami ini perampok, bukan orang bodoh. Tapi jangan salahkan kami kalau nama itu sampai ke Daha lebih dulu daripada Raden sampai ke laut.",
+        "tandai": "perampok-tegas",
+        "selesai": true
+      },
+      "n4c": {
+        "tokoh": "perampok",
+        "teks": "Keranjang paling belakang, ya... Hei, mana? Tidak ada keranjang apa-apa di... kau...",
+        "tandai": "perampok-lawan",
+        "selesai": true
+      }
+    }
+  },
+  "desertir-kediri": {
+    "judul": "Prajurit tanpa tombak",
+    "tokoh": {
+      "wijaya": "Raden Wijaya",
+      "desertir": "Prajurit Daha",
+      "sora": "Lembu Sora"
+    },
+    "mulai": "n1",
+    "simpul": {
+      "n1": {
+        "tokoh": "desertir",
+        "teks": "Jangan bunuh aku, jangan. Aku dari Gelang-gelang, dipaksa ikut waktu Jayakatwang kumpulkan orang. Aku lari waktu mereka mulai membakar Singasari. Aku tidak mau bakar rumah orang, Raden, sungguh. Bawa aku ikut. Aku tahu jalan-jalan patroli mereka.",
+        "lanjut": "n2"
+      },
+      "n2": {
+        "tokoh": "sora",
+        "teks": "Atau dia mata-mata yang cukup pandai untuk menangis, Raden. Yang begitu juga ada.",
+        "lanjut": "n3"
+      },
+      "n3": {
+        "tokoh": "wijaya",
+        "pilihan": [
+          {
+            "nada": "hormat",
+            "teks": "Orang yang menolak membakar rumah orang, itu orang yang kubutuhkan. Ikut. Tapi kau jalan di depan Sora, dan Sora tidak pernah tidur.",
+            "lanjut": "n4a"
+          },
+          {
+            "nada": "tegas",
+            "teks": "Tidak. Malam seperti ini, aku tidak membawa orang yang kutemukan di pinggir jalan. Pergilah ke selatan, dan jangan ikuti kami.",
+            "lanjut": "n4b"
+          },
+          {
+            "nada": "licik",
+            "teks": "Sora, dia tahu jalan patroli. Berarti dia tahu ke mana kita pergi. Kau tahu apa yang harus dilakukan.",
+            "lanjut": "n4c"
+          }
+        ]
+      },
+      "n4a": {
+        "tokoh": "desertir",
+        "teks": "Di depan Sora. Baik, Raden, baik. Namaku Jaran. Terima kasih, Raden.",
+        "tandai": "desertir-ikut",
+        "selesai": true
+      },
+      "n4b": {
+        "tokoh": "desertir",
+        "teks": "Selatan... ya. Baik. Semoga laut lebih baik pada Raden daripada Daha padaku.",
+        "tandai": "desertir-ditolak",
+        "selesai": true
+      },
+      "n4c": {
+        "tokoh": "sora",
+        "teks": "Tidak, Raden. Aku membunuh orang yang mengangkat tombak ke arahku. Bukan orang yang berlutut dan menangis. Kalau Raden mau, Raden lakukan sendiri. Aku tidak mau.",
+        "lanjut": "n5c"
+      },
+      "n5c": {
+        "tokoh": "wijaya",
+        "teks": "...Pergi, prajurit. Dan ingat baik-baik siapa yang menyelamatkanmu malam ini. Bukan aku.",
+        "tandai": "sora-menolak",
+        "selesai": true
+      }
+    }
+  },
+  "harimau-sora": {
+    "judul": "Setelah harimau",
+    "tokoh": {
+      "wijaya": "Raden Wijaya",
+      "sora": "Lembu Sora"
+    },
+    "mulai": "n1",
+    "simpul": {
+      "n1": {
+        "tokoh": "sora",
+        "teks": "Dia ambil Gagak, Raden. Satu kejap dia di belakangku, kejap berikutnya tidak ada, cuma suara di semak. Di Singasari yang kita lawan itu orang. Di sini hutannya sendiri yang melawan.",
+        "lanjut": "n2"
+      },
+      "n2": {
+        "tokoh": "wijaya",
+        "teks": "Rapatkan barisan. Tidak ada lagi yang jalan sendirian sampai kita lihat laut.",
+        "selesai": true
+      }
+    }
+  },
+  "longsor-pagon": {
+    "judul": "Tebing dan luka",
+    "tokoh": {
+      "wijaya": "Raden Wijaya",
+      "pagon": "Gajah Pagon"
+    },
+    "mulai": "n1",
+    "simpul": {
+      "n1": {
+        "tokoh": "pagon",
+        "teks": "Sudah kubilang di Pandakan, Raden. Sekarang lihat: Raden memikul orang pincang naik tebing, hujan-hujan, dengan Daha di belakang. Aku ini beban, Raden.",
+        "lanjut": "n2"
+      },
+      "n2": {
+        "tokoh": "wijaya",
+        "teks": "Dan aku masih memikulmu, kan? Jadi diam, Pagon, dan pegang yang erat.",
         "selesai": true
       }
     }

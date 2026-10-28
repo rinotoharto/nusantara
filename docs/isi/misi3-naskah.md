@@ -83,3 +83,24 @@ Di Kudadu, seorang warga (NPC) menyebut ada prajurit Singasari yang tercecer ber
 
 Sudah ada: prasasti-kudadu, jayakatwang, desa-kudadu, rakryan.
 Ditulis di docs/isi/codex.json pada tahap berikutnya: raden-wijaya, gajah-pagon, nambi, ranggalawe, lembu-sora, pararaton, sima, madura-wiraraja, prajurit-singasari, pandakan.
+
+## Kejadian di jalur (ditambah setelah playtest pengembang, sprint 7)
+
+Perjalanan antar titik terasa kosong. Tiap rute diisi dua sampai tiga kejadian; semuanya masuk akal untuk Jawa Timur akhir 1292 dan terhubung ke variabel rombongan.
+
+| Kejadian | Di mana | Jenis | Pilihan pemain | Dasar |
+| --- | --- | --- | --- | --- |
+| Babi hutan | Jalur Pandakan ke Kudadu | Lawan kecil: menyeruduk lurus, berisik, menarik penjaga | Hindar atau lawan cepat | Umum di hutan Jawa |
+| Buaya muara | Penyeberangan sungai | Bahaya zona: menyelam dan menerkam | Tunggu ia menjauh, atau seberangi di tempat lebih dalam (lambat, berisik) | Fakta; muara Brantas |
+| Perampok | Rute sungai | Tiga orang bergolok, dialog dulu | Bayar (Perbekalan -2), tegas dengan nama Wijaya (Kewaspadaan +1), licik (bertarung dengan keuntungan) | Interpretasi; masa kacau |
+| Desertir Kediri | Salah satu rute (diundi) | Keputusan | Terima (Pengikut +1, 50 persen tidak setia → Kewaspadaan +1 di akhir), tolak, atau minta Sora membunuhnya (Sora menolak; tanda `sora-menolak` untuk bab 2) | Interpretasi; prajurit tercerai |
+| Longsor | Rute bukit | Rintangan: jalur tertutup, memanjat memutar; Gajah Pagon harus dipikul | Tempo saja | Musim hujan Desember 1292 |
+| Harimau jawa | Rute bukit | Lawan baru: mengintai, mengelilingi, menerkam | Lawan, lempar bekal (Perbekalan -1), atau obor | Fakta; punah 1970-an |
+
+Pengikut yang disebut dalam dialog kejadian (Gagak, Jaran, Wirot) adalah nama rekaan untuk pengikut tanpa nama; ditandai di Kitab sebagai rekaan kalau nanti punya entri.
+
+## Catatan sumber Prasasti Kudadu (28 Oktober 2026)
+
+Panel pembuka dan layar selesai memakai parafrase berlabel "ringkasan isi prasasti", bukan kutipan, karena teks asli lempeng naratif belum di tangan. Yang sudah dipakai dari ringkasan (unggahan populer yang mengikuti uraian Slametmuljana/Boechari): tanggal 11 September 1294, gelar lengkap, desa Jasun Wungkal, pengantaran ke Rembang. Yang ditolak: Macan Kuping sebagai kepala desa Kudadu (dalam Pararaton ia kepala desa Pandakan). Yang belum pasti: apakah daftar sepuluh pengikut ada di prasasti atau hanya di Pararaton.
+
+- [ ] Dapatkan teks dan terjemahan lempeng III sampai V dari Brandes (OJO LXXXI) atau Slametmuljana, lalu ganti parafrase dengan kutipan asli.

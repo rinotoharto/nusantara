@@ -126,7 +126,7 @@ Catatan penulisan: tidak ada potret tokoh-tokoh ini yang bertahan, sehingga waja
 
 Empat mekanik, semuanya sederhana dan sudah terbukti di game lain; keunikan game ini ada pada isinya, bukan pada sistem baru.
 
-**Jelajah.** Kamera orang ketiga di area semi-terbuka berukuran kecil (sekitar 300 x 300 meter per misi). Tidak ada peta dunia terbuka penuh. Pemain berjalan, berlari, memanjat tebing rendah, dan menyeberangi sungai. Titik minat ditandai dengan asap, cahaya, atau kerumunan, bukan ikon di layar, meniru pendekatan Ghost of Tsushima.
+**Jelajah.** Kamera orang ketiga di area semi-terbuka berukuran kecil sampai sedang (300 sampai 600 meter per sisi per misi), dibentuk sebagai lembah dan koridor oleh medan alami (tebing, hutan rapat, sungai dalam), bukan tembok tak kasat mata, supaya pilihan rute sungguhan dan tujuan tidak terlihat dari titik awal. Tidak ada peta dunia terbuka penuh. Penjaga melihat dengan dua lapis pandangan dan mendengar langkah; berjongkok mengurangi suara, bukan hanya untuk bersembunyi. Pemain berjalan, berlari, memanjat tebing rendah, dan menyeberangi sungai. Titik minat ditandai dengan asap, cahaya, atau kerumunan, bukan ikon di layar, meniru pendekatan Ghost of Tsushima.
 
 **Pertarungan.** Satu tombol serang, satu tangkis, satu hindar, satu serangan berat; lawan diberi isyarat jelas sebelum menyerang. Dua senjata: keris untuk jarak dekat dan tombak untuk jangkauan. Misi 2, 6, dan 7 menambah komando pasukan sederhana: tahan, maju, sergap. Pertarungan harus terasa berbobot tapi tidak sulit; pemain sekolah bukan pemain Souls-like.
 

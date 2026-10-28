@@ -2,7 +2,7 @@
 
 Oct 27, 2026 · @rino
 
-Prototipe ini membuktikan dalam 6 minggu bahwa misi 3 (pelarian) enak dimainkan di browser, memakai kapsul dan balok tanpa aset jadi.
+Prototipe ini membuktikan dalam 8 minggu bahwa misi 3 (pelarian) enak dimainkan di browser, memakai kapsul dan balok tanpa aset jadi.
 
 ## Tujuan prototipe
 
@@ -70,7 +70,11 @@ Satu sprint = satu minggu kerja paruh waktu (sekitar 10 sampai 15 jam). Setiap s
 3. **Menyelinap.** Kerucut pandang prajurit yang terlihat di lantai, status waspada dan mengejar, semak persembunyian, pengikut yang mengikuti pemain. Syarat lolos: pemain bisa melewati tiga penjaga tanpa bertarung, dan ketahuan memicu pertarungan yang adil.
 4. **Dialog dan ensiklopedia.** Sistem percakapan dari JSON dengan tiga pilihan nada; adegan dengan kepala desa Kudadu; ensiklopedia dengan tiga entri bersumber dan label fakta, interpretasi, atau legenda; entri terbuka saat peristiwa terjadi. Syarat lolos: pemain yang diuji membaca minimal satu entri tanpa disuruh.
 5. **Misi 3 utuh.** Rangkai semuanya: pembukaan di tepi hutan, melewati patroli Kediri, dialog di Kudadu, manajemen rombongan dalam bentuk kasar (jumlah pengikut, perbekalan, keputusan tentang Gajah Pagon), pilihan rute (sungai atau bukit) yang terasa bedanya, satu tujuan pilihan, penyeberangan ke Madura sebagai penutup; titik simpan; layar misi selesai dengan ringkasan sejarah. Syarat lolos: dimainkan dari awal sampai akhir tanpa macet dalam 8 sampai 12 menit, dan pemain menyebut setidaknya satu keputusan yang ia pertimbangkan (bukan hanya refleks). Catatan: GDD kini menargetkan bab 1 sekitar 90 menit dengan satu tantangan berpikir per misi; prototipe menguji contohnya di misi 3.
-6. **Rapikan dan uji.** Perbaiki umpan balik sprint 5, tambah gamepad, pasang di GitHub Pages, dan jalankan playtest dengan tiga sampai lima orang. Syarat lolos: lihat bagian playtest.
+6. **Rapikan.** Perbaiki umpan balik sprint 5 (pemandu arah tanpa ikon, penjaga yang mendengar, dunia 600 m dengan dua rute terpisah), tambah gamepad, pasang di GitHub Pages, siapkan mode playtest. Syarat lolos: pemain baru menemukan arah tanpa diberi tahu; rute bukit dan sungai tidak bisa saling dipotong.
+7. **Kejadian di jalur.** Harimau, perampok, buaya, longsor, desertir, babi hutan: dua sampai tiga kejadian per rute, dua jenis lawan baru. Syarat lolos: tiap rute 4 sampai 6 menit dan pemain menyebut satu kejadian yang berkesan tanpa diminta.
+8. **Playtest.** Jalankan playtest dengan tiga sampai lima orang memakai mode playtest dan lembar pengamatan. Syarat lolos: lihat bagian playtest.
+
+Catatan: rencana awal enam sprint; sprint 7 ditambah setelah playtest pengembang menemukan perjalanan terasa kosong. Prototipe menjadi delapan minggu.
 
 Setiap akhir sprint, catat di `docs/catatan-sprint.md` apa yang jalan, apa yang tidak, dan keputusan yang diambil; Claude Code akan memakainya sebagai konteks sesi berikutnya.
 
