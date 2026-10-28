@@ -350,3 +350,71 @@ Hasil lain Tahap E:
 - Kepala desa di gerbang utara adalah NPC kedua, bukan NPC pertama yang berpindah, supaya `kudadu-ulang` tetap tersedia di rumahnya.
 - Titik simpan menyalin tanda dan percakapan selesai, sehingga gugur juga membatalkan tanda yang muncul setelah segmen mulai; Kitab tetap karena kemajuan belajar.
 - Memuat halaman menampilkan layar awal dengan dunia di belakangnya (`misi.siapkan()` memasang isi statis tanpa memulai), bukan langsung masuk misi.
+
+## Sprint 6: rapikan dan uji (28 Oktober 2026)
+
+Tujuan: memperbaiki masukan playtest pengembang sprint 5 (pemain tidak tahu harus ke mana, penjaga kaku, dunia terasa kecil dan rute bisa dipotong), menambah gamepad dan pengaturan, memasang di GitHub Pages, dan menyiapkan mode playtest untuk sesi dengan tiga sampai lima pemain. Tujuh commit, satu per tahap.
+
+### Yang sudah jalan
+
+- **Pemandu arah tanpa ikon di layar** (`src/world/guide.ts`, `src/mission/guide-hint.ts`, `src/ui/map.ts`, angka di `src/data/guide.json`). Tujuan segmen kini bertahap: `tujuan` di misi3.json boleh berupa daftar langkah `{teks, penanda, selesai.area}`; obor penanda jauh dipasang di langkah yang sedang aktif saja. Saat langkah baru mulai, kamera menoleh ke penanda 2 detik lalu kembali (batal kalau mouse atau stik digerakkan). Tab memancarkan kunang-kunang dari pemain ke arah penanda (gaya `kunang` atau `daun` dipilih dari `pemandu` di misi3.json). Nambi menunjuk jalan dengan subtitle kalau pemain tidak mendekati penanda selama 20 detik, paling cepat tiap 40 detik. Peta (M) berupa kanvas gaya lontar dari fungsi tinggi medan, memperlihatkan sel 5 m yang sudah dilalui, pemain, dan penanda. Obor (`src/world/torch.ts`) punya pendar sprite yang terlihat sampai 150 m menembus kabut.
+- **Penjaga dua lapis dan pendengaran** (`src/stealth/guard.ts`, `vision.ts`, `stealth-manager.ts`, `sound-ring.ts`). Kerucut utama 110° sejauh 14 m; kerucut tepi 180° sejauh 5 m mengisi meteran setengah laju; jarak langsung 2,5 m dari arah mana pun kecuali pemain bersembunyi di semak. Pemain dan pengikut memancarkan radius suara (jongkok 2 m, jalan 6 m, lari 12 m, di air 1,5 kali, pengikut 0,7 kali); penjaga di dalam radius menoleh dan curiga, di dalam 60 persen radius selama 1,5 detik meterannya penuh. Lingkaran suara digambar tipis di tanah sampai 20 m dari penjaga. Bot uji: bot sabar melewati Pandakan ke Kudadu 3 dari 3 kali tanpa ketahuan, bot ceroboh ketahuan 2 kali.
+- **Dunia 600 m, dua rute terpisah** (`src/world/terrain.ts`, `river.ts`, `forest.ts`, data `dunia` di misi3.json). Medan adalah fungsi analitik `tinggiMedan(x, z)` dari jarak ke garis sungai dan garis punggung bukit, bukan heightmap. Rute sungai (jalan setapak sisi timur laut sungai) dan rute bukit (punggung bukit di utara) dipisah oleh tebing curam sisi selatan bukit (x −45 sampai −195, lereng maksimal 42° dari `lerengMaksDerajat`), pita hutan jati rapat di kedua tepi sungai, dan arus deras di barat x −75 yang menyeret siapa pun yang masuk lebih dalam dari 0,5 m. Kabut 125 m, hutan dipetak 75 m dengan LOD (petak lebih dari 150 m disembunyikan), indeks pohon kisi 12 m untuk tabrakan dan garis pandang. Rute sungai dan bukit masing-masing dua segmen (titik simpan di tengah). Bot: rute sungai 102 detik dengan 2 pertarungan, rute bukit 87 detik; jalan pintas tebing turun atau naik, menembus pita jati, dan menyeberang arus semuanya gagal.
+- **Perbaikan sprint 5**: penjaga rute sungai dibagi dua segmen lewat `bagianPenjaga {ke, dari}` (jumlah dari `penjagaSungai` tetap 2 + Kewaspadaan, maksimal 5; diuji untuk n = 2, 3, 5); Lanjutkan memasang kembali isi dinamis segmen yang sudah lewat (penjaga pagi, penjaga sungai paruh pertama); Esc selalu membuka menu jeda lewat `pointerlockchange`; `bukit-tumbang` dipicu area di (−100, −128).
+- **Gamepad dan pengaturan** (`src/character/input.ts`, `gamepad.ts`, `src/data/input.json`, `src/ui/settings.ts`, `src/data/settings.json`). Semua masukan lewat nama aksi yang dipetakan ke kode keyboard dan indeks tombol gamepad di data; stik kiri analog (jalan pelan kalau stik setengah), stik kanan kamera, tombol Xbox: A lompat, B hindar, X serang, Y bicara, LB tangkis, RB jongkok, L3 lari, D-pad atas kunang-kunang, Start jeda, Select peta; menu, dialog, dan layar awal dijelajahi D-pad dan A/B. Petunjuk tombol di HUD berganti keyboard atau gamepad mengikuti masukan terakhir. Pengaturan di menu jeda: ukuran huruf, kepekaan mouse dan stik (0,3 sampai 2,5), balik sumbu Y, kualitas (rendah tanpa bayangan rasio piksel 0,75; sedang 1,5; tinggi 2), dipilih otomatis sekali dari fps rata-rata 5 detik pertama (kurang dari 40 rendah, kurang dari 55 sedang), tersimpan di localStorage.
+- **GitHub Pages**: `vite.config.ts` memakai `base: './'` (jalur relatif, berjalan di nama repo apa pun; `BASE_PATH` untuk mengubahnya), workflow `.github/workflows/pages.yml` membangun dengan Node 22 dan memasang `dist` tiap push ke `main`. Layar awal menampilkan peringatan sekali di perangkat tanpa penunjuk halus (ponsel, tablet). Remote GitHub belum dibuat; langkahnya ada di pesan sesi Tahap F (buat repo, `git remote add origin`, push, Settings → Pages → Source "GitHub Actions").
+- **Mode playtest** (`src/mission/playtest.ts`, `src/data/playtest.json`). Aktif dengan `?playtest=1`; lencana kecil "Mode playtest" di atas layar. Merekam ke localStorage (`nusantara.playtest`, 10 sesi terakhir): waktu per segmen, ketahuan dan gugur per segmen beserta koordinat, pilihan dialog (percakapan, simpul, indeks, nada), pemakaian kunang-kunang, peta, dan Nambi, entri Kitab yang terbuka dan lama dibaca, hasil misi. Tombol "Unduh catatan playtest" di layar selesai mengunduh JSON. Tanpa parameter, tidak ada yang ditulis. Lembar pengamat: `docs/playtest-lembar.md`.
+
+### Angka baru di guide.json
+
+| Kelompok | Angka |
+| --- | --- |
+| `arahanKamera` | lama 2 s, lamaPutar 0,7 s |
+| `partikel` | jumlah 80, jariMuncul 3 m, laju 6 m/s, umur 4 s, jarakMaks 25 m, kelok 1,2, frekuensiKelok 1,5, tinggi 0,6 sampai 2,2 m, ukuran 0,32 |
+| `partikel.gaya.kunang` | warna #d8f070, kedip 3, kedipDalam 0,5, putar 0, jatuh 0 |
+| `partikel.gaya.daun` | warna #b89040, kedip 0, putar 4, jatuh 0,4 |
+| `nambi` | tokoh nambi, tanpaKemajuan 20 s, toleransiKemajuan 1 m, jeda 40 s, jarakJalan 4 m, lamaJalan 3 s, lamaSubtitle 2,5 s, 3 baris ucapan (teks permainan, bukan isi sejarah) |
+| `peta` | ukuranSel 5 m, pikselPerMeter 1,5 |
+
+### Angka baru atau berubah di stealth.json
+
+| Kelompok | Angka |
+| --- | --- |
+| `penjaga` pandangan utama | sudutPandang 110° (sebelumnya 70), jarakPandang 14 m (tetap) |
+| `penjaga` pandangan tepi (baru) | sudutTepi 180°, jarakTepi 5 m, lajuTepi 0,5 |
+| `penjaga` jarak langsung | jarakLangsung 2,5 m (tetap; kini berlaku dari arah mana pun, kecuali pemain di semak) |
+| `suara` (baru) | jongkok 2 m, jalan 6 m, lari 12 m, pengaliAir 1,5, pengaliPengikut 0,7, pengaliPagon 1,0, waktuPenuh 1,5 s, bagianPenuh 0,6, jarakTampilLingkaran 20 m |
+
+Angka lain di `penjaga`, `pemain`, `semak`, dan `pengikut` tidak berubah dari sprint 3.
+
+### Tata letak dunia 600 m (misi3.json → `dunia`)
+
+Sumbu: +x timur, −z utara; desa Kudadu di (0, 0); ukuran 600 × 600 m; lereng maksimal yang bisa didaki 42°.
+
+- **Sungai**: jalur (320, 55) → (−60, 55) → (−120, 10) → (−170, −50) → (−210, −110) → (−240, −150) → (−320, −200); lebar 14 m, dalam 2,6 m, permukaan air −1 m. Tempat dangkal di x 32 (lebar 16 m) untuk penyeberangan awal. Di barat x −75 (peralihan 20 m) sungai melebar 6 m dan mendalam 1,2 m, arus mendorong 5 m/s ke tepi. Teluk muara di (−222, −132), sigma 15 m.
+- **Bukit**: punggung (70, −100) → (−30, −105) → (−90, −120) → (−150, −150) → (−200, −180) → (−260, −220); tinggi 24 m, lebar puncak 8 m, lereng utara 70 m, lereng selatan landai 56 m kecuali tebing 12 m di x −45 sampai −195 (peralihan 18 m).
+- **Hutan** (petak 75 m, LOD 150 m; pohon menghindari desa 48 m, jalan 3 m, air 0,2 m, lereng lebih dari 0,7): rimba-selatan kotak [−140, 72, 150, 230] jarak 7,5 m; jati-tepi-utara pita 30 sampai 46 m di sisi timur laut sungai, x −215 sampai −72, jarak 1,6 m; jati-dinding-timur kotak [−84, −118, −68, 12]; jati-tepi-selatan pita 9 sampai 25 m sisi barat daya sungai, x −250 sampai −70; rumpun-tepian kotak [−215, −130, −60, 45] jarak 13 m; rumpun-bukit kotak [−230, −230, 40, −90] jarak 16 m.
+- **Jalan setapak** (lebar 2,6 m): rute sungai (0, −44) → (−28, −22) → (−46, 6) → (−58, 32) → (−78, 16) → (−98, 2) → (−115, −15) → (−135, −39) → (−155, −63) → (−173, −91) → (−188, −114) → (−198, −127); rute bukit (0, −44) → (−15, −52) → (−15, −66) → (−28, −96) → (−60, −112) → (−100, −128) → (−150, −150) → (−198, −180) → (−216, −190) → (−220, −152) → (−213, −138) → (−198, −127).
+- **Tempat**: titik awal (30, 92); Pandakan tiga rumah di sekitar (44 sampai 55, 27 sampai 39); Kudadu (0, 0), gerbang utara dan kepala desa kedua (0, −44); lumbung (42, −36); perahu (−203,2, −123,4) putar 0,64; nelayan (−199, −127); area selesai kedua rute pusat (−198, −127) jari 8.
+- **Segmen dan penanda**: hutan (mulai (30, 92); penanda (32, 66), (32, 56)) → pandakan (mulai (32, 44)) → kudadu (mulai (46, 34); penanda (10, −12), (8, −36)) → rute (mulai (4, −37)) → sungai (mulai (0, −46); penanda (−58, 32), (−115, −15); penjaga sungai-1, -3, -5) → sungai-2 (mulai (−115, −15); penanda (−163, −76), (−197, −124); penjaga sungai-2, -4) atau bukit (mulai (0, −46); penanda (−15, −50), (−30, −98), (−150, −148); pemicu tumbang (−100, −128) jari 9) → bukit-2 (mulai (−150, −150); penanda (−216, −188), (−197, −124)) → pantai (mulai (−195, −124); penjaga pantai hanya di rute sungai).
+
+### Yang belum
+
+- Belum ada uji pemain manusia; semua angka durasi dari bot. Rute bukit dengan bot sekitar 1,5 menit dan rute sungai 1,7 menit tanpa menyelinap, di bawah target 4 sampai 5 menit per rute; sprint 7 mengisi perjalanan (lihat `docs/prompt-sprint-7.md`).
+- Kualitas otomatis hanya diukur dari 5 detik pertama; kalau tab dibuka di latar belakang, fps rendah palsu bisa memilih "rendah". Pemain bisa mengubahnya di menu jeda.
+- Peta tidak menampilkan penjaga atau pengikut, hanya medan, jejak, pemain, dan penanda; disengaja supaya tidak menjadi radar.
+- Pita hutan jati rapat di tepi sungai memakai 1,6 m antarpohon; di laptop pelan jumlah instance bisa terasa. Belum diukur di laptop sekolah.
+- Catatan playtest hanya merekam waktu misi (berjalan saat tab terlihat), bukan waktu jam dinding; waktu jam ada di `mulaiPada` dan `selesaiPada` per sesi.
+- Belum ada remote GitHub; pemasangan Pages belum pernah dijalankan sungguhan, baru `vite preview` lokal.
+- Uji gamepad memakai gamepad tiruan di konsol (menimpa `navigator.getGamepads`), belum dengan gamepad sungguhan; pemetaan tombol mengikuti tata letak standar Xbox.
+
+### Keputusan yang diambil
+
+- Pemandu arah tidak memakai ikon atau panah di layar: arahan kamera, kunang-kunang, obor jauh, Nambi, dan peta. Semua bisa diabaikan pemain yang sudah tahu jalan.
+- Medan dibuat dari fungsi analitik (garis sungai dan garis bukit di data), bukan heightmap, supaya tata letak diubah dengan mengedit koordinat di misi3.json dan peta bisa digambar dari fungsi yang sama.
+- Rute dipisah secara fisik (tebing, pita jati, arus), bukan dengan dinding tak terlihat; batas lereng 42° berlaku untuk pemain dan pengikut, naik maupun turun.
+- Semua angka baru (pemandu, suara, dunia, gamepad, pengaturan, playtest) ada di `src/data/*.json`; kode tidak memegang angka penyetelan.
+- Masukan dipisah menjadi lapisan aksi supaya keyboard dan gamepad memakai jalur kode yang sama; L3 untuk lari adalah tambahan di luar prompt.
+- `base: './'` dipilih daripada `/nama-repo/` supaya build yang sama berjalan di GitHub Pages, `vite preview`, dan dibuka dari berkas.
+- Mode playtest aktif lewat parameter URL, bukan tombol di menu, supaya pemain tidak sengaja membukanya dan pengamat yang menyiapkannya.
+- Docs selain `catatan-sprint.md` dan `playtest-lembar.md` tidak di-commit dari sesi ini karena milik penulis.

@@ -17,6 +17,9 @@ export class LayarSelesai {
   private readonly catatanEl: HTMLParagraphElement;
   saatKitab: (() => void) | null = null;
   saatMainLagi: (() => void) | null = null;
+  /** Tombol unduh catatan playtest; hanya tampil di mode playtest. */
+  saatUnduh: (() => void) | null = null;
+  private readonly tombolUnduh: HTMLButtonElement;
 
   constructor() {
     this.lapis = document.createElement('div');
@@ -36,7 +39,9 @@ export class LayarSelesai {
     this.catatanEl.className = 'selesai-catatan';
     const tombol = document.createElement('div');
     tombol.className = 'selesai-tombol';
-    tombol.append(this.tombol(UI.selesai.bukaKitab, () => this.saatKitab?.()), this.tombol(UI.selesai.mainLagi, () => this.saatMainLagi?.()));
+    this.tombolUnduh = this.tombol(UI.selesai.unduhPlaytest, () => this.saatUnduh?.());
+    this.tombolUnduh.hidden = true;
+    tombol.append(this.tombol(UI.selesai.bukaKitab, () => this.saatKitab?.()), this.tombol(UI.selesai.mainLagi, () => this.saatMainLagi?.()), this.tombolUnduh);
     kotak.append(judul, this.sejarahEl, this.kutipanEl, this.ringkasanEl, this.catatanEl, tombol);
     this.lapis.append(kotak);
     document.body.append(this.lapis);
@@ -58,6 +63,10 @@ export class LayarSelesai {
 
   tutup(): void {
     this.lapis.classList.remove('tampil');
+  }
+
+  tampilkanUnduh(tampil: boolean): void {
+    this.tombolUnduh.hidden = !tampil;
   }
 
   private tombol(teks: string, aksi: () => void): HTMLButtonElement {

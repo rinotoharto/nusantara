@@ -75,6 +75,8 @@ export class PertarunganPemain {
   pencariTerhuyung: ((pos: THREE.Vector3, maks: number) => Sasaran | null) | null = null;
   /** Dipanggil saat Tikaman Keris keluar; `pertama` benar pada tikaman pertama. */
   saatTikaman: ((pertama: boolean) => void) | null = null;
+  /** Dipanggil sekali saat pemain gugur. */
+  saatMati: (() => void) | null = null;
   /** Sisa efek Tikaman Keris, dihitung dalam waktu nyata: permainan melambat, kamera mendekat. */
   sisaLambat = 0;
   sisaKameraDekat = 0;
@@ -194,8 +196,10 @@ export class PertarunganPemain {
     this.warnaKilat.copy(ditangkis ? WARNA_TERTANGKIS : WARNA_KENA);
     if (ditangkis) return;
     catatDamage(pos, damage, false);
-    if (this.nyawa.kurangi(damage)) this.masuk('mati');
-    else this.masuk('terpukul');
+    if (this.nyawa.kurangi(damage)) {
+      this.masuk('mati');
+      this.saatMati?.();
+    } else this.masuk('terpukul');
   }
 
   /**

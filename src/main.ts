@@ -46,6 +46,7 @@ import { KITAB_PER_ID } from './codex/config';
 import { TEKS_SELESAI } from './mission/config';
 import { isiPola } from './ui/config';
 import type { HasilMisi } from './mission/state';
+import { CatatanPlaytest } from './mission/playtest';
 
 const kanvas = document.getElementById('kanvas') as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas: kanvas, antialias: true });
@@ -119,13 +120,29 @@ const rombongan = new Rombongan();
 const hudRombongan = new HudRombongan(rombongan);
 rombongan.saatBerubah = (p) => hudRombongan.tampilkanPerubahan(p);
 status.saatTanda = (tanda) => rombongan.terapkanTanda(tanda);
-siluman.saatKetahuan = () => rombongan.ketahuan();
+siluman.saatKetahuan = () => {
+  rombongan.ketahuan();
+  catatan.ketahuan(pemain.posisi.x, pemain.posisi.z);
+};
 
+// Catatan playtest (sprint 6): aktif hanya dengan ?playtest=1; merekam ke localStorage.
+const catatan = new CatatanPlaytest(() => waktuMisi);
+if (catatan.aktif) {
+  const lencana = document.createElement('div');
+  lencana.className = 'playtest-lencana';
+  lencana.textContent = UI.playtest.lencana;
+  document.body.append(lencana);
+}
 const mesinDialog = new MesinDialog(status);
+mesinDialog.saatPilih = (percakapan, simpul, indeks, nada) => catatan.pilihanDialog(percakapan, simpul, indeks, nada);
 const uiDialog = new UiDialog(mesinDialog, status);
 const uiKitab = new UiKitab(status);
 const pemberitahuan = new PemberitahuanKitab();
-status.saatKitabTerbuka = (id) => pemberitahuan.tambah(id);
+status.saatKitabTerbuka = (id) => {
+  pemberitahuan.tambah(id);
+  catatan.kitabTerbuka(id);
+};
+uiKitab.saatBaca = (id, detik) => catatan.kitabDibaca(id, detik);
 const menuJeda = new MenuJeda(status);
 const hudTujuan = new HudTujuan();
 const panel = new PanelNaskah();
@@ -170,6 +187,7 @@ function bukaPeta(asal: 'main' | 'jeda'): void {
   menuJeda.tutup();
   hud.tampilkanAksi(null);
   peta.buka();
+  catatan.petunjuk('peta', pemain.posisi.x, pemain.posisi.z);
 }
 function tutupPeta(): void {
   peta.tutup();
@@ -273,6 +291,7 @@ for (const pesan of misi.validasi()) console.warn(`[data] ${pesan}`);
 misi.saatSegmenMulai = (titik) => {
   titik.waktu = waktuMisi;
   status.simpanTitik(titik);
+  catatan.masukSegmen(titik.segmen);
 };
 /** Penanda langkah baru yang menunggu arahan kamera: dijalankan begitu permainan kembali ke mode main tanpa pertarungan. */
 let arahanTertunda: [number, number] | null = null;
@@ -280,6 +299,7 @@ misi.saatLangkahBaru = (penanda) => {
   arahanTertunda = penanda;
 };
 const penunjuk = new PenunjukJalan(pengikut, subtitle);
+penunjuk.saatTunjuk = () => catatan.petunjuk('nambi', pemain.posisi.x, pemain.posisi.z);
 misi.saatSelesai = () => mulaiSinematikPerahu();
 
 // --- Layar awal, sinematik perahu, layar selesai --------------------------------------------
@@ -344,6 +364,7 @@ function tampilkanSelesai(): void {
   const rute = status.tanda.has('rute-sungai') ? 'sungai' : status.tanda.has('rute-bukit') ? 'bukit' : null;
   const hasil: HasilMisi = { pengikutTiba: n.pengikut, pagon: n.pagon, rute, kewaspadaanDaha: n.kewaspadaan, kaliKetahuan: n.kaliKetahuan, waktu: waktuMisi };
   status.selesaikanMisi(hasil);
+  catatan.selesaiMisi(hasil);
   const teks = TEKS_SELESAI;
   const S = UI.selesai;
   isiSelesaiTerakhir = {
@@ -360,6 +381,7 @@ function tampilkanSelesai(): void {
     catatan: n.pagon === 'ikut' ? teks.catatanPagonIkut : teks.catatanPagonDitinggal,
   };
   modeUi = 'selesai';
+  layarSelesai.tampilkanUnduh(catatan.aktif);
   layarSelesai.buka(isiSelesaiTerakhir);
 }
 
@@ -378,6 +400,7 @@ function kembaliKeJudul(): void {
 layarJudul.saatMulaiBaru = () => {
   layarJudul.tutup();
   status.ulangMisi();
+  catatan.mulaiSesi();
   peta.reset();
   waktuMisi = 0;
   modeUi = 'main';
@@ -388,12 +411,15 @@ layarJudul.saatLanjutkan = () => {
   if (!titik) return;
   layarJudul.tutup();
   waktuMisi = titik.waktu;
+  catatan.mulaiSesi(true);
   modeUi = 'main';
   misi.lanjutkan(titik);
 };
 layarJudul.saatKitab = () => bukaKitab('judul');
 layarSelesai.saatKitab = () => bukaKitab('selesai');
 layarSelesai.saatMainLagi = kembaliKeJudul;
+layarSelesai.saatUnduh = () => catatan.unduh();
+tarung.saatMati = () => catatan.gugur(pemain.posisi.x, pemain.posisi.z);
 
 /** Gugur: kembali ke titik simpan segmen. */
 function ulangiDariTitikSimpan(): void {
@@ -406,6 +432,7 @@ tarung.saatTikaman = (pertama) => {
 };
 menuJeda.saatUlangMisi = () => {
   status.ulangMisi();
+  catatan.mulaiSesi();
   tarung.hidupkan();
   tutupMenu();
   peta.reset();
@@ -547,7 +574,10 @@ function perbaruiPermainan(dt: number): void {
 
   // Pemandu arah: Tab memancarkan partikel ke penanda terdekat; Nambi menunjuk jalan kalau pemain lama tidak mendekat.
   const penanda = misi.penandaTerdekat(pemain.posisi.x, pemain.posisi.z);
-  if (input.aksiBaru('pemandu') && penanda && !tarung.mati) pemandu.pancarkan(pemain.posisi, penanda);
+  if (input.aksiBaru('pemandu') && penanda && !tarung.mati) {
+    pemandu.pancarkan(pemain.posisi, penanda);
+    catatan.petunjuk('kunang', pemain.posisi.x, pemain.posisi.z);
+  }
   penunjuk.perbarui(dt, pemain.posisi, penanda, tenang && !tarung.mati && !siluman.konteks.pemain.tersembunyi);
   peta.catatKunjungan(pemain.posisi.x, pemain.posisi.z);
 
@@ -624,7 +654,7 @@ if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
     pemain, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
-    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas,
+    perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan,
     get waktuMisi() {
       return waktuMisi;
     },

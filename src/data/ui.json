@@ -195,12 +195,16 @@
     "kitab": "Entri Kitab terbuka: {n} dari {total}",
     "waktu": "Waktu: {menit} menit {detik} detik",
     "bukaKitab": "Buka Kitab",
-    "mainLagi": "Main lagi"
+    "mainLagi": "Main lagi",
+    "unduhPlaytest": "Unduh catatan playtest"
   },
   "peta": {
     "judul": "Peta",
     "tutup": "Tutup",
     "petunjuk": "M atau Esc untuk menutup",
     "keterangan": "Segitiga: Anda. Lingkaran berpendar: tujuan. Lebih terang: sudah dilalui."
+  },
+  "playtest": {
+    "lencana": "Mode playtest: catatan direkam"
   }
 }

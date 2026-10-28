@@ -21,6 +21,8 @@ export class PenunjukJalan {
   private indeksBaris = Math.floor(Math.random() * N.baris.length);
   /** Berapa kali petunjuk terpakai (untuk catatan playtest). */
   jumlahDipicu = 0;
+  /** Dipanggil tiap kali Nambi menunjuk jalan (untuk catatan playtest). */
+  saatTunjuk: (() => void) | null = null;
 
   constructor(
     private readonly pengikut: PengelolaPengikut,
@@ -55,6 +57,7 @@ export class PenunjukJalan {
     if (!nambi || !nambi.aktif) return; // Nambi tidak ada di segmen ini (misalnya di perahu)
     this.sisaJeda = N.jeda;
     this.jumlahDipicu += 1;
+    this.saatTunjuk?.();
     this.indeksBaris = (this.indeksBaris + 1) % N.baris.length;
     this.subtitle.tampilkan(N.nama, N.baris[this.indeksBaris], N.lamaSubtitle);
     nambi.tunjukArah(posisiPemain, penanda, N.jarakJalan, N.lamaJalan);

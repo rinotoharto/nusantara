@@ -1,0 +1,8 @@
+{
+  "keterangan": "Mode playtest (sprint 6 tahap G): aktif kalau URL memuat ?<parameter>=1. Catatan disimpan ke localStorage di kunciSimpan, paling banyak maksSesi sesi terakhir, dan diunduh sebagai <namaBerkas>-<tanggal>.json dari layar selesai.",
+  "parameter": "playtest",
+  "kunciSimpan": "nusantara.playtest",
+  "namaBerkas": "playtest-nusantara",
+  "maksSesi": 10,
+  "versi": 1
+}

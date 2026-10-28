@@ -11,6 +11,8 @@ export class MesinDialog {
   private idSimpul = '';
   /** Dipanggil saat percakapan berakhir, dengan id percakapannya. */
   saatSelesai: ((id: string) => void) | null = null;
+  /** Dipanggil saat pemain memilih (percakapan, simpul, indeks pilihan, nada), untuk catatan playtest. */
+  saatPilih: ((percakapan: string, simpul: string, indeks: number, nada: string) => void) | null = null;
 
   constructor(private status: StatusPermainan) {}
 
@@ -79,6 +81,7 @@ export class MesinDialog {
     const s = this.simpul;
     const pil = s?.pilihan?.[indeks];
     if (!pil) return;
+    this.saatPilih?.(this.idPercakapan, this.idSimpul, indeks, pil.nada);
     this.masukSimpul(pil.lanjut);
   }
 

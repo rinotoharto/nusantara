@@ -15,6 +15,10 @@ export class UiKitab {
   private tampil = false;
   /** Dipanggil saat Kitab ditutup lewat tombol Tutup. */
   saatTutup: (() => void) | null = null;
+  /** Dipanggil saat sebuah entri terbuka selesai ditampilkan (entri lain dipilih atau Kitab ditutup), dengan lama bacanya dalam detik. */
+  saatBaca: ((id: string, detik: number) => void) | null = null;
+  private idDibaca: string | null = null;
+  private mulaiBaca = 0;
 
   constructor(private readonly status: StatusPermainan) {
     this.lapis = document.createElement('div');
@@ -59,10 +63,12 @@ export class UiKitab {
   tutup(): void {
     this.tampil = false;
     this.lapis.classList.remove('tampil');
+    this.catatBaca(null);
   }
 
   pilih(id: string | null): void {
     this.idTerpilih = id;
+    this.catatBaca(this.tampil && id && this.status.kitabTerbuka(id) ? id : null);
     this.renderDaftar();
     this.renderIsi();
     this.isiEl.scrollTop = 0;
@@ -107,6 +113,14 @@ export class UiKitab {
       return;
     }
     this.isiEl.append(...this.bagianEntri(entri));
+  }
+
+  /** Menutup catatan baca entri sebelumnya dan membuka catatan untuk `id` (null: tidak ada yang dibaca). */
+  private catatBaca(id: string | null): void {
+    const kini = performance.now();
+    if (this.idDibaca && this.idDibaca !== id) this.saatBaca?.(this.idDibaca, (kini - this.mulaiBaca) / 1000);
+    if (id !== this.idDibaca) this.mulaiBaca = kini;
+    this.idDibaca = id;
   }
 
   private bagianEntri(entri: EntriKitab): HTMLElement[] {
