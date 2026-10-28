@@ -217,6 +217,9 @@
     "geram": "...",
     "lamaGeram": 1.6,
     "pengikutDitangkap": "Harimau menyeret seorang pengikut! Serang atau lempar bekal",
-    "desertirGubuk": "Gubuk"
+    "desertirGubuk": "Gubuk",
+    "tanahBergeser": "Tanah bergeser!",
+    "memikul": "Tahan E: memikul Gajah Pagon ({detik} detik)",
+    "memikulPad": "Tahan Y: memikul Gajah Pagon ({detik} detik)"
   }
 }

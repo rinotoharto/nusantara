@@ -12,6 +12,7 @@ const S = DUNIA.sungai;
 const B = DUNIA.bukit;
 const M = DUNIA.muara;
 const JALUR_SUNGAI = S.jalur as Titik2[];
+const DANGKAL = S.dangkal as { x: number; lebar: number; sisa: number }[];
 const JALUR_BUKIT = B.jalur as Titik2[];
 
 function smoothstep(tepi0: number, tepi1: number, x: number): number {
@@ -97,9 +98,11 @@ export function tinggiMedan(x: number, z: number): number {
   const lebar = S.lebar + S.deras.lebarTambahan * deras;
   const sigma = lebar / 2.5;
   let parit = Math.exp(-(ts.jarak * ts.jarak) / (2 * sigma * sigma)) * (S.dalam + S.deras.dalamTambahan * deras);
-  // Tempat dangkal penyeberangan (hanya di bagian lurus timur): cekungan tinggal 30 persen.
-  const dangkal = 1 - smoothstep(0, 1, Math.abs(x - S.dangkal.x) / (S.dangkal.lebar / 2));
-  parit *= 1 - 0.7 * dangkal;
+  // Tempat dangkal penyeberangan: pita selebar `lebar` di sekitar `x`, cekungan tinggal `sisa` kali.
+  for (const d of DANGKAL) {
+    const faktor = 1 - smoothstep(0, 1, Math.abs(x - d.x) / (d.lebar / 2));
+    parit *= 1 - (1 - d.sisa) * faktor;
+  }
   // Teluk muara: cekungan bundar tambahan.
   const dm = Math.hypot(x - M.x, z - M.z);
   parit += Math.exp(-(dm * dm) / (2 * M.sigma * M.sigma)) * M.dalam;

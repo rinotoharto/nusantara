@@ -87,6 +87,15 @@
       },
       "desertir-khianat": {
         "kewaspadaan": 1
+      },
+      "longsor-terjadi": {
+        "teks": "Longsor menutup jalan bukit"
+      },
+      "buaya-menerkam": {
+        "teks": "Buaya menerkam di penyeberangan"
+      },
+      "babi-mengamuk": {
+        "teks": "Babi hutan mengamuk, penjaga mendengar"
       }
     },
     "ketahuan": {
@@ -149,7 +158,7 @@
     }
   },
   "dunia": {
-    "keterangan": "Tata letak dunia 600 x 600 m (sumbu: +x timur, -z utara). Desa Kudadu di (0,0). Sungai lurus di timur lalu berbelok ke barat laut menuju muara; punggung bukit di utara dengan tebing curam di sisi selatannya (x dari curam.xMulai sampai curam.xSelesai), landai di dekat desa dan di celah dekat muara. Hutan: kotak [xMin, zMin, xMaks, zMaks] atau pita di satu sisi sungai. Jalan setapak: jalur tanah lebih terang.",
+    "keterangan": "Tata letak dunia 600 x 600 m (sumbu: +x timur, -z utara). Desa Kudadu di (0,0). Sungai lurus di timur lalu berbelok ke barat laut menuju muara; punggung bukit di utara dengan tebing curam di sisi selatannya (x dari curam.xMulai sampai curam.xSelesai), landai di dekat desa dan di celah dekat muara. Hutan: kotak [xMin, zMin, xMaks, zMaks] atau pita di satu sisi sungai. Jalan setapak: jalur tanah lebih terang. `sungai.dangkal`: daftar tempat dangkal (pita x selebar `lebar`, cekungan tinggal `sisa` kali).",
     "ukuran": 600,
     "lerengMaksDerajat": 42,
     "sungai": {
@@ -186,17 +195,25 @@
       "lebar": 14,
       "dalam": 2.6,
       "permukaanAir": -1.0,
-      "dangkal": {
-        "x": 32,
-        "lebar": 16
-      },
+      "dangkal": [
+        {
+          "x": 32,
+          "lebar": 16,
+          "sisa": 0.3
+        },
+        {
+          "x": -110,
+          "lebar": 36,
+          "sisa": 0.42
+        }
+      ],
       "deras": {
         "keterangan": "Di barat xMulai sungai lebih lebar dan dalam; pemain yang masuk lebih dalam dari batasDalam di bawah permukaan terseret ke tepi.",
         "xMulai": -75,
         "peralihan": 20,
         "lebarTambahan": 6,
         "dalamTambahan": 1.2,
-        "batasDalam": 0.5,
+        "batasDalam": 0.8,
         "dorong": 5
       }
     },
@@ -350,8 +367,16 @@
             16
           ],
           [
-            -98,
-            2
+            -100,
+            10
+          ],
+          [
+            -108,
+            18
+          ],
+          [
+            -114,
+            12
           ],
           [
             -115,
@@ -516,6 +541,23 @@
         "panel": "pembuka",
         "percakapan": "hutan-pembukaan"
       },
+      "kejadian": [
+        {
+          "id": "buaya-hutan",
+          "jenis": "buaya",
+          "pusat": [
+            32,
+            58
+          ],
+          "jari": 14,
+          "muncul": [
+            36,
+            58
+          ],
+          "peluang": 0.5,
+          "sekaliPerMisi": false
+        }
+      ],
       "selesai": {
         "area": {
           "pusat": [
@@ -826,6 +868,23 @@
           "percakapan": "kudadu-malam"
         }
       ],
+      "kejadian": [
+        {
+          "id": "babi-kudadu",
+          "jenis": "babi",
+          "pusat": [
+            20,
+            -8
+          ],
+          "jari": 5,
+          "muncul": [
+            20,
+            -8
+          ],
+          "peluang": 1.0,
+          "sekaliPerMisi": true
+        }
+      ],
       "selesai": {
         "percakapan": "kudadu-malam"
       }
@@ -1060,6 +1119,24 @@
           "peluang": 1.0,
           "percakapan": "perampok-hadang",
           "sekaliPerMisi": true
+        },
+        {
+          "id": "buaya-sungai",
+          "jenis": "buaya",
+          "pusat": [
+            -108,
+            16
+          ],
+          "jari": 14,
+          "muncul": [
+            -112,
+            20
+          ],
+          "syarat": [
+            "rute-sungai"
+          ],
+          "peluang": 1.0,
+          "sekaliPerMisi": false
         }
       ],
       "selesai": {
@@ -1313,6 +1390,60 @@
           },
           "percakapan": "desertir-kediri",
           "sekaliPerMisi": true
+        },
+        {
+          "id": "longsor-bukit",
+          "jenis": "longsor",
+          "pusat": [
+            -112,
+            -133
+          ],
+          "jari": 8,
+          "syarat": [
+            "rute-bukit"
+          ],
+          "peluang": 1.0,
+          "percakapan": "longsor-pagon",
+          "sekaliPerMisi": true,
+          "tumpukan": [
+            {
+              "x": -124,
+              "z": -139,
+              "lebar": 8,
+              "tinggi": 3.2,
+              "dalam": 18
+            },
+            {
+              "x": -117,
+              "z": -156,
+              "lebar": 8,
+              "tinggi": 3.2,
+              "dalam": 16
+            },
+            {
+              "x": -112,
+              "z": -168,
+              "lebar": 8,
+              "tinggi": 3.2,
+              "dalam": 10
+            }
+          ],
+          "tangga": [
+            {
+              "x": -116.4,
+              "z": -138,
+              "lebar": 2.4,
+              "tinggi": 1.6,
+              "dalam": 2.4
+            },
+            {
+              "x": -118.8,
+              "z": -138,
+              "lebar": 2.4,
+              "tinggi": 3.2,
+              "dalam": 2.4
+            }
+          ]
         }
       ],
       "selesai": {

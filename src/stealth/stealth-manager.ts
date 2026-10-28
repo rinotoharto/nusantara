@@ -104,8 +104,8 @@ export class PengelolaSiluman {
     };
   }
 
-  /** Batu padat: menghalangi gerak, pandangan, dan kamera. Mengembalikan pencabutnya. */
-  tambahBatu(b: DataBatu): () => void {
+  /** Batu padat: menghalangi gerak, pandangan, dan kamera; `bisaDipanjat` untuk tebing pendek. Mengembalikan pencabutnya. */
+  tambahBatu(b: DataBatu, bisaDipanjat = false): () => void {
     const yTanah = tinggiMedan(b.x, b.z);
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(b.lebar, b.tinggi + 1, b.dalam), bahanBatu);
     mesh.position.set(b.x, yTanah + b.tinggi / 2 - 0.5, b.z);
@@ -114,7 +114,7 @@ export class PengelolaSiluman {
     mesh.name = 'batu';
     mesh.updateMatrixWorld(true);
     this.scene.add(mesh);
-    const padat = { kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat: false };
+    const padat = { kotak: new THREE.Box3().setFromObject(mesh), bisaDipanjat };
     this.dunia.tabrakan.padat.push(padat);
     this.dunia.penghalangKamera.push(mesh);
     return () => {

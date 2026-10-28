@@ -107,6 +107,9 @@ export interface DataKejadian {
   muncul?: [number, number];
   /** Posisi tiap anggota untuk kejadian berkelompok (perampok). */
   posisi?: [number, number][];
+  /** Longsor: balok tumpukan yang menutup jalan (tidak bisa dipanjat) dan tangga tebing pendek (bisa dipanjat). */
+  tumpukan?: DataBatuMisi[];
+  tangga?: DataBatuMisi[];
   syarat?: string[];
   peluang?: number;
   undian?: { kunci: string; dari: number; ke: number };

@@ -81,6 +81,8 @@ export class Pemain {
   skalaBadan = 1;
   /** Batas kecepatan dari misi (m/s), misalnya saat membawa Gajah Pagon; null = normal. */
   batasLaju: number | null = null;
+  /** Salah saat kejadian melarang memanjat sebentar (harus memikul Gajah Pagon dulu). */
+  bolehPanjat = true;
   /** Punya obor (dari kepala desa Kudadu, sprint 7); diisi main dari tanda. */
   punyaObor = false;
   /** Obor menyala di tangan kiri: harimau menjauh, tapi penjaga melihat lebih jauh dan tidak bisa bersembunyi. */
@@ -193,7 +195,7 @@ export class Pemain {
 
     // Memanjat atau melompat.
     if (perintah.bolehLompat && !this.jongkok && input.aksiBaru('lompat') && this.diTanah) {
-      const tebing = cariTebing(this.data, this.posisi, JARI_PEMAIN);
+      const tebing = this.bolehPanjat ? cariTebing(this.data, this.posisi, JARI_PEMAIN) : null;
       if (tebing) {
         this.mulaiPanjat(tebing.tujuan);
         return;

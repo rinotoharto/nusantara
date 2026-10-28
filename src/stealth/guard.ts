@@ -97,6 +97,13 @@ export class Penjaga extends Lawan {
     super.terkena(serangan, dari);
   }
 
+  /** Mendengar keributan (babi hutan): berjalan memeriksa ke (x, z) tanpa mengejar pemain. */
+  selidiki(x: number, z: number): void {
+    if (!this.hidup || this.bertarung) return;
+    this.titikTerakhir.set(x, this.posisi.y, z);
+    this.mulaiMencari();
+  }
+
   /** Dipanggil kawan yang berteriak. */
   ikutMengejar(): void {
     if (!this.hidup || this.bertarung) return;

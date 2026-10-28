@@ -189,5 +189,58 @@
       "kecepatan": 4.5
     },
     "hilangSetelahMati": 3.0
+  },
+  "buaya": {
+    "keterangan": "Buaya muara (sprint 7): bukan lawan, tidak bisa dibunuh. Muncul lamaMuncul detik lalu menyelam lamaMenyelam detik sambil hanyut pelan. Menerkam pemain yang berada di air (kaki lebih dalam dari kedalamanMin di bawah permukaan) dalam jarakTerkam selama waktuTerkam; tangkis pas saat terkaman membatalkannya. Setelah menerkam menyelam lamaMenyelamSetelahTerkam.",
+    "panjang": 2.6,
+    "lamaMuncul": 3,
+    "lamaMenyelam": 6,
+    "lajuHanyut": 0.4,
+    "jariHanyut": 6,
+    "kedalamanMin": 0.1,
+    "jarakTerkam": 3,
+    "waktuTerkam": 1.0,
+    "terkam": {
+      "kecepatan": 9,
+      "durasi": 0.45,
+      "damage": 35,
+      "seret": 1.0,
+      "jatuh": 0.6,
+      "lebarKena": 1.0
+    },
+    "lamaMenyelamSetelahTerkam": 8,
+    "jarakAman": 8
+  },
+  "babi": {
+    "keterangan": "Babi hutan (sprint 7): bersembunyi di semak, keluar saat pemain dalam jarakKeluar, menyeruduk lurus; berbalik pelan lalu menyeruduk lagi setelah jedaSeruduk. Lari setelah satu kali kena atau jumlahSerudukMaks serudukan. Berisik: tiap serudukan menarik penjaga terdekat dalam radiusSuara ke tempatnya.",
+    "nyawa": 30,
+    "jarakKeluar": 5,
+    "bersiap": 0.35,
+    "seruduk": {
+      "kecepatan": 8,
+      "jarak": 9,
+      "damage": 15,
+      "dorong": 1.2,
+      "jatuh": 0.6,
+      "lebarKena": 0.8
+    },
+    "jedaSeruduk": 2.0,
+    "lajuPutar": 1.6,
+    "jumlahSerudukMaks": 3,
+    "radiusSuara": 15,
+    "pergi": {
+      "jarak": 30,
+      "kecepatan": 7
+    },
+    "hilangSetelahMati": 3.0
+  },
+  "longsor": {
+    "keterangan": "Longsor (sprint 7): getaran dan teks HUD saat pemain masuk jari kejadian, tumpukan muncul jedaMuncul detik kemudian; pemain di dalam zona (tumpukan diperlebar zonaTambahan) kena damage dan jatuh. Dengan Gajah Pagon, tiap tangga tebing harus didahului memikul selama lamaMemikul detik (tahan E).",
+    "jedaMuncul": 2.0,
+    "damage": 20,
+    "jatuh": 0.8,
+    "zonaTambahan": 1.5,
+    "lamaGetar": 2.5,
+    "lamaMemikul": 3.0
   }
 }

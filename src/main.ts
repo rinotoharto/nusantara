@@ -296,6 +296,8 @@ const kejadian = new PengelolaKejadian({
   mulaiDialog,
   gamepadTerakhir: () => input.gamepadTerakhir,
   pemainMenyerang: () => tarung.sedangMenyerang,
+  aksiDitahan: () => input.aksiDitekan('bicara'),
+  tarung,
 });
 
 // Misi: segmen dari misi3.json.

@@ -2,6 +2,7 @@ import type * as THREE from 'three';
 import type { Pemain } from '../character/player';
 import type { PengelolaPengikut } from '../character/follower';
 import type { PengelolaLawan } from '../combat/enemy-manager';
+import type { PertarunganPemain } from '../combat/player-combat';
 import type { PengelolaSiluman } from '../stealth/stealth-manager';
 import type { DataTabrakan } from '../world/collision';
 import { acakBerbenih } from '../world/forest';
@@ -13,6 +14,9 @@ import type { PengelolaNpc } from './npc';
 import { KejadianHarimau } from './event-tiger';
 import { KejadianPerampok } from './event-bandit';
 import { KejadianDesertir } from './event-desertir';
+import { KejadianBuaya } from './event-crocodile';
+import { KejadianLongsor } from './event-landslide';
+import { KejadianBabi } from './event-boar';
 
 /** Hal di luar kejadian yang dipakai aktornya: dunia, lawan, rombongan, pemain, UI. */
 export interface KetergantunganKejadian {
@@ -32,6 +36,10 @@ export interface KetergantunganKejadian {
   gamepadTerakhir: () => boolean;
   /** Benar saat pemain sedang mengayun keris: percakapan penghadang ditunda, serangan yang kena memulai pertarungan. */
   pemainMenyerang: () => boolean;
+  /** Benar selama tombol aksi (E) ditahan, untuk memikul. */
+  aksiDitahan: () => boolean;
+  /** Pertarungan pemain: tangkis, kebal, dijatuhkan. */
+  tarung: PertarunganPemain;
 }
 
 /** Satu kejadian yang sedang berjalan: harimau, perampok, buaya, dan seterusnya. */
@@ -145,6 +153,12 @@ export class PengelolaKejadian {
         return new KejadianPerampok(data, this.d);
       case 'desertir':
         return new KejadianDesertir(data, this.d);
+      case 'buaya':
+        return new KejadianBuaya(data, this.d);
+      case 'longsor':
+        return new KejadianLongsor(data, this.d);
+      case 'babi':
+        return new KejadianBabi(data, this.d);
       default:
         // Jenis lain menyusul di tahap berikutnya: aktor kosong yang langsung selesai.
         console.warn(`[kejadian] jenis "${data.jenis}" belum ada`);
