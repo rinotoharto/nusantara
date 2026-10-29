@@ -41,6 +41,8 @@ export class KameraOrangKetiga {
   private faktorTarung = 0;
   /** Pengurangan jarak sementara (meter), misalnya saat Tikaman Keris mengenai. */
   mendekat = 0;
+  /** Penurunan titik pandang sementara (meter), misalnya saat Sergap: kamera ikut merendah. */
+  merendah = 0;
   /** Pose sinematik (dialog). Selama ada, mouse diabaikan dan kamera bergerak pelan ke pose ini. */
   sinematik: PoseKamera | null = null;
   private campurSinematik = 0;
@@ -119,7 +121,7 @@ export class KameraOrangKetiga {
     const pitchEfektif = this.pitch + KONFIG.kamera.pitchTambahan * this.faktorTarung;
     const jarakTujuan = Math.max(1.5, JARAK + KONFIG.kamera.jarakTambahan * this.faktorTarung - this.mendekat);
 
-    this.sasaran.set(kakiPemain.x, kakiPemain.y + TINGGI_SASARAN, kakiPemain.z);
+    this.sasaran.set(kakiPemain.x, kakiPemain.y + TINGGI_SASARAN - this.merendah, kakiPemain.z);
     this.arah.set(
       Math.sin(this.yaw) * Math.cos(pitchEfektif),
       Math.sin(pitchEfektif),

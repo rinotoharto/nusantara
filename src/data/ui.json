@@ -160,7 +160,10 @@
     "damage": "-{jumlah}",
     "gugur": "Raden Wijaya gugur",
     "ulangi": "Ulangi",
-    "jurusTikaman": "Tikaman Keris"
+    "jurusTikaman": "Tikaman Keris",
+    "jurusSergap": "Sergap",
+    "sergap": "Klik kiri: Sergap",
+    "sergapPad": "X: Sergap"
   },
   "siluman": {
     "tersembunyi": "Tersembunyi",

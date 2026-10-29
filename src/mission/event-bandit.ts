@@ -1,3 +1,4 @@
+import { menghadap } from '../combat/hit';
 import { Gerombolan, Perampok } from '../combat/bandit';
 import { ATURAN, type DataKejadian } from './config';
 import type { AktorKejadian, KetergantunganKejadian } from './events';
@@ -52,10 +53,11 @@ export class KejadianPerampok implements AktorKejadian {
       if (!bertarung) this.gerombolan.serang();
       return;
     }
-    // Percakapan: sekali, saat pemain mendekati kepala perampok dan belum ada yang bertarung.
+    // Percakapan: sekali, saat pemain mendekati kepala perampok dari depan (setengah lingkaran hadapnya) dan belum
+    // ada yang bertarung. Dari belakang tidak ada sapaan, supaya Sergap sebelum dialog mungkin (perbaikan 1).
     if (!this.dialogDimulai && !bertarung && this.kepala.hidup && !this.d.pemainMenyerang()) {
       const p = this.d.pemain.posisi;
-      if (Math.hypot(p.x - this.kepala.posisi.x, p.z - this.kepala.posisi.z) <= ATURAN.perampok.jarakDialog) {
+      if (Math.hypot(p.x - this.kepala.posisi.x, p.z - this.kepala.posisi.z) <= ATURAN.perampok.jarakDialog && menghadap(this.kepala.posisi, this.kepala.hadap, p, 180)) {
         this.dialogDimulai = true;
         this.kepala.hadap = Math.atan2(p.x - this.kepala.posisi.x, p.z - this.kepala.posisi.z);
         this.d.mulaiDialog(id, this.kepala.posisi);

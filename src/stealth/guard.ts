@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import type { Pemain } from '../character/player';
 import { Lawan, JARI_LAWAN, type PemberiGiliran, type StatusLawan } from '../combat/enemy';
 import type { PertarunganPemain, Serangan } from '../combat/player-combat';
+import { KONFIG } from '../combat/config';
+import { menghadap } from '../combat/hit';
 import { tinggiLantai, dorongKeluar, type DataTabrakan } from '../world/collision';
 import { SILUMAN } from './config';
 import { KerucutPandang, ujiPandang, garisPandangBebas } from './vision';
@@ -97,6 +99,29 @@ export class Penjaga extends Lawan {
     super.terkena(serangan, dari);
   }
 
+  /** Bisa disergap selama belum mengejar: patroli, curiga, mencari, kembali. */
+  override get bisaDisergap(): boolean {
+    return this.hidup && !this.bertarung;
+  }
+
+  /** Sergapan batal di detik terakhir, atau memergoki kawan disergap: langsung mengejar dan berteriak. */
+  override sadar(): void {
+    if (this.hidup && !this.bertarung) this.mulaiMengejar(true);
+  }
+
+  /**
+   * Benar kalau penjaga ini memergoki sergapan: sasaran (sejauh `sergap.jarakSasaran`) atau pemain
+   * (sejauh jarak pandang dikali faktor jongkok/semak) ada di dalam kerucut utamanya dengan garis
+   * pandang bebas. Hanya berarti untuk penjaga yang belum mengejar.
+   */
+  memergoki(sasaran: THREE.Vector3): boolean {
+    if (!this.hidup || this.bertarung) return false;
+    const G = SILUMAN.sergap;
+    const k = this.konteks.pemain;
+    if (ujiPandang(this.posisi, this.hadap, G.sudutPandang, G.jarakSasaran, sasaran, this.data, P.tinggiMata, this.konteks.penghalangSemak).terlihat) return true;
+    return ujiPandang(this.posisi, this.hadap, G.sudutPandang, P.jarakPandang * k.faktorJarak, k.posisi, this.data, P.tinggiMata, this.konteks.penghalangSemak).terlihat;
+  }
+
   /** Mendengar keributan (babi hutan): berjalan memeriksa ke (x, z) tanpa mengejar pemain. */
   selidiki(x: number, z: number): void {
     if (!this.hidup || this.bertarung) return;
@@ -112,6 +137,13 @@ export class Penjaga extends Lawan {
   }
 
   override perbarui(dt: number, pemain: Pemain, tarung: PertarunganPemain, giliran: PemberiGiliran): void {
+    if (!this.hidup) {
+      // Mati: rebah lalu menghilang (sebelumnya cabang ini tidak pernah dijalankan untuk penjaga).
+      this.waktu += dt;
+      this.perbaruiMati(dt);
+      this.perbaruiKerucut();
+      return;
+    }
     if (this.bertarung) {
       this.perbaruiMengejar(dt, pemain, tarung, giliran);
     } else {
@@ -349,9 +381,15 @@ export class Penjaga extends Lawan {
       lajuPandang = P.lajuTepi;
     }
     if (k.tersembunyi && hasil.jarak >= k.jarakTembus) hasil = { terlihat: false, jarak: hasil.jarak };
+    // Titik buta Sergap: pemain berjongkok tepat di belakang tidak kena jarak langsung dan langkahnya tidak terdengar.
+    const diBelakangAman =
+      k.jongkok &&
+      jarak < SILUMAN.sergap.jarakAmanBelakang &&
+      menghadap(this.posisi, this.hadap + Math.PI, k.posisi, KONFIG.pemain.sergap.sudutBelakang);
     // Terlalu dekat dari sisi mana pun (garis pandang tetap harus bebas dari batu dan rumah).
     const terlaluDekat =
       jarak < P.jarakLangsung &&
+      !diBelakangAman &&
       (!k.tersembunyi || jarak < k.jarakTembus) &&
       garisPandangBebas(this.data, this.posisi, k.posisi, P.tinggiMata, this.konteks.penghalangSemak);
     this.terlihat = hasil.terlihat || terlaluDekat;
@@ -368,7 +406,7 @@ export class Penjaga extends Lawan {
       }
       return;
     }
-    if (this.perbaruiPendengaran(dt)) return;
+    if (this.perbaruiPendengaran(dt, diBelakangAman)) return;
     if (k.tersembunyi && this.pengikutTerlihat(jarakPandang)) {
       // Pemain bersembunyi tapi seorang pengikut masih di luar semak: meteran naik setengah laju.
       this.curiga = Math.min(1, this.curiga + (k.pengaliCuriga * SILUMAN.pengikut.faktorCuriga / P.waktuCuriga) * dt);
@@ -378,10 +416,11 @@ export class Penjaga extends Lawan {
   }
 
   /** Mendengar langkah: benar kalau ada sumber suara di dalam radiusnya; meteran dan titik terakhir disesuaikan. */
-  private perbaruiPendengaran(dt: number): boolean {
+  private perbaruiPendengaran(dt: number, abaikanLangkahPemain = false): boolean {
     const S = SILUMAN.suara;
     let terdekat: { x: number; z: number; bagian: number } | null = null;
     for (const s of this.konteks.suara) {
+      if (s.dariPemain && abaikanLangkahPemain) continue;
       const d = Math.hypot(s.x - this.posisi.x, s.z - this.posisi.z);
       if (d >= s.radius) continue;
       const bagian = d / s.radius;

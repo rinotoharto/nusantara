@@ -65,6 +65,20 @@
       "kameraMendekat": 1.0,
       "lamaKamera": 0.4
     },
+    "sergap": {
+      "keterangan": "Sergap (perbaikan 1, jurus kedua): berjongkok di belakang sasaran yang lengah (dalam `jarak` dari tepi kapsul, di dalam kerucut `sudutBelakang` di belakang arah hadapnya) lalu tekan serang. Melesat `lesat` detik ke `jarakHenti` di belakang sasaran, sasaran mati seketika, lalu `durasi` detik pemain terkunci dan TIDAK kebal. Syarat yang batal kurang dari `jendelaBatal` detik sebelum tombol: serang ringan biasa dan sasaran langsung mengejar. Suara hanya `radiusSuara`. Kamera mendekat dan merendah selama `lamaKamera`. Sasaran rebah ke depan dengan laju `lajuRebahSasaran`.",
+      "jarak": 1.6,
+      "sudutBelakang": 120,
+      "jarakHenti": 0.75,
+      "lesat": 0.15,
+      "durasi": 1.0,
+      "jendelaBatal": 0.1,
+      "radiusSuara": 3,
+      "kameraMendekat": 0.6,
+      "kameraMerendah": 0.4,
+      "lamaKamera": 1.15,
+      "lajuRebahSasaran": 2.5
+    },
     "terjatuh": {
       "keterangan": "Terjatuh (diterkam, diseruduk, longsor): lamanya ditentukan penyerang; bangun = bagian akhir untuk berdiri lagi.",
       "kilatan": 0.15,

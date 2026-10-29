@@ -40,6 +40,11 @@ export class Gerombolan {
     for (const a of this.anggota) a.serang();
   }
 
+  /** Seorang anggota disergap: sisanya (yang menghadang maupun yang sedang pergi) sadar dan menyerang. */
+  balasSergap(): void {
+    for (const a of this.anggota) a.sadar();
+  }
+
   get adaYangHidup(): boolean {
     return this.anggota.some((a) => a.hidup);
   }
@@ -100,6 +105,25 @@ export class Perampok extends Lawan {
   /** Perampok tidak dibangunkan lawan lain; gerombolannya yang mengajak. */
   override waspada(): void {}
 
+  /** Bisa disergap selama belum bertarung: menghadang sebelum dialog, atau sedang pergi. */
+  override get bisaDisergap(): boolean {
+    return this.hidup && !this.sudahPergi && (this.status === 'diam' || this.status === 'pergi');
+  }
+
+  /** Sergapan batal di detik terakhir: seluruh gerombolan menyerang. */
+  override sadar(): void {
+    if (!this.hidup || this.sudahPergi) return;
+    this.gerombolan.serang();
+    if (this.status === 'pergi') this.masuk('mendekat');
+  }
+
+  /** Disergap: mati seketika; kawan-kawannya yang berdiri beberapa meter saja langsung menyerang. */
+  override disergap(): void {
+    if (!this.hidup) return;
+    super.disergap();
+    this.gerombolan.balasSergap();
+  }
+
   /** Mulai bertarung (dari kejadian atau karena diserang). */
   serang(): void {
     if (this.hidup && this.status === 'diam') this.masuk('mendekat');
@@ -154,7 +178,10 @@ export class Perampok extends Lawan {
     const keZ = jarak > 1e-4 ? dz / jarak : 0;
     const jarakSerang = R.golok.jangkauan - 0.2;
 
-    if (this.status !== 'menyerang' && this.status !== 'terhuyung' && this.status !== 'pergi' && (this.status !== 'diam' || jarak < R.jarakDeteksi)) {
+    // Menghadang (diam): berputar mengikuti pemain yang mendekat sambil berdiri atau dari depan; pemain yang
+    // berjongkok di belakang setengah lingkaran hadapnya tidak disadari (Sergap sebelum dialog, perbaikan 1).
+    const tidakDisadari = this.status === 'diam' && pemain.jongkok && !menghadap(this.posisi, this.hadap, posPemain, 180);
+    if (this.status !== 'menyerang' && this.status !== 'terhuyung' && this.status !== 'pergi' && (this.status !== 'diam' || (jarak < R.jarakDeteksi && !tidakDisadari))) {
       let selisih = sudutKe(this.posisi, posPemain) - this.hadap;
       selisih = Math.atan2(Math.sin(selisih), Math.cos(selisih));
       this.hadap += selisih * Math.min(1, 7 * dt);

@@ -511,3 +511,78 @@ Sesi pendek sebelum playtest: isi penulis dimasukkan, prolog dijadikan panel tek
 - Melewati prolog tetap menampilkan "1292." sebelum misi 3, supaya lompatan tahunnya tetap terbaca.
 - Memutar ulang prolog dari judul tidak mengubah status permainan selain membuka entri Kitab yang belum terbuka.
 - Pegangan dev `window.nusantara` hanya ada di mode dev, jadi di Pages pengujian lewat DOM dan localStorage.
+
+## Perbaikan 1: air di penyeberangan buaya, jurus Sergap (29 Oktober 2026)
+
+Dua pekerjaan dari playtest pengembang (docs/prompt-perbaikan-1.md). Dua commit: "Perbaikan air di penyeberangan dan pita sungai", "Jurus Sergap".
+
+### Bug air: penyebab
+
+Tiga dugaan diperiksa dengan menghitung ulang `tinggiMedan` di Node sebelum menyentuh kode:
+
+1. Jalan setapak memengaruhi medan: **salah**. Fungsi tinggi medan tidak memakai jalan; jalan hanya mewarnai vertex, dan warna pasir untuk jalur air diterapkan lebih dulu.
+2. Pita air menyempit di tikungan: **bukan penyebab** di x −110 (tikungan di (−120, 10) hanya 13 derajat, pita menyempit 0,1 m). Ketidakcocokan kecil memang ada: faktor deras di pita dihitung linear antar simpul, di medan dengan smoothstep, sehingga di x −95 pita 1,2 m lebih sempit dari `diJalurAir`.
+3. Tempat dangkal dan gelombang: **benar**. Di belokan jalan parit tinggal 1,6 m, sedangkan gelombang medan di situ +0,5 sampai +0,84 m, jadi dasar sungai naik sampai 0,1 sampai 0,7 m di bawah permukaan dan 5 m pertama belokan (dari (−100, 10) sampai (−105, 15)) malah di atas permukaan. Pemain hanya melambat kalau kedalaman lebih dari 0,3 m, sehingga belokan terasa seperti tanah. Penyeberangan pertama (x 32) pun hanya 0,0 sampai 0,21 m, kebetulan karena gelombang di sana negatif.
+
+Temuan keempat di luar dugaan, dan yang paling besar: sejak commit "Dunia 600 m" (sprint 6) urutan segitiga pita air membuat normalnya menghadap ke bawah. Bahan air bersisi tunggal, jadi bidang air tidak pernah terlihat dari atas di sungai mana pun; dasar sungai berwarna pasir yang jauh di bawah permukaan masih terbaca sebagai "sungai", tetapi di belokan buaya dasarnya naik ke permukaan dan tampak seperti tanah. Dibuktikan di browser: dari titik yang sama, bahan dua sisi langsung menampilkan air.
+
+### Bug air: perbaikan
+
+- `tinggiMedan` meredam gelombang di dalam alur sungai mengikuti bentuk lonceng parit (dan lonceng muara): `dunia.sungai.redamGelombang` 1,0. Bantaran tetap bergelombang.
+- Tempat dangkal: x −110 sisa 0,42 menjadi 0,40; x 32 sisa 0,30 menjadi 0,55.
+- Pita air (`river.ts`) dibangun dari titik tiap 10 m sepanjang jalur, lebar dari `setengahJalurAir(x)` (fungsi yang sama dengan `diJalurAir`) ditambah `dunia.sungai.pitaMargin` 6 m; bagian pita yang berada di bawah tanah tidak terlihat, jadi margin hanya menutup cekungan tepi yang di bawah permukaan. Urutan segitiga dibalik supaya menghadap atas.
+
+Kedalaman terukur di browser setelah perubahan:
+
+| Tempat | Kedalaman |
+| --- | --- |
+| Belokan buaya, (−104, 14) sampai (−114, 12) | 0,34 sampai 0,75 m (di bawah batas seret arus 0,8) |
+| Belokan buaya, keluar di (−115, 4) | 0,18 m |
+| Penyeberangan pertama x 32, z 52 sampai 58 | 0,27 sampai 0,43 m |
+| Muara (−222, −132); perahu (−203, −123) | 3,85 m; 0,80 m |
+
+### Sergap: yang jalan
+
+- Angka di combat.json `pemain.sergap`; aturan penjaga di stealth.json `sergap`. Teks di ui.json `tarung.sergap`, `sergapPad`, `jurusSergap`.
+- Syarat (`PengelolaLawan.lawanBisaDisergap`): pemain berjongkok di tanah, lawan `bisaDisergap` (penjaga: hidup dan tidak mengejar; perampok: menghadang sebelum dialog atau sedang pergi; babi, harimau, lawan dasar tidak), jarak dari tepi kapsul kurang dari 1,6 m, pemain di dalam kerucut 120 derajat di belakang arah hadap lawan. HUD menampilkan "Klik kiri: Sergap" atau "X: Sergap" di atas kepala sasaran (`HudPertarungan.teksSergap`).
+- Pelaksanaan (status `sergap` di player-combat.ts): tombol serang dari status bebas; melesat 0,15 detik ke 0,75 m di belakang sasaran (searah hadapnya; 0,65 m sempat dicoba tetapi lebih kecil dari jarak pisah kapsul 0,7 m sehingga keduanya terseret maju), keris masuk, `Lawan.disergap()` menamatkan apa pun nyawanya dan rebah pelan ke depan (laju 2,5) lalu hilang 3 detik seperti lawan mati lain. 1,0 detik berikutnya pemain terkunci, tidak kebal, dan serangan lain memutus animasinya. Kamera mendekat 0,6 m dan merendah 0,4 m selama 1,15 detik (`KameraOrangKetiga.merendah` baru; efek kamera jurus digeneralisasi lewat `mulaiEfekKamera`). Tanpa perlambatan waktu, tanpa angka damage.
+- Titik buta (stealth.json `sergap.jarakAmanBelakang` 2,5 m): tanpa ini Sergap tidak pernah terjadi, karena jarak langsung 2,5 m membuat penjaga sadar dari arah mana pun dan langkah jongkok (radius 2 m) terdengar. Pemain yang berjongkok di dalam kerucut belakang penjaga dan lebih dekat dari 2,5 m tidak kena jarak langsung dan langkahnya sendiri tidak terdengar penjaga itu (pengikut tetap terdengar, penjaga lain tetap mendengar). Perampok yang menghadang tidak berputar mengikuti pemain yang berjongkok di belakang setengah lingkaran hadapnya, dan dialog hadang hanya dimulai kalau pemain datang dari depan kepala perampok; satu anggota yang disergap membuat sisanya langsung menyerang (`Gerombolan.balasSergap`).
+- Suara: keris berbunyi radius 3 m hanya setelah masuk (sasaran sendiri tidak mendengarnya); penjaga lain dalam 3 m curiga biasa. Saksi: selama keris masuk sampai akhir, penjaga lain yang melihat sasaran (14 m) atau pemain (14 m dikali faktor jongkok 0,5) di kerucut utamanya langsung mengejar dan berteriak (`Penjaga.memergoki`, `sadar`); dihitung sebagai ketahuan. Penjaga 16 m di depan sasaran tidak bereaksi.
+- Jendela batal 0,1 detik: sasaran yang syaratnya baru batal diingat; tombol serang dalam jendela itu menghasilkan serang ringan biasa dan sasaran `sadar()` (mengejar). Dalam praktik, penjaga yang berbalik menghadap pemain pada 1,3 m sudah mengejar lewat jarak langsung sebelum tombol ditekan.
+- HUD "Sergap" di tengah layar dan tanda `sergap-pertama` saat pertama berhasil. Playtest: `sergap {jumlah, ketahuan}` dan `sergapKejadian` per sesi (diuji: dua sergap, satu dipergoki).
+- Perbaikan sampingan: penjaga yang mati tidak pernah menjalankan `perbaruiMati` (cabang mati di `Penjaga.perbarui` tidak ada), jadi kapsulnya tetap berdiri dan tidak hilang. Kini rebah dan hilang seperti lawan lain.
+
+### Sergap: angka akhir (combat.json `pemain.sergap`, stealth.json `sergap`)
+
+| Bagian | Nilai |
+| --- | --- |
+| Jarak picu (dari tepi kapsul), kerucut belakang | 1,6 m; 120 derajat |
+| Jarak henti, lesat, durasi terkunci | 0,75 m; 0,15 s; 1,0 s |
+| Jendela batal, radius suara keris | 0,1 s; 3 m |
+| Kamera mendekat, merendah, lama | 0,6 m; 0,4 m; 1,15 s |
+| Laju rebah sasaran | 2,5 |
+| Titik buta: jarak, saksi: sudut, jarak sasaran | 2,5 m; 110 derajat; 14 m |
+
+### Hasil bot (frame 1/60, bot sabar: menjauh kalau di depan penjaga dalam 9,5 m, membuntuti berjongkok tepat di belakangnya, menekan serang begitu petunjuk muncul, bertarung kalau ada yang mengejar)
+
+- Jalur Pandakan ke Kudadu (segmen kudadu, 6 penjaga termasuk tepi-timur, tepi-barat, lumbung): 5 disergap, 1 ketahuan saat mendekat (jalur-utara, dimenangkan dengan bertarung), 187 detik termasuk 50 detik menunggu, nyawa tidak pernah turun.
+- Rute sungai dari segmen kedua: sungai-3 dan sungai-1 disergap tanpa ketahuan (24 dan 72 detik). Dari titik awal segmen pertama bot tersangkut dinding jati karena berjalan lurus, bukan lewat jalan setapak; bukan masalah permainan.
+- Dua penjaga diam saling berhadapan 8 m: yang pertama disergap, yang kedua memergoki pada frame keris masuk dan langsung mengejar; dimenangkan dengan bertarung dalam 3 detik.
+- Penjaga pendengar 2,85 m di belakang pemain yang membelakangi: curiga 0,31 saat keris masuk, berbalik ke sumber suara, melihat pemain berjongkok di sebelah mayat, dan mengejar 0,5 detik kemudian. Jadi "hanya mendengar" biasanya berujung pengejaran kalau penjaga itu lebih dekat dari 3 m, karena pemain terkunci 1 detik.
+- Kerucut 120 derajat dan durasi 1,0 detik dipertahankan: bot dengan ketepatan waktu sempurna masih ketahuan 1 dari 6, dan dua penjaga yang saling melihat memang tidak bisa disergap keduanya.
+
+### Yang belum
+
+- Belum ada uji pemain manusia untuk Sergap; angka titik buta 2,5 m dan jarak picu 1,6 m mungkin perlu ditala setelah pemain sekolah mencobanya.
+- Penjaga yang mendengar keris lalu berbalik hampir selalu melihat pemain karena pemain terkunci 1 detik; kalau ingin "hanya curiga" benar-benar terjadi, perpendek durasi atau beri pemain pulih lebih cepat.
+- Bot tidak mengikuti jalan setapak, jadi rute sungai dari awal segmen belum terukur dengan Sergap.
+- Cekungan gelombang di luar jalur air masih ada (13 persen sel 2 m yang di bawah permukaan berada di luar `diJalurAir`); pita dengan margin 6 m menutup sebagian besar, sisanya di barat jauh di luar rute.
+
+### Keputusan yang diambil
+
+- Gelombang diredam di alur sungai, bukan tempat dangkal diperdalam saja: dengan sisa 0,46 kedalaman di (−114, 12) melebihi batas seret arus 0,8 m sementara 5 m pertama masih kering, karena gelombang berbeda 0,7 m di sepanjang belokan.
+- Titik buta belakang dibuat sebagai pengecualian sempit (jongkok, kerucut belakang, 2,5 m) dan ditaruh di stealth.json, bukan dengan memperkecil jarak langsung atau radius langkah jongkok, supaya keseimbangan menyelinap sprint 6 tidak berubah.
+- Sergap memakai tombol serang dari status bebas (bukan saat mengisi), sehingga pemain tidak bisa serangan berat terhadap sasaran yang sedang memenuhi syarat Sergap; sesuai prinsip satu tombol serang.
+- Sasaran Sergap dibunuh lewat `disergap()` tanpa `Serangan`, supaya kilatan, dorongan, dan angka damage tidak muncul.
+- Saksi dinilai sejak keris masuk, bukan sejak lesatan, supaya sasaran tidak sempat berteriak sebelum mati.
+- Perampok: dialog hadang dari belakang ditiadakan supaya "sergap sebelum dialog" mungkin; ini mengubah kejadian sprint 7 sedikit (pemain yang memutar lewat hutan bisa menghindari sapaan).

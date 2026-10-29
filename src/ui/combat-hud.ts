@@ -27,6 +27,9 @@ export class HudPertarungan {
   private readonly penanda: HTMLDivElement;
   private readonly layarMati: HTMLDivElement;
   private readonly pemberitahuan: HTMLDivElement;
+  private readonly petunjukSergap: HTMLDivElement;
+  /** Teks petunjuk Sergap di dekat sasaran ("Klik kiri: Sergap" atau "X: Sergap"); diatur main. */
+  teksSergap = '';
   private sisaPemberitahuan = 0;
   private readonly angka: AngkaMelayang[] = [];
   private readonly proyeksi = new THREE.Vector3();
@@ -62,7 +65,10 @@ export class HudPertarungan {
     this.pemberitahuan = document.createElement('div');
     this.pemberitahuan.className = 'hud hud-jurus';
 
-    document.body.append(nyawa, this.penanda, this.layarMati, this.pemberitahuan);
+    this.petunjukSergap = document.createElement('div');
+    this.petunjukSergap.className = 'hud hud-sergap';
+
+    document.body.append(nyawa, this.penanda, this.layarMati, this.pemberitahuan, this.petunjukSergap);
   }
 
   /** Menampilkan nama jurus sebentar di tengah layar, misalnya saat jurus pertama kali berhasil. */
@@ -106,6 +112,17 @@ export class HudPertarungan {
       }
     }
     this.penanda.style.display = penandaTampil ? 'block' : 'none';
+
+    // Petunjuk Sergap kecil di atas kepala sasaran yang memenuhi syarat.
+    const sasaranSergap = tarung.sasaranSergap;
+    const titikSergap = sasaranSergap && this.teksSergap ? this.keLayar(sasaranSergap.posisi, 2.3, kamera) : null;
+    if (titikSergap) {
+      if (this.petunjukSergap.textContent !== this.teksSergap) this.petunjukSergap.textContent = this.teksSergap;
+      this.petunjukSergap.style.display = 'block';
+      this.petunjukSergap.style.transform = `translate(${titikSergap.x}px, ${titikSergap.y}px) translate(-50%, -100%)`;
+    } else {
+      this.petunjukSergap.style.display = 'none';
+    }
 
     // Angka damage: ambil yang baru, lalu gerakkan yang ada.
     for (const a of antreanAngkaDamage) {

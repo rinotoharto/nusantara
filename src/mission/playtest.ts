@@ -37,6 +37,9 @@ export interface SesiPlaytest {
   petunjukKejadian: (Kejadian & { jenis: 'kunang' | 'peta' | 'nambi' })[];
   /** Entri Kitab: kapan terbuka (detik misi) dan berapa detik dibaca di layar Kitab. */
   kitab: { id: string; terbukaPada: number | null; dibaca: number }[];
+  /** Sergap (perbaikan 1): berapa kali berhasil dan berapa di antaranya dipergoki penjaga lain, beserta tempatnya. */
+  sergap: { jumlah: number; ketahuan: number };
+  sergapKejadian: (Kejadian & { ketahuan: boolean })[];
   /** Prolog: lama (detik nyata), dilewati atau tidak, dan di panel ke berapa; null kalau tidak diputar di sesi ini. */
   prolog: HasilProlog | null;
   hasil: HasilMisi | null;
@@ -102,6 +105,8 @@ export class CatatanPlaytest {
       petunjuk: { kunang: 0, peta: 0, nambi: 0 },
       petunjukKejadian: [],
       kitab: [],
+      sergap: { jumlah: 0, ketahuan: 0 },
+      sergapKejadian: [],
       prolog: null,
       hasil: null,
     });
@@ -162,6 +167,28 @@ export class CatatanPlaytest {
     if (!s) return;
     s.petunjuk[jenis] += 1;
     s.petunjukKejadian.push({ jenis, ...this.kejadian(this.segmenSekarang, x, z) });
+    this.simpan();
+  }
+
+  /** Sergap berhasil di (x, z); `ketahuan` benar kalau ada penjaga lain yang memergokinya. */
+  sergap(x: number, z: number, ketahuan: boolean): void {
+    const s = this.sesi;
+    if (!s) return;
+    s.sergap ??= { jumlah: 0, ketahuan: 0 };
+    s.sergapKejadian ??= [];
+    s.sergap.jumlah += 1;
+    if (ketahuan) s.sergap.ketahuan += 1;
+    s.sergapKejadian.push({ ...this.kejadian(this.segmenSekarang, x, z), ketahuan });
+    this.simpan();
+  }
+
+  /** Sergap terakhir ternyata dipergoki penjaga lain beberapa frame kemudian (masih dalam 1 detik pelaksanaan). */
+  sergapDipergoki(): void {
+    const s = this.sesi;
+    const akhir = s?.sergapKejadian?.[s.sergapKejadian.length - 1];
+    if (!s || !akhir || akhir.ketahuan) return;
+    akhir.ketahuan = true;
+    s.sergap.ketahuan += 1;
     this.simpan();
   }
 

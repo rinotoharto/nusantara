@@ -24,6 +24,7 @@ export type StatusAksi =
   | 'terpukul'
   | 'terjatuh' // rebah karena terkaman harimau, serudukan babi, atau longsor; lamanya dari penyerang
   | 'tikaman' // Tikaman Keris: melesat lalu menusuk lawan yang terhuyung
+  | 'sergap' // Sergap: dari jongkok di belakang lawan lengah, melesat lalu menamatkannya; tidak kebal
   | 'mati';
 
 /** Satu serangan yang siap diuji kena; dikeluarkan sekali per ayunan. */
@@ -43,6 +44,13 @@ export type KeadaanTangkis = 'tidak' | 'pas' | 'biasa';
 /** Sasaran kunci ringan: cukup posisinya. */
 export interface Sasaran {
   posisi: THREE.Vector3;
+}
+
+/** Sasaran Sergap: perlu arah hadapnya (pemain menempel di belakangnya) dan cara menamatkannya. */
+export interface SasaranSergap extends Sasaran {
+  hadap: number;
+  disergap(): void;
+  sadar(): void;
 }
 
 const WARNA_BADAN = new THREE.Color(0xc8402c);
@@ -76,13 +84,27 @@ export class PertarunganPemain {
   pencariTerhuyung: ((pos: THREE.Vector3, maks: number) => Sasaran | null) | null = null;
   /** Dipanggil saat Tikaman Keris keluar; `pertama` benar pada tikaman pertama. */
   saatTikaman: ((pertama: boolean) => void) | null = null;
+  /** Pencari lawan lengah yang bisa disergap dari belakang; dipasang oleh main. */
+  pencariSergap: ((pos: THREE.Vector3) => SasaranSergap | null) | null = null;
+  /** Dipanggil saat Sergap menamatkan sasaran (akhir lesatan). */
+  saatSergap: ((sasaran: SasaranSergap) => void) | null = null;
   /** Dipanggil sekali saat pemain gugur. */
   saatMati: (() => void) | null = null;
   /** Sisa efek Tikaman Keris, dihitung dalam waktu nyata: permainan melambat, kamera mendekat. */
   sisaLambat = 0;
   sisaKameraDekat = 0;
+  /** Efek kamera jurus yang sedang berjalan: lama, jarak mendekat, dan penurunan (Tikaman atau Sergap). */
+  private lamaKameraDekat = 1;
+  private jumlahMendekat = 0;
+  private jumlahMerendah = 0;
   private sasaranTikaman: Sasaran | null = null;
   private jumlahTikaman = 0;
+  /** Sasaran Sergap yang sedang memenuhi syarat (untuk petunjuk HUD), dan yang sedang disergap. */
+  sasaranSergap: SasaranSergap | null = null;
+  private sasaranSergapAktif: SasaranSergap | null = null;
+  /** Sasaran yang syaratnya baru saja batal, dan sudah berapa lama (jendela batal Sergap). */
+  private sasaranSergapBatal: SasaranSergap | null = null;
+  private sejakSergapBatal = 99;
   /** Detik sejak masuk status sekarang. */
   private waktu = 0;
   /** Pukulan ke berapa dalam kombo (0 sampai maksKombo - 1). */
@@ -138,6 +160,9 @@ export class PertarunganPemain {
     this.seranganSiap = null;
     this.sasaranTerkunci = null;
     this.sasaranTikaman = null;
+    this.sasaranSergap = null;
+    this.sasaranSergapAktif = null;
+    this.sasaranSergapBatal = null;
     this.sisaKilat = 0;
     this.sisaDoronganLuar = 0;
     this.sisaLambat = 0;
@@ -148,13 +173,28 @@ export class PertarunganPemain {
   /** Benar saat pemain sedang mengayun keris atau baru saja mengayun (satu detik terakhir); percakapan penghadang ditunda. */
   get sedangMenyerang(): boolean {
     const s = this.status;
-    return s === 'mengisi' || s === 'serangRingan' || s === 'serangBerat' || s === 'tikaman' || this.sejakSeranganTerakhir < 1.0;
+    return s === 'mengisi' || s === 'serangRingan' || s === 'serangBerat' || s === 'tikaman' || s === 'sergap' || this.sejakSeranganTerakhir < 1.0;
   }
 
-  /** Benar saat pemain tidak bisa dilukai: awal hindar, atau sepanjang Tikaman Keris. */
+  /** Benar saat pemain tidak bisa dilukai: awal hindar, atau sepanjang Tikaman Keris. Sergap TIDAK kebal. */
   get kebal(): boolean {
     if (this.status === 'tikaman') return true;
     return this.status === 'hindar' && this.waktu < K.hindar.kebal;
+  }
+
+  /** Benar selama Sergap berjalan (lesat dan tusukan); penjaga lain yang melihatnya langsung mengejar. */
+  get sedangMenyergap(): boolean {
+    return this.status === 'sergap';
+  }
+
+  /** Benar saat keris Sergap sudah masuk: suaranya (radius kecil) terdengar penjaga lain; sasaran sendiri sudah mati. */
+  get kerisSergapBerbunyi(): boolean {
+    return this.status === 'sergap' && this.seranganSudahKeluar;
+  }
+
+  /** Posisi sasaran yang baru ditamatkan, untuk uji saksi selama sisa Sergap; null sebelum keris masuk atau di luar Sergap. */
+  get posisiSasaranSergap(): THREE.Vector3 | null {
+    return this.kerisSergapBerbunyi && this.sasaranSergapAktif ? this.sasaranSergapAktif.posisi : null;
   }
 
   /** Pengali kecepatan waktu permainan; di bawah 1 sesaat setelah Tikaman Keris mengenai. */
@@ -162,11 +202,28 @@ export class PertarunganPemain {
     return this.sisaLambat > 0 ? K.tikaman.skalaLambat : 1;
   }
 
-  /** 0 sampai 1: seberapa dekat kamera harus mendekat karena Tikaman Keris. */
+  /** 0 sampai 1: kurva efek kamera jurus (naik lalu turun) selama `lamaKameraDekat`. */
   get faktorKameraDekat(): number {
     if (this.sisaKameraDekat <= 0) return 0;
-    const t = 1 - this.sisaKameraDekat / K.tikaman.lamaKamera;
+    const t = 1 - this.sisaKameraDekat / this.lamaKameraDekat;
     return Math.sin(Math.PI * t);
+  }
+
+  /** Meter kamera mendekat sekarang (Tikaman Keris atau Sergap). */
+  get kameraMendekat(): number {
+    return this.jumlahMendekat * this.faktorKameraDekat;
+  }
+
+  /** Meter kamera merendah sekarang (Sergap). */
+  get kameraMerendah(): number {
+    return this.jumlahMerendah * this.faktorKameraDekat;
+  }
+
+  private mulaiEfekKamera(lama: number, mendekat: number, merendah: number): void {
+    this.sisaKameraDekat = lama;
+    this.lamaKameraDekat = lama;
+    this.jumlahMendekat = mendekat;
+    this.jumlahMerendah = merendah;
   }
 
   /** Dipanggil tiap frame dengan waktu nyata (sebelum diperlambat). */
@@ -268,6 +325,43 @@ export class PertarunganPemain {
     return true;
   }
 
+  /**
+   * Sasaran Sergap tiap frame: lawan lengah terdekat yang pemain jongkok di belakangnya. Kalau syaratnya
+   * baru batal (sasaran berbalik atau waspada), sasaran itu diingat sebentar untuk jendela batal.
+   */
+  private perbaruiSasaranSergap(dt: number): void {
+    this.sejakSergapBatal += dt;
+    const sebelumnya = this.sasaranSergap;
+    const boleh = (this.status === 'bebas' || this.status === 'mengisi') && this.pemain.jongkok && this.pemain.diTanah;
+    this.sasaranSergap = boleh && this.pencariSergap ? this.pencariSergap(this.pemain.posisi) : null;
+    if (sebelumnya && this.sasaranSergap !== sebelumnya && boleh) {
+      this.sasaranSergapBatal = sebelumnya;
+      this.sejakSergapBatal = 0;
+    }
+  }
+
+  /**
+   * Sergap: tombol serang saat ada sasaran yang memenuhi syarat. Mengembalikan benar kalau Sergap dimulai.
+   * Kalau syaratnya batal kurang dari `jendelaBatal` detik yang lalu, serangan jadi serang ringan biasa
+   * dan sasaran itu langsung sadar (penjaga mengejar).
+   */
+  private cobaSergap(): boolean {
+    const S = K.sergap;
+    if (this.sasaranSergap) {
+      this.sasaranSergapAktif = this.sasaranSergap;
+      this.sasaranSergapBatal = null;
+      this.hadapAksi = this.sasaranSergap.hadap;
+      this.seranganTertunda = false;
+      this.masuk('sergap');
+      return true;
+    }
+    if (this.sasaranSergapBatal && this.sejakSergapBatal < S.jendelaBatal) {
+      this.sasaranSergapBatal.sadar();
+      this.sasaranSergapBatal = null;
+    }
+    return false;
+  }
+
   private mulaiSerangan(berat: boolean, input: Input, yawKamera: number): void {
     if (!berat && this.cobaTikaman()) return;
     const kunci = this.kunciSasaran(input);
@@ -313,12 +407,13 @@ export class PertarunganPemain {
     const mintaSerang = input.aksiBaru('serang');
     const tahanTangkis = input.aksiDitekan('tangkis');
     const bisaSerangLagi = !this.komboHabis || this.sejakSeranganTerakhir > K.seranganRingan.pemulihanSetelahKombo;
+    this.perbaruiSasaranSergap(dt);
 
     switch (this.status) {
       case 'bebas':
         if (mintaHindar && this.pemain.diTanah) this.mulaiHindar(input, yawKamera);
         else if (tahanTangkis && this.pemain.diTanah) this.mulaiTangkis(input);
-        else if (mintaSerang && bisaSerangLagi && this.pemain.diTanah) this.masuk('mengisi');
+        else if (mintaSerang && bisaSerangLagi && this.pemain.diTanah && !this.cobaSergap()) this.masuk('mengisi');
         break;
 
       case 'mengisi':
@@ -380,7 +475,7 @@ export class PertarunganPemain {
           };
           this.jumlahTikaman += 1;
           this.sisaLambat = T.lamaLambat;
-          this.sisaKameraDekat = T.lamaKamera;
+          this.mulaiEfekKamera(T.lamaKamera, T.kameraMendekat, 0);
           this.saatTikaman?.(this.jumlahTikaman === 1);
         }
         // Tidak bisa diputus: hindar dan tangkis diabaikan sampai selesai.
@@ -389,6 +484,25 @@ export class PertarunganPemain {
           this.kombo = 0;
           this.komboHabis = false;
           this.sasaranTikaman = null;
+          this.masuk('bebas');
+        }
+        break;
+      }
+
+      case 'sergap': {
+        const S = K.sergap;
+        // Di akhir lesatan keris masuk: sasaran mati seketika. Sesudahnya pemain terkunci (tidak kebal).
+        if (!this.seranganSudahKeluar && this.waktu >= S.lesat && this.sasaranSergapAktif) {
+          this.seranganSudahKeluar = true;
+          this.sasaranSergapAktif.disergap();
+          this.mulaiEfekKamera(S.lamaKamera, S.kameraMendekat, S.kameraMerendah);
+          this.saatSergap?.(this.sasaranSergapAktif);
+        }
+        if (this.waktu >= S.lesat + S.durasi) {
+          this.sejakSeranganTerakhir = 0;
+          this.kombo = 0;
+          this.komboHabis = false;
+          this.sasaranSergapAktif = null;
           this.masuk('bebas');
         }
         break;
@@ -518,6 +632,27 @@ export class PertarunganPemain {
         }
         break;
       }
+      case 'sergap': {
+        const S = K.sergap;
+        p.kunciGerak = true;
+        p.bolehLompat = false;
+        p.hadapPaksa = this.hadapAksi;
+        // Melesat ke titik `jarakHenti` di belakang sasaran (searah hadapnya), tepat selesai di akhir lesatan.
+        const s = this.sasaranSergapAktif;
+        if (this.waktu < S.lesat && s) {
+          const tx = s.posisi.x - Math.sin(s.hadap) * S.jarakHenti;
+          const tz = s.posisi.z - Math.cos(s.hadap) * S.jarakHenti;
+          const pos = this.pemain.posisi;
+          const dx = tx - pos.x;
+          const dz = tz - pos.z;
+          const d = Math.hypot(dx, dz);
+          const laju = d / Math.max(S.lesat - this.waktu, 0.016);
+          p.dorongan = d > 1e-4 ? this.dorongan.set((dx / d) * laju, 0, (dz / d) * laju) : this.dorongan.set(0, 0, 0);
+        } else {
+          p.dorongan = this.dorongan.set(0, 0, 0);
+        }
+        break;
+      }
       case 'terpukul':
       case 'terjatuh':
       case 'mati':
@@ -612,6 +747,22 @@ export class PertarunganPemain {
         kerisY = 0;
         kerisMaju = lerp(0.05, 0.75, tTusuk);
         sinar = 0.5 * tTusuk;
+        sinarWarna.copy(WARNA_KENA);
+        langsung = true;
+        break;
+      }
+      case 'sergap': {
+        const S = K.sergap;
+        // Merunduk rendah saat melesat, lalu menempel condong ke depan dengan keris masuk dan ditahan.
+        const tLesat = halus(this.waktu / S.lesat);
+        const tTusuk = halus((this.waktu - S.lesat) / 0.12);
+        const tTarik = halus((this.waktu - S.lesat - S.durasi * 0.75) / (S.durasi * 0.25));
+        condong = lerp(0.25, 0.45, tTusuk) * (1 - 0.5 * tTarik);
+        turun = -0.15 * tLesat;
+        kerisX = 0.1;
+        kerisY = 0;
+        kerisMaju = lerp(0.05, 0.6, tTusuk) * (1 - tTarik) + 0.05 * tTarik;
+        sinar = 0.3 * tTusuk * (1 - tTarik);
         sinarWarna.copy(WARNA_KENA);
         langsung = true;
         break;

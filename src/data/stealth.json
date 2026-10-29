@@ -70,5 +70,11 @@
   "obor": {
     "keterangan": "Obor di tangan: pemain tidak bisa tersembunyi, jarak pandang penjaga dikalikan faktorJarak.",
     "faktorJarak": 1.5
+  },
+  "sergap": {
+    "keterangan": "Sergap (perbaikan 1). Titik buta: pemain yang berjongkok di dalam kerucut belakang penjaga (pemain.sergap.sudutBelakang di combat.json) dan lebih dekat dari jarakAmanBelakang tidak terdeteksi lewat jarak langsung maupun suara langkah jongkoknya sendiri (pengikut tetap terdengar); tanpa ini penjaga selalu sadar sebelum tombol ditekan. Saksi: penjaga lain yang melihat sasaran (sejauh jarakSasaran, sudut sudutPandang) atau pemain (sejauh jarakPandang dikali faktor jongkok/semak) di dalam kerucutnya selama pelaksanaan langsung mengejar dan berteriak; yang hanya mendengar keris (radius suara di combat.json) curiga biasa. Penjaga yang bisa disergap: patroli, curiga, mencari, kembali.",
+    "jarakAmanBelakang": 2.5,
+    "sudutPandang": 110,
+    "jarakSasaran": 14
   }
 }

@@ -70,6 +70,8 @@ export class Lawan {
   private readonly asal: THREE.Vector3;
   protected readonly doronganKena = new THREE.Vector3();
   protected sisaDoronganKena = 0;
+  /** Benar kalau mati karena Sergap: rebah pelan ke depan, bukan terlempar ke belakang. */
+  protected rebahDepan = false;
 
   constructor(protected data: DataTabrakan, x: number, z: number) {
     this.bahan = this.bangunBadan();
@@ -138,6 +140,32 @@ export class Lawan {
     return false;
   }
 
+  /**
+   * Benar kalau lawan ini sedang lengah dan boleh disergap dari belakang (Sergap, perbaikan 1).
+   * Lawan dasar, babi, dan harimau tidak bisa; penjaga dan perampok menimpanya.
+   */
+  get bisaDisergap(): boolean {
+    return false;
+  }
+
+  /** Disergap dari belakang: mati seketika apa pun nyawanya, rebah pelan ke depan tanpa terlempar. */
+  disergap(): void {
+    if (!this.hidup) return;
+    this.nyawa.kurangi(this.nyawa.sekarang);
+    this.sisaDoronganKena = 0;
+    this.sisaKilat = 0;
+    this.rebahDepan = true;
+    this.masuk('mati');
+  }
+
+  /**
+   * Disadarkan tanpa terluka, misalnya sergapan yang batal sepersekian detik sebelum tombol ditekan:
+   * lawan dasar mulai mendekat; penjaga dan perampok menimpanya.
+   */
+  sadar(): void {
+    this.waspada();
+  }
+
   /** Kembalikan ke titik awal dalam keadaan hidup. */
   hidupkan(): void {
     this.posisi.set(this.asal.x, tinggiLantai(this.data, this.asal.x, this.asal.z, 1e9), this.asal.z);
@@ -147,6 +175,7 @@ export class Lawan {
     this.badan.rotation.set(0, this.hadap, 0);
     this.sisaKilat = 0;
     this.sisaDoronganKena = 0;
+    this.rebahDepan = false;
   }
 
   /** Dibangunkan kawan: mulai mendekat walau pemain belum terlihat sendiri. */
@@ -321,8 +350,9 @@ export class Lawan {
       dorongKeluar(this.data, this.posisi, JARI_LAWAN);
       this.posisi.y = tinggiLantai(this.data, this.posisi.x, this.posisi.z, this.posisi.y + 0.5);
     }
-    const laju = Math.min(1, 5 * dt);
-    this.badan.rotation.x += (-1.5 - this.badan.rotation.x) * laju;
+    // Mati biasa: rebah cepat ke belakang. Disergap: rebah pelan ke depan.
+    const laju = Math.min(1, (this.rebahDepan ? KONFIG.pemain.sergap.lajuRebahSasaran : 5) * dt);
+    this.badan.rotation.x += ((this.rebahDepan ? 1.5 : -1.5) - this.badan.rotation.x) * laju;
     this.badan.rotation.z += (0 - this.badan.rotation.z) * laju;
     if (this.sisaKilat > 0) {
       this.sisaKilat -= dt;

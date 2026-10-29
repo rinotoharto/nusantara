@@ -3,7 +3,7 @@ import type { Pemain } from '../character/player';
 import { JARI_PEMAIN } from '../character/player';
 import { pisahkan } from '../world/collision';
 import { Lawan, JARI_LAWAN, type PemberiGiliran } from './enemy';
-import { dalamJangkauan } from './hit';
+import { dalamJangkauan, menghadap } from './hit';
 import type { PertarunganPemain } from './player-combat';
 
 /** Jarak seruan: lawan yang waspada membangunkan kawan sejauh ini. */
@@ -91,6 +91,25 @@ export class PengelolaLawan implements PemberiGiliran {
         jarakTerdekat = d;
         terdekat = l;
       }
+    }
+    return terdekat;
+  }
+
+  /**
+   * Lawan lengah terdekat yang bisa disergap dari `pos`: dalam `maks` meter dari tepi kapsulnya dan
+   * `pos` berada di dalam kerucut `sudutBelakang` di belakang arah hadapnya (Sergap).
+   */
+  lawanBisaDisergap(pos: THREE.Vector3, maks: number, sudutBelakang: number): Lawan | null {
+    let terdekat: Lawan | null = null;
+    let jarakTerdekat = maks;
+    for (const l of this.daftar) {
+      if (!l.bisaDisergap) continue;
+      const d = Math.hypot(l.posisi.x - pos.x, l.posisi.z - pos.z) - JARI_LAWAN;
+      if (d >= jarakTerdekat) continue;
+      if (Math.abs(l.posisi.y - pos.y) > 1.5) continue;
+      if (!menghadap(l.posisi, l.hadap + Math.PI, pos, sudutBelakang)) continue;
+      jarakTerdekat = d;
+      terdekat = l;
     }
     return terdekat;
   }

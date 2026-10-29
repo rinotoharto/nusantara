@@ -31,6 +31,8 @@ export interface SumberSuara {
   x: number;
   z: number;
   radius: number;
+  /** Benar untuk langkah pemain sendiri: tidak terdengar penjaga yang pemain berjongkok tepat di belakangnya. */
+  dariPemain?: boolean;
 }
 
 export interface KonteksSiluman {
@@ -90,6 +92,8 @@ export class PengelolaSiluman {
   readonly lingkaranSuara = new LingkaranSuara();
   /** Dipanggil saat ada penjaga yang mulai mengejar sementara belum ada penjaga lain yang mengejar. */
   saatKetahuan: (() => void) | null = null;
+  /** Radius suara tambahan di posisi pemain pada frame ini (meter), misalnya keris Sergap; 0 kalau tidak ada. */
+  suaraTambahan = 0;
 
   constructor(
     private readonly dunia: Dunia,
@@ -154,6 +158,21 @@ export class PengelolaSiluman {
     this.scene.remove(penjaga.grup, penjaga.kerucut.mesh, penjaga.kerucutTepi.mesh);
   }
 
+  /**
+   * Saksi Sergap: penjaga lain yang melihat sasaran di `posisiSasaran` atau pemain di kerucut utamanya
+   * langsung mengejar dan berteriak. Mengembalikan jumlah penjaga yang baru memergoki pada frame ini.
+   */
+  periksaSaksiSergap(posisiSasaran: THREE.Vector3): number {
+    let jumlah = 0;
+    for (const p of this.penjaga) {
+      if (p.posisi === posisiSasaran) continue;
+      if (!p.memergoki(posisiSasaran)) continue;
+      p.sadar();
+      jumlah += 1;
+    }
+    return jumlah;
+  }
+
   /** Radius suara langkah untuk laju dan sikap tertentu; 0 kalau diam. */
   private radiusSuara(laju: number, jongkok: boolean, lari: boolean, diAir: boolean): number {
     const S = SILUMAN.suara;
@@ -192,7 +211,8 @@ export class PengelolaSiluman {
     suara.length = 0;
     const diAir = pemain.posisi.y < PERMUKAAN_AIR - 0.3;
     const radiusPemain = this.radiusSuara(pemain.laju, pemain.jongkok, k.lari, diAir);
-    if (radiusPemain > 0) suara.push({ x: pemain.posisi.x, z: pemain.posisi.z, radius: radiusPemain });
+    if (radiusPemain > 0) suara.push({ x: pemain.posisi.x, z: pemain.posisi.z, radius: radiusPemain, dariPemain: true });
+    if (this.suaraTambahan > 0) suara.push({ x: pemain.posisi.x, z: pemain.posisi.z, radius: this.suaraTambahan });
     for (const p of pengikut) {
       const lajuP = p.laju;
       const r = this.radiusSuara(lajuP, p.jongkok, lajuP > SILUMAN.pemain.lajuLari, p.posisi.y < PERMUKAAN_AIR - 0.3);

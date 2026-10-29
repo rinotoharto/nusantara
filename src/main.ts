@@ -77,6 +77,7 @@ const siluman = new PengelolaSiluman(dunia, scene, lawan);
 const pengikut = new PengelolaPengikut(dunia.tabrakan, scene, ATURAN.pagonIkut.lajuPagon);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
 tarung.pencariTerhuyung = (pos, maks) => lawan.lawanTerhuyungTerdekat(pos, maks);
+tarung.pencariSergap = (pos) => lawan.lawanBisaDisergap(pos, KONFIG.pemain.sergap.jarak, KONFIG.pemain.sergap.sudutBelakang);
 
 const kameraOrangKetiga = new KameraOrangKetiga(camera, dunia.penghalangKamera);
 const hud = new Hud();
@@ -502,6 +503,16 @@ function ulangiDariTitikSimpan(): void {
 tarung.saatTikaman = (pertama) => {
   if (pertama) hudTarung.umumkan(UI.tarung.jurusTikaman);
 };
+// Sergap (perbaikan 1): nama jurus di tengah layar saat pertama berhasil, tanda `sergap-pertama`, catatan playtest.
+let sergapDipergoki = false;
+tarung.saatSergap = (sasaran) => {
+  if (!status.tanda.has('sergap-pertama')) {
+    hudTarung.umumkan(UI.tarung.jurusSergap);
+    status.tandai('sergap-pertama');
+  }
+  sergapDipergoki = siluman.periksaSaksiSergap(sasaran.posisi) > 0;
+  catatan.sergap(sasaran.posisi.x, sasaran.posisi.z, sergapDipergoki);
+};
 menuJeda.saatUlangMisi = () => {
   status.ulangMisi();
   catatan.mulaiSesi();
@@ -642,7 +653,14 @@ function perbaruiPermainan(dt: number): void {
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
   if (pemain.baruSelesaiMemanjat) pengikut.susulkanSetelahPanjat(pemain, camera);
+  // Sergap: keris berbunyi pelan (radius kecil), dan penjaga lain yang melihat pelaksanaannya langsung mengejar.
+  siluman.suaraTambahan = tarung.kerisSergapBerbunyi ? KONFIG.pemain.sergap.radiusSuara : 0;
   siluman.perbarui(pemain, pengikut.aktif, dt);
+  const sasaranSergap = tarung.posisiSasaranSergap;
+  if (sasaranSergap && siluman.periksaSaksiSergap(sasaranSergap) > 0 && !sergapDipergoki) {
+    sergapDipergoki = true;
+    catatan.sergapDipergoki();
+  }
   pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
   if (!tarung.mati) kejadian.perbarui(dt);
@@ -721,13 +739,15 @@ renderer.setAnimationLoop(() => {
   if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
-  kameraOrangKetiga.mendekat = KONFIG.pemain.tikaman.kameraMendekat * tarung.faktorKameraDekat;
+  kameraOrangKetiga.mendekat = tarung.kameraMendekat;
+  kameraOrangKetiga.merendah = tarung.kameraMerendah;
 
   perbaruiKameraDanPemandu(dtNyata);
   ikutkanMatahari();
   hud.perbarui(dtMentah, input.terkunci || tarung.mati || modeUi !== 'main');
   pemberitahuan.perbarui(dtNyata, modeUi !== 'main');
   hudRombongan.perbarui(dtNyata, modeUi !== 'main');
+  hudTarung.teksSergap = modeUi === 'main' ? (input.gamepadTerakhir ? UI.tarung.sergapPad : UI.tarung.sergap) : '';
   hudTarung.perbarui(dt, pemain, lawan.daftar, tarung, camera);
   hudSiluman.perbarui(siluman.penjaga, siluman.konteks.pemain, camera);
   hudKejadian.perbarui(dtNyata, camera, modeUi !== 'main');
