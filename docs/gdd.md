@@ -139,8 +139,10 @@ Empat mekanik, semuanya sederhana dan sudah terbukti di game lain; keunikan game
 | Jurus | Dibuka | Cara pakai | Yang dikatakan tentang Wijaya |
 | --- | --- | --- | --- |
 | Tikaman Keris | Misi 2 | Setelah tangkis pas, tekan serang: hukuman cepat yang menamatkan lawan biasa, kamera mendekat sesaat | Membaca lawan lalu menghukum; hadiah langsung untuk mekanik tangkis pas |
+| Sergap | Misi 3 | Berjongkok di belakang lawan yang lengah, tekan serang: tamat seketika tanpa suara, tapi satu detik rentan dan penjaga yang melihat langsung mengejar | Pelarian adalah misi menyelinap; Wijaya menang dengan memilih saat, bukan dengan kekuatan |
 | Sapuan Tombak | Misi 6 | Tahan serangan berat dengan tombak: ayunan lebar yang mendorong semua lawan di depan dan membuka kepungan | Mengurai keroyokan dengan satu gerak, bukan dengan menekan serang terus |
-| Sergap | Misi 7 | Serangan dari semak atau dari belakang pada lawan yang tidak waspada: tamat seketika tanpa suara | Puncak bab: siasat terakhir terhadap Mongol adalah sergapan |
+
+Misi 7 tidak membuka jurus baru: puncak bab memakai ketiganya, dan penyergapan terhadap Mongol adalah Sergap dalam skala pasukan.
 
 Ditambah satu jurus pasukan di misi 2, 6, dan 7: komando "sergap" dibuat seperti jurus dengan adegan kamera dan efek bersama, sehingga momen paling megah bab 1 adalah Wijaya bersama pasukannya, sesuai sejarah.
 
@@ -154,7 +156,7 @@ Inspirasi gerak jurus (interpretasi, sumber lemah; dipakai untuk animasi dan ara
 
 - [ ] Verifikasi klaim di atas ke sumber yang lebih kuat (misalnya buku Bambang Harsrinuksmo tentang keris dan penelitian metalurgi keris) sebelum dipakai di Kitab; bahan awalnya dari Quora, grup Facebook, dan artikel populer, yang hanya cukup untuk inspirasi.
 
-Keputusan: Tikaman Keris dibuat di prototipe karena logikanya sederhana; Sapuan Tombak dan Sergap dibuat di tahap aset karena nilainya ada di animasi dan kamera. Pohon skill yang lebih dalam baru dipertimbangkan di bab 2 ke atas, saat total durasi permainan sudah berjam-jam.
+Keputusan: Tikaman Keris dan Sergap dibuat di prototipe karena logikanya sederhana dan keduanya dibutuhkan misi 3 (Sergap dimajukan dari misi 7 setelah playtest pengembang: tanpa itu, pemain yang menyelinap hanya punya pilihan lari atau bertarung); Sapuan Tombak dibuat di tahap aset karena nilainya ada di animasi. Pohon skill yang lebih dalam baru dipertimbangkan di bab 2 ke atas, saat total durasi permainan sudah berjam-jam.
 
 Ukuran keberhasilan edukasi: setelah bermain, pemain bisa menceritakan urutan 1292 sampai 1293 dan menyebut minimal dua sumbernya. Ini diuji lewat playtest dengan pelajar.
 

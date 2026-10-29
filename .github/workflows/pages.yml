@@ -1,6 +1,6 @@
 # Membangun prototipe dengan Vite dan memasangnya ke GitHub Pages setiap push ke main.
 # Di GitHub: Settings → Pages → Source: "GitHub Actions" (sekali saja).
-name: Pasang ke GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  bangun:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,12 +31,12 @@ jobs:
         with:
           path: dist
 
-  pasang:
-    needs: bangun
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.pasang.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - id: pasang
+      - id: deploy
         uses: actions/deploy-pages@v4
