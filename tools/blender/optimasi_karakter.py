@@ -43,6 +43,12 @@ def argumen():
     p.add_argument("--pratinjau", default=None, help="folder render pembanding")
     p.add_argument("--nama", default="karakter", help="awalan nama berkas pratinjau")
     p.add_argument("--kualitas-jpeg", type=int, default=85)
+    p.add_argument("--rm", choices=["tetap", "tekstur"], default="tetap",
+                   help="tetap: buang tekstur metallic-roughness, pakai nilai --roughness dan --metallic")
+    p.add_argument("--roughness", type=float, default=0.8)
+    p.add_argument("--metallic", type=float, default=0.0)
+    p.add_argument("--cage", type=float, default=0.003, help="jarak cage bake, pecahan dari tinggi model")
+    p.add_argument("--jarak-sinar", type=float, default=0.01, help="jarak sinar bake maksimum, pecahan dari tinggi model")
     return p.parse_args(argv)
 
 
@@ -130,15 +136,16 @@ def siapkan_gpu():
     return "CPU"
 
 
-def bake_normal(tinggi, rendah, ukuran, path_png):
+def bake_normal(tinggi, rendah, ukuran, path_png, cage, jarak_sinar):
+    """Cage dan jarak sinar kecil supaya sinar dari paha tidak mengenai ujung kain yang menempel."""
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     perangkat = siapkan_gpu()
     scene.cycles.samples = 4
     scene.cycles.use_denoising = False
     scene.render.bake.use_selected_to_active = True
-    scene.render.bake.cage_extrusion = 0.008
-    scene.render.bake.max_ray_distance = 0.02
+    scene.render.bake.cage_extrusion = cage
+    scene.render.bake.max_ray_distance = jarak_sinar
     scene.render.bake.margin = 16
     scene.render.bake.normal_space = "TANGENT"
     scene.render.bake.use_clear = True
@@ -163,7 +170,7 @@ def bake_normal(tinggi, rendah, ukuran, path_png):
     t0 = time.time()
     bpy.ops.object.bake(type="NORMAL")
     lama = time.time() - t0
-    catat(f"bake normal {ukuran}px di {perangkat}: {lama:.1f} s")
+    catat(f"bake normal {ukuran}px di {perangkat}: {lama:.1f} s (cage {cage:.4f}, sinar {jarak_sinar:.4f})")
 
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGB"
@@ -223,26 +230,32 @@ def siapkan_render(obj, tinggi_model):
 
 
 def render_sudut(kam, pusat, tinggi_model, folder, awalan):
-    """Empat sudut: depan (dari -Y), samping (dari +X), belakang (dari +Y), tiga perempat."""
+    """Lima sudut: depan (dari -Y), samping (dari +X), belakang (dari +Y), tiga perempat,
+    dan paha (dari depan bawah, diperbesar ke paha dan ujung kain)."""
     os.makedirs(folder, exist_ok=True)
     jarak = tinggi_model * 4
+    z_bawah = pusat.z - tinggi_model / 2
     sudut = {
-        "depan": (0.0, -1.0),
-        "samping": (1.0, 0.0),
-        "belakang": (0.0, 1.0),
-        "tigaperempat": (-0.7071, -0.7071),
+        "depan": ((0.0, -1.0, 0.0), pusat, 1.0),
+        "samping": ((1.0, 0.0, 0.0), pusat, 1.0),
+        "belakang": ((0.0, 1.0, 0.0), pusat, 1.0),
+        "tigaperempat": ((-0.7071, -0.7071, 0.0), pusat, 1.0),
+        "paha": ((0.0, -0.866, -0.5), Vector((pusat.x, pusat.y, z_bawah + tinggi_model * 0.4)), 0.45),
     }
     scene = bpy.context.scene
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGB"
-    for nama, (dx, dy) in sudut.items():
-        kam.location = Vector((pusat.x + dx * jarak, pusat.y + dy * jarak, pusat.z))
-        arah = pusat - kam.location
-        kam.rotation_euler = arah.to_track_quat("-Z", "Y").to_euler()
+    skala_penuh = kam.data.ortho_scale
+    for nama, ((dx, dy, dz), sasaran, zoom) in sudut.items():
+        kam.location = Vector((sasaran.x + dx * jarak, sasaran.y + dy * jarak, sasaran.z + dz * jarak))
+        arah = sasaran - kam.location
+        kam.rotation_euler = arah.to_track_quat("-Z", "Z").to_euler()
+        kam.data.ortho_scale = skala_penuh * zoom
         path = os.path.join(folder, f"{awalan}-{nama}.png")
         bpy.context.scene.render.filepath = path
         bpy.ops.render.render(write_still=True)
         catat("pratinjau", path)
+    kam.data.ortho_scale = skala_penuh
 
 
 def ukuran_mb(path):
@@ -309,6 +322,9 @@ def main():
     mat = mat_asal.copy()
     mat.name = "karakter"
     rendah.data.materials[0] = mat
+    # Decimate Collapse polos. Yang pernah dicoba dan ditolak: melindungi verteks batas UV
+    # lewat vertex group (mesh jadi bersegi, UV ternyata tidak terseret) dan menandai tepi
+    # tajam setelah decimate (menimbulkan goresan terang di kulit).
     dec = rendah.modifiers.new("Decimate", "DECIMATE")
     dec.decimate_type = "COLLAPSE"
     dec.ratio = a.segitiga / jumlah_segitiga(rendah)
@@ -336,7 +352,8 @@ def main():
         catat("normal map dari", a.normal_dari)
     elif a.normal == "bake":
         tinggi.hide_render = False
-        img_normal, lama_bake = bake_normal(tinggi, rendah, ukuran_normal, path_bake)
+        img_normal, lama_bake = bake_normal(tinggi, rendah, ukuran_normal, path_bake,
+                                            a.cage * tinggi_asal, a.jarak_sinar * tinggi_asal)
         catat("normal map hasil bake disimpan di", path_bake)
     else:
         img_normal = n_normal.image
@@ -378,11 +395,23 @@ def main():
         img.scale(a.tekstur, a.tekstur)
         n_base.image = simpan_gambar(img, os.path.join(tmp, f"{a.nama}_basecolor.jpg"), "JPEG", a.kualitas_jpeg)
         n_base.image.colorspace_settings.name = "sRGB"
-    if n_rm and n_rm.image:
+    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    if a.rm == "tekstur" and n_rm and n_rm.image:
         img = n_rm.image
         img.scale(a.tekstur // 2, a.tekstur // 2)
         n_rm.image = simpan_gambar(img, os.path.join(tmp, f"{a.nama}_rm.jpg"), "JPEG", a.kualitas_jpeg)
         n_rm.image.colorspace_settings.name = "Non-Color"
+    else:
+        # Tekstur Tripo tidak berguna (kulit lebih mengkilap dari kain, emas tidak metalik): nilai tetap.
+        for nama_soket in ("Roughness", "Metallic"):
+            for l in list(bsdf.inputs[nama_soket].links):
+                mat.node_tree.links.remove(l)
+        bsdf.inputs["Roughness"].default_value = a.roughness
+        bsdf.inputs["Metallic"].default_value = a.metallic
+        if n_rm:
+            mat.node_tree.nodes.remove(n_rm)
+        n_rm = None
+        catat(f"metallic-roughness: nilai tetap roughness {a.roughness} metallic {a.metallic}")
 
     # material: buram, tanpa volume
     for atr, nilai in (("blend_method", "OPAQUE"), ("surface_render_method", "DITHERED")):
@@ -390,7 +419,6 @@ def main():
             setattr(mat, atr, nilai)
         except Exception:
             pass
-    bsdf = next(n for n in mat.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
     for nama_soket in ("Alpha",):
         s = bsdf.inputs[nama_soket]
         for l in list(s.links):

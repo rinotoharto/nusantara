@@ -31,8 +31,24 @@ diteruskan ke skrip sebagai argumen.
   tidak menghadap +Z; `--normal asal` memakai normal map Tripo tanpa bake;
   `--normal-dari <png>` memakai hasil bake sebelumnya (disimpan di folder
   sementara sistem, jalurnya dicetak skrip); `--ukuran-normal` dan
-  `--format-normal png|jpeg` (bawaan jpeg, karena PNG 2048 berukuran 4 MB).
+  `--format-normal png|jpeg` (bawaan jpeg, karena PNG 2048 berukuran 4 MB);
+  `--cage` dan `--jarak-sinar` sebagai pecahan tinggi model (bawaan 0,003 dan
+  0,01; lebih besar membuat sinar dari paha mengenai ujung kain sehingga
+  normal kain terproyeksi ke kulit); `--rm tekstur` mempertahankan tekstur
+  metallic-roughness Tripo, bawaan `tetap` dengan `--roughness 0.8
+  --metallic 0` karena tekstur Tripo membuat kulit lebih mengkilap daripada
+  kain dan emasnya tidak metalik.
   Bake pertama di Mac memakan sekitar 3 menit untuk kompilasi kernel Metal;
   bake berikutnya hanya beberapa detik.
+  Pratinjau: 5 sudut, termasuk `paha` dari depan bawah yang diperbesar ke
+  ujung kain.
+- `ekspor_mixamo.py` (Tahap C): dari GLB hasil optimasi ke FBX tanpa Draco
+  dengan tekstur tersemat, untuk diunggah ke Mixamo. Langkah manual Mixamo
+  ada di `aset-mentah/mixamo/LANGKAH.md`.
+
+  ```bash
+  /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/ekspor_mixamo.py -- --masuk public/models/wijaya.glb --keluar aset-mentah/mixamo/wijaya-untuk-mixamo.fbx
+  ```
+
 - `gabung_animasi.py` (Tahap D): gabungkan karakter berkulit Mixamo dan
   animasi FBX menjadi satu GLB beranimasi.
