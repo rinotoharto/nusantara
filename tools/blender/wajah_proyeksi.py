@@ -7,8 +7,8 @@ Proyeksi gambar konsep selaras ke ruang UV model (Tahap 2 perbaikan wajah, Blend
 
 Keluaran di folder --keluar:
   wajah-proyeksi.png   warna konsep yang diproyeksikan dari kamera wajah.json, di UV asli (sRGB)
-  wajah-data.png       data topeng, linear: R = normal . arah kamera (0..1), G = tinggi ternormalisasi
-                       (0 di z_bawah, 1 di z_atas, lihat wajah.json "topeng"), B = 1 di permukaan (cakupan)
+  wajah-data.png       data topeng, linear: R = normal . arah kamera (0..1), G = tinggi absolut dipetakan
+                       dari wajah.json "data_z" [z0, z1] meter ke 0..1, B = 1 di permukaan (cakupan)
 Mesh dan UV asli tidak diubah; UV kedua hanya hidup di sesi Blender ini.
 """
 import argparse
@@ -163,9 +163,11 @@ def main():
     nt.links.new(dot.outputs["Value"], jepit.inputs["Value"])
     pisah = nt.nodes.new("ShaderNodeSeparateXYZ")
     nt.links.new(geo.outputs["Position"], pisah.inputs["Vector"])
+    # G = tinggi absolut dipetakan ke rentang tetap data_z (m), supaya skrip lain bisa memakai z dalam meter.
+    data_z = data.setdefault("data_z", [1.2, 1.8])
     z_norm = nt.nodes.new("ShaderNodeMapRange")
-    z_norm.inputs["From Min"].default_value = topeng["z_bawah_m"]
-    z_norm.inputs["From Max"].default_value = topeng["z_atas_m"]
+    z_norm.inputs["From Min"].default_value = data_z[0]
+    z_norm.inputs["From Max"].default_value = data_z[1]
     z_norm.clamp = True
     nt.links.new(pisah.outputs["Z"], z_norm.inputs["Value"])
     gabung = nt.nodes.new("ShaderNodeCombineColor")

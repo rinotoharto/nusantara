@@ -105,7 +105,9 @@ def main():
     # 1. Topeng.
     sudut = np.degrees(np.arccos(np.clip(dot, 0, 1)))
     w_sudut = halus((topeng["sudut_nol_derajat"] - sudut) / (topeng["sudut_nol_derajat"] - topeng["sudut_penuh_derajat"]))
-    w_tinggi = halus(z_norm)
+    z0, z1 = data.get("data_z", [1.2, 1.8])
+    z_abs = z0 + z_norm * (z1 - z0)
+    w_tinggi = halus((z_abs - topeng["z_bawah_m"]) / (topeng["z_atas_m"] - topeng["z_bawah_m"]))
     kanal_min = proj.min(axis=2)
     w_latar = 1 - halus((kanal_min - gabung["latar_putih_min"]) / (gabung["latar_putih_maks"] - gabung["latar_putih_min"]))
     tercakup = cakupan > 0.5
@@ -123,13 +125,23 @@ def main():
     w = np.clip(w, 0, 1) * tercakup
     print(f"[gabung] piksel topeng > 0,5: {(w > 0.5).sum()}, > 0,05: {(w > 0.05).sum()}")
 
-    # 2. Penyesuaian warna di Lab, hanya piksel kulit.
+    # Rambut gelap di tekstur lama tidak boleh ditimpa latar terang konsep (sanggul).
+    hsv_lama = cv2.cvtColor(np.clip(lama, 0, 255).astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32) / 255
+    hsv_proj = cv2.cvtColor(np.clip(proj, 0, 255).astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32) / 255
+    rambut = (hsv_lama[:, :, 2] < gabung["rambut_v_maks"]) & (hsv_proj[:, :, 2] > gabung["latar_terang_v_min"])
+    w = w * (1 - cv2.GaussianBlur(rambut.astype(np.float32), (0, 0), 3))
+    w = np.clip(w, 0, 1)
+
+    # 2. Penyesuaian warna di Lab, hanya piksel kulit. Statistik diambil dari pita batas (w sedang),
+    # tempat kedua tekstur saling bertemu, supaya warnanya pas tepat di batas.
     kulit_proj = topeng_kulit(proj)
     kulit_lama = topeng_kulit(lama)
     lab_proj = cv2.cvtColor(np.clip(proj, 0, 255).astype(np.uint8), cv2.COLOR_BGR2LAB).astype(np.float32)
     lab_lama = cv2.cvtColor(np.clip(lama, 0, 255).astype(np.uint8), cv2.COLOR_BGR2LAB).astype(np.float32)
-    bobot_a = kulit_proj * (w > 0.5)
-    bobot_b = kulit_lama * (z_norm > 0.5) * (cakupan > 0.5)
+    pita = ((w > gabung["pita_w"][0]) & (w < gabung["pita_w"][1])).astype(np.float32)
+    pita_ada = (pita * kulit_proj * kulit_lama).sum() > 2000
+    bobot_a = kulit_proj * (pita if pita_ada else (w > 0.5))
+    bobot_b = kulit_lama * (pita if pita_ada else ((z_abs > topeng["z_atas_m"]) * (cakupan > 0.5)))
     rata_a, simpang_a = statistik_lab(lab_proj, bobot_a)
     rata_b, simpang_b = statistik_lab(lab_lama, bobot_b)
     lo, hi = gabung["batas_rasio_simpang"]
@@ -137,13 +149,25 @@ def main():
     lab_cocok = (lab_proj - rata_a) * rasio + rata_b
     kekuatan = kulit_proj[..., None]
     lab_hasil = lab_proj * (1 - kekuatan) + lab_cocok * kekuatan
+    # Koreksi lokal frekuensi rendah: selisih lama - proyeksi di pita batas (kulit di keduanya) diblur
+    # lebar di ruang UV, lalu ditambahkan paling kuat di pita dan melemah ke tengah wajah.
+    m = pita * kulit_proj * kulit_lama * (cakupan > 0.5)
+    sig_l = gabung["sigma_lokal_px"]
+    num = cv2.GaussianBlur((lab_lama - lab_hasil) * m[..., None], (0, 0), sig_l)
+    den = cv2.GaussianBlur(m, (0, 0), sig_l)[..., None]
+    selisih = np.where(den > 1e-4, num / np.maximum(den, 1e-4), 0.0)
+    k_pita = gabung["lokal_tengah"] + (1 - gabung["lokal_tengah"]) * (1 - halus((w - gabung["pita_w"][0]) / (1 - gabung["pita_w"][0])))
+    lab_hasil = lab_hasil + selisih * (k_pita * kulit_proj)[..., None]
+    data["gabung"]["warna"] = data["gabung"].get("warna", {})
+    data["gabung"]["warna"]["selisih_lokal_maks_L"] = round(float(np.abs(selisih[..., 0]).max()), 1)
     proj_cocok = cv2.cvtColor(np.clip(lab_hasil, 0, 255).astype(np.uint8), cv2.COLOR_LAB2BGR).astype(np.float32)
-    data["gabung"]["warna"] = {
+    data["gabung"]["warna"] = data["gabung"].get("warna", {})
+    data["gabung"]["warna"].update({
         "lab_konsep_rata": [round(float(v), 1) for v in rata_a], "lab_konsep_simpang": [round(float(v), 1) for v in simpang_a],
         "lab_lama_rata": [round(float(v), 1) for v in rata_b], "lab_lama_simpang": [round(float(v), 1) for v in simpang_b],
         "rasio_dipakai": [round(float(v), 2) for v in rasio],
         "catatan": "L 0..255, a dan b 128 = netral (skala OpenCV)",
-    }
+    })
     print(f"[gabung] Lab konsep {np.round(rata_a, 1)} +- {np.round(simpang_a, 1)}; lama {np.round(rata_b, 1)} +- {np.round(simpang_b, 1)}; rasio {np.round(rasio, 2)}")
 
     # 3. Detail halus dari tekstur lama.

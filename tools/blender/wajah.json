@@ -116,16 +116,16 @@
     277
   ],
   "topeng": {
-    "sudut_penuh_derajat": 35,
-    "sudut_nol_derajat": 65,
+    "sudut_penuh_derajat": 25,
+    "sudut_nol_derajat": 70,
     "z_atas_m": 1.44,
     "z_bawah_m": 1.39,
     "keterangan": "bobot proyeksi penuh kalau sudut normal ke kamera < sudut_penuh, nol di atas sudut_nol; dikali bobot tinggi: 1 di atas z_atas (leher atas), 0 di bawah z_bawah (tulang selangka)"
   },
   "gabung": {
-    "latar_putih_min": 215,
-    "latar_putih_maks": 245,
-    "halus_topeng_px": 5,
+    "latar_putih_min": 185,
+    "latar_putih_maks": 230,
+    "halus_topeng_px": 10,
     "kekuatan_detail": 0.5,
     "sigma_detail_px": 2.5,
     "batas_rasio_simpang": [
@@ -136,34 +136,47 @@
     "keterangan": "latar putih konsep (kanal minimum di atas ambang) dibuang dari topeng; detail = lama - blur(lama)",
     "warna": {
       "lab_konsep_rata": [
-        134.4,
-        146.9,
-        151.3
+        127.5,
+        146.6,
+        151.0
       ],
       "lab_konsep_simpang": [
-        34.2,
-        3.5,
-        4.7
+        33.1,
+        3.3,
+        5.2
       ],
       "lab_lama_rata": [
-        125.2,
+        130.3,
         145.9,
-        150.0
+        151.4
       ],
       "lab_lama_simpang": [
-        25.3,
-        3.1,
-        4.8
+        22.2,
+        2.9,
+        4.3
       ],
       "rasio_dipakai": [
-        0.74,
-        0.9,
-        1.03
+        0.7,
+        0.87,
+        0.82
       ],
-      "catatan": "L 0..255, a dan b 128 = netral (skala OpenCV)"
+      "catatan": "L 0..255, a dan b 128 = netral (skala OpenCV)",
+      "selisih_lokal_maks_L": 47.2
     },
-    "tutup_lubang_px": 25
+    "tutup_lubang_px": 25,
+    "rambut_v_maks": 0.3,
+    "latar_terang_v_min": 0.55,
+    "pita_w": [
+      0.1,
+      0.9
+    ],
+    "sigma_lokal_px": 40,
+    "lokal_tengah": 0.3
   },
+  "data_z": [
+    1.2,
+    1.8
+  ],
   "abu": {
     "abu_kroma_maks": 14,
     "abu_rona_biru": [
@@ -182,6 +195,14 @@
     ],
     "kain_v_maks": 0.25,
     "jarak_kain_emas_px": 6,
+    "abu_gelap_v_min": 0.06,
+    "gelap_kroma_maks": 20,
+    "rambut_kroma_maks": 12,
+    "wajah_z_min_m": 1.45,
+    "gelap_kulit_cincin_min": 0.6,
+    "gelap_luas_maks_px": 20000,
+    "cokelat_v_maks": 0.4,
+    "cokelat_luas_min_px": 1500,
     "cincin_px": 6,
     "kulit_cincin_min": 0.3,
     "kulit_cincin_abaikan": 0.12,
@@ -194,14 +215,16 @@
     "kekuatan_detail": 0.6,
     "keterangan": "piksel abu-abu (kroma Lab <= abu_kroma_maks) diisi otomatis kecuali dalam jarak_kain_emas_px dari kain/emas, atau komponennya punya cincin kulit < kulit_cincin_min, atau (kalau isi_tepi false) menyentuh tepi pulau; sisanya ke topeng tangan",
     "hasil": {
-      "otomatis_px": 127106,
-      "tangan_px": 16900,
+      "otomatis_px": 254234,
+      "tangan_px": 15420,
       "komponen": {
-        "kecil": 54,
-        "otomatis": 361,
+        "kecil": 28,
+        "otomatis": 353,
         "tepi": 0,
         "bukan_kulit": 14,
-        "diabaikan": 8
+        "diabaikan": 6,
+        "gelap": 45,
+        "gelap_dilewati": 1429
       }
     }
   }

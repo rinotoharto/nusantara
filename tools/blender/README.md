@@ -98,12 +98,17 @@ butuh unduhan model terpisah.
   /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/wajah_proyeksi.py -- --masuk public/models/wijaya.glb --json tools/blender/wajah.json --konsep aset-mentah/tekstur/wajah-konsep-selaras.png --keluar aset-mentah/tekstur
   ```
 
-- `wajah_gabung.py` (Tahap 2, venv): topeng = sudut (penuh di bawah 35
-  derajat, nol di 65) x tinggi x bukan latar putih konsep; diperluas ke luar
-  pulau UV sebelum closing dan blur supaya tidak muncul garis jahitan (itu
+- `wajah_gabung.py` (Tahap 2, venv): topeng = sudut (penuh di bawah 25
+  derajat, nol di 70) x tinggi (1,39 sampai 1,44 m; lebih rendah berarti
+  menempelkan bayangan dagu dari konsep ke leher) x bukan latar putih konsep
+  x bukan rambut gelap yang ditimpa latar terang; diperluas ke luar pulau UV
+  sebelum closing dan blur 10 px supaya tidak muncul garis jahitan (itu
   penyebab segitiga tekstur lama di alis pada percobaan pertama); warna kulit
-  konsep disamakan ke kulit lama di Lab; detail halus lama ditambahkan 0,5;
-  dilate 8 piksel. Angka di wajah.json blok `topeng` dan `gabung`. Keluaran
+  konsep disamakan ke kulit lama di Lab dengan statistik dari pita batas
+  (w 0,1 sampai 0,9), ditambah koreksi lokal frekuensi rendah (blur 40 px)
+  yang penuh di pita dan 0,3 di tengah wajah; detail halus lama 0,5; dilate
+  8 piksel. Kanal G `wajah-data.png` adalah tinggi absolut pada rentang
+  `data_z` (1,2 sampai 1,8 m). Angka di wajah.json blok `topeng` dan `gabung`. Keluaran
   `wijaya-basecolor-wajah.png`, `topeng-wajah.png`, dan pratinjau pulau
   `wajah-tekstur-sebelum-sesudah.png`.
 
@@ -120,7 +125,14 @@ butuh unduhan model terpisah.
 
 - `abu_isi.py` (Tahap 3, venv): bercak abu-abu. Deteksi per piksel di dalam
   pulau UV: kroma Lab rendah atau rona biru-kelabu bersaturasi rendah, di luar
-  daerah wajah Tahap 2. Komponen yang cincin sekelilingnya nyaris tanpa kulit
+  wajah Tahap 2 (topeng di atas 0,5 dan z di atas 1,45 m; leher tetap
+  dideteksi). Dua kelas gelap diproses per komponen dengan syarat ketat
+  (cincin kulit minimal 0,6, luas maksimal 20.000 px, di luar topeng wajah):
+  abu-abu gelap (kroma rendah, V di bawah 0,3) dan cokelat gelap (rona
+  kulit, V di bawah 0,4, luas minimal 1.500 px supaya puting dan pusar
+  dibiarkan), yaitu bayangan rambut yang terproyeksi Tripo di bahu. Warna
+  rambut sama dengan kedua kelas itu, jadi tanpa syarat cincin kulit sanggul
+  ikut terisi. Komponen yang cincin sekelilingnya nyaris tanpa kulit
   diabaikan (sorotan kain, mata); yang kulitnya sedikit masuk topeng tangan;
   sisanya diisi otomatis kecuali piksel dalam 6 piksel dari kain atau emas
   (ke topeng tangan). Isian: inpainting Telea per pulau dengan sumber hanya

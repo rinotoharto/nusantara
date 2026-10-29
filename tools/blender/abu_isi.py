@@ -47,11 +47,19 @@ def kelas_warna(bgr, abu):
     kroma = np.hypot(lab[:, :, 1] - 128, lab[:, :, 2] - 128)
     kulit = (h >= 0) & (h <= abu["kulit_rona_maks"]) & (s >= abu["kulit_sat_min"]) & (s <= 0.85) & (v >= 0.3)
     emas = (h >= abu["emas_rona"][0]) & (h <= abu["emas_rona"][1]) & (s >= 0.45) & (v >= 0.5) & ~kulit
-    kain = (v < abu["kain_v_maks"]) | (((h >= 160) | (h <= 6)) & (s > 0.5) & (v < 0.6))
+    # Kain: gelap tapi berwarna (cokelat), atau merah. Rambut: gelap dan nyaris tanpa warna.
+    gelap = v < abu["kain_v_maks"]
+    rambut = gelap & (kroma <= abu["rambut_kroma_maks"])
+    kain = (gelap & ~rambut) | (((h >= 160) | (h <= 6)) & (s > 0.5) & (v < 0.6))
     r0, r1 = abu["abu_rona_biru"]
     biru_kelabu = (h >= r0) & (h <= r1) & (s <= abu["abu_sat_biru_maks"])
-    kelabu = ((kroma <= abu["abu_kroma_maks"]) | biru_kelabu) & (v >= abu["abu_v_min"]) & (v <= abu["abu_v_maks"])
-    return kulit, emas, kain, kelabu
+    kelabu_terang = ((kroma <= abu["abu_kroma_maks"]) | biru_kelabu) & (v >= abu["abu_v_min"]) & (v <= abu["abu_v_maks"])
+    # Abu-abu gelap (bercak hitam di atas bahu): kroma rendah, gelap. Kelas terpisah dengan syarat ketat
+    # (komponen kecil, di bawah dagu, cincin separuh kulit) karena warnanya sama dengan rambut dan bayangan.
+    kelabu_gelap = (kroma <= abu["gelap_kroma_maks"]) & (v >= abu["abu_gelap_v_min"]) & (v < abu["abu_v_min"])
+    # Cokelat gelap (bayangan rambut terproyeksi di bahu): rona kulit tapi jauh lebih gelap dari kulit sekitar.
+    cokelat_gelap = (h <= abu["kulit_rona_maks"]) & (s >= 0.3) & (v >= abu["abu_gelap_v_min"]) & (v < abu["cokelat_v_maks"])
+    return kulit, emas, kain, kelabu_terang, rambut, kelabu_gelap, cokelat_gelap
 
 
 def main():
@@ -62,6 +70,9 @@ def main():
         "abu_v_min": 0.30, "abu_v_maks": 0.92, "lebar_topeng_px": 2,
         "kulit_rona_maks": 22, "kulit_sat_min": 0.25,
         "emas_rona": [18, 40], "kain_v_maks": 0.25, "jarak_kain_emas_px": 6,
+        "abu_gelap_v_min": 0.06, "gelap_kroma_maks": 20, "rambut_kroma_maks": 12, "wajah_z_min_m": 1.45,
+        "gelap_kulit_cincin_min": 0.6, "gelap_luas_maks_px": 20000,
+        "cokelat_v_maks": 0.40, "cokelat_luas_min_px": 1500,
         "cincin_px": 6, "kulit_cincin_min": 0.3, "kulit_cincin_abaikan": 0.12,
         "tepi_px": 2, "komponen_min_px": 12, "isi_tepi": True, "dilate_margin_px": 8,
         "inpaint_radius": 5, "sigma_detail_px": 2.0, "kekuatan_detail": 0.6,
@@ -75,10 +86,13 @@ def main():
     h, w = img.shape[:2]
     cakupan = d[:, :, 0] > 0.5   # persis; margin atlas Tripo berwarna biru-kelabu dan tidak boleh jadi sumber
 
-    kulit, emas, kain, kelabu = kelas_warna(img, abu)
+    kulit, emas, kain, kelabu, rambut, kelabu_gelap, cokelat_gelap = kelas_warna(img, abu)
     kelabu &= cakupan
+    z0, z1 = data.get("data_z", [1.2, 1.8])
+    z_abs = z0 + d[:, :, 1] * (z1 - z0)
     if a.topeng_wajah and os.path.exists(a.topeng_wajah):
-        wajah = cv2.imread(a.topeng_wajah, 0) > 128
+        # Hanya wajah di atas dagu (z absolut) yang dikecualikan; leher tetap masuk deteksi.
+        wajah = (cv2.imread(a.topeng_wajah, 0) > 128) & (z_abs > abu["wajah_z_min_m"])
         kelabu &= ~wajah
         print(f"[abu] daerah wajah Tahap 2 dikecualikan: {wajah.sum()} piksel")
     # Lebarkan sedikit supaya piksel peralihan setengah abu-abu ikut diganti, bukan jadi sumber.
@@ -94,7 +108,7 @@ def main():
     n, label, stat, _ = cv2.connectedComponentsWithStats(kelabu.astype(np.uint8), connectivity=8)
     otomatis = np.zeros((h, w), bool)
     tangan = np.zeros((h, w), bool)
-    alasan = {"kecil": 0, "otomatis": 0, "tepi": 0, "bukan_kulit": 0, "diabaikan": 0}
+    alasan = {"kecil": 0, "otomatis": 0, "tepi": 0, "bukan_kulit": 0, "diabaikan": 0, "gelap": 0, "gelap_dilewati": 0}
     piksel_dekat_kain_emas = 0
     inti_cincin = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * abu["cincin_px"] + 1,) * 2)
     for i in range(1, n):
@@ -127,6 +141,27 @@ def main():
             piksel_dekat_kain_emas += int(dekat.sum())
             tangan[y0:y1, x0:x1] |= dekat
             otomatis[y0:y1, x0:x1] |= komp & ~dekat
+    # Bercak gelap: komponen kecil di bawah dagu yang cincinnya separuh kulit (bukan rambut, bukan bayangan luas).
+    kg = (kelabu_gelap | cokelat_gelap) & cakupan & ~kelabu
+    if a.topeng_wajah and os.path.exists(a.topeng_wajah):
+        kg &= ~wajah
+    n_g, label_g, stat_g, _ = cv2.connectedComponentsWithStats(kg.astype(np.uint8), connectivity=8)
+    for i in range(1, n_g):
+        x, y, bw, bh, luas = stat_g[i]
+        komp_cokelat = cokelat_gelap[label_g == i].mean() > 0.5 if luas >= abu["komponen_min_px"] else False
+        luas_min = abu["cokelat_luas_min_px"] if komp_cokelat else abu["komponen_min_px"]   # puting dan pusar kecil, dibiarkan
+        if luas < luas_min or luas > abu["gelap_luas_maks_px"]:
+            alasan["gelap_dilewati"] += 1
+            continue
+        y0, y1 = max(y - abu["cincin_px"] - 1, 0), min(y + bh + abu["cincin_px"] + 1, h)
+        x0, x1 = max(x - abu["cincin_px"] - 1, 0), min(x + bw + abu["cincin_px"] + 1, w)
+        komp = label_g[y0:y1, x0:x1] == i
+        cincin = (cv2.dilate(komp.astype(np.uint8), inti_cincin) > 0) & ~komp & cakupan[y0:y1, x0:x1]
+        if cincin.sum() == 0 or kulit[y0:y1, x0:x1][cincin].mean() < abu["gelap_kulit_cincin_min"]:
+            alasan["gelap_dilewati"] += 1
+            continue
+        alasan["gelap"] += 1
+        otomatis[y0:y1, x0:x1] |= komp & ~dekat_kain_emas[y0:y1, x0:x1]
     print(f"[abu] piksel abu-abu di pulau: {kelabu.sum()}; komponen {n - 1}; {alasan}; "
           f"piksel dekat kain/emas ke tangan: {piksel_dekat_kain_emas}")
     print(f"[abu] piksel diisi otomatis: {otomatis.sum()}, untuk tangan: {tangan.sum()}")
@@ -145,7 +180,7 @@ def main():
     # Topeng isian diperluas ke piksel bukan-kulit (peralihan setengah kelabu) dalam radius cincin di
     # sekitar bercak, supaya sumber inpainting benar-benar kulit; kain dan emas tidak ikut.
     sekitar = cv2.dilate(otomatis.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=abu["cincin_px"]) > 0
-    isi_semua = otomatis | (sekitar & ~kulit & ~kain & ~emas & cakupan & ~tangan)
+    isi_semua = otomatis | (sekitar & ~kulit & ~rambut & ~kain & ~emas & cakupan & ~tangan)
     print(f"[abu] piksel isian termasuk peralihan: {isi_semua.sum()}")
 
     # Isi per pulau: sumber inpainting hanya piksel pulau yang sama.
@@ -173,7 +208,7 @@ def main():
     sig = abu["sigma_detail_px"]
     f = hasil.astype(np.float32)
     detail = f - cv2.GaussianBlur(f, (0, 0), sig)
-    kulit2, _, _, _ = kelas_warna(hasil, abu)
+    kulit2 = kelas_warna(hasil, abu)[0]
     otomatis = isi_semua
     sumber = kulit2 & ~otomatis
     tambah = np.zeros_like(f)
