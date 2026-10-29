@@ -486,3 +486,28 @@ Tujuan: mengisi kedua rute dengan kejadian (lawan baru, bahaya alam, keputusan) 
 - Buaya tidak masuk pengelola lawan: serangan pemain tidak mengenainya, kamera dan pengikut tidak menganggapnya pertarungan.
 - Tempat dangkal kedua dan belokan jalan lewat air ditambahkan karena tata letak sprint 6 tidak pernah menyeberangi air di rute sungai.
 - Obor diberikan lewat tanda Kudadu yang sudah ada karena dialog tidak boleh diubah.
+
+## Prolog dan Pages (29 Oktober 2026)
+
+Sesi pendek sebelum playtest: isi penulis dimasukkan, prolog dijadikan panel teks kasar, dan game dipasang ke GitHub Pages.
+
+### Yang jalan
+
+- Isi penulis masuk ke src/data: prolog (misi1.json), Kitab 26 entri, dialog ditulis ulang. Semua id Kitab yang dibuka dari prolog ada di codex.json; tidak ada peringatan `[data]`.
+- Prolog (src/mission/panels.ts): enam panel dari misi1.json di layar cokelat gelap, kotak gambar masih placeholder teks seperti `[relief: jawa-1289]` atau `[tinta: khan-agung]`, narasi diketik per huruf dengan kecepatan dialog (klik atau Spasi menyelesaikan, klik lagi lanjut), label sumber di kanan bawah memakai lencana fakta/interpretasi/legenda yang sama dengan Kitab. Entri Kitab dibuka saat panel tampil, pemberitahuannya baru muncul setelah prolog selesai. Tombol "Lewati prolog" muncul mulai panel ke-2 (Esc atau tombol B). Penutup "1292." tiga detik lalu langsung ke panel pembuka misi 3.
+- Layar judul: "Mulai baru" memutar prolog lalu misi 3; tombol "Prolog" memutar ulang lalu kembali ke judul tanpa menyentuh titik simpan; "Lanjutkan" tidak memutar prolog. `prologSelesai` tersimpan di status, tidak dihapus oleh ulang misi.
+- Playtest mencatat prolog: lama (detik nyata), dilewati atau tidak, dan di panel ke berapa.
+- GitHub Pages: repo publik `rinotoharto/nusantara`, workflow "Pasang ke GitHub Pages" (Node 22, `npm ci`, `npm run build`, unggah dist). Game terbuka dari https://rinotoharto.github.io/nusantara/?playtest=1 : layar judul, prolog, dan catatan playtest jalan tanpa error konsol.
+
+### Yang belum
+
+- Gambar relief dan tinta belum ada; kotak gambar hanya placeholder. Belum ada suara.
+- Gamepad di prolog baru diuji dengan tiruan `navigator.getGamepads`, belum dengan stik asli.
+- Percobaan pertama workflow gagal di `deploy-pages` karena Pages belum diaktifkan; setelah Source diatur ke "GitHub Actions" dan run dijalankan ulang, berhasil.
+
+### Keputusan yang diambil
+
+- Waktu prolog tidak dihitung ke `waktuMisi`, supaya target 4 sampai 6 menit per rute tetap mengukur misi saja.
+- Melewati prolog tetap menampilkan "1292." sebelum misi 3, supaya lompatan tahunnya tetap terbaca.
+- Memutar ulang prolog dari judul tidak mengubah status permainan selain membuka entri Kitab yang belum terbuka.
+- Pegangan dev `window.nusantara` hanya ada di mode dev, jadi di Pages pengujian lewat DOM dan localStorage.
