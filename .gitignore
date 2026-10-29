@@ -2,3 +2,11 @@ node_modules
 dist
 .DS_Store
 *.local
+
+# venv alat Python (deteksi wajah, OpenCV)
+tools/.venv
+
+# berkas antara perbaikan tekstur, dibuat ulang oleh skrip tools/blender
+aset-mentah/tekstur/wajah-data.png
+aset-mentah/tekstur/wajah-proyeksi.png
+aset-mentah/tekstur/topeng-abu.png

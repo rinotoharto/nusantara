@@ -21,6 +21,10 @@ Setiap berkas dicatat di sini: asal, tanggal, lisensi, dan masalah yang diketahu
 - Masalah yang diketahui: tekstur wajah meleleh; bercak abu-abu tanpa warna di
   tepi tangan, jari, kaki, bahu, dan leher. Belum diperbaiki (rencana: proyeksi
   dari gambar konsep di sesi berikutnya).
+- Pekerjaan nanti: tekstur metallic-roughness Tripo dibuang saat optimasi
+  (roughness tetap 0,8, metallic 0), sehingga gelang lengan dan kalung emas
+  ikut tidak metalik. Perlu topeng sederhana (dari warna emas di base color
+  atau pulau UV perhiasan) supaya perhiasan tetap berkilau logam.
 
 ### Lisensi (dicek 29 Oktober 2026)
 
@@ -42,7 +46,47 @@ Setiap berkas dicatat di sini: asal, tanggal, lisensi, dan masalah yang diketahu
   (CC BY 4.0), diubah" di layar kredit. Gambar konsep dari ChatGPT: syarat
   OpenAI memberikan hak hasil ke pengguna; tidak perlu atribusi.
 
+### Perbaikan wajah dan bercak tekstur (29 Oktober 2026)
+
+Hanya base color yang diubah; mesh, UV, normal map, dan ukuran tetap. Skrip di
+`tools/blender/` (wajah_render, wajah_acuan, wajah_proyeksi, wajah_gabung,
+abu_isi, tekstur_pasang), angka di `tools/blender/wajah.json`. Cadangan base
+color lama: `tekstur/wijaya-basecolor-sebelum.jpg`.
+
+- Wajah: diproyeksikan dari gambar konsep `docs/referensi/wijaya-konsep-01.png`
+  lewat kamera ortografis depan (ortho 0.306 m,
+  pusat z 1.581 m). Titik acuan mata, hidung, mulut,
+  dagu, dahi dari mediapipe; transformasi konsep ke model skala 4.4532,
+  putar 0.65 derajat, sisa rata sekitar 5 px pada bingkai
+  1024. Topeng: sudut normal ke kamera penuh di bawah 35
+  derajat dan nol di 65, tinggi penuh di atas
+  1.44 m dan nol di bawah 1.39 m, latar putih konsep
+  dibuang, lubang ditutup 25 px, blur 5 px.
+  Warna kulit konsep disamakan ke kulit lama di Lab (L 134.4
+  ke 125.2, rasio sebaran [0.74, 0.9, 1.03]), detail halus
+  lama 0.5, dilate 8 px. Hasil:
+  `tekstur/wijaya-basecolor-wajah.png`.
+- Bercak abu-abu: deteksi kroma Lab <= 14 atau rona
+  biru-kelabu [85, 135] dengan saturasi <= 0.4;
+  127106 piksel diisi otomatis (inpainting Telea per pulau
+  UV, radius 5, sumber hanya kulit pulau itu, detail
+  0.6), 16900 piksel dekat kain atau
+  emas dicadangkan di `tekstur/topeng-abu-tangan.png` untuk tangan (panduan
+  `tekstur/LANGKAH-texture-paint.md`). Keputusan: bercak di tepi pulau UV ikut
+  diisi (`isi_tepi`), karena hampir semua bercak ada di siluet dan sumber
+  inpainting sudah dibatasi ke pulau sendiri. Hasil:
+  `tekstur/wijaya-basecolor-abu.png`, dipasang ke `public/models/wijaya.glb`.
+- Masalah yang diketahui: dari samping, mulut dan hidung sedikit meregang
+  (proyeksi tunggal sampai 65 derajat); sisa pita abu-abu
+  tipis di batas kain dan gelang menunggu rapikan tangan.
+- Berkas antara yang tidak masuk git (dibuat ulang oleh skrip): `wajah-data.png`,
+  `wajah-proyeksi.png`, `topeng-abu.png`.
+
 ## Folder
 
-- `pratinjau/`: render pembanding sebelum dan sesudah optimasi (Tahap B).
+- `pratinjau/`: render pembanding sebelum dan sesudah optimasi (Tahap B),
+  `wajah-*.png` (penyelarasan dan hasil proyeksi wajah), `abu-*.png` (hasil
+  isi bercak).
+- `tekstur/`: base color cadangan, hasil tiap tahap, topeng, dan panduan
+  rapikan tangan.
 - `mixamo/`: FBX untuk diunggah ke Mixamo dan hasil unduhannya (Tahap C).
