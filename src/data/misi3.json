@@ -173,7 +173,7 @@
     }
   },
   "dunia": {
-    "keterangan": "Tata letak dunia 600 x 600 m (sumbu: +x timur, -z utara). Desa Kudadu di (0,0). Sungai lurus di timur lalu berbelok ke barat laut menuju muara; punggung bukit di utara dengan tebing curam di sisi selatannya (x dari curam.xMulai sampai curam.xSelesai), landai di dekat desa dan di celah dekat muara. Hutan: kotak [xMin, zMin, xMaks, zMaks] atau pita di satu sisi sungai. Jalan setapak: jalur tanah lebih terang. `sungai.dangkal`: daftar tempat dangkal (pita x selebar `lebar`, cekungan tinggal `sisa` kali).",
+    "keterangan": "Tata letak dunia 600 x 600 m (sumbu: +x timur, -z utara). Desa Kudadu di (0,0). Sungai lurus di timur lalu berbelok ke barat laut menuju muara; punggung bukit di utara dengan tebing curam di sisi selatannya (x dari curam.xMulai sampai curam.xSelesai), landai di dekat desa dan di celah dekat muara. Hutan: kotak [xMin, zMin, xMaks, zMaks] atau pita di satu sisi sungai. Jalan setapak: jalur tanah lebih terang. `sungai.dangkal`: daftar tempat dangkal (pita x selebar `lebar`, cekungan tinggal `sisa` kali). `sungai.redamGelombang`: seberapa jauh gelombang medan diredam di dalam alur sungai (1 = dasar sungai mengikuti parit sepenuhnya di tengah alur; perbaikan 1). `sungai.pitaMargin`: tambahan lebar bidang air di luar jalur air, supaya cekungan tepi yang di bawah permukaan ikut tertutup air.",
     "ukuran": 600,
     "lerengMaksDerajat": 42,
     "sungai": {
@@ -210,16 +210,18 @@
       "lebar": 14,
       "dalam": 2.6,
       "permukaanAir": -1.0,
+      "redamGelombang": 1.0,
+      "pitaMargin": 6,
       "dangkal": [
         {
           "x": 32,
           "lebar": 16,
-          "sisa": 0.3
+          "sisa": 0.55
         },
         {
           "x": -110,
           "lebar": 36,
-          "sisa": 0.42
+          "sisa": 0.4
         }
       ],
       "deras": {

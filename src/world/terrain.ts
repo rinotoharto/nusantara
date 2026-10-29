@@ -78,7 +78,7 @@ function faktorCuram(x: number): number {
 
 /** Tinggi tanah (meter) pada titik (x, z). */
 export function tinggiMedan(x: number, z: number): number {
-  // Gelombang lembut di seluruh medan, diratakan di sekitar desa.
+  // Gelombang lembut di seluruh medan, diratakan di sekitar desa dan di dalam alur sungai (lihat `redam` di bawah).
   const gelombang = Math.sin(x * 0.05) * Math.cos(z * 0.04) * 0.8 + Math.sin(x * 0.13 + z * 0.09) * 0.3;
   const jarakDesa = Math.hypot(x, z);
   const faktorDesa = smoothstep(25, 60, jarakDesa);
@@ -95,9 +95,10 @@ export function tinggiMedan(x: number, z: number): number {
   // Cekungan sungai berbentuk lonceng mengikuti jalur; di barat lebih lebar dan dalam.
   const ts = titikTerdekatJalur(JALUR_SUNGAI, x, z, sementaraSungai);
   const deras = faktorDeras(x);
-  const lebar = S.lebar + S.deras.lebarTambahan * deras;
+  const lebar = lebarSungaiDi(x);
   const sigma = lebar / 2.5;
-  let parit = Math.exp(-(ts.jarak * ts.jarak) / (2 * sigma * sigma)) * (S.dalam + S.deras.dalamTambahan * deras);
+  const bentukSungai = Math.exp(-(ts.jarak * ts.jarak) / (2 * sigma * sigma));
+  let parit = bentukSungai * (S.dalam + S.deras.dalamTambahan * deras);
   // Tempat dangkal penyeberangan: pita selebar `lebar` di sekitar `x`, cekungan tinggal `sisa` kali.
   for (const d of DANGKAL) {
     const faktor = 1 - smoothstep(0, 1, Math.abs(x - d.x) / (d.lebar / 2));
@@ -105,16 +106,29 @@ export function tinggiMedan(x: number, z: number): number {
   }
   // Teluk muara: cekungan bundar tambahan.
   const dm = Math.hypot(x - M.x, z - M.z);
-  parit += Math.exp(-(dm * dm) / (2 * M.sigma * M.sigma)) * M.dalam;
+  const bentukMuara = Math.exp(-(dm * dm) / (2 * M.sigma * M.sigma));
+  parit += bentukMuara * M.dalam;
+  // Di dalam alur sungai gelombang diredam supaya dasar mengikuti parit; tanpa ini gelombang (sampai
+  // ±1,1 m) mengangkat dasar tempat dangkal ke atas permukaan air (perbaikan 1).
+  const redam = 1 - S.redamGelombang * Math.max(bentukSungai, bentukMuara);
 
-  return bukit + gelombang * faktorDesa - parit;
+  return bukit + gelombang * faktorDesa * redam - parit;
+}
+
+/** Lebar alur sungai pada x: lebih lebar di bagian deras (barat). */
+export function lebarSungaiDi(x: number): number {
+  return S.lebar + S.deras.lebarTambahan * faktorDeras(x);
+}
+
+/** Setengah lebar jalur air (alur ditambah tepian 3 m) pada x; dipakai `diJalurAir` dan pita air. */
+export function setengahJalurAir(x: number): number {
+  return lebarSungaiDi(x) / 2 + 3;
 }
 
 /** Benar kalau (x, z) berada di jalur air (sungai atau teluk muara), untuk peta dan pewarnaan. */
 export function diJalurAir(x: number, z: number): boolean {
   const ts = titikTerdekatJalur(JALUR_SUNGAI, x, z, sementaraSungai);
-  const lebar = S.lebar + S.deras.lebarTambahan * faktorDeras(x);
-  return ts.jarak < lebar / 2 + 3 || Math.hypot(x - M.x, z - M.z) < M.sigma * 1.6;
+  return ts.jarak < setengahJalurAir(x) || Math.hypot(x - M.x, z - M.z) < M.sigma * 1.6;
 }
 
 /**
