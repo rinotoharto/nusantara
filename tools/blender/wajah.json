@@ -316,15 +316,15 @@
     "jarak_mata_m": 0.07,
     "segitiga_kepala": 3000,
     "serabut_muka_min": 200,
-    "halus_jahitan_iterasi": 8,
+    "halus_jahitan_iterasi": 0,
     "pack_margin": 0.004,
     "hasil": {
-      "skala": 0.3013,
+      "skala": 0.2631,
       "leher_badan_m": 0.12,
-      "leher_kepala_m": 0.138,
-      "segitiga_model": 17320,
-      "tinggi_m": 1.727,
-      "berkas_mb": 1.98
+      "leher_kepala_m": 0.127,
+      "segitiga_model": 17028,
+      "tinggi_m": 1.694,
+      "berkas_mb": 1.95
     },
     "voxel_m": 0.004,
     "smart_uv_sudut": 66.0,
@@ -334,13 +334,24 @@
     "kepala_skala_uv": 1.8,
     "kepala_lama_z_m": 1.5,
     "halus_rambut_iterasi": 12,
-    "halus_rambut_faktor": 0.5
+    "halus_rambut_faktor": 0.5,
+    "skala_mode": "tinggi",
+    "tinggi_kepala_rasio": 7.5,
+    "tinggi_badan_m": 1.7,
+    "leher_blend_m": 0.03,
+    "halus_jahitan_faktor": 0.2,
+    "las_jarak_m": 0.0,
+    "jahit_merge": false,
+    "selisih_potong_kepala_m": 0.007,
+    "jahit_mode": "selip",
+    "selip_m": 0.0015,
+    "selip_dalam_m": 0.012
   },
   "kulit": {
     "sasaran_lab_badan": [
-      128,
+      140,
       146,
-      154
+      156
     ],
     "rona_pusat": 10,
     "rona_lebar": 14,
@@ -354,38 +365,57 @@
     "keterangan": "Lab skala OpenCV (L 0..255, a/b 128 netral). Kulit badan digeser ke sasaran (rata-rata saja, sebaran tetap); kulit kepala disamakan rata-rata dan sebarannya ke badan.",
     "hasil": {
       "badan_sebelum": [
-        109.5,
+        109.6,
         144.2,
         149.1
       ],
       "badan_sesudah": [
-        126.7,
+        138.1,
         145.4,
-        154.6
+        156.4
       ],
       "kepala_sebelum": [
-        136.7,
-        145.4,
-        149.4
+        138.6,
+        145.5,
+        149.7
       ],
       "kepala_simpang": [
-        32.9,
+        33.4,
         3.0,
-        4.4
+        4.6
       ],
       "badan_simpang": [
-        32.4,
-        3.1,
-        5.4
+        33.5,
+        3.2,
+        5.5
       ],
       "rasio_kepala": [
-        0.99,
-        1.04,
-        1.22
+        1.0,
+        1.06,
+        1.21
       ]
     },
-    "pita_leher_m": 0.05,
-    "leher_v_min": 0.4,
-    "margin_px": 8
+    "pita_leher_m": 0.0,
+    "leher_v_min": 0.3,
+    "margin_px": 8,
+    "rahang_z_m": 0.04,
+    "rahang_nz_maks": -0.3,
+    "rahang_v_min": 0.45,
+    "leher_badan_z_m": 1.38,
+    "leher_badan_v_min": 0.35,
+    "leher_badan_tebal_m": 0.04,
+    "pita_dagu_m": 0.02,
+    "hasil_pita": {
+      "leher_badan": [
+        163.2,
+        146.0,
+        155.9
+      ],
+      "pita_kepala": [
+        157.9,
+        144.7,
+        160.4
+      ]
+    }
   }
 }

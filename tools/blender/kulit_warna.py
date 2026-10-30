@@ -62,7 +62,8 @@ def main():
     d16 = cv2.imread(os.path.join(t, "kepala-data.png"), cv2.IMREAD_UNCHANGED).astype(np.float32)
     d = d16 / (65535.0 if d16.max() > 255 else 255.0)
     kepala = d[:, :, 2] > 0.5   # R = indeks bahan
-    cakupan = d[:, :, 0] > 0.5
+    cakupan = d[:, :, 0] > 0.05  # B = 0,55 + 0,45 nz; texel kosong 0
+    nz = (d[:, :, 0] - 0.55) / 0.45
     # Pulau kepala di bake A berisi sampah; ambil dari B. Margin: dilate topeng kepala 4 px.
     kepala_m = cv2.dilate(kepala.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=6) > 0
     # Texel kepala yang sinar bake-nya meleset (hitam pekat) dan pita leher di bawah dagu (tekstur Tripo
@@ -76,8 +77,11 @@ def main():
     hsv0 = cv2.cvtColor(B, cv2.COLOR_BGR2HSV)
     # Lubang: sinar meleset (hitam), pita leher di atas potongan, dan texel gelap di bawah dagu (bayangan
     # dagu yang terbakar di tekstur Tripo; leher asli tidak sehitam itu).
-    gelap_leher = (z_abs < dagu - 0.005) & (hsv0[:, :, 2] < K.setdefault("leher_v_min", 0.4) * 255)
-    lubang = kepala_m & ((B.max(axis=2) < 6) | ((z_abs < zp + pita) & (z_abs > zp - 0.02)) | gelap_leher)
+    gelap_leher = (z_abs < dagu - 0.005) & (hsv0[:, :, 2] < K.setdefault("leher_v_min", 0.3) * 255)
+    # Sisi bawah rahang dan belakang telinga (menghadap bawah, gelap): tekstur Tripo di situ bayangan.
+    bawah_rahang = (z_abs < dagu + K.setdefault("rahang_z_m", 0.04)) & (nz < K.setdefault("rahang_nz_maks", -0.3)) \
+                   & (hsv0[:, :, 2] < K.setdefault("rahang_v_min", 0.45) * 255)
+    lubang = kepala_m & ((B.max(axis=2) < 6) | ((z_abs < zp + pita) & (z_abs > zp - 0.02)) | gelap_leher | bawah_rahang)
     if lubang.any():
         hsv = cv2.cvtColor(B, cv2.COLOR_BGR2HSV)
         gelap = (hsv[:, :, 2] < 90) & kepala_m & ~lubang
@@ -93,6 +97,12 @@ def main():
     print(f"[kulit] texel kepala diisi: {lubang.sum()} (rambut {int(lubang_rambut.sum()) if lubang.any() else 0})")
     if a.normal_kepala_rata:
         Bn[kepala_m] = (255, 128, 128)
+    # Leher badan lama (bayangan kepala lama di tekstur Tripo badan): texel badan di atas leher_badan_z_m
+    # yang gelap diisi dari kulit badan sekitarnya.
+    gelap_badan = cakupan & ~kepala_m & (z_abs > K.setdefault("leher_badan_z_m", 1.38)) & (cv2.cvtColor(A, cv2.COLOR_BGR2HSV)[:, :, 2] < K.setdefault("leher_badan_v_min", 0.5) * 255)
+    if gelap_badan.any():
+        A = cv2.inpaint(A, (gelap_badan | ~cakupan | kepala_m).astype(np.uint8) * 255, 7, cv2.INPAINT_TELEA)
+    print(f"[kulit] texel leher badan gelap diisi: {gelap_badan.sum()}")
     bc = np.where(kepala_m[..., None], B, A)
     nm = np.where(kepala_m[..., None], Bn, An)
     # Margin seragam: texel di luar cakupan diisi dari texel tercakup terdekat (8 px), menimpa margin bake
@@ -125,6 +135,19 @@ def main():
     rasio = np.clip(simpang_b2 / np.maximum(simpang_k, 1e-3), lo, hi)
     lab_k = (lab - rata_k) * rasio + rata_b2
     lab_baru = lab_baru * (1 - w_kepala[..., None]) + lab_k * w_kepala[..., None]
+    # Pita leher kepala (di bawah dagu sampai jahitan): rata-rata Lab disamakan ke leher badan tepat di
+    # bawah jahitan, memudar ke atas sepanjang pita_dagu_m, supaya tidak ada pita pucat di sambungan.
+    zp = data["kepala"]["z_potong_m"]
+    dagu = data["kepala"]["dagu_z_m"]
+    w_leher_badan = kulit * (~kepala_m) * cakupan * (z_abs > zp - K.setdefault("leher_badan_tebal_m", 0.04)) * (z_abs <= zp)
+    w_pita = kulit * kepala_m * cakupan * (z_abs < dagu)
+    if w_leher_badan.sum() > 500 and w_pita.sum() > 500:
+        rata_lb, _ = statistik(lab_baru, w_leher_badan)
+        rata_pt, _ = statistik(lab_baru, w_pita)
+        pudar = halus((dagu + K.setdefault("pita_dagu_m", 0.02) - z_abs) / K["pita_dagu_m"]) * kulit * kepala_m * cakupan
+        lab_baru = lab_baru + (rata_lb - rata_pt) * pudar[..., None]
+        K["hasil_pita"] = {"leher_badan": [round(float(v), 1) for v in rata_lb], "pita_kepala": [round(float(v), 1) for v in rata_pt]}
+        print(f"[kulit] pita leher kepala {np.round(rata_pt, 1)} -> leher badan {np.round(rata_lb, 1)}")
     hasil = cv2.cvtColor(np.clip(lab_baru, 0, 255).astype(np.uint8), cv2.COLOR_LAB2BGR)
     K["hasil"] = {
         "badan_sebelum": [round(float(v), 1) for v in rata_b], "badan_sesudah": [round(float(v), 1) for v in rata_b2],

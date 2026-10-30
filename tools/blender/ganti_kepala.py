@@ -179,6 +179,10 @@ def main():
     K.setdefault("dagu_z_m", None)          # diisi dari acuan model kalau None
     K.setdefault("jarak_mata_m", None)
     K.setdefault("segitiga_kepala", 3000)
+    K.setdefault("skala_mode", "tinggi")     # "tinggi": dagu ke puncak rambut = tinggi badan / tinggi_kepala_rasio; "mata": jarak mata konsep
+    K.setdefault("tinggi_kepala_rasio", 7.5)
+    K.setdefault("tinggi_badan_m", 1.7)
+    K.setdefault("leher_blend_m", 0.03)      # pita di atas potongan tempat lingkar kepala dilebur ke lingkar badan
     K.setdefault("serabut_muka_min", 200)   # bagian lepas dengan muka lebih sedikit dari ini dibuang
     K.setdefault("voxel_m", 0.004)           # ukuran voxel remesh kepala (serabut lebih tipis dari ini hilang)
     K.setdefault("smart_uv_sudut", 66.0)
@@ -186,7 +190,7 @@ def main():
     K.setdefault("halus_rambut_faktor", 0.5)
     K.setdefault("bake_cage_m", 0.008)
     K.setdefault("bake_sinar_m", 0.06)
-    K.setdefault("halus_jahitan_iterasi", 8)
+    K.setdefault("halus_jahitan_iterasi", 3)
     K.setdefault("pack_margin", 0.004)
     K.setdefault("leher_radius_m", 0.13)     # potongan badan dan pencarian lingkar leher dibatasi silinder ini
     K.setdefault("kepala_skala_uv", 1.8)     # bonus kepadatan texel kepala setelah disetarakan
@@ -220,7 +224,14 @@ def main():
 
     # 1. Skala dan posisi kepala.
     ac = K["acuan"]
-    skala = jarak_mata_sasaran / K["jarak_mata"]
+    if K["skala_mode"] == "tinggi":
+        co_k0 = koordinat(kepala)
+        tinggi_kepala_unit = float(co_k0[:, 2].max() - ac["dagu"][1])
+        skala = (K["tinggi_badan_m"] / K["tinggi_kepala_rasio"]) / tinggi_kepala_unit
+        catat(f"skala dari tinggi kepala: dagu ke puncak {tinggi_kepala_unit:.3f} unit -> {K['tinggi_badan_m'] / K['tinggi_kepala_rasio']:.3f} m; "
+              f"jarak mata jadi {K['jarak_mata'] * skala:.4f} m (konsep {jarak_mata_sasaran:.4f})")
+    else:
+        skala = jarak_mata_sasaran / K["jarak_mata"]
     kepala.scale = (skala, skala, skala)
     pilih_hanya(kepala)
     bpy.ops.object.transform_apply(scale=True)
@@ -242,6 +253,46 @@ def main():
     lebar_b, lebar_k = cincin_b[:, 0].ptp() if hasattr(cincin_b[:, 0], "ptp") else np.ptp(cincin_b[:, 0]), np.ptp(cincin_k[:, 0])
     catat(f"skala kepala {skala:.4f}; leher badan lebar {lebar_b:.3f} m, leher kepala {lebar_k:.3f} m di z {zp}; "
           f"puncak kepala z {koordinat(kepala)[:, 2].max():.3f}")
+
+    # Lingkar leher kepala dilebur ke lingkar badan: tiap verteks kepala dalam pita leher_blend_m di atas zp
+    # digeser radial sehingga di zp jari-jarinya sama dengan badan pada sudut itu, memudar ke atas.
+    def jari_sudut(cincin):
+        ang = np.arctan2(cincin[:, 1] - pb[1], cincin[:, 0] - pb[0])
+        r = np.hypot(cincin[:, 0] - pb[0], cincin[:, 1] - pb[1])
+        urut = np.argsort(ang)
+        return ang[urut], r[urut]
+    ang_b, r_b = jari_sudut(cincin_b)
+    co_k = koordinat(kepala)
+    cincin_k2 = co_k[np.abs(co_k[:, 2] - zp) < 0.008]
+    ang_k, r_k = jari_sudut(cincin_k2)
+    def r_pada(ang_arr, r_arr, a_):
+        return np.interp(a_, np.concatenate([ang_arr - 2 * np.pi, ang_arr, ang_arr + 2 * np.pi]), np.concatenate([r_arr, r_arr, r_arr]))
+    bm = bmesh.new()
+    bm.from_mesh(kepala.data)
+    M, Mi = kepala.matrix_world, kepala.matrix_world.inverted()
+    band = K["leher_blend_m"]
+    n_geser = 0
+    for v in bm.verts:
+        w = M @ v.co
+        if w.z < zp - 0.005 or w.z > zp + band:
+            continue
+        a_ = math.atan2(w.y - pb[1], w.x - pb[0])
+        r = math.hypot(w.x - pb[0], w.y - pb[1])
+        rb, rk = r_pada(ang_b, r_b, a_), r_pada(ang_k, r_k, a_)
+        if rk < 1e-6:
+            continue
+        t = max(0.0, min(1.0, (w.z - zp) / band))
+        t = t * t * (3 - 2 * t)
+        # mode selip: di bawah zp jari-jari kepala dibuat lebih kecil dari badan (terselip di dalam leher badan)
+        selip = K.setdefault("selip_m", 0.0025) if K.setdefault("jahit_mode", "selip") == "selip" else 0.0
+        f = ((rb - selip) / rk) * (1 - t) + 1.0 * t
+        baru = Vector((pb[0] + (w.x - pb[0]) * f, pb[1] + (w.y - pb[1]) * f, w.z))
+        v.co = Mi @ baru
+        n_geser += 1
+    bm.to_mesh(kepala.data)
+    bm.free()
+    kepala.data.update()
+    catat(f"lingkar leher kepala dilebur ke badan: {n_geser} verteks dalam {band} m")
     K["hasil"] = {"skala": round(float(skala), 4), "leher_badan_m": round(float(lebar_b), 3), "leher_kepala_m": round(float(lebar_k), 3)}
 
     # 2. Kepala tinggi disimpan utuh sebagai sumber bake; kepala kerja di-remesh voxel supaya serabut
@@ -266,7 +317,11 @@ def main():
     bm.free()
     badan.data.update()
     potong_bidang(badan, zp, buang_atas=True, pusat_xy=(float(pb[0]), float(pb[1])), radius=K["leher_radius_m"])
-    potong_bidang(kepala, zp, buang_atas=False)
+    if K["jahit_mode"] == "selip":
+        zk = zp - K.setdefault("selip_dalam_m", 0.012)   # leher kepala diteruskan ke dalam badan, tanpa jembatan
+    else:
+        zk = zp + K.setdefault("selisih_potong_kepala_m", 0.007)   # kepala dipotong sedikit lebih tinggi: pita jembatan pendek
+    potong_bidang(kepala, zk, buang_atas=False)
     co_b2 = koordinat(badan)
     catat(f"badan setelah potong: z maks {co_b2[:, 2].max():.3f} (bahu tetap), verteks di atas {zp}: {(co_b2[:, 2] > zp + 1e-4).sum()}")
     catat(f"setelah potong: badan {jumlah_segitiga(badan)}, kepala {jumlah_segitiga(kepala)} segitiga")
@@ -345,29 +400,48 @@ def main():
     tepi = [e for e in bm.edges if e.is_boundary]
     # hanya tepi di sekitar z_potong (lubang lain, mis. mata/mulut, dibiarkan)
     tepi = [e for e in tepi if all(abs(v.co.z - zp) < 0.02 and math.hypot(v.co.x - pb[0], v.co.y - pb[1]) < K["leher_radius_m"] for v in e.verts)]
+    n_atas = sum(1 for e in tepi if e.verts[0].co.z > zp + 0.003)
+    catat(f"tepi lingkar: badan {len(tepi) - n_atas}, kepala {n_atas}")
     catat(f"tepi lingkar leher: {len(tepi)}")
-    hasil = bmesh.ops.bridge_loops(bm, edges=tepi, use_pairs=False, use_cyclic=False, use_merge=False)
-    muka_jembatan = hasil.get("faces", [])
+    # Kedua lingkar sudah sama tinggi dan jari-jari (peleburan radial), jadi dilebur jadi satu jahitan
+    # (use_merge) tanpa muka jembatan; dengan use_merge=False jembatan segitiga sempit tampak bergerigi.
+    if K["jahit_mode"] == "selip":
+        muka_jembatan = []
+        catat("mode selip: tanpa jembatan, lingkar kepala terselip di dalam leher badan")
+    else:
+        hasil = bmesh.ops.bridge_loops(bm, edges=tepi, use_pairs=False, use_cyclic=False,
+                                       use_merge=K.setdefault("jahit_merge", False), merge_factor=0.5)
+        muka_jembatan = [f for f in hasil.get("faces", []) if f.is_valid]
     idx_kepala = [i for i, m in enumerate(model.data.materials) if m.name == nama_mat_kepala][0]
     for f in muka_jembatan:
         f.material_index = idx_kepala   # di-bake dari leher mesh tinggi bersama kepala
         f.smooth = True
         f.select = True
     # haluskan jahitan: verteks dekat bidang potong
-    verts_jahit = [v for v in bm.verts if abs(v.co.z - zp) < 0.025]
-    bmesh.ops.smooth_vert(bm, verts=verts_jahit, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
-    for _ in range(K["halus_jahitan_iterasi"] - 1):
-        bmesh.ops.smooth_vert(bm, verts=verts_jahit, factor=0.5, use_axis_x=True, use_axis_y=True, use_axis_z=True)
+    verts_jahit = [v for v in bm.verts if abs(v.co.z - zp) < 0.02 and math.hypot(v.co.x - pb[0], v.co.y - pb[1]) < K["leher_radius_m"]]
+    for _ in range(K["halus_jahitan_iterasi"] if K["jahit_mode"] != "selip" else 0):
+        bmesh.ops.smooth_vert(bm, verts=verts_jahit, factor=K.setdefault("halus_jahitan_faktor", 0.3), use_axis_x=True, use_axis_y=True, use_axis_z=True)
+    # Las: setelah lingkar dilebur, verteks kedua sisi yang berdekatan digabung supaya jembatan tidak
+    # tinggal sebagai pita segitiga sempit yang kusut.
+    if K.setdefault("las_jarak_m", 0.0) > 0:
+        verts_las = [v for v in bm.verts if abs(v.co.z - zp) < 0.012 and math.hypot(v.co.x - pb[0], v.co.y - pb[1]) < K["leher_radius_m"]]
+        n_sebelum = len(bm.verts)
+        bmesh.ops.remove_doubles(bm, verts=verts_las, dist=K["las_jarak_m"])
+        muka_jembatan = [f for f in muka_jembatan if f.is_valid]
+        catat(f"las jahitan: {n_sebelum - len(bm.verts)} verteks digabung")
     for f in bm.faces:
         if f not in muka_jembatan:
             f.select = False
     bmesh.ops.triangulate(bm, faces=muka_jembatan)
+    sisa_tepi = [e for e in bm.edges if e.is_boundary and abs(e.verts[0].co.z - zp) < 0.03 and math.hypot(e.verts[0].co.x - pb[0], e.verts[0].co.y - pb[1]) < K["leher_radius_m"]]
+    catat(f"tepi terbuka tersisa di leher: {len(sisa_tepi)}")
     bm.to_mesh(model.data)
     bm.free()
     model.data.update()
     # UV muka jembatan: Smart UV Project hanya pada muka terpilih (jembatan).
     bpy.ops.object.mode_set(mode="EDIT")
-    bpy.ops.uv.smart_project(angle_limit=math.radians(K["smart_uv_sudut"]), island_margin=0.01)
+    if muka_jembatan:
+        bpy.ops.uv.smart_project(angle_limit=math.radians(K["smart_uv_sudut"]), island_margin=0.01)
     bpy.ops.mesh.select_all(action="SELECT")
     bpy.ops.mesh.normals_make_consistent(inside=False)
     bpy.ops.object.mode_set(mode="OBJECT")
@@ -489,7 +563,8 @@ def main():
     simpan_png(img_b_n, path_b_n, non_color=True)
     catat("bake B (kepala dari mesh tinggi) selesai")
 
-    # Bake C: data. R = indeks bahan (0 badan, 1 kepala dan jembatan), G = tinggi absolut pada data_z, B = 1.
+    # Bake C: data. R = indeks bahan (0 badan, 1 kepala dan jembatan), G = tinggi absolut pada data_z,
+    # B = 0,55 + 0,45 * normal dunia z (menghadap bawah < 0,55; texel kosong = 0).
     z0, z1 = data.get("data_z", [1.2, 1.8])
     for mat in model.data.materials:
         idx = 1 if mat.name == nama_mat_kepala else 0
@@ -505,7 +580,14 @@ def main():
         gab = nt.nodes.new("ShaderNodeCombineColor")
         gab.inputs[0].default_value = float(idx)
         nt.links.new(zr.outputs["Result"], gab.inputs[1])
-        gab.inputs[2].default_value = 1.0
+        nz = nt.nodes.new("ShaderNodeSeparateXYZ")
+        nt.links.new(geo.outputs["Normal"], nz.inputs["Vector"])
+        nzm = nt.nodes.new("ShaderNodeMath")
+        nzm.operation = "MULTIPLY_ADD"
+        nzm.inputs[1].default_value = 0.45
+        nzm.inputs[2].default_value = 0.55
+        nt.links.new(nz.outputs["Z"], nzm.inputs[0])
+        nt.links.new(nzm.outputs["Value"], gab.inputs[2])
         nt.links.new(gab.outputs["Color"], emisi.inputs["Color"])
     img_d = bpy.data.images.new("bake_data", N, N, alpha=False, float_buffer=True)
     img_d.colorspace_settings.name = "Non-Color"

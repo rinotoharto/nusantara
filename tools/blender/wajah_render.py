@@ -30,7 +30,8 @@ def argumen():
     p.add_argument("--rata", action="store_true", help="tanpa pencahayaan terarah: emisi base color saja")
     p.add_argument("--netral", action="store_true", help="cahaya netral: tiga matahari lemah tanpa bayangan")
     p.add_argument("--sudut", choices=["depan", "tigaperempat", "samping", "badan", "badan-tigaperempat",
-                                       "badan-samping", "badan-belakang", "tangan", "kaki"], default="depan",
+                                       "badan-samping", "badan-belakang", "tangan", "kaki",
+                                       "leher-depan", "leher-samping", "leher-tigaperempat"], default="depan",
                    help="depan juga menyimpan kamera ke wajah.json; sudut lain hanya pratinjau")
     return p.parse_args(argv)
 
@@ -89,7 +90,8 @@ def main():
     jarak = tinggi * 2
     arah = {"depan": (0, -1, 0), "tigaperempat": (-0.7071, -0.7071, 0), "samping": (-1, 0, 0),
             "badan": (0, -1, 0), "badan-tigaperempat": (-0.7071, -0.7071, 0), "badan-samping": (1, 0, 0),
-            "badan-belakang": (0, 1, 0), "tangan": (0, -1, 0), "kaki": (0, -1, 0)}[a.sudut]
+            "badan-belakang": (0, 1, 0), "tangan": (0, -1, 0), "kaki": (0, -1, 0),
+            "leher-depan": (0, -1, 0), "leher-samping": (-1, 0, 0), "leher-tigaperempat": (-0.7071, -0.7071, 0)}[a.sudut]
     if a.sudut.startswith("badan"):
         pusat = Vector((0.0, 0.0, (z_min + z_max) / 2))
         kd.ortho_scale = tinggi * 1.15 * 1.5
@@ -103,6 +105,9 @@ def main():
     elif a.sudut == "kaki":
         pusat = Vector((0.0, 0.0, z_min + tinggi * 0.1))
         kd.ortho_scale = tinggi * 0.35
+    elif a.sudut.startswith("leher"):
+        pusat = Vector((0.0, 0.0, z_max - tinggi * 0.17))
+        kd.ortho_scale = tinggi * 0.2
     kam.location = pusat + Vector(arah) * jarak
     # Kamera mendatar: X 90 derajat membuat kamera memandang +Y; yaw dihitung dari arah pandang (dx, dy).
     dx, dy = -arah[0], -arah[1]

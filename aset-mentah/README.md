@@ -110,3 +110,18 @@ tidak berlaku lagi). Kulit badan dihangatkan ke Lab (127, 145, 155), kepala
 disamakan. Model 17.320 segitiga, GLB 2,12 MB. Sisa: garis tipis di batas pulau
 UV wajah dari dekat, coretan gelap di lubang hidung. Pengikatan kepala ke tulang
 Head dan Neck menunggu Tahap D.
+
+Putaran kedua (30 Oktober): kepala diperkecil ke 1/7,5 tinggi badan (22,7 cm),
+kulit badan dihangatkan ke Lab (138, 145, 156) lalu kepala disamakan, sambungan
+leher mode selip (lingkar kepala dilebur ke lingkar badan dan diteruskan 1,2 cm
+ke dalam badan, tanpa jembatan).
+
+Masalah leher yang DITUNDA untuk sesi berikutnya:
+- Pita tekstur janggut Tripo terbawa ke bawah dagu sampai jahitan (texel kepala
+  z 1,455 sampai 1,470); perlu diganti kulit polos leher, misalnya menimpa
+  texel kepala di bawah dagu dengan proyeksi warna leher badan.
+- Jahitan masih terlihat: undakan 1,5 mm (`selip_m`) dan perbedaan arah normal
+  antara kepala dan badan di z 1,455. Pilihan: selip lebih kecil plus normal
+  dihaluskan lintas jahitan, atau jahit sungguhan dengan lingkar yang jumlah
+  verteksnya disamakan dulu (bridge polos gagal: kerah bergerigi).
+- Dari samping ada garis gelap tipis di bawah rahang.

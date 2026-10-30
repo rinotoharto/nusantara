@@ -185,6 +185,18 @@ tools/.venv/bin/python tools/blender/kulit_warna.py --json tools/blender/wajah.j
 /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/tekstur_pasang.py -- --masuk /tmp/wijaya-kepala.glb --basecolor aset-mentah/tekstur/wijaya-basecolor-kepala.png --normal aset-mentah/tekstur/wijaya-normal-kepala.png --keluar public/models/wijaya.glb
 ```
 
+Putaran kedua (30 Oktober): skala kepala dari tinggi dagu ke puncak = tinggi badan
+/ 7,5 (22,7 cm; `skala_mode` "tinggi"), bukan dari jarak mata. Sambungan leher
+mode `selip`: lingkar leher kepala dilebur radial ke lingkar badan dalam pita
+3 cm (`leher_blend_m`) dan diteruskan 1,2 cm ke dalam badan dengan jari-jari
+1,5 mm lebih kecil, tanpa jembatan (bridge dua lingkar dengan jumlah verteks
+berbeda menghasilkan kerah bergerigi; merge menyisakan celah). Warna: sasaran
+badan Lab (140, 146, 156); pita leher kepala di bawah dagu disamakan ke leher
+badan tepat di bawah jahitan, memudar 2 cm ke atas; texel badan gelap di atas
+1,38 m (bayangan kepala lama) dan texel kepala gelap di bawah rahang (normal
+menghadap bawah) diisi dari kulit sekitar. Pratinjau tambahan
+`wajah_render.py --sudut leher-depan|leher-samping|leher-tigaperempat`.
+
 Catatan: `ganti_kepala.py` membaca badan dari GLB yang masih berkepala lama; GLB
 sebelum ganti kepala ada di git (commit 3857c46). Topeng tangan Tahap 3 tidak cocok
 lagi dengan atlas baru. Sisa yang diketahui: garis tipis di batas pulau UV wajah
