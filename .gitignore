@@ -10,3 +10,9 @@ tools/.venv
 aset-mentah/tekstur/wajah-data.png
 aset-mentah/tekstur/wajah-proyeksi.png
 aset-mentah/tekstur/topeng-abu.png
+
+# berkas antara ganti kepala, dibuat ulang oleh ganti_kepala.py dan kulit_warna.py
+aset-mentah/tekstur/kepala-A-*.png
+aset-mentah/tekstur/kepala-B-*.png
+aset-mentah/tekstur/kepala-data.png
+aset-mentah/tekstur/topeng-kulit.png

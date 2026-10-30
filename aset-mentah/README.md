@@ -90,3 +90,23 @@ color lama: `tekstur/wijaya-basecolor-sebelum.jpg`.
 - `tekstur/`: base color cadangan, hasil tiap tahap, topeng, dan panduan
   rapikan tangan.
 - `mixamo/`: FBX untuk diunggah ke Mixamo dan hasil unduhannya (Tahap C).
+
+## Masalah kepala (30 Oktober 2026)
+
+Bentuk kepala hasil Tripo salah: profil hampir rata, hidung tidak menonjol, dahi menjorok, proporsi kepala lebih pendek dari gambar konsep. Akibatnya proyeksi wajah meleset (mata ikut tercetak di dahi, mulut jatuh di bawah dagu). Ini masalah mesh, bukan tekstur; jangan utak-atik proyeksi lagi.
+
+Rencana setelah Tahap D terbukti di game: ganti kepala.
+1. Gambar kepala dekat (tampak depan, latar putih) dari gambar konsep yang sama → Tripo H2.5 → kepala-tripo.glb.
+2. Skrip Blender tools/blender/ganti_kepala.py: potong kepala lama di garis leher, pasang kepala baru dengan skala dan posisi disamakan (jarak mata, tinggi dagu), jahit verteks leher, pindahkan bobot rig ke tulang Head dan Neck, bake tekstur kepala baru ke UV yang sama, decimate kepala ke sekitar 3.000 segitiga.
+3. Ekspor ulang dan jalankan gabung animasi tanpa mengubah kerangka.
+
+Catatan urutan (30 Oktober): penggantian kepala dikerjakan sebelum Tahap D, paralel dengan unduhan Mixamo. Tidak perlu rig ulang di Mixamo: kepala baru diikat ke tulang Head dan Neck dari kerangka yang sudah ada; gabung_animasi.py memakai kerangka dari berkas animasi dan mesh dari public/models/wijaya.glb terbaru.
+
+Hasil (30 Oktober 2026): kepala diganti dengan `tools/blender/ganti_kepala.py` dan
+`kulit_warna.py` (alur dan angka di `tools/blender/README.md` dan `wajah.json`).
+Kepala 3.000 segitiga dari remesh voxel 4 mm, dipotong di leher 1,455 m dan
+dijembatani ke badan; atlas UV seluruh model ditata ulang (topeng tangan Tahap 3
+tidak berlaku lagi). Kulit badan dihangatkan ke Lab (127, 145, 155), kepala
+disamakan. Model 17.320 segitiga, GLB 2,12 MB. Sisa: garis tipis di batas pulau
+UV wajah dari dekat, coretan gelap di lubang hidung. Pengikatan kepala ke tulang
+Head dan Neck menunggu Tahap D.

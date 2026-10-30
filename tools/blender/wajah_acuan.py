@@ -180,4 +180,5 @@ def main():
     print("[acuan] tersimpan:", a.json, "dan", os.path.join(a.pratinjau, "wajah-tumpang.png"))
 
 
-main()
+if __name__ == "__main__":
+    main()

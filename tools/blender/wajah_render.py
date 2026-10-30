@@ -28,6 +28,7 @@ def argumen():
     p.add_argument("--bagian-kepala", type=float, default=0.16,
                    help="tinggi kepala sebagai pecahan tinggi model (untuk batas bawah bingkai, di leher)")
     p.add_argument("--rata", action="store_true", help="tanpa pencahayaan terarah: emisi base color saja")
+    p.add_argument("--netral", action="store_true", help="cahaya netral: tiga matahari lemah tanpa bayangan")
     p.add_argument("--sudut", choices=["depan", "tigaperempat", "samping", "badan", "badan-tigaperempat",
                                        "badan-samping", "badan-belakang", "tangan", "kaki"], default="depan",
                    help="depan juga menyimpan kamera ke wajah.json; sudut lain hanya pratinjau")
@@ -107,7 +108,15 @@ def main():
     dx, dy = -arah[0], -arah[1]
     kam.rotation_euler = (math.radians(90), 0.0, math.atan2(-dx, dy))
 
-    if not a.rata:
+    if a.netral:
+        for nama, en, rot in (("Depan", 1.4, (80, 0, 0)), ("Kiri", 1.0, (70, 0, -60)), ("Kanan", 1.0, (70, 0, 60))):
+            l = bpy.data.objects.new(nama, bpy.data.lights.new(nama, "SUN"))
+            l.data.energy = en
+            l.data.use_shadow = False
+            l.rotation_euler = tuple(np.radians(v) for v in rot)
+            scene.collection.objects.link(l)
+        scene.world.node_tree.nodes["Background"].inputs[1].default_value = 0.6
+    elif not a.rata:
         for nama, en, rot in (("Kunci", 2.0, (70, 0, -20)), ("Isi", 1.2, (75, 0, 25))):
             l = bpy.data.objects.new(nama, bpy.data.lights.new(nama, "SUN"))
             l.data.energy = en

@@ -22,6 +22,7 @@ def argumen():
     p.add_argument("--basecolor", required=True)
     p.add_argument("--keluar", required=True)
     p.add_argument("--kualitas-jpeg", type=int, default=85)
+    p.add_argument("--normal", default=None, help="normal map PNG baru (opsional)")
     return p.parse_args(argv)
 
 
@@ -59,6 +60,25 @@ def main():
     jpg.colorspace_settings.name = "sRGB"
     tex.image = jpg
     bpy.data.images.remove(lama)
+
+    if a.normal:
+        nmap = next(n for n in nt.nodes if n.type == "NORMAL_MAP")
+        tex_n = nmap.inputs["Color"].links[0].from_node
+        lama_n = tex_n.image
+        baru_n = bpy.data.images.load(os.path.join(akar, a.normal))
+        baru_n.colorspace_settings.name = "Non-Color"
+        baru_n.pixels[0]
+        baru_n.scale(baru_n.size[0], baru_n.size[1])
+        path_njpg = os.path.join(tmp, "wijaya_normal.jpg")
+        baru_n.file_format = "JPEG"
+        baru_n.filepath_raw = path_njpg
+        baru_n.save()
+        bpy.data.images.remove(baru_n)
+        njpg = bpy.data.images.load(path_njpg)
+        njpg.name = "wijaya_normal"
+        njpg.colorspace_settings.name = "Non-Color"
+        tex_n.image = njpg
+        bpy.data.images.remove(lama_n)
 
     keluar = os.path.join(akar, a.keluar)
     bpy.ops.object.select_all(action="DESELECT")

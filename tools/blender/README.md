@@ -151,3 +151,41 @@ butuh unduhan model terpisah.
 - Pratinjau: `wajah_render.py --sudut depan|tigaperempat|samping|badan|
   badan-tigaperempat|badan-samping|badan-belakang|tangan|kaki`; Tahap 2 ke
   `aset-mentah/pratinjau/wajah-<sudut>.png`, Tahap 3 ke `abu-<sudut>.png`.
+
+## Ganti kepala (30 Oktober 2026)
+
+Kepala Tripo lama (profil rata) diganti kepala Tripo baru `aset-mentah/kepala-tripo.glb`.
+Angka di `wajah.json` blok `kepala` dan `kulit`.
+
+1. `kepala_render.py` (Blender) lalu `kepala_acuan.py` (venv): render kepala baru dari
+   depan, titik mata dan dagu dengan mediapipe, disimpan di `kepala.acuan`.
+2. `ganti_kepala.py` (Blender): skala kepala dari jarak mata konsep di model (7,0 cm),
+   dagu di z 1,470 m, pusat leher disamakan ke badan. Salinan kepala tinggi jadi sumber
+   bake. Kepala kerja: remesh voxel 4 mm (serabut rambut menyatu), potong di
+   `z_potong_m` 1,455, bagian lepas kecil dibuang, daerah rambut (di atas mata atau di
+   belakang pusat kepala) dihaluskan, decimate ke 3.000 segitiga, Smart UV baru. Badan:
+   muka di atas 1,50 m dibuang, leher dipotong hanya di silinder radius 0,13 m (bahu
+   tidak teriris), lingkar leher dijembatani (bridge loops), jahitan dihaluskan. UV
+   seluruh model disalin, kepadatan disetarakan, kepala diberi bonus 1,8x, lalu pack
+   tanpa rotasi. Bake A (badan dari UV lama), bake B (kepala dan jembatan dari mesh
+   tinggi, selected to active, cage 8 mm, sinar 6 cm), bake C (data: indeks bahan,
+   tinggi).
+3. `kulit_warna.py` (venv): gabung A/B lewat C; texel kosong, pita leher 5 cm di atas
+   potongan, dan texel gelap di bawah dagu diisi dari tetangga sejenis (rambut dari
+   gelap, kulit dari terang); margin seragam 8 px. Warna: kulit badan digeser ke
+   `sasaran_lab_badan` (128, 146, 154), kulit kepala disamakan rata-rata dan sebarannya
+   ke badan; hanya piksel kulit.
+4. `tekstur_pasang.py --normal` memasang base color dan normal ke GLB.
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/kepala_render.py -- --masuk aset-mentah/kepala-tripo.glb --keluar aset-mentah/pratinjau/kepala-baru-depan.png --json tools/blender/wajah.json
+tools/.venv/bin/python tools/blender/kepala_acuan.py --json tools/blender/wajah.json --render aset-mentah/pratinjau/kepala-baru-depan.png
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/ganti_kepala.py -- --badan <GLB badan lama> --kepala aset-mentah/kepala-tripo.glb --json tools/blender/wajah.json --tekstur aset-mentah/tekstur --keluar /tmp/wijaya-kepala.glb
+tools/.venv/bin/python tools/blender/kulit_warna.py --json tools/blender/wajah.json --tekstur aset-mentah/tekstur --keluar-basecolor aset-mentah/tekstur/wijaya-basecolor-kepala.png --keluar-normal aset-mentah/tekstur/wijaya-normal-kepala.png
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/tekstur_pasang.py -- --masuk /tmp/wijaya-kepala.glb --basecolor aset-mentah/tekstur/wijaya-basecolor-kepala.png --normal aset-mentah/tekstur/wijaya-normal-kepala.png --keluar public/models/wijaya.glb
+```
+
+Catatan: `ganti_kepala.py` membaca badan dari GLB yang masih berkepala lama; GLB
+sebelum ganti kepala ada di git (commit 3857c46). Topeng tangan Tahap 3 tidak cocok
+lagi dengan atlas baru. Sisa yang diketahui: garis tipis di batas pulau UV wajah
+(hanya terlihat dari dekat), coretan gelap di lubang hidung dari tekstur Tripo.
