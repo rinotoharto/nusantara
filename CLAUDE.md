@@ -1,4 +1,4 @@
-# Nusantara: Rise of Majapahit (game sejarah berbasis web)
+# Nusantara: Rise of Madjapahit (game sejarah berbasis web)
 
 Game aksi-petualangan orang ketiga tentang Raden Wijaya (1292-1293), dibangun dengan Three.js + TypeScript + Vite, dirilis gratis sebagai aplikasi web statis.
 

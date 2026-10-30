@@ -1,4 +1,4 @@
-# Kredit Nusantara: Rise of Majapahit
+# Kredit Nusantara: Rise of Madjapahit
 
 Daftar kredit untuk layar kredit game (menu utama dan setelah epilog bab 1). Isi nama dan gelar sesuai persetujuan masing-masing.
 

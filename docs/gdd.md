@@ -1,4 +1,4 @@
-# Nusantara: Rise of Majapahit. GDD Bab 1, Raden Wijaya 1293
+# Nusantara: Rise of Madjapahit. GDD Bab 1, Raden Wijaya 1293
 
 Oct 27, 2026 · @rino
 
@@ -6,7 +6,11 @@ Oct 27, 2026 · @rino
 
 Game aksi-petualangan orang ketiga berbasis web, sekitar 90 menit permainan untuk bab pertama, mengikuti Raden Wijaya dari runtuhnya Singasari (1292) sampai berdirinya Majapahit (1293). Pemain memainkan Raden Wijaya sendiri, bukan tokoh fiktif, dan setiap misi berpijak pada peristiwa yang tercatat dalam sumber sejarah.
 
-Judul: seri **Nusantara**, jilid pertama **Nusantara: Rise of Majapahit** (judul Indonesia untuk pemasaran lokal: *Lahirnya Majapahit*). Jilid berikutnya mengikuti pola yang sama, misalnya *Nusantara: Sumpah Palapa*. Kata Nusantara sendiri berasal dari masa Majapahit (Sumpah Palapa, Nagarakretagama) dan menjadi entri ensiklopedia pertama yang dibuka pemain.
+Judul: seri **Nusantara**, jilid pertama **Nusantara: Rise of Madjapahit** (judul Indonesia untuk pemasaran lokal: *Lahirnya Majapahit*). Jilid berikutnya mengikuti pola yang sama, misalnya *Nusantara: Sumpah Palapa*. Kata Nusantara sendiri berasal dari masa Majapahit (Sumpah Palapa, Nagarakretagama) dan menjadi entri ensiklopedia pertama yang dibuka pemain.
+
+Ejaan judul: **Madjapahit** (ejaan lama) dipakai untuk judul dan identitas seri, misalnya *Nusantara: Rise of Madjapahit*. Di dalam game (dialog, Kitab, narasi) tetap dipakai ejaan baku **Majapahit** supaya sesuai buku pelajaran. TODO-KEPUTUSAN kalau ingin ejaan lama juga di dalam game.
+
+Nama seri cadangan (kalau "Nusantara" ternyata sudah dipakai atau terdaftar sebagai merek): **Babad** atau **Prasasti** (pilihan utama pengembang), lalu Dwipantara (kata Jawa Kuno untuk pulau-pulau di seberang, muncul di Prasasti Kudadu), Wangsa, Pusaka. Subjudul tetap mengikuti kerajaan per jilid: Rise of Madjapahit, Age of Singhasari, Glory of Pajajaran, dan seterusnya. Cek ketersediaan judul di Steam, itch.io, Google Play, App Store, dan pangkalan data merek DJKI sebelum rilis.
 
 Tujuan utama: pemain memahami rangkaian sebab-akibat 1292 sampai 1293 (pemberontakan Jayakatwang, pelarian ke Madura, pembukaan hutan Tarik, kedatangan Mongol, dan siasat Wijaya) dan tahu dari sumber mana pengetahuan itu berasal. Hiburan adalah alat, pemahaman sejarah adalah ukuran keberhasilan.
 
@@ -88,7 +92,7 @@ Aturan pilihan pemain: pilihan memengaruhi jalan menuju peristiwa (rute, nada di
 
 ## Rencana bab berikutnya
 
-Satu judul, *Nusantara: Rise of Majapahit*, berisi enam bab yang dirilis bertahap seperti episode, dari berdirinya Majapahit sampai puncaknya di masa Hayam Wuruk. Target satu judul lengkap adalah 9 sampai 12 jam; bab 1 sekitar 90 menit karena fungsinya membuktikan alur produksi, dan bab berikutnya bisa lebih panjang karena sistem, lingkungan, dan karakter sudah ada. Pemain lama melanjutkan dari simpanan bab sebelumnya; pemain baru bisa mulai dari bab mana pun dengan ringkasan relief.
+Satu judul, *Nusantara: Rise of Madjapahit*, berisi enam bab yang dirilis bertahap seperti episode, dari berdirinya Majapahit sampai puncaknya di masa Hayam Wuruk. Target satu judul lengkap adalah 9 sampai 12 jam; bab 1 sekitar 90 menit karena fungsinya membuktikan alur produksi, dan bab berikutnya bisa lebih panjang karena sistem, lingkungan, dan karakter sudah ada. Pemain lama melanjutkan dari simpanan bab sebelumnya; pemain baru bisa mulai dari bab mana pun dengan ringkasan relief.
 
 | Bab | Periode | Tokoh dimainkan | Inti cerita | Catatan |
 | --- | --- | --- | --- | --- |
