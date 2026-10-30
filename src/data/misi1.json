@@ -58,12 +58,13 @@
       "lapisan": 2,
       "gerak": "cahaya-obor",
       "durasi": 30,
-      "narasi": "Di deretan belakang berdiri Raden Wijaya, menantu raja, bersama putri-putri Kertanagara. Tidak ada catatan tentang apa yang mereka pikirkan hari itu. Tapi tiga tahun kemudian, keputusan raja di balairung ini akan menentukan hidup mereka berdua lebih daripada hidup siapa pun.",
+      "narasi": "Di deretan belakang berdiri Raden Wijaya, yang memimpin pasukan raja, bersama putri-putri Kertanagara: Tribhuwaneswari yang sulung, sampai Gayatri yang bungsu. Kertanagara tidak berputra; menantu-menantunya adalah masa depan wangsa ini. Tidak ada catatan tentang apa yang mereka pikirkan hari itu. Tapi tiga tahun kemudian, keputusan raja di balairung ini akan menentukan hidup mereka lebih daripada hidup siapa pun.",
       "label": "interpretasi",
       "sumber": "Kehadiran mereka dramatisasi; hubungan keluarga dari Prasasti Kudadu dan Nagarakretagama",
       "bukaKitab": [
         "raden-wijaya",
-        "gayatri"
+        "gayatri",
+        "tribhuwaneswari"
       ]
     },
     {

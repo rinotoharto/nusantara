@@ -31,7 +31,9 @@ Rangkaian peristiwa di bawah ini disusun dari ingatan saya atas sumber-sumber ut
 | 1289 | Kertanegara menghina utusan Kubilai Khan, Meng Qi (wajahnya dilukai), setelah menolak tunduk | Yuan Shi (sejarah resmi Dinasti Yuan) | Tinggi, sumber sezaman |
 | 1292 | Jayakatwang, bupati Gelang-Gelang, memberontak; pasukannya menyerang Singasari dari utara dan selatan | Pararaton, Nagarakretagama, Prasasti Kudadu | Tinggi untuk peristiwanya; detail taktik dari Pararaton |
 | 1292 | Raden Wijaya memimpin pasukan utara, menang, lalu mendapati ibu kota jatuh dan Kertanegara tewas | Pararaton, Prasasti Kudadu | Tinggi; Prasasti Kudadu adalah kesaksian Wijaya sendiri |
-| 1292 | Pelarian Wijaya bersama pengikut setia, dibantu kepala desa Kudadu, menyeberang ke Madura | Prasasti Kudadu (1294), Pararaton | Tinggi; jumlah pengikut dan kisah heroiknya dari Pararaton, lebih rendah |
+| 1292 | Wijaya dan Ardharaja (putra Jayakatwang, juga menantu Kertanagara) dikirim ke utara; bertempur di Kedung Peluk dan Kapulungan; di Rabut Carat Ardharaja membelot ke Daha, sisa pengikut sekitar 600 | Prasasti Kudadu | Tinggi; kesaksian Wijaya sendiri |
+| 1292 | Pelarian: Pamwatan Apajeg, gagal ke Terung (akuwu Wuru Agraja), Kembangsri dan penyeberangan sungai besar dengan banyak korban, Kudadu, Rembang, lalu ke Madura | Prasasti Kudadu | Tinggi |
+| 1292 | Versi Pararaton: Mameling (Jaran Guyang), Sawah Miring (Kebo Mundarang), Talaga Pager, Pandakan (Macan Kuping; Gajah Pagon dititipkan), Datar | Pararaton, Kidung Ranggalawe | Sedang; tradisi berbeda dari prasasti, game menggabungkan keduanya |
 | 1292 | Arya Wiraraja menampung Wijaya di Sumenep dan menyarankan berpura-pura tunduk kepada Jayakatwang | Pararaton; nama Wiraraja sebagai mantri tercatat di Prasasti Kudadu (1294) | Tokohnya tinggi (sezaman); perannya di Sumenep sedang, hanya dari Pararaton |
 | 1292 | Jayakatwang mengizinkan Wijaya membuka hutan Tarik; nama Majapahit lahir dari buah maja yang pahit | Pararaton | Peristiwa sedang; asal nama tergolong legenda |
 | Awal 1293 | Armada Mongol (Shi Bi, Ike Mese, Gao Xing; sekitar 20.000 prajurit) mendarat di pesisir Jawa Timur dekat Tuban | Yuan Shi | Tinggi; angka pasukan perlu dicek |
@@ -42,6 +44,7 @@ Rangkaian peristiwa di bawah ini disusun dari ingatan saya atas sumber-sumber ut
 
 Sumber yang wajib dibaca sebelum menulis naskah:
 
+- Masukan narasumber sejarah proyek (30 Oktober 2026), lihat docs/isi/narasumber-pelarian.md: rute lengkap menurut Prasasti Kudadu dan menurut Pararaton, beserta pertanyaan balik yang masih terbuka.
 - Prasasti Kudadu (1294): kesaksian langsung Wijaya tentang pelariannya. Sumber paling kuat untuk bab ini. Edisi: Brandes, Oud-Javaansche Oorkonden LXXXI; terjemahan Indonesia dalam Slametmuljana, Menuju Puncak Kemegahan. Alih aksara di Wikipedia Indonesia tampak mengikuti Brandes tapi terjemahannya tidak bisa diandalkan. Memuat nama Wiraraja sebagai mantri dan menyebut Wijaya sebagai menantu Kertanagara.
 - Yuan Shi, bagian tentang Jawa (Jawa/Zhao-wa) dan biografi Shi Bi serta Gao Xing: sudut pandang Mongol, lengkap dengan kronologi ekspedisi.
 - Nagarakretagama (Mpu Prapanca, 1365): sudut pandang resmi istana Majapahit, singkat untuk periode ini.
@@ -55,7 +58,7 @@ Sumber yang wajib dibaca sebelum menulis naskah:
 Bab ini terdiri dari tujuh misi berurutan dengan total sekitar 90 menit (prolog 3 menit, misi 2 sampai 7 masing-masing 10 sampai 18 menit), yang bersama-sama membentuk satu busur: kehilangan, bertahan, menyusun siasat, dan menang dengan kecerdikan, bukan kekuatan. Tema yang ditonjolkan: Wijaya mengalahkan dua musuh yang jauh lebih kuat dengan kesabaran dan sekutu.
 
 1. **Prolog: Utusan yang dihina (1289), sekitar 3 menit.** Adegan sinematik singkat di istana Singasari: Kertanegara menolak tunduk dan menghukum utusan Meng Qi. Pemain belum mengendalikan apa pun; adegan ini menanam benih konflik Mongol. Ditandai sebagai fakta bersumber (Yuan Shi).
-2. **Serangan dari utara (1292), 10 sampai 12 menit.** Pemain sebagai Wijaya memimpin pasukan menghadang pasukan Jayakatwang di utara. Tutorial pertarungan dan komando pasukan sederhana. Diakhiri kabar bahwa serangan utara hanyalah pengalih dan ibu kota telah jatuh.
+2. **Serangan dari utara (1292), 10 sampai 12 menit.** Pemain sebagai Wijaya, bersama Ardharaja, memimpin pasukan menghadang musuh yang sudah sampai Jasun Wungkal. Tutorial pertarungan dan komando pasukan di Kedung Peluk dan Kapulungan (rute Prasasti Kudadu). Kabar ibu kota jatuh dan Sang Prabu gugur datang di tengah jalan. Puncaknya Rabut Carat: musuh datang dari barat dan Ardharaja berbalik ke pihak ayahnya, meninggalkan Wijaya dengan sekitar enam ratus orang. Diakhiri pengejaran di Pamwatan dan penyeberangan maut di sungai besar di Kembangsri (panel relief), yang mengantar ke misi 3.
 3. **Malam pelarian, 15 sampai 18 menit.** Misi menyelinap dan bertahan: Wijaya dan belasan pengikut (Ranggalawe, Nambi, Lembu Sora, Gajah Pagon yang terluka) melarikan diri lewat desa-desa, dibantu kepala desa Kudadu. Pemain memilih rute dan membagi perbekalan; pilihan tidak mengubah hasil sejarah, hanya kondisi pengikut. Ensiklopedia membuka Prasasti Kudadu.
 4. **Sumenep, 10 sampai 12 menit.** Misi dialog dan penjelajahan di kediaman Arya Wiraraja. Pemain menyusun rencana berpura-pura tunduk kepada Jayakatwang. Di sini pemain belajar politik: tunduk sebagai siasat, bukan kekalahan.
 5. **Membuka hutan Tarik, 12 sampai 15 menit.** Misi membangun: pemain memimpin orang Madura membuka hutan, mendirikan permukiman, dan mengatur pertahanan. Buah maja pahit muncul sebagai anekdot dan ditandai sebagai legenda dari Pararaton. Di akhir misi, kabar armada asing mendarat di Tuban.
@@ -109,6 +112,7 @@ Semua tokoh utama adalah tokoh sejarah. Kolom "peran dalam game" menjelaskan fun
 | Raden Wijaya (Nararya Sanggramawijaya) | Menantu Kertanegara, pendiri Majapahit | Tokoh yang dimainkan; sabar, cerdik, pemimpin yang mengandalkan sekutu | Prasasti Kudadu memberi suaranya sendiri; penampilan fisik tidak diketahui |
 | Kertanegara | Raja terakhir Singasari | Hadir di prolog; ambisius, menantang Mongol | Nagarakretagama memujinya; Pararaton menggambarkannya lebih lemah; pilih sudut pandang dan tandai |
 | Jayakatwang | Bupati Gelang-Gelang (Kediri), keturunan raja Kediri | Antagonis bab 1; bukan penjahat kartun, ia menuntut takhta yang direbut Ken Arok dari leluhurnya | Motif balas dendam dinasti dari Pararaton; perlakukan sebagai interpretasi |
+| Ardharaja | Putra Jayakatwang, menantu Kertanagara | Sekutu yang berangkat bersama Wijaya di misi 2, lalu membelot di Rabut Carat; pengkhianatan pertama yang dialami pemain | Prasasti Kudadu; alasannya tidak dicatat |
 | Arya Wiraraja | Penguasa Sumenep, Madura | Mentor politik; penasihat siasat pura-pura tunduk | Pararaton; Nagarakretagama menyebut perannya secara singkat |
 | Ranggalawe | Putra Wiraraja | Pengikut paling berapi-api, kelak memberontak (bahan sekuel) | Pararaton dan Kidung Ranggalawe |
 | Nambi | Pengikut setia Wijaya, kelak patih | Taktikus tenang, pendamping di pelarian | Pararaton |
@@ -245,6 +249,7 @@ Bab 1 membutuhkan sekitar 60 aset. Kolom "cara" mengikuti alur kerja yang sudah 
 Urutan pembuatan: lingkungan dan bangunan dulu karena murah dan dipakai di semua misi, lalu satu karakter utama sampai tuntas termasuk animasi, baru karakter lain. Satu karakter yang selesai lebih berharga daripada sepuluh yang setengah jadi.
 
 - [ ] Cek lisensi setiap aset dan foto referensi dari museum sebelum dipakai.
+- [ ] Layar kredit (menu utama dan setelah epilog) dari docs/kredit.md, termasuk narasumber sebagai pemeriksa materi sejarah dan dialog.
 
 ## Teknologi dan arsitektur game web
 
@@ -281,7 +286,7 @@ Pembagian kerja: Claude Code untuk kode dan skrip Blender, Fable untuk naskah, d
 
 Pertanyaan terbuka yang perlu dijawab sebelum produksi:
 
-- [ ] Siapa sejarawan atau pengajar yang bisa diminta memeriksa naskah?
+- [x] Ada narasumber sejarah (masukan pertama 30 Oktober 2026); naskah dan Kitab diperiksa bertahap lewat dia.
 - [x] Diputuskan: dialog utama bahasa Indonesia dengan lapisan Jawa Kuno terukur (lihat bagian Bahasa).
 - [ ] Seberapa keras adegan kekerasan (perang, hukuman utusan) mengingat pemain pelajar?
 - [ ] Lisensi foto koleksi museum untuk referensi dan image-to-3D: perlu izin atau cukup foto sendiri?

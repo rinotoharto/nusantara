@@ -9,7 +9,7 @@
       "isi": [
         "Prasasti Kudadu, disebut juga Prasasti Gunung Butak, adalah lempengan tembaga berangka tahun 1216 Saka, bulan Bhadrapada, yang dikonversi para ahli menjadi 11 September 1294, setahun setelah Majapahit berdiri. Ditemukan di lereng Gunung Butak (letak persisnya diperdebatkan: Trawas, Mojokerto, atau perbatasan Blitar dan Malang). Inilah sumber tertua dan paling kuat untuk peristiwa 1292 sampai 1293, karena dibuat oleh pelakunya sendiri hanya dua tahun setelah kejadian.",
         "Isinya adalah perintah Raja Kertarajasa Jayawardhana, nama penobatan Raden Wijaya, yang menetapkan desa Kudadu sebagai sima: tanah bebas pajak yang hasilnya diperuntukkan bagi penduduknya. Anugerah itu diberikan karena pemimpin desa Kudadu telah menolong Wijaya ketika ia dikejar pasukan Jayakatwang setelah Singasari jatuh.",
-        "Di bagian pembukanya, Wijaya memakai gelar lengkap Kertarajasa Jayawardhana Anantawikramottunggadewa, menyebut dirinya keturunan Narasinghamurti dan menantu Kertanagara, serta mendaftar para pejabat tinggi kerajaan, termasuk Arya Wiraraja. Bagian sambadha, alasan anugerah, memenuhi lebih dari tiga lempeng: Wijaya diperintahkan Kertanagara menghalau musuh yang telah menyerbu sampai desa Jasun Wungkal; ia lalu terpaksa melarikan diri, terkepung, terus melawan sambil mundur dan selalu kalah karena banyaknya musuh; sampai akhirnya tiba di Kudadu, yang penduduknya masih setia kepada Kertanagara dan memberinya makan, minum, serta tempat bersembunyi, lalu mengantarnya ke Rembang untuk berlayar ke Madura. TODO-VERIFIKASI: teks asli bagian ini untuk kutipan, dari edisi Brandes (Oud-Javaansche Oorkonden LXXXI) atau terjemahan Slametmuljana.",
+        "Di bagian pembukanya, Wijaya memakai gelar lengkap Kertarajasa Jayawardhana Anantawikramottunggadewa, menyebut dirinya keturunan Narasinghamurti dan menantu Kertanagara, serta mendaftar para pejabat tinggi kerajaan, termasuk Arya Wiraraja. Bagian sambadha, alasan anugerah, memenuhi lebih dari tiga lempeng dan mencatat rute pelarian dengan rinci: berangkat dari Tumapel bersama Ardharaja karena musuh sudah di Jasun Wungkal; bertempur di Kedung Peluk; melewati Lembah dan Batang; bertempur lagi di Kapulungan; di Rabut Carat bertemu musuh dari barat, dan di sana Ardharaja membelot ke pihak Daha, meninggalkan Wijaya dengan sekitar enam ratus orang; dikejar dan kehilangan banyak prajurit di Pamwatan Apajeg; mencoba ke Terung untuk meminta bantuan akuwu Rakryan Wuru Agraja lewat Kulawan pada malam hari, tetapi bertemu musuh dan berbelok ke Kembangsri; di sana dikejar sampai menyeberangi sungai besar, dan banyak yang tenggelam atau tertusuk tombak; lalu tiba di Kudadu, yang kepala desanya memberi makan, minum, dan tempat bersembunyi, kemudian mengantarnya ke Rembang untuk menyeberang ke Madura.",
         "Karena dibuat untuk kepentingan raja yang baru naik takhta, prasasti ini tetap perlu dibaca dengan hati-hati: ia menonjolkan kesetiaan Wijaya kepada Kertanagara dan jasa para penolongnya, dan diam tentang hal yang tidak menguntungkan."
       ],
       "kutipan": {
@@ -19,12 +19,15 @@
       "sumber": [
         "Prasasti Kudadu (1216 Saka / 1294 M), Museum Nasional Jakarta",
         "J.L.A. Brandes, Oud-Javaansche Oorkonden, no. LXXXI (1913)",
-        "Slametmuljana, Menuju Puncak Kemegahan (1965), bab tentang Prasasti Kudadu"
+        "Slametmuljana, Menuju Puncak Kemegahan (1965), bab tentang Prasasti Kudadu",
+        "Rangkuman rute dari narasumber sejarah proyek (30 Oktober 2026)"
       ],
       "terkait": [
         "desa-kudadu",
         "jayakatwang",
-        "rakryan"
+        "rakryan",
+        "ardharaja",
+        "rute-pelarian"
       ],
       "dibukaOleh": "dialog:kudadu-tiba"
     },
@@ -59,9 +62,9 @@
       "label": "fakta",
       "ringkas": "Desa yang menyembunyikan dan memberi makan Raden Wijaya saat pelarian; dianugerahi status sima pada 1294.",
       "isi": [
-        "Kudadu adalah desa tempat Raden Wijaya dan sisa pengikutnya berlindung ketika dikejar pasukan Jayakatwang pada akhir 1292. Kepala desanya memberi mereka makan, menyembunyikan mereka, dan membantu perjalanan selanjutnya. Jasa itu dibalas dua tahun kemudian dengan Prasasti Kudadu, yang menjadikan desa ini sima, tanah bebas pajak kerajaan.",
+        "Kudadu adalah desa tempat Raden Wijaya dan sisa pengikutnya berlindung pada akhir 1292, setelah menyeberangi sungai besar di Kembangsri dengan kehilangan banyak orang. Kepala desanya, Rama Kudadu, memberi mereka makan dan minum, menyembunyikan mereka, lalu mengantar mereka ke Rembang untuk menyeberang ke Madura. Jasa itu dibalas dua tahun kemudian dengan Prasasti Kudadu, yang menjadikan desa ini sima, tanah bebas pajak kerajaan, untuk para pejabat desa dan keturunan mereka.",
         "Letak persis Kudadu tidak diketahui. Prasastinya ditemukan di lereng Gunung Butak dekat Trawas, Mojokerto, tetapi prasasti sima tidak selalu ditemukan di desa yang disebutnya. Para ahli umumnya menempatkan Kudadu di Jawa Timur antara bekas ibu kota Singasari dan pantai utara, di jalur pelarian Wijaya menuju Madura. TODO-VERIFIKASI: cek usulan lokasi dalam Slametmuljana atau penelitian arkeologi terbaru.",
-        "Nama kepala desa Kudadu tidak dicatat. Dalam game ini ia mewakili rakyat biasa yang pilihannya menentukan jalannya sejarah: menolong buronan berarti mempertaruhkan seluruh desa."
+        "Nama kepala desa Kudadu tidak pasti. Beberapa tulisan menyebutnya Macan Kuping, tetapi dalam Pararaton Macan Kuping adalah tetua desa Pandakan. Game ini mengikuti Pararaton dan membiarkan kepala desa Kudadu tanpa nama: ia mewakili rakyat biasa yang pilihannya menentukan jalannya sejarah."
       ],
       "kutipan": null,
       "sumber": [
@@ -70,7 +73,8 @@
       ],
       "terkait": [
         "prasasti-kudadu",
-        "jayakatwang"
+        "jayakatwang",
+        "rute-pelarian"
       ],
       "dibukaOleh": "area:desa-kudadu"
     },
@@ -132,7 +136,7 @@
       "label": "interpretasi",
       "ringkas": "Pengikut Wijaya yang terluka di paha saat pelarian dan, menurut Pararaton, ditinggalkan di desa Pandakan untuk dirawat.",
       "isi": [
-        "Gajah Pagon dikenal hanya dari Pararaton. Dalam pelarian dari Singasari, ia tertusuk tombak di paha dan tidak sanggup berjalan cepat. Wijaya menitipkannya kepada kepala desa Pandakan, yang bernama Macan Kuping, agar dirawat sampai sembuh.",
+        "Gajah Pagon dikenal dari Pararaton dan Kidung Ranggalawe. Dalam pelarian dari Singasari, pahanya tertusuk tombak sampai tembus dan ia tidak sanggup berjalan cepat. Wijaya menitipkannya kepada tetua desa Pandakan, Macan Kuping, yang menyembunyikannya di sebuah gubuk di tengah ladang sampai sembuh.",
         "Kisah ini tidak muncul dalam Prasasti Kudadu maupun Nagarakretagama, sehingga diberi label interpretasi: cerita dari sumber yang ditulis dua abad kemudian, mungkin berdasar tradisi lisan. Namun kisah ini menunjukkan hal yang masuk akal: rombongan Wijaya terus menyusut, dan tiap orang yang tertinggal adalah keputusan yang berat.",
         "Dalam game, pemain boleh membawanya terus. Itu pilihan pemain, bukan catatan sejarah; Pararaton mencatat ia ditinggal di Pandakan."
       ],
@@ -313,16 +317,19 @@
       "label": "interpretasi",
       "ringkas": "Desa tempat Gajah Pagon ditinggalkan menurut Pararaton; dalam game diletakkan di jalur sebelum Kudadu.",
       "isi": [
-        "Pandakan disebut Pararaton sebagai desa tempat Wijaya menitipkan Gajah Pagon yang terluka kepada kepala desanya, Macan Kuping. Lokasinya tidak diketahui dan nama itu tidak muncul di prasasti mana pun. Beberapa tulisan populer menyebut Macan Kuping sebagai kepala desa Kudadu; itu tampaknya pencampuran dua sumber, karena Prasasti Kudadu tidak menyebut nama kepala desanya (TODO-VERIFIKASI).",
-        "Dalam game, Pandakan dijadikan dukuh kecil di jalur menuju Kudadu supaya keputusan tentang Gajah Pagon bisa dimainkan di area yang sama. Urutan sebenarnya dalam Pararaton belum dipastikan (TODO-VERIFIKASI)."
+        "Menurut Pararaton dan Kidung Ranggalawe, setelah dipukul mundur ke Sawah Miring dan dikejar di Talaga Pager, Wijaya tiba di Pandakan. Tetua desanya, Macan Kuping, menolong rombongan itu, membuatkan gubuk di tengah ladang sebagai persembunyian, dan merawat Gajah Pagon yang pahanya tertembus tombak. Dari Pandakan rombongan menuju Datar untuk naik perahu ke Madura.",
+        "Pandakan tidak disebut Prasasti Kudadu, yang mencatat rute berbeda dan menyebut Kudadu sebagai desa penolong. Game ini menggabungkan kedua tradisi: Pandakan menjadi dukuh di jalur sebelum Kudadu. Itu penyederhanaan; lihat entri Rute pelarian."
       ],
       "kutipan": null,
       "sumber": [
-        "Pararaton (terjemahan Padmapuspita)"
+        "Pararaton (terjemahan Padmapuspita)",
+        "Kidung Ranggalawe",
+        "Rangkuman narasumber sejarah proyek (30 Oktober 2026)"
       ],
       "terkait": [
         "gajah-pagon",
-        "desa-kudadu"
+        "desa-kudadu",
+        "rute-pelarian"
       ],
       "dibukaOleh": "dialog:pandakan-pagon"
     },
@@ -515,7 +522,8 @@
       ],
       "terkait": [
         "kertanagara",
-        "raden-wijaya"
+        "raden-wijaya",
+        "tribhuwaneswari"
       ],
       "dibukaOleh": "panel:yang-menyaksikan"
     },
@@ -581,6 +589,80 @@
         "kubilai-khan"
       ],
       "dibukaOleh": "panel:perintah-khan"
+    },
+    {
+      "id": "ardharaja",
+      "judul": "Ardharaja",
+      "jenis": "tokoh",
+      "label": "fakta",
+      "ringkas": "Putra Jayakatwang dan menantu Kertanagara yang berangkat bersama Wijaya ke utara, lalu membelot ke Daha di Rabut Carat.",
+      "isi": [
+        "Ardharaja adalah putra Jayakatwang dan sekaligus menantu Kertanagara: ia menikahi salah satu putri raja Singasari, sama seperti Wijaya. Ketika musuh menyerbu sampai Jasun Wungkal, Kertanagara mengirim Wijaya dan Ardharaja bersama-sama ke utara untuk menghalaunya.",
+        "Menurut Prasasti Kudadu, di Rabut Carat, saat musuh datang dari barat, Ardharaja meninggalkan Wijaya dan bergabung dengan pasukan Daha, pasukan ayahnya sendiri. Wijaya tersisa dengan sekitar enam ratus orang. Pembelotan ini dicatat Wijaya sendiri, jadi berlabel fakta; alasan Ardharaja tidak dicatat.",
+        "Dalam game, Ardharaja adalah sahabat seperjuangan di misi 2 yang berbalik di saat paling genting. Ia memperlihatkan sisi lain perang 1292: perang keluarga, bukan hanya perang dua kerajaan."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Pararaton",
+        "Rangkuman narasumber sejarah proyek (30 Oktober 2026)"
+      ],
+      "terkait": [
+        "jayakatwang",
+        "raden-wijaya",
+        "rute-pelarian"
+      ],
+      "dibukaOleh": "panel:misi3-pembuka"
+    },
+    {
+      "id": "rute-pelarian",
+      "judul": "Rute pelarian Wijaya: dua tradisi",
+      "jenis": "peristiwa",
+      "label": "interpretasi",
+      "ringkas": "Prasasti Kudadu dan Pararaton mencatat rute pelarian yang berbeda; game ini menggabungkan keduanya.",
+      "isi": [
+        "Prasasti Kudadu (1294), kesaksian Wijaya sendiri: Tumapel, Kedung Peluk, Lembah dan Batang, Kapulungan, Rabut Carat (Ardharaja membelot), Pamwatan Apajeg, rencana ke Terung lewat Kulawan, Kembangsri dan penyeberangan sungai besar, Kudadu, lalu Rembang dan menyeberang ke Madura.",
+        "Pararaton dan Kidung Ranggalawe, ditulis jauh kemudian: Tumapel, Mameling (melawan Jaran Guyang), kembali ke Tumapel dan dipukul mundur ke Sawah Miring oleh Kebo Mundarang, Talaga Pager, Pandakan (ditolong Macan Kuping, Gajah Pagon dititipkan), lalu Datar dan menyeberang ke Madura.",
+        "Kedua tradisi sepakat pada garis besarnya: pasukan utara, kekalahan, pelarian dengan rombongan yang terus menyusut, pertolongan rakyat desa, dan penyeberangan ke Madura. Game ini memakai Pandakan dan Kudadu berurutan dalam satu malam. Itu penyederhanaan untuk permainan; prasasti adalah pegangan untuk fakta."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Prasasti Kudadu (1294)",
+        "Pararaton",
+        "Kidung Ranggalawe",
+        "Rangkuman narasumber sejarah proyek (30 Oktober 2026)"
+      ],
+      "terkait": [
+        "prasasti-kudadu",
+        "pararaton",
+        "pandakan",
+        "desa-kudadu",
+        "ardharaja"
+      ],
+      "dibukaOleh": "panel:misi3-pembuka"
+    },
+    {
+      "id": "tribhuwaneswari",
+      "judul": "Tribhuwaneswari",
+      "jenis": "tokoh",
+      "label": "interpretasi",
+      "ringkas": "Putri sulung Kertanagara dan permaisuri utama Wijaya setelah Majapahit berdiri.",
+      "isi": [
+        "Tribhuwaneswari adalah putri sulung Kertanagara. Setelah Majapahit berdiri, ia menjadi permaisuri utama Kertarajasa. Karena Kertanagara tidak berputra, menikahi putrinya adalah jalan Wijaya menjadi penerus sah wangsa Singasari.",
+        "Pararaton menyiratkan Wijaya sudah dijodohkan dengannya sebelum 1292; ini tafsir dari sumber yang lebih muda. Nagarakretagama menyebut keempat putri Kertanagara menjadi istri Wijaya: Tribhuwaneswari, Narendraduhita, Prajnaparamita, dan Gayatri."
+      ],
+      "kutipan": null,
+      "sumber": [
+        "Nagarakretagama",
+        "Pararaton",
+        "Rangkuman narasumber sejarah proyek (30 Oktober 2026)"
+      ],
+      "terkait": [
+        "gayatri",
+        "kertanagara",
+        "raden-wijaya"
+      ],
+      "dibukaOleh": "panel:yang-menyaksikan"
     }
   ]
 }

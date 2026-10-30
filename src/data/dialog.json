@@ -116,8 +116,12 @@
     "simpul": {
       "n1": {
         "tokoh": "nambi",
-        "teks": "Dua belas, Raden. Sudah kuhitung tiga kali, tetap dua belas. Dari lima ratus yang berangkat ke utara kemarin. Yang lain gugur, atau tercerai di hutan, atau... ya, pulang ke desanya. Aku tidak bisa menyalahkan.",
-        "lanjut": "n2"
+        "teks": "Dua belas, Raden. Sudah kuhitung tiga kali, tetap dua belas. Di Rabut Carat, waktu Ardharaja berbalik ke Daha, kita masih enam ratus. Lalu Pamwatan, lalu sungai semalam... Yang lain gugur, tenggelam, atau tercerai di hutan. Aku tidak bisa menyalahkan yang pulang.",
+        "lanjut": "n2",
+        "bukaKitab": [
+          "ardharaja",
+          "rute-pelarian"
+        ]
       },
       "n2": {
         "tokoh": "lawe",
