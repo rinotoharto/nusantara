@@ -147,6 +147,17 @@ export class PertarunganPemain {
     pemain.pose.add(this.keris);
   }
 
+  /** Pukulan ke berapa dalam kombo sekarang (0 sampai maksKombo - 1); dipakai model beranimasi. */
+  get komboSekarang(): number {
+    return this.kombo;
+  }
+
+  /** Lepaskan keris balok dari pose kapsul supaya bisa ditempel ke tulang tangan model (?model=wijaya). */
+  ambilKeris(): THREE.Group {
+    this.pemain.pose.remove(this.keris);
+    return this.keris;
+  }
+
   get mati(): boolean {
     return this.status === 'mati';
   }

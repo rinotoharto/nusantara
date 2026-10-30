@@ -109,6 +109,7 @@ export class Pemain {
       new THREE.MeshStandardMaterial({ color: 0xf2e2c0 }),
     );
     hidung.position.set(0, TINGGI_PEMAIN - 0.35, JARI_PEMAIN);
+    hidung.name = 'hidung';
     this.pose.add(hidung);
 
     // Obor di tangan kiri: batang pendek, nyala, dan lampu titik; tampil hanya saat menyala.

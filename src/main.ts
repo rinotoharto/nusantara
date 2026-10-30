@@ -7,6 +7,7 @@ import { KameraOrangKetiga } from './character/camera';
 import { Hud } from './ui/hud';
 import { HudPertarungan } from './ui/combat-hud';
 import { PertarunganPemain } from './combat/player-combat';
+import { ModelWijaya } from './character/model-wijaya';
 import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
 import { PengelolaSiluman } from './stealth/stealth-manager';
@@ -71,6 +72,9 @@ const pemain = new Pemain(dunia.tabrakan);
 scene.add(pemain.grup);
 
 const tarung = new PertarunganPemain(pemain);
+// Model Wijaya beranimasi hanya dengan ?model=wijaya; tanpa itu prototipe tetap kapsul.
+const modelWijaya = new URLSearchParams(window.location.search).get('model') === 'wijaya' ? new ModelWijaya(pemain, tarung) : null;
+modelWijaya?.muat(import.meta.env.BASE_URL).catch((e) => console.error('[model] gagal memuat wijaya.glb', e));
 
 const lawan = new PengelolaLawan();
 const siluman = new PengelolaSiluman(dunia, scene, lawan);
@@ -652,6 +656,7 @@ function perbaruiPermainan(dt: number): void {
 
   const perintah = tarung.perbarui(dt, input, kameraOrangKetiga.yaw);
   pemain.perbarui(dt, input, kameraOrangKetiga.yaw, perintah);
+  modelWijaya?.perbarui(dt);
   if (pemain.baruSelesaiMemanjat) pengikut.susulkanSetelahPanjat(pemain, camera);
   // Sergap: keris berbunyi pelan (radius kecil), dan penjaga lain yang melihat pelaksanaannya langsung mengejar.
   siluman.suaraTambahan = tarung.kerisSergapBerbunyi ? KONFIG.pemain.sergap.radiusSuara : 0;
@@ -739,6 +744,7 @@ renderer.setAnimationLoop(() => {
   if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
+  if (modelWijaya) modelWijaya.siaga = sisaWaktuTarung > 0;
   kameraOrangKetiga.mendekat = tarung.kameraMendekat;
   kameraOrangKetiga.merendah = tarung.kameraMerendah;
 

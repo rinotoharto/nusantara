@@ -586,3 +586,28 @@ Kedalaman terukur di browser setelah perubahan:
 - Sasaran Sergap dibunuh lewat `disergap()` tanpa `Serangan`, supaya kilatan, dorongan, dan angka damage tidak muncul.
 - Saksi dinilai sejak keris masuk, bukan sejak lesatan, supaya sasaran tidak sempat berteriak sebelum mati.
 - Perampok: dialog hadang dari belakang ditiadakan supaya "sergap sebelum dialog" mungkin; ini mengubah kejadian sprint 7 sedikit (pemain yang memutar lewat hutan bisa menghindari sapaan).
+
+## Aset 1: Wijaya (29 sampai 30 Oktober 2026)
+
+Tujuan: membuktikan alur aset dari Tripo ke game sebelum tahap aset resmi. Model hanya muncul dengan `?model=wijaya`; tanpa itu prototipe tetap kapsul.
+
+### Alur dan angka
+
+- Tripo H2.5 dari gambar konsep: 226.932 segitiga, 12,7 MB, tekstur 4096. Optimasi (`tools/blender/optimasi_karakter.py`): 14.998 segitiga, bake normal dari mesh tinggi, tekstur 2048 JPEG, Draco, 1,45 MB. Tekstur metallic-roughness dibuang (kulit lebih mengkilap dari kain), roughness tetap 0,8.
+- Wajah: diproyeksikan dari gambar konsep (mediapipe, UV Project, bake, OpenCV); bercak abu-abu diisi inpainting per pulau UV. Lalu kepala Tripo diganti kepala Tripo baru karena profil kepala lama rata: remesh voxel, 3.000 segitiga, atlas UV ditata ulang, kulit badan dihangatkan ke warna konsep. Model akhir 17.028 segitiga.
+- Animasi (`tools/blender/gabung_animasi.py`): kerangka Mixamo Standard 52 tulang dari idle.fbx, bobot dipindah ke mesh berkepala baru, kain 70 persen Hips, root dibuang, klip serangan dipotong di sekitar bingkai kontak (bingkai 9 dari 19), jongkok-diam dibuat dari jongkok-jalan karena berkas aslinya 27 cm lebih rendah, siaga dan serang-berat dipotong dari tarung. 14 aksi, GLB 2,93 MB.
+- Di game (`src/character/model-wijaya.ts`): GLTFLoader + DRACOLoader (decoder di `public/draco/`), mesh menggantikan kapsul, keris balok ditempel ke tulang tangan kanan, aksi dipilih dari status Pemain dan PertarunganPemain dengan crossfade 0,15 s; timeScale jalan, lari, jongkok-jalan mengikuti laju (1,4; 3,5; 1,0 m/s per klip), serang ringan 1,67 supaya kontak jatuh di 0,16 s.
+- Ukur di laptop pengembang (pane browser): muat 182 ms dari localhost, unduhan 2,93 MB plus decoder Draco 0,76 MB, fps 60 saat jalan dan serang.
+
+### Yang belum
+
+- Sambungan leher kepala baru belum rapi (pita tekstur janggut terbawa ke bawah dagu, jahitan terlihat); rincian di aset-mentah/README.md.
+- Kecepatan jalan 4 m/s jauh di atas langkah animasi (timeScale 2,9); catatan LANGKAH.md menyarankan jalan sekitar 2 m/s di data dan uji ulang keseimbangan menyelinap. Belum diubah.
+- Belum ada aksi lompat, panjat, dan sergap khusus (sergap dan tikaman memakai serang-3). Pengikut dan lawan masih kapsul.
+- Perhiasan emas belum metalik (tekstur metallic-roughness dibuang).
+- Belum diukur di laptop sekolah.
+
+### Keputusan
+
+- Kerangka dan posisi badan di bawah leher tidak berubah saat ganti kepala, sehingga rig Mixamo tetap sah tanpa rig ulang.
+- Semua pekerjaan Blender lewat skrip di `tools/blender/` dengan angka di `wajah.json`, supaya bisa diulang untuk karakter berikutnya.
