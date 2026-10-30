@@ -16,3 +16,6 @@ aset-mentah/tekstur/kepala-A-*.png
 aset-mentah/tekstur/kepala-B-*.png
 aset-mentah/tekstur/kepala-data.png
 aset-mentah/tekstur/topeng-kulit.png
+
+# cadangan otomatis Blender
+*.blend1

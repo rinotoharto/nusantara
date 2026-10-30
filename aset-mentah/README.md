@@ -125,3 +125,50 @@ Masalah leher yang DITUNDA untuk sesi berikutnya:
   dihaluskan lintas jahitan, atau jahit sungguhan dengan lingkar yang jumlah
   verteksnya disamakan dulu (bridge polos gagal: kerah bergerigi).
 - Dari samping ada garis gelap tipis di bawah rahang.
+
+## Keris (30 Oktober 2026)
+
+- Konsep: docs/referensi/keris-konsep-01.png (ChatGPT; bilah lurus pendek lebar ala keris Buda, pamor, ganja asimetris, hulu sosok jongkok, mendak kuningan). Label interpretasi; tunjukkan ke Yayat S. Soelaeman sebelum final.
+- Model: aset-mentah/keris-tripo.glb (Tripo H2.5). Ketebalan bilah bagus. Masalah: bercak putih kebiruan tanpa warna di sisi dan bawah hulu.
+- Rencana (bersama tahap "Rapikan Wijaya"): ringankan ke sekitar 2.000 segitiga, isi bercak hulu dengan warna kayu sekitar (pakai skrip bercak yang ada), titik pusat di genggaman, pasang ke tulang RightHand menggantikan keris balok, cek orientasi saat serang-1 sampai 3, tangkis, dan Tikaman Keris. Warangka dibuat terpisah (prompt sudah ada di chat; konsep belum dibuat) dan dipasang di pinggang kiri depan; keris disembunyikan dari warangka saat dicabut.
+
+## Prosedur tetap karakter (dari pengalaman Wijaya dan prajurit Kediri)
+
+Tripo dari gambar seluruh badan selalu menghasilkan wajah meleleh, bercak abu-abu di bagian yang tidak terlihat (tangan, pergelangan kaki, leher), dan kulit pucat. Jadi setiap karakter dibuat dari dua gambar:
+1. Seluruh badan, pose A, latar putih → Tripo H2.5 → `<nama>-tripo.glb` (dipakai untuk bentuk badan).
+2. Kepala dan leher dekat dari karakter yang sama (percakapan ChatGPT yang sama) → Tripo H2.5 → `<nama>-kepala-tripo.glb`.
+3. Skrip: optimasi_karakter.py, ganti_kepala.py, perbaikan bercak, kulit_warna.py, lalu Mixamo memakai animasi yang sudah ada.
+
+## Prajurit Kediri (30 Oktober 2026)
+
+- Konsep: docs/referensi/prajurit-kediri-konsep-01.png (ChatGPT; ikat kepala dan kain biru nila, sabuk cokelat pendek, kain bersilang bermotif).
+- Badan: aset-mentah/prajurit-tripo.glb (Tripo H2.5). Bentuk dan kain bagus; wajah meleleh, bercak abu-abu, kulit pucat.
+- Kepala: aset-mentah/prajurit-kepala-tripo.glb (menyusul).
+- Dipakai sebagai tubuh dasar semua prajurit dan pengikut; variasi warna ikat kepala dan kain lewat kode (Kediri biru nila, Singasari merah tua, Madura putih dan hitam). Badan agak berotot; kalau perlu diramping lewat skrip supaya Wijaya tetap menonjol.
+
+## Sambungan kepala: belum terbukti (catatan 30 Oktober 2026)
+
+Prosedur dua gambar baru terbukti separuh: kepala hasil Tripo bagus, sambungan ke badan masih berantakan (rahang dobel karena leher lama dan baru tumpang tindih, tekstur janggut terbawa ke bawah dagu, warna kulit beda, garis potong terlihat).
+
+Percobaan berikutnya (Wijaya dulu, baru prajurit):
+1. Potong kepala baru dan badan di ketinggian yang sama, tepat di pangkal leher, di garis tempat kalung (Wijaya) atau tali leher (prajurit) melingkar.
+2. Samakan jumlah verteks di kedua tepi potongan, lalu sambung tepi ke tepi (bmesh bridge edge loops), bukan menumpuk dua leher. Haluskan beberapa cincin di sekitar sambungan.
+3. Buang tekstur kepala di bawah dagu; pita peralihan warna kulit sekitar 3 cm di leher, warna disamakan di ruang Lab.
+4. Kalung atau tali leher menutup garis sambungan; pastikan kalung ikut bobot tulang Neck.
+5. Render dekat leher dari depan, samping, tiga perempat, dan bawah (sudut kamera dialog).
+
+Kalau masih gagal: (a) pengguna menyambung manual di Blender dengan panduan langkah demi langkah, atau (b) badan dan kepala utuh dari MakeHuman/MPFB2 (CC0) dengan wajah dari konsep diproyeksikan ke sana.
+
+## Leher Wijaya: hasil kerja manual di Blender (30 Oktober 2026)
+
+Berkas: aset-mentah/wijaya-leher-rapi.glb (ekspor) dan aset-mentah/wijaya-leher.blend (berkas kerja). Diperiksa: satu mesh "rendah", 16.540 segitiga, 12.673 verteks, tinggi 1,694 m, satu material (base color + normal), tanpa kerangka dan animasi, tanpa Draco (2,3 MB).
+
+Yang sudah dikerjakan pengguna: kepala dimundurkan 3,7 cm (tegak di atas leher), bawah kepala dipotong rata di z 1,48 m (serpihan janggut dibuang), leher badan dipotong lalu diekstrusi naik sekitar 3 cm masuk ke kepala dan diskalakan 0,92.
+
+Sisa masalah (untuk skrip rapikan_leher.py, ditunda sampai kuota pulih; pesan lengkap untuk Claude Code ada di chat Cowork 30 Oktober):
+1. Pita leher berbentuk tabung lurus, menonjol ke depan di bawah dagu; cincin atas harus mengikuti garis rahang dan dihaluskan.
+2. Bukaan bawah kepala masih terbuka (lubang gelap dari bawah). Fill Holes dan Merge by Distance 2 mm gagal dan merusak wajah; tutup hanya cincin batas di z sekitar 1,48 m.
+3. Tekstur pita bergaris tegak (UV terekstrusi); bake ulang dari kulit leher.
+4. Tepi bawah dagu bergerigi dari depan.
+5. Kalung emas tipis di pangkal leher untuk menutup sambungan.
+Lalu optimasi dan gabung_animasi dijalankan ulang dari berkas ini.

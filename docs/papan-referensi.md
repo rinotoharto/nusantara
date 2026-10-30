@@ -94,6 +94,9 @@ Keputusan desain: tiga tingkat, prajurit biasa (zirah kain tebal, helm sederhana
 | Berkas | Kelompok | Isi | Sumber | Lisensi | Boleh untuk |
 | --- | --- | --- | --- | --- | --- |
 | wijaya-konsep-01.png | 1 | Konsep Wijaya bab 1, pose A, tanpa keris, 1024 × 1536 | Dibuat sendiri dengan ChatGPT (gambar), 29 Okt 2026 | Milik sendiri (cek ketentuan OpenAI untuk gambar hasil) | Image-to-3D (sudah dipakai: Tripo H2.5 → aset-mentah/wijaya-tripo.glb), referensi tekstur wajah |
+| keris-konsep-01.png | 5 | Keris bilah lurus pendek lebar ala keris Buda, pamor, ganja asimetris, hulu sosok jongkok | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/keris-tripo.glb); interpretasi, perlu diperiksa Yayat S. Soelaeman |
+| prajurit-kediri-konsep-01.png | 2 | Prajurit Kediri pose A, ikat kepala dan kain biru nila bersilang, sabuk cokelat pendek | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D badan (Tripo H2.5 → aset-mentah/prajurit-tripo.glb, belum ada di repo) |
+| prajurit-kediri-kepala-01.png | 2 | Kepala dan leher prajurit Kediri, tampak depan | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D kepala (aset-mentah/prajurit-kepala-tripo.glb, belum ada di repo) |
 
 ## Pertanyaan yang dijawab papan ini sebelum aset dibuat
 
