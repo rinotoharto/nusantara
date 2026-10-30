@@ -417,5 +417,85 @@
         160.4
       ]
     }
+  },
+  "animasi": {
+    "kepala_z_m": 1.5,
+    "kain_hips": 0.7,
+    "kain_z_maks_m": 1.05,
+    "kain_z_min_m": 0.5,
+    "serang_sebelum": 8,
+    "serang_sesudah": 10,
+    "berat_sebelum": 12,
+    "berat_sesudah": 11,
+    "jongkok_diam_detik": 3.0,
+    "siaga_detik": 2.0,
+    "hasil": {
+      "jongkok_diam": {
+        "pinggul_asli": 0.538,
+        "pinggul_jalan": 0.807,
+        "kaki_asli": 0.815,
+        "kaki_jalan": 0.45,
+        "pakai_asli": false
+      },
+      "serang-1": {
+        "kontak_asli": 21,
+        "dipotong": [
+          13,
+          31
+        ],
+        "bingkai": 19,
+        "kontak_baru": 9
+      },
+      "serang-2": {
+        "kontak_asli": 27,
+        "dipotong": [
+          19,
+          37
+        ],
+        "bingkai": 19,
+        "kontak_baru": 9
+      },
+      "serang-3": {
+        "kontak_asli": 28,
+        "dipotong": [
+          20,
+          38
+        ],
+        "bingkai": 19,
+        "kontak_baru": 9
+      },
+      "siaga": {
+        "dari_tarung": [
+          164,
+          223
+        ],
+        "bingkai": 60
+      },
+      "serang-berat": {
+        "dari_tarung": [
+          75,
+          98
+        ],
+        "bingkai": 24,
+        "kontak_baru": 13
+      },
+      "aksi": {
+        "idle": 224,
+        "jalan": 36,
+        "lari": 24,
+        "jongkok-jalan": 37,
+        "tangkis": 18,
+        "hindar": 50,
+        "terkena": 39,
+        "mati": 124,
+        "serang-1": 19,
+        "serang-2": 19,
+        "serang-3": 19,
+        "jongkok-diam": 90,
+        "siaga": 60,
+        "serang-berat": 24
+      },
+      "berkas_mb": 2.93
+    }
   }
 }
