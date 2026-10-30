@@ -12,16 +12,19 @@ import type { PertarunganPemain, StatusAksi } from '../combat/player-combat';
  * jongkok-diam, serang-1..3, serang-berat, tangkis, hindar, terkena, mati.
  */
 
-/** Kecepatan langkah tiap klip (m/s) supaya kaki tidak meluncur: timeScale = laju / nilai ini. */
-const LAJU_KLIP = { jalan: 1.4, lari: 3.5, 'jongkok-jalan': 1.0 };
+/**
+ * Kecepatan langkah tiap klip (m/s), diukur dari laju kaki tumpu relatif pinggul pada FBX sumber
+ * (jalan 1,43; lari 4,01, cocok dengan root 4,16; jongkok-jalan 1,10). timeScale = laju / nilai ini.
+ */
+const LAJU_KLIP = { jalan: 1.43, lari: 4.01, 'jongkok-jalan': 1.1 };
 /** Pengali waktu klip aksi tetap: kontak serang ringan jatuh di 0,16 s (bingkai 9 dari 19 pada 30 fps). */
 const SKALA_WAKTU: Partial<Record<string, number>> = {
-  'serang-1': 1.67, 'serang-2': 1.67, 'serang-3': 1.67, 'serang-berat': 1.03,
+  'serang-1': 1.67, 'serang-2': 1.88, 'serang-3': 1.67, 'serang-berat': 1.03,
   hindar: 2.5, terkena: 2.0, mati: 1.0, tangkis: 1.0, idle: 1.0, siaga: 1.0, 'jongkok-diam': 1.0,
 };
 const SEKALI = new Set(['serang-1', 'serang-2', 'serang-3', 'serang-berat', 'hindar', 'terkena', 'mati']);
 const CROSSFADE = 0.15;
-const AMBANG_LARI = 5.5;
+const AMBANG_LARI = 4.5;
 
 export class ModelWijaya {
   readonly grup = new THREE.Group();

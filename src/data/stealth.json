@@ -31,7 +31,9 @@
     "lajuLari": 5.0,
     "faktorJarakJongkok": 0.5,
     "faktorJarakSemak": 0.5,
-    "kecepatanJongkok": 2,
+    "kecepatanJalan": 2,
+    "kecepatanLari": 7.5,
+    "kecepatanJongkok": 1.4,
     "skalaJongkok": 0.65
   },
   "semak": {

@@ -420,7 +420,7 @@
   },
   "animasi": {
     "kepala_z_m": 1.5,
-    "kain_hips": 0.7,
+    "kain_hips": 0.85,
     "kain_z_maks_m": 1.05,
     "kain_z_min_m": 0.5,
     "serang_sebelum": 8,
@@ -447,12 +447,12 @@
         "kontak_baru": 9
       },
       "serang-2": {
-        "kontak_asli": 27,
+        "kontak_asli": 18,
         "dipotong": [
-          19,
-          37
+          10,
+          25
         ],
-        "bingkai": 19,
+        "bingkai": 16,
         "kontak_baru": 9
       },
       "serang-3": {
@@ -489,13 +489,20 @@
         "terkena": 39,
         "mati": 124,
         "serang-1": 19,
-        "serang-2": 19,
+        "serang-2": 16,
         "serang-3": 19,
         "jongkok-diam": 90,
         "siaga": 60,
         "serang-berat": 24
       },
       "berkas_mb": 2.93
+    },
+    "kontak_manual": {
+      "serang-2": [
+        18,
+        8,
+        7
+      ]
     }
   }
 }

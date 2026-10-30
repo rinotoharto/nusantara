@@ -7,8 +7,10 @@ import { SILUMAN } from '../stealth/config';
 export const TINGGI_PEMAIN = 1.7;
 export const JARI_PEMAIN = 0.35;
 
-const KECEPATAN_JALAN = 4;
-const KECEPATAN_LARI = 7.5;
+// Kecepatan jalan dan lari dari data (stealth.json blok pemain). Jalan diturunkan dari 4 ke 2 m/s pada
+// penyetelan animasi 1 supaya sesuai langkah klip Mixamo; lari tetap 7,5.
+const KECEPATAN_JALAN = SILUMAN.pemain.kecepatanJalan;
+const KECEPATAN_LARI = SILUMAN.pemain.kecepatanLari;
 const PERCEPATAN = 30;
 const GRAVITASI = 22;
 const LOMPAT = 7; // tinggi lompat sekitar 1,1 m, tidak cukup untuk tebing 2 m

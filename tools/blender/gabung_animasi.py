@@ -141,7 +141,7 @@ def main():
     data = json.load(open(os.path.join(akar, a.json)))
     A = data.setdefault("animasi", {})
     A.setdefault("kepala_z_m", 1.50)
-    A.setdefault("kain_hips", 0.7)
+    A.setdefault("kain_hips", 0.85)
     A.setdefault("kain_z_maks_m", 1.05)
     A.setdefault("kain_z_min_m", 0.5)
     A.setdefault("serang_sebelum", 8)
@@ -344,6 +344,11 @@ def main():
         act = aksi[nama]
         f0, f1, laju = laju_tangan(arm, act)
         fc = f0 + int(np.argmax(laju))
+        manual = A.setdefault("kontak_manual", {}).get(nama)
+        if manual:
+            # kontak dipatok tangan: [bingkai kontak, sebelum, sesudah]; serang-2 otomatis memilih ayunan balik
+            # (bingkai 27) saat tangan kiri terbenam di punggung, tebasan sebenarnya di bingkai 16-19.
+            fc, sb, ss = manual
         a0, a1 = max(f0, fc - sb), min(f1, fc + ss)
         potong(act, a0, a1)
         ringkasan[nama] = {"kontak_asli": fc, "dipotong": [a0, a1], "bingkai": a1 - a0 + 1, "kontak_baru": fc - a0 + 1}
