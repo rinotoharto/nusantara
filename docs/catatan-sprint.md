@@ -611,3 +611,15 @@ Tujuan: membuktikan alur aset dari Tripo ke game sebelum tahap aset resmi. Model
 
 - Kerangka dan posisi badan di bawah leher tidak berubah saat ganti kepala, sehingga rig Mixamo tetap sah tanpa rig ulang.
 - Semua pekerjaan Blender lewat skrip di `tools/blender/` dengan angka di `wajah.json`, supaya bisa diulang untuk karakter berikutnya.
+
+## Rencana setelah 3 November 2026 (ditulis 30 Oktober, saat kuota habis)
+
+Keadaan: prototipe lengkap (prolog, misi 3 dua rute, kejadian, pemandu arah, mode playtest) dan terpasang di GitHub Pages. Model Wijaya 3D beranimasi aktif hanya lewat `?model=wijaya`; sambungan leher belum rapi (lihat aset-mentah/README.md).
+
+Urutan:
+1. Sprint 8, playtest dengan 3 sampai 5 orang memakai versi kapsul, docs/playtest-lembar.md, dan `?playtest=1`. Keputusan sesuai docs/prototipe.md bagian playtest.
+2. Rapikan Wijaya: sambungan leher (potong lebih bersih, hapus tekstur janggut yang terbawa ke bawah dagu), proporsi kepala dicek di game, gelang emas metalik, kaki meluncur kalau masih ada.
+3. Klip tambahan: siaga, sergap, serang-berat dari klip yang ada; ulti setelah desainnya masuk GDD.
+4. Kalau playtest lolos: tahap alur aset resmi (lingkungan desa dan sawah, prajurit Kediri pertama, keris sebagai benda terpisah). Kalau tidak lolos: kembali ke desain sebelum menyentuh aset lagi.
+
+Catatan repo: aset-mentah/ (sekitar 120 MB) ikut ter-commit; pertimbangkan Git LFS atau mengeluarkannya dari repo saat ada waktu.

@@ -93,7 +93,7 @@ Keputusan desain: tiga tingkat, prajurit biasa (zirah kain tebal, helm sederhana
 
 | Berkas | Kelompok | Isi | Sumber | Lisensi | Boleh untuk |
 | --- | --- | --- | --- | --- | --- |
-| | | | | | |
+| wijaya-konsep-01.png | 1 | Konsep Wijaya bab 1, pose A, tanpa keris, 1024 × 1536 | Dibuat sendiri dengan ChatGPT (gambar), 29 Okt 2026 | Milik sendiri (cek ketentuan OpenAI untuk gambar hasil) | Image-to-3D (sudah dipakai: Tripo H2.5 → aset-mentah/wijaya-tripo.glb), referensi tekstur wajah |
 
 ## Pertanyaan yang dijawab papan ini sebelum aset dibuat
 
