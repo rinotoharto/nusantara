@@ -97,6 +97,8 @@ Keputusan desain: tiga tingkat, prajurit biasa (zirah kain tebal, helm sederhana
 | keris-konsep-01.png | 5 | Keris bilah lurus pendek lebar ala keris Buda, pamor, ganja asimetris, hulu sosok jongkok | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/keris-tripo.glb); interpretasi, perlu diperiksa Yayat S. Soelaeman |
 | prajurit-kediri-konsep-01.png | 2 | Prajurit Kediri pose A, ikat kepala dan kain biru nila bersilang, sabuk cokelat pendek | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D badan (Tripo H2.5 → aset-mentah/prajurit-tripo.glb, belum ada di repo) |
 | prajurit-kediri-kepala-01.png | 2 | Kepala dan leher prajurit Kediri, tampak depan | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D kepala (aset-mentah/prajurit-kepala-tripo.glb, belum ada di repo) |
+| tombak-konsep-01.png | 5 | Tombak prajurit: gagang kayu gelap sekitar 2 m, mata tombak berbentuk daun dengan rusuk tengah, cincin kuningan, tutup besi | Dibuat sendiri dengan ChatGPT (gambar), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/tombak-tripo.glb); interpretasi |
+| keris-raja-konsep-01.png | 5 | Keris raja: hulu sosok jongkok bersanggul beraksen emas, mendak emas berbatu merah, bilah lurus asimetris, pamor rapat | Dibuat sendiri dengan ChatGPT (gambar, revisi ketiga), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/keris-raja-tripo.glb); interpretasi |
 
 ## Pertanyaan yang dijawab papan ini sebelum aset dibuat
 

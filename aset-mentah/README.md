@@ -172,3 +172,15 @@ Sisa masalah (untuk skrip rapikan_leher.py, ditunda sampai kuota pulih; pesan le
 4. Tepi bawah dagu bergerigi dari depan.
 5. Kalung emas tipis di pangkal leher untuk menutup sambungan.
 Lalu optimasi dan gabung_animasi dijalankan ulang dari berkas ini.
+
+## Tombak (1 November 2026)
+
+- Konsep: docs/referensi/tombak-konsep-01.png (ChatGPT; gagang kayu gelap sekitar 2 m, mata tombak berbentuk daun dengan rusuk tengah, cincin kuningan, tutup besi). Label interpretasi; tunjukkan ke Yayat S. Soelaeman bersama keris.
+- Model: aset-mentah/tombak-tripo.glb (Tripo H2.5). Dari samping bagus, gagang lurus.
+- Perbaikan lewat skrip (bersama pemasangan senjata): mata tombak bersirip empat (rusuk tengah ditafsirkan sebagai sirip atas-bawah); pipihkan verteks mata tombak ke ketebalan sekitar 25 persen pada sumbu tegak lurus bilah. Tutup besi bawah terlalu besar dan menggembung; kecilkan sekitar 30 persen. Ringankan ke sekitar 1.500 segitiga, panjang total 2 m, titik pusat di genggaman (sekitar sepertiga dari bawah). Ganti tombak balok prajurit dan penjaga, tempel ke tulang RightHand.
+
+## Keris raja (1 November 2026)
+
+- Konsep: docs/referensi/keris-raja-konsep-01.png (ChatGPT, revisi ketiga; hulu sosok jongkok bersanggul dengan aksen emas, mendak emas berbatu merah, bilah lurus asimetris dengan ganja ke satu sisi, greneng, gandik, pamor rapat). Untuk Kertanagara, Jayakatwang, dan Wijaya sebagai raja (epilog, bab 2 ke atas). Label interpretasi; tunjukkan ke Yayat S. Soelaeman.
+- Model: aset-mentah/keris-raja-tripo.glb (Tripo H2.5). Bentuk bagus dari samping.
+- Perbaikan tekstur lewat skrip: bercak putih keabu-abuan di sisi tak terlihat hulu; garis jingga (warna emas bocor) di tepi ujung bilah; merah dan emas mendak terlalu jenuh. Usulan: warnai ulang hulu per bagian (kayu cokelat gelap, aksen emas, metallic tinggi untuk emas), bersihkan tepi bilah dengan warna pamor sekitar, turunkan saturasi mendak dan beri metallic. Ringankan ke sekitar 2.500 segitiga.
