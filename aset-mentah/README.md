@@ -45,6 +45,7 @@ Setiap berkas dicatat di sini: asal, tanggal, lisensi, dan masalah yang diketahu
 - Konsekuensi untuk game ini: tulis "Model Raden Wijaya dibuat dengan Tripo
   (CC BY 4.0), diubah" di layar kredit. Gambar konsep dari ChatGPT: syarat
   OpenAI memberikan hak hasil ke pengguna; tidak perlu atribusi.
+- FAQ Tripo "Can You Use Tripo AI Models for Commercial Projects?" (dibaca pengguna 1 November 2026): menjamin hak penuh untuk pengguna berbayar, dan menyebut semua model Tripo boleh dipakai komersial asal sumbernya bebas sengketa hak cipta; model "public" boleh ditampilkan Tripo. Tidak bertentangan dengan catatan CC BY 4.0 untuk paket gratis di atas. Kesimpulan kerja: aset dari akun gratis dipakai dengan atribusi ke Tripo di layar kredit. Sebelum rilis: cek label lisensi tiap model di akun Tripo, dan kalau ragu kirim pertanyaan ke dukungan Tripo; alternatif aman adalah berlangganan satu bulan saat produksi akhir dan membuat ulang aset final di akun berbayar.
 
 ### Perbaikan wajah dan bercak tekstur (29 Oktober 2026)
 
@@ -184,3 +185,22 @@ Lalu optimasi dan gabung_animasi dijalankan ulang dari berkas ini.
 - Konsep: docs/referensi/keris-raja-konsep-01.png (ChatGPT, revisi ketiga; hulu sosok jongkok bersanggul dengan aksen emas, mendak emas berbatu merah, bilah lurus asimetris dengan ganja ke satu sisi, greneng, gandik, pamor rapat). Untuk Kertanagara, Jayakatwang, dan Wijaya sebagai raja (epilog, bab 2 ke atas). Label interpretasi; tunjukkan ke Yayat S. Soelaeman.
 - Model: aset-mentah/keris-raja-tripo.glb (Tripo H2.5). Bentuk bagus dari samping.
 - Perbaikan tekstur lewat skrip: bercak putih keabu-abuan di sisi tak terlihat hulu; garis jingga (warna emas bocor) di tepi ujung bilah; merah dan emas mendak terlalu jenuh. Usulan: warnai ulang hulu per bagian (kayu cokelat gelap, aksen emas, metallic tinggi untuk emas), bersihkan tepi bilah dengan warna pamor sekitar, turunkan saturasi mendak dan beri metallic. Ringankan ke sekitar 2.500 segitiga.
+
+## Warangka (1 November 2026)
+
+- Konsep: docs/referensi/warangka-konsep-01.png (ChatGPT, revisi kedua: gandar pipih menyempit ke bawah).
+- Model: aset-mentah/warangka-tripo.glb (Tripo H2.5). Bentuk bagus, lubang bilah di atas terbentuk.
+- Perbaikan lewat skrip: bercak putih kecil di bawah bagian atas (kiri-kanan sambungan gandar); warna terlalu oranye, turunkan saturasi dan kecerahan ke cokelat jati gelap. Ringankan ke sekitar 1.000 segitiga. Pasang di pinggang kiri depan Wijaya (ikut tulang Hips/Spine); keris tampil di dalam warangka saat tidak bertarung dan berpindah ke tulang RightHand saat dicabut.
+
+## Perahu nelayan (1 November 2026)
+
+- Konsep: docs/referensi/perahu-konsep-01.png (ChatGPT, revisi kedua dengan tiang utuh): lambung kayu melengkung, cadik bambu di kedua sisi, layar anyaman tergulung, jala, gulungan tali.
+- Model: aset-mentah/perahu-tripo.glb (Tripo H2.5). Lambung berongga dengan papan duduk, kedua cadik utuh, tiang dan layar utuh.
+- Perbaikan lewat skrip: bercak abu-abu keperakan di bibir lambung sepanjang sisi, pelampung cadik sisi jauh, sisi bawah pelampung, dan sebagian batang penyangga; isi dengan warna kayu (lambung) dan bambu (cadik) sekitar. Tali tipis boleh dibuang kalau berantakan. Skala panjang sekitar 7 m. Ringankan ke sekitar 6.000 segitiga. Ganti perahu balok di segmen pantai misi 3; untuk sinematik penyeberangan pakai dua perahu berdampingan (rombongan sekitar 11 orang).
+
+## Prosedur sambung kepala (diputuskan 1 November 2026)
+
+Gabungan manual dan skrip, karena masing-masing gagal di bagian berbeda (skrip: kepala menjorok; manual: Fill Holes dan Merge by Distance merusak wajah).
+1. Manual di Blender (pengguna, sekitar 15 menit): impor badan dan kepala, letakkan kepala (tegak di atas leher, telinga di atas sendi bahu), Bisect kepala sedikit di bawah dagu dan leher badan sedikit di bawahnya, ekstrusi leher badan masuk ke kepala. Simpan sebagai aset-mentah/<nama>-leher.blend.
+2. Skrip rapikan_leher.py (dibuat saat merapikan Wijaya, dipakai ulang): bentuk cincin atas pita leher mengikuti garis rahang, tutup cincin batas bawah kepala, bake ulang warna pita dan samakan kulit di ruang Lab, kalung atau tali leher penutup sambungan, lalu optimasi dan gabung_animasi.
+Cadangan bila hasil Wijaya tetap kurang rapi: MakeHuman/MPFB2 untuk prajurit dan warga; prosedur dua gambar hanya untuk tokoh utama.

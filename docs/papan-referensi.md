@@ -99,6 +99,8 @@ Keputusan desain: tiga tingkat, prajurit biasa (zirah kain tebal, helm sederhana
 | prajurit-kediri-kepala-01.png | 2 | Kepala dan leher prajurit Kediri, tampak depan | Dibuat sendiri dengan ChatGPT (gambar), 30 Okt 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D kepala (aset-mentah/prajurit-kepala-tripo.glb, belum ada di repo) |
 | tombak-konsep-01.png | 5 | Tombak prajurit: gagang kayu gelap sekitar 2 m, mata tombak berbentuk daun dengan rusuk tengah, cincin kuningan, tutup besi | Dibuat sendiri dengan ChatGPT (gambar), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/tombak-tripo.glb); interpretasi |
 | keris-raja-konsep-01.png | 5 | Keris raja: hulu sosok jongkok bersanggul beraksen emas, mendak emas berbatu merah, bilah lurus asimetris, pamor rapat | Dibuat sendiri dengan ChatGPT (gambar, revisi ketiga), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/keris-raja-tripo.glb); interpretasi |
+| warangka-konsep-01.png | 5 | Warangka kayu jati gelap: atas berbentuk perahu dengan satu ujung naik, gandar pipih menyempit | Dibuat sendiri dengan ChatGPT (gambar, revisi kedua), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/warangka-tripo.glb); interpretasi |
+| perahu-konsep-01.png | 6 | Perahu nelayan bercadik: lambung kayu melengkung, cadik bambu kedua sisi, layar anyaman tergulung | Dibuat sendiri dengan ChatGPT (gambar, revisi kedua), 1 Nov 2026 | Milik sendiri (cek ketentuan OpenAI) | Image-to-3D (Tripo H2.5 → aset-mentah/perahu-tripo.glb); bentuk umum perahu Nusantara, interpretasi untuk 1292 |
 
 ## Pertanyaan yang dijawab papan ini sebelum aset dibuat
 

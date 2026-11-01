@@ -53,4 +53,7 @@ Catatan:
 
 ## Lisensi aset pihak ketiga
 
+- Model 3D Raden Wijaya, keris, keris raja, warangka, tombak, perahu, dan prajurit Kediri dibuat dengan Tripo (tripo3d.ai), paket gratis berlisensi CC BY 4.0, lalu diubah. Tulis di layar kredit: "Beberapa model 3D dibuat dengan Tripo AI (CC BY 4.0), diubah."
+- Animasi karakter: Mixamo (Adobe).
+
 - TODO: catat setiap aset dan lisensinya saat dipakai (lihat docs/papan-referensi.md dan aset-mentah/README.md)
