@@ -607,8 +607,17 @@ Laju langkah klip (kaki tumpu relatif pinggul): jalan 1,43; lari lama 4,01; lari
 Di game: jalan pelan memakai `jalan`, lari santai memakai `lari` lama, lari kencang memakai `lari-kencang`
 (angka di `src/data/stealth.json`, tabel laju dan fase kaki di `src/character/model-wijaya.ts`).
 
+- `koreksi_pergelangan`: per klip, RightHand diputar per bingkai supaya bilah masuk rentang arah (`naik_derajat`
+  [min, maks], `serong_maks_derajat` dari depan tokoh), bobot penuh di sekitar kontak (`inti_sebelum`,
+  `inti_sesudah`) dan memudar `pudar` bingkai. Rotasi terbesar dan arah per bingkai ditulis ke
+  `hasil.koreksi_pergelangan`. Lembar `-anim-putaran-<klip>.png` (`--putaran`) menampilkan delapan bingkai
+  sepanjang ayunan, baris atas depan dan baris bawah belakang.
+
 ### Jebakan yang ditemukan
 
+- `pratinjau_animasi.py` dulu menyetel 30 fps SESUDAH mengimpor GLB, sehingga pengimpor memakai 24 fps dan semua
+  "bingkai kontak" di lembar dan ukuran meleset 2 sampai 3 bingkai ke belakang (lembar sebelum 17 November malam
+  menampilkan bingkai setelah kontak). Sekarang fps disetel sebelum impor; bingkai GLB sama dengan bingkai aksi.
 - Klip Without Skin yang diunduh dengan karakter berjari dua rantai (prajurit) hanya mengunci jempol dan telunjuk;
   jari lain tidak punya kurva dan harus dibuat sebelum bisa ditimpa (`buat_kurva_rotasi`).
 - Keris balok modul pertarungan digerakkan tiap frame untuk kapsul; kalau ditempel langsung ke tulang tangan,

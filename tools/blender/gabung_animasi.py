@@ -690,6 +690,76 @@ def luruskan_kepala(act, arm, pasang, bagian, maks_derajat):
     return round(sebelum, 1), round(sesudah, 1)
 
 
+def arah_bilah_keris(arm, koef):
+    """Arah bilah keris (dunia) pada pose sekarang, dari kerangka acuan tangan kanan (x garis buku jari ke
+    sisi telunjuk, f arah jari, n normal telapak) dan koefisien `koef` (<blok>.animasi.keris.arah_xfn)."""
+    B = arm.data.bones
+    t0 = B[PRE + "RightHand"].head_local
+    tanda = -1.0 if (B[PRE + "RightHandIndex1"].head_local - t0).cross(B[PRE + "RightHandPinky1"].head_local - t0).z > 0 else 1.0
+    t, i1, m1, p1 = (arm.matrix_world @ arm.pose.bones[PRE + n].head for n in ("RightHand", "RightHandIndex1", "RightHandMiddle1", "RightHandPinky1"))
+    x = (i1 - p1).normalized()
+    f = m1 - t
+    f = (f - x * f.dot(x)).normalized()
+    n = x.cross(f).normalized()
+    if n.dot((i1 - t).cross(p1 - t)) * tanda < 0:
+        n = -n
+    return (x * koef[0] + f * koef[1] + n * koef[2]).normalized()
+
+
+def koreksi_pergelangan(act, arm, pasang, koef, kontak, K):
+    """Putar RightHand (pergelangan) per bingkai supaya bilah keris masuk rentang arah yang diminta di
+    sepanjang ayunan: kenaikan dijepit ke K["naik_derajat"] [min, maks] dan, kalau K["serong_maks_derajat"]
+    diisi, arah mendatarnya dijepit sejauh itu dari depan tokoh (-Y). Tiap bingkai memakai rotasi terkecil ke
+    arah yang sudah dijepit (jepitan menerus, jadi tidak meloncat). Bobot penuh dari K["inti_sebelum"] bingkai
+    sebelum kontak sampai K["inti_sesudah"] sesudahnya, memudar halus K["pudar"] bingkai di kedua sisi.
+    Mengembalikan kamus hasil atau None."""
+    fc4 = kurva_rotasi(act, "RightHand")
+    if fc4 is None or kontak is None:
+        return None
+    pb = arm.pose.bones[PRE + "RightHand"]
+    pasang(act)
+    sc = bpy.context.scene
+    n0, n1 = (math.radians(v) for v in K["naik_derajat"])
+    serong = K.get("serong_maks_derajat")
+    a0, a1, pudar = kontak - K.get("inti_sebelum", 2), kontak + K.get("inti_sesudah", 2), max(1, K.get("pudar", 4))
+    tambah, catatan = {}, {}
+    for k in range(len(fc4[0].keyframe_points)):
+        f = fc4[0].keyframe_points[k].co.x
+        w = 1.0 if a0 <= f <= a1 else float(halus01(1.0 - ((a0 - f) if f < a0 else (f - a1)) / pudar))
+        if w <= 0:
+            continue
+        sc.frame_set(int(round(f)))
+        d = arah_bilah_keris(arm, koef)
+        M = pb.matrix.to_quaternion()
+        naik = math.asin(max(-1.0, min(1.0, d.z)))
+        arah = math.atan2(d.x, -d.y)                      # 0 = depan tokoh, positif ke kiri tokoh
+        naik_s = min(n1, max(n0, naik))
+        arah_s = arah if serong is None else min(math.radians(serong), max(-math.radians(serong), arah))
+        sasaran = Vector((math.sin(arah_s) * math.cos(naik_s), -math.cos(arah_s) * math.cos(naik_s), math.sin(naik_s)))
+        C = d.rotation_difference(sasaran)
+        Cw = Quaternion().slerp(C, w)
+        tambah[k] = M.inverted() @ Cw @ M
+        catatan[int(round(f))] = {"naik": round(math.degrees(naik)), "serong": round(math.degrees(arah)), "rotasi": round(math.degrees(Cw.angle)), "bobot": round(w, 2)}
+    for k, X in tambah.items():
+        q = Quaternion([fc.keyframe_points[k].co.y for fc in fc4]) @ X
+        for fc, nilai in zip(fc4, q):
+            kp = fc.keyframe_points[k]
+            selisih = nilai - kp.co.y
+            kp.co.y = nilai
+            kp.handle_left.y += selisih
+            kp.handle_right.y += selisih
+    for fc in fc4:
+        fc.update()
+    sesudah = {}
+    for f in catatan:
+        sc.frame_set(f)
+        d2 = arah_bilah_keris(arm, koef)
+        sesudah[f] = [round(math.degrees(math.asin(max(-1.0, min(1.0, d2.z))))), round(math.degrees(math.atan2(d2.x, -d2.y)))]
+    return {"kontak": int(kontak), "rotasi_terbesar_derajat": max(c["rotasi"] for c in catatan.values()),
+            "rotasi_di_kontak_derajat": catatan.get(int(kontak), {}).get("rotasi"),
+            "sebelum_per_bingkai": catatan, "sesudah_naik_serong_per_bingkai": sesudah}
+
+
 def cari_koreksi_lengan(arm, utama, act, K, kontak):
     """Cari rotasi tambahan terkecil supaya sendi tangan menjauh dari badan: pada bingkai kontak sejauh
     K["sasaran_m"] dan sepanjang klip paling dekat K["terkecil_m"]. Koreksi dibagi ke dua sendi supaya bahu
@@ -1258,6 +1328,19 @@ def main():
             hasil_kp = luruskan_kepala(aksi[nama_klip], arm, pasang, KP.get("bagian", 0.8), KP.get("maks_derajat", 50))
             ringkasan["kepala_lurus"][nama_klip] = hasil_kp
             catat(f"kepala lurus {nama_klip}: simpangan terbesar (derajat) sebelum dan sesudah {hasil_kp}")
+        arm.animation_data.action = None
+
+    # Koreksi pergelangan per klip (wajah.json "<blok>.animasi.koreksi_pergelangan"): sudut pasang keris tetap
+    # satu; di klip yang disebut, pergelangan kanan diputar bertahap di sekitar kontak supaya bilah mendatar.
+    KW = A.get("koreksi_pergelangan")
+    if KW and KW.get("aktif", True) and "arah_xfn" in A.get("keris", {}):
+        ringkasan["koreksi_pergelangan"] = {}
+        for nama_klip in KW["klip"]:
+            if nama_klip not in aksi:
+                continue
+            hasil_w = koreksi_pergelangan(aksi[nama_klip], arm, pasang, A["keris"]["arah_xfn"], ringkasan.get(nama_klip, {}).get("kontak_baru"), KW["klip"][nama_klip])
+            ringkasan["koreksi_pergelangan"][nama_klip] = hasil_w
+            catat(f"koreksi pergelangan {nama_klip}: {hasil_w}")
         arm.animation_data.action = None
 
     # Genggaman (wajah.json "<blok>.animasi.genggam"): jari ditimpa pose tetap. Klip serang Mixamo membuka

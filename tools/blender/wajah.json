@@ -2166,19 +2166,19 @@
           "pakai_asli": false
         },
         "serang-1": {
-          "kontak_asli": 18,
+          "kontak_asli": 20,
           "dipotong": [
-            10,
-            28
+            12,
+            30
           ],
           "bingkai": 19,
           "kontak_baru": 9
         },
         "serang-2": {
-          "kontak_asli": 26,
+          "kontak_asli": 27,
           "dipotong": [
-            18,
-            36
+            19,
+            37
           ],
           "bingkai": 19,
           "kontak_baru": 9
@@ -2250,6 +2250,265 @@
             38.8,
             7.8
           ]
+        },
+        "koreksi_pergelangan": {
+          "serang-1": {
+            "kontak": 9,
+            "rotasi_terbesar_derajat": 43,
+            "rotasi_di_kontak_derajat": 18,
+            "sebelum_per_bingkai": {
+              "7": {
+                "naik": -58,
+                "serong": -67,
+                "rotasi": 7,
+                "bobot": 0.1
+              },
+              "8": {
+                "naik": -45,
+                "serong": -46,
+                "rotasi": 43,
+                "bobot": 0.84
+              },
+              "9": {
+                "naik": -13,
+                "serong": -5,
+                "rotasi": 18,
+                "bobot": 1.0
+              },
+              "10": {
+                "naik": 19,
+                "serong": 32,
+                "rotasi": 0,
+                "bobot": 1.0
+              },
+              "11": {
+                "naik": 24,
+                "serong": 86,
+                "rotasi": 33,
+                "bobot": 0.9
+              },
+              "12": {
+                "naik": 54,
+                "serong": 105,
+                "rotasi": 11,
+                "bobot": 0.22
+              },
+              "13": {
+                "naik": 71,
+                "serong": 31,
+                "rotasi": 0,
+                "bobot": 0.01
+              }
+            },
+            "sesudah_naik_serong_per_bingkai": {
+              "7": [
+                -58,
+                -67
+              ],
+              "8": [
+                -20,
+                -45
+              ],
+              "9": [
+                5,
+                -5
+              ],
+              "10": [
+                19,
+                32
+              ],
+              "11": [
+                24,
+                45
+              ],
+              "12": [
+                43,
+                68
+              ],
+              "13": [
+                71,
+                31
+              ]
+            }
+          },
+          "serang-berat": {
+            "kontak": 13,
+            "rotasi_terbesar_derajat": 41,
+            "rotasi_di_kontak_derajat": 0,
+            "sebelum_per_bingkai": {
+              "8": {
+                "naik": 34,
+                "serong": -166,
+                "rotasi": 3,
+                "bobot": 0.16
+              },
+              "9": {
+                "naik": 42,
+                "serong": 177,
+                "rotasi": 15,
+                "bobot": 0.5
+              },
+              "10": {
+                "naik": 51,
+                "serong": 163,
+                "rotasi": 32,
+                "bobot": 0.84
+              },
+              "11": {
+                "naik": 54,
+                "serong": 143,
+                "rotasi": 41,
+                "bobot": 1.0
+              },
+              "12": {
+                "naik": 41,
+                "serong": 105,
+                "rotasi": 28,
+                "bobot": 1.0
+              },
+              "13": {
+                "naik": 7,
+                "serong": 69,
+                "rotasi": 0,
+                "bobot": 1.0
+              },
+              "14": {
+                "naik": -38,
+                "serong": 45,
+                "rotasi": 30,
+                "bobot": 1.0
+              },
+              "15": {
+                "naik": -43,
+                "serong": 25,
+                "rotasi": 35,
+                "bobot": 1.0
+              },
+              "16": {
+                "naik": -51,
+                "serong": -7,
+                "rotasi": 36,
+                "bobot": 0.84
+              },
+              "17": {
+                "naik": -76,
+                "serong": -26,
+                "rotasi": 34,
+                "bobot": 0.5
+              },
+              "18": {
+                "naik": -81,
+                "serong": 69,
+                "rotasi": 11,
+                "bobot": 0.16
+              }
+            },
+            "sesudah_naik_serong_per_bingkai": {
+              "8": [
+                31,
+                -166
+              ],
+              "9": [
+                28,
+                177
+              ],
+              "10": [
+                19,
+                163
+              ],
+              "11": [
+                13,
+                143
+              ],
+              "12": [
+                13,
+                105
+              ],
+              "13": [
+                7,
+                69
+              ],
+              "14": [
+                -8,
+                45
+              ],
+              "15": [
+                -8,
+                25
+              ],
+              "16": [
+                -15,
+                -7
+              ],
+              "17": [
+                -42,
+                -26
+              ],
+              "18": [
+                -70,
+                69
+              ]
+            }
+          },
+          "serang-2": {
+            "kontak": 9,
+            "rotasi_terbesar_derajat": 30,
+            "rotasi_di_kontak_derajat": 3,
+            "sebelum_per_bingkai": {
+              "8": {
+                "naik": 69,
+                "serong": 10,
+                "rotasi": 30,
+                "bobot": 0.5
+              },
+              "9": {
+                "naik": 11,
+                "serong": 6,
+                "rotasi": 3,
+                "bobot": 1.0
+              },
+              "10": {
+                "naik": -12,
+                "serong": 12,
+                "rotasi": 0,
+                "bobot": 1.0
+              },
+              "11": {
+                "naik": -23,
+                "serong": 6,
+                "rotasi": 8,
+                "bobot": 1.0
+              },
+              "12": {
+                "naik": -25,
+                "serong": -8,
+                "rotasi": 5,
+                "bobot": 0.5
+              }
+            },
+            "sesudah_naik_serong_per_bingkai": {
+              "8": [
+                38,
+                10
+              ],
+              "9": [
+                8,
+                6
+              ],
+              "10": [
+                -12,
+                12
+              ],
+              "11": [
+                -15,
+                6
+              ],
+              "12": [
+                -20,
+                -8
+              ]
+            }
+          }
         },
         "genggam": {
           "kanan": {
@@ -3058,12 +3317,12 @@
       },
       "kontak_manual_baru": {
         "serang-1": [
-          18,
+          20,
           8,
           10
         ],
         "serang-2": [
-          26,
+          27,
           8,
           10
         ],
@@ -3077,7 +3336,7 @@
           12,
           11
         ],
-        "keterangan": "Patokan klip dari folder baru/ (17 November 2026): [bingkai kontak, sebelum, sesudah]. serang-1 tebasan keluar (laju tangan puncak bingkai 18), serang-2 tebasan balik turun (bingkai 26-27; ayunan bingkai 4-15 adalah ancang-ancang), serang-3 tusukan (lengan lurus mulai bingkai 18), serang-berat (tangan paling depan bingkai 27)."
+        "keterangan": "Patokan klip dari folder baru/ (17 November 2026): [bingkai kontak, sebelum, sesudah]. serang-1 tebasan keluar (laju tangan puncak bingkai 18), serang-2 tebasan balik turun (bingkai 26-27; ayunan bingkai 4-15 adalah ancang-ancang), serang-3 tusukan (lengan lurus mulai bingkai 18), serang-berat (tangan paling depan bingkai 27). Revisi: serang-1 kontak di bingkai 20 (dua bingkai setelah laju tangan puncak), saat bilah sudah menyapu ke depan dan naik; di bingkai 18 bilah masih menunjuk 57 derajat ke bawah. serang-3 di bingkai 19 (tangan paling depan). serang-2 kontak di bingkai 27 (satu bingkai setelah patokan lama): di bingkai 26 bilah masih 69 derajat ke atas, di 27 sudah menyapu ke depan (naik 11, serong 6)."
       },
       "klip_baru_lewati": [
         "lari-santai"
@@ -3131,46 +3390,82 @@
       },
       "keris": {
         "arah_xfn": [
-          0.7562,
-          0.5908,
-          0.2814
+          0.7774,
+          0.5797,
+          0.2441
         ],
         "kalibrasi": {
           "klip": "serang-3",
-          "bingkai": 8
+          "bingkai": 9
         },
         "arah_di_kontak": {
           "serang-1": {
-            "bingkai": 8,
-            "naik_derajat": -43.0,
-            "serong_derajat": -44.0
+            "bingkai": 9,
+            "naik_derajat": 5.0,
+            "serong_derajat": -5.0
           },
           "serang-2": {
-            "bingkai": 8,
-            "naik_derajat": 11.0,
-            "serong_derajat": 8.0
+            "bingkai": 9,
+            "naik_derajat": 8.0,
+            "serong_derajat": 6.0
           },
           "serang-3": {
-            "bingkai": 8,
-            "naik_derajat": 0.0,
-            "serong_derajat": -0.0
+            "bingkai": 9,
+            "naik_derajat": -0.0,
+            "serong_derajat": 0.0
           },
           "serang-berat": {
-            "bingkai": 12,
-            "naik_derajat": -42.0,
-            "serong_derajat": 28.0
+            "bingkai": 13,
+            "naik_derajat": 7.0,
+            "serong_derajat": 69.0
           },
           "tangkis": {
-            "bingkai": 7,
-            "naik_derajat": 22.0,
-            "serong_derajat": -42.0
+            "bingkai": 9,
+            "naik_derajat": 21.0,
+            "serong_derajat": -45.0
           },
           "siaga": {
-            "bingkai": 24,
-            "naik_derajat": -9.0,
-            "serong_derajat": 62.0
+            "bingkai": 30,
+            "naik_derajat": -6.0,
+            "serong_derajat": 61.0
           }
         }
+      },
+      "koreksi_pergelangan": {
+        "aktif": true,
+        "klip": {
+          "serang-1": {
+            "naik_derajat": [
+              5,
+              25
+            ],
+            "serong_maks_derajat": 45,
+            "inti_sebelum": 0,
+            "inti_sesudah": 2,
+            "pudar": 2
+          },
+          "serang-berat": {
+            "naik_derajat": [
+              -8,
+              13
+            ],
+            "serong_maks_derajat": null,
+            "inti_sebelum": 2,
+            "inti_sesudah": 2,
+            "pudar": 4
+          },
+          "serang-2": {
+            "naik_derajat": [
+              -15,
+              8
+            ],
+            "serong_maks_derajat": 40,
+            "inti_sebelum": 0,
+            "inti_sesudah": 2,
+            "pudar": 2
+          }
+        },
+        "keterangan": "Sudut pasang keris satu untuk semua klip (keris.arah_xfn). Per klip, RightHand diputar per bingkai supaya bilah masuk rentang: kenaikan dijepit ke naik_derajat [min, maks], arah mendatar dijepit serong_maks_derajat dari depan tokoh (null: dibiarkan). Bobot penuh dari inti_sebelum bingkai sebelum kontak sampai inti_sesudah sesudahnya, memudar halus selama pudar bingkai. serang-1: sayatan diagonal naik, bilah ke depan dan naik 0 sampai 30 derajat. serang-berat: putaran, bilah mendekati mendatar (-10 sampai +15). serang-2: tebasan turun, bilah mendatar sampai sedikit menurun (-20 sampai +10) menghadap depan."
       }
     }
   }

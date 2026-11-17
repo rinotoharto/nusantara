@@ -48,6 +48,7 @@ def argumen():
     p.add_argument("--klip-ukur", default=None, help="ukur hanya klip ini (dipisah koma); bawaan semua")
     p.add_argument("--lain", default="jalan:8,hindar:20,terkena:10,jongkok-diam:0",
                    help="lembar tambahan <nama>-anim-lain.png: daftar klip:bingkai dipisah koma")
+    p.add_argument("--putaran", default="serang-berat,serang-1", help="klip untuk lembar sepanjang ayunan (dengan --lembar keris)")
     p.add_argument("--kalibrasi-keris", action="store_true", help="hitung ulang arah pasang keris dari kontak serang-3")
     p.add_argument("--tanpa-json", action="store_true", help="jangan tulis ukuran ke json (untuk membandingkan model lain)")
     return p.parse_args(argv)
@@ -66,6 +67,9 @@ def main():
     A = P.setdefault("animasi", {})
     f_skala = P.get("sambung", {}).get("hasil", {}).get("skala_akhir", 1.0)
     bpy.ops.wm.read_factory_settings(use_empty=True)
+    # fps harus 30 SEBELUM impor: pengimpor glTF mengubah detik ke bingkai dengan fps adegan saat itu. Dengan
+    # bawaan 24 fps, bingkai k berarti k/24 detik dan "bingkai kontak" meleset 2 sampai 3 bingkai ke belakang.
+    bpy.context.scene.render.fps = 30
     bpy.ops.import_scene.gltf(filepath=os.path.join(akar, a.masuk))
     scene = bpy.context.scene
     scene.render.fps = 30
@@ -485,6 +489,23 @@ def main():
             path = os.path.join(akar, a.keluar, f"{a.nama}-anim-{akhiran}.png")
             simpan(np.vstack(baris_px[::-1]), path)
             catat(f"{path} (baris dari atas: {pasangan[0]}, {pasangan[1]}; kolom: sebelum kontak depan, belakang, kontak depan, belakang)")
+        # Sepanjang ayunan (bukan hanya kontak): baris atas depan, baris bawah belakang.
+        for n in [n_ for n_ in a.putaran.split(",") if n_ in aksi and n_ in ukur]:
+            fk_ = kontak(n)
+            f0_, f1_ = ukur[n]["bingkai"]
+            daftar_f = [f_ for f_ in (fk_ - 6, fk_ - 4, fk_ - 2, fk_ - 1, fk_, fk_ + 1, fk_ + 2, fk_ + 4) if f0_ <= f_ <= f1_]
+            baris = {"depan": [], "belakang": []}
+            for fr in daftar_f:
+                pasang(n, fr)
+                taruh_keris()
+                h_ = tulang("Hips")
+                for sudut, arah in (("depan", (0, -1, 0)), ("belakang", (0, 1, 0))):
+                    path = os.path.join(tmp, f"putaran-{n}-{fr}-{sudut}.png")
+                    render(path, (float(h_[0]), float(h_[1]), 0.90), arah, (420, 760), ortho=2.25)
+                    baris[sudut].append(muat(path))
+            path = os.path.join(akar, a.keluar, f"{a.nama}-anim-putaran-{n}.png")
+            simpan(np.vstack([np.hstack(baris["belakang"]), np.hstack(baris["depan"])]), path)
+            catat(f"{path} (baris atas depan, bawah belakang): bingkai {daftar_f}, kontak {fk_}")
         for o in (hulu, bilah):
             bpy.data.objects.remove(o, do_unlink=True)
 
