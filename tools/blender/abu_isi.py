@@ -11,6 +11,19 @@ pulau itu sendiri) lalu diberi detail halus dari kulit sekitar. Komponen yang me
 emas, atau tepi pulau UV tidak diisi; ditandai di topeng terpisah untuk dirapikan tangan.
 Keluaran: topeng-abu.png (merah = diisi otomatis, kuning = untuk tangan), topeng-abu-tangan.png
 (putih = perlu tangan), dan base color baru. Angka di wajah.json blok "abu".
+
+Karakter lain: --blok <nama> memakai data[<nama>]["abu"] dan data[<nama>]["data_z"] (bawaan disalin dari
+blok "abu" Wijaya lalu disetel di json), --awalan <nama>- menamai topeng <nama>-topeng-abu*.png supaya topeng
+Wijaya tidak tertimpa. Pilihan tambahan di blok "abu" (semua opsional, untuk data dari data_uv.py):
+  "zona_kain": {"z_m": [a, b], "x_abs_maks_m": c}  daerah kain menurut posisi (bukan warna), tidak disentuh;
+               dipakai kalau warna kain mirip bercak (nila pudar prajurit: kroma rendah, kebiruan)
+  "kain_rona": [a, b] dan "kain_sat_min"            kain berwarna yang tidak gelap, menurut rona
+  "gelap_aktif": false                              matikan kelas bercak gelap (abu-abu gelap, cokelat gelap)
+  "z_maks_m": z                                     di atas tinggi ini tidak dideteksi (kepala yang akan diganti)
+  "gelap_z_maks_m": z                               kelas bercak gelap hanya di bawah tinggi ini (jari kaki)
+  "isi_tanpa_kulit": {"x_abs_min_m": c}             bercak tanpa kulit di sekelilingnya (jari yang seluruhnya kelabu) tetap
+                                                    diisi kalau letaknya di luar |x| ini (tangan), dengan warna kulit
+                                                    rata-rata kalau pulaunya tidak punya kulit
 """
 import argparse
 import json
@@ -30,6 +43,8 @@ def argumen():
     p.add_argument("--topeng-wajah", default=None, help="topeng-wajah.png Tahap 2: daerah ini tidak disentuh")
     p.add_argument("--hanya-deteksi", action="store_true")
     p.add_argument("--isi-tepi", action="store_true", help="isi juga komponen yang menyentuh tepi pulau (bawaan: tangan)")
+    p.add_argument("--blok", default=None, help="blok karakter di json (bawaan: tingkat atas, Wijaya)")
+    p.add_argument("--awalan", default="", help="awalan nama berkas topeng, mis. 'prajurit-'")
     return p.parse_args()
 
 
@@ -51,6 +66,10 @@ def kelas_warna(bgr, abu):
     gelap = v < abu["kain_v_maks"]
     rambut = gelap & (kroma <= abu["rambut_kroma_maks"])
     kain = (gelap & ~rambut) | (((h >= 160) | (h <= 6)) & (s > 0.5) & (v < 0.6))
+    if abu.get("kain_rona"):
+        # Kain berwarna yang tidak gelap (nila): rentang rona dengan saturasi minimal.
+        k0, k1 = abu["kain_rona"]
+        kain |= (h >= k0) & (h <= k1) & (s >= abu.get("kain_sat_min", 0.25))
     r0, r1 = abu["abu_rona_biru"]
     biru_kelabu = (h >= r0) & (h <= r1) & (s <= abu["abu_sat_biru_maks"])
     kelabu_terang = ((kroma <= abu["abu_kroma_maks"]) | biru_kelabu) & (v >= abu["abu_v_min"]) & (v <= abu["abu_v_maks"])
@@ -65,7 +84,10 @@ def kelas_warna(bgr, abu):
 def main():
     a = argumen()
     data = json.load(open(a.json))
-    abu = data.setdefault("abu", {
+    akar = data.setdefault(a.blok, {}) if a.blok else data
+    if a.blok and "abu" not in akar and "abu" in data:
+        akar["abu"] = {k: v for k, v in data["abu"].items() if k != "hasil"}
+    abu = akar.setdefault("abu", {
         "abu_kroma_maks": 14, "abu_rona_biru": [85, 135], "abu_sat_biru_maks": 0.40,
         "abu_v_min": 0.30, "abu_v_maks": 0.92, "lebar_topeng_px": 2,
         "kulit_rona_maks": 22, "kulit_sat_min": 0.25,
@@ -88,8 +110,24 @@ def main():
 
     kulit, emas, kain, kelabu, rambut, kelabu_gelap, cokelat_gelap = kelas_warna(img, abu)
     kelabu &= cakupan
-    z0, z1 = data.get("data_z", [1.2, 1.8])
+    z0, z1 = akar.get("data_z", [1.2, 1.8])
     z_abs = z0 + d[:, :, 1] * (z1 - z0)
+    if abu.get("zona_kain"):
+        # Kain menurut posisi: kanal R data_uv.py = |x| pada rentang data_x. Seluruh zona dianggap kain.
+        zk = abu["zona_kain"]
+        x0, x1 = akar["data_x"]
+        x_abs = x0 + d[:, :, 2] * (x1 - x0)
+        zona = cakupan & (z_abs >= zk["z_m"][0]) & (z_abs <= zk["z_m"][1]) & (x_abs <= zk["x_abs_maks_m"])
+        kain |= zona
+        kulit &= ~zona
+        kelabu &= ~zona
+        print(f"[abu] zona kain menurut posisi: {zona.sum()} piksel")
+    x_abs_semua = None
+    if abu.get("isi_tanpa_kulit"):
+        x0, x1 = akar["data_x"]
+        x_abs_semua = x0 + d[:, :, 2] * (x1 - x0)
+    if abu.get("z_maks_m") is not None:
+        kelabu &= z_abs <= abu["z_maks_m"]
     if a.topeng_wajah and os.path.exists(a.topeng_wajah):
         # Hanya wajah di atas dagu (z absolut) yang dikecualikan; leher tetap masuk deteksi.
         wajah = (cv2.imread(a.topeng_wajah, 0) > 128) & (z_abs > abu["wajah_z_min_m"])
@@ -121,12 +159,20 @@ def main():
         komp = label[y0:y1, x0:x1] == i
         cincin = (cv2.dilate(komp.astype(np.uint8), inti_cincin) > 0) & ~komp & cakupan[y0:y1, x0:x1]
         if cincin.sum() == 0:
-            alasan["bukan_kulit"] += 1
-            tangan[y0:y1, x0:x1] |= komp
+            if x_abs_semua is not None and float(np.median(x_abs_semua[y0:y1, x0:x1][komp])) >= abu["isi_tanpa_kulit"]["x_abs_min_m"]:
+                alasan["otomatis"] += 1
+                otomatis[y0:y1, x0:x1] |= komp
+            else:
+                alasan["bukan_kulit"] += 1
+                tangan[y0:y1, x0:x1] |= komp
             continue
         f_kulit = kulit[y0:y1, x0:x1][cincin].mean()
         sentuh_tepi = (komp & tepi[y0:y1, x0:x1]).any()
-        if f_kulit < abu["kulit_cincin_abaikan"]:
+        if x_abs_semua is not None and f_kulit < abu["kulit_cincin_min"] \
+                and float(np.median(x_abs_semua[y0:y1, x0:x1][komp])) >= abu["isi_tanpa_kulit"]["x_abs_min_m"]:
+            alasan["otomatis"] += 1      # jari yang seluruhnya kelabu
+            otomatis[y0:y1, x0:x1] |= komp
+        elif f_kulit < abu["kulit_cincin_abaikan"]:
             alasan["diabaikan"] += 1   # sorotan kain, mata, gigi: bukan bercak di kulit
         elif f_kulit < abu["kulit_cincin_min"]:
             alasan["bukan_kulit"] += 1
@@ -143,6 +189,12 @@ def main():
             otomatis[y0:y1, x0:x1] |= komp & ~dekat
     # Bercak gelap: komponen kecil di bawah dagu yang cincinnya separuh kulit (bukan rambut, bukan bayangan luas).
     kg = (kelabu_gelap | cokelat_gelap) & cakupan & ~kelabu
+    if not abu.get("gelap_aktif", True):
+        kg[:] = False
+    if abu.get("z_maks_m") is not None:
+        kg &= z_abs <= abu["z_maks_m"]
+    if abu.get("gelap_z_maks_m") is not None:
+        kg &= z_abs <= abu["gelap_z_maks_m"]
     if a.topeng_wajah and os.path.exists(a.topeng_wajah):
         kg &= ~wajah
     n_g, label_g, stat_g, _ = cv2.connectedComponentsWithStats(kg.astype(np.uint8), connectivity=8)
@@ -152,13 +204,20 @@ def main():
         luas_min = abu["cokelat_luas_min_px"] if komp_cokelat else abu["komponen_min_px"]   # puting dan pusar kecil, dibiarkan
         if luas < luas_min or luas > abu["gelap_luas_maks_px"]:
             alasan["gelap_dilewati"] += 1
+            if os.environ.get("ABU_DEBUG") and luas >= 100:
+                print(f"[abu] gelap dilewati karena luas {luas} (min {luas_min}), cokelat {komp_cokelat}, z {np.median(z_abs[label_g == i]):.2f}")
             continue
         y0, y1 = max(y - abu["cincin_px"] - 1, 0), min(y + bh + abu["cincin_px"] + 1, h)
         x0, x1 = max(x - abu["cincin_px"] - 1, 0), min(x + bw + abu["cincin_px"] + 1, w)
         komp = label_g[y0:y1, x0:x1] == i
         cincin = (cv2.dilate(komp.astype(np.uint8), inti_cincin) > 0) & ~komp & cakupan[y0:y1, x0:x1]
-        if cincin.sum() == 0 or kulit[y0:y1, x0:x1][cincin].mean() < abu["gelap_kulit_cincin_min"]:
+        # Dengan gelap_z_maks_m dan isi_tanpa_kulit (jari kaki yang seluruh pulaunya gelap), komponen tanpa cincin ikut diisi.
+        tanpa_cincin_ok = abu.get("gelap_z_maks_m") is not None and abu.get("isi_tanpa_kulit") and cincin.sum() == 0
+        if not tanpa_cincin_ok and (cincin.sum() == 0 or kulit[y0:y1, x0:x1][cincin].mean() < abu["gelap_kulit_cincin_min"]):
             alasan["gelap_dilewati"] += 1
+            if os.environ.get("ABU_DEBUG"):
+                print(f"[abu] gelap dilewati: luas {luas}, cincin {int(cincin.sum())}, kulit cincin "
+                      f"{kulit[y0:y1, x0:x1][cincin].mean() if cincin.sum() else -1:.2f}, z {np.median(z_abs[label_g == i]):.2f}")
             continue
         alasan["gelap"] += 1
         otomatis[y0:y1, x0:x1] |= komp & ~dekat_kain_emas[y0:y1, x0:x1]
@@ -170,9 +229,22 @@ def main():
     tampil = img.copy()
     tampil[otomatis] = (0, 0, 255)
     tampil[tangan] = (0, 255, 255)
-    cv2.imwrite(os.path.join(a.tekstur, "topeng-abu.png"), tampil)
-    cv2.imwrite(os.path.join(a.tekstur, "topeng-abu-tangan.png"), (tangan * 255).astype(np.uint8))
-    data["abu"]["hasil"] = {"otomatis_px": int(otomatis.sum()), "tangan_px": int(tangan.sum()), "komponen": alasan}
+    cv2.imwrite(os.path.join(a.tekstur, a.awalan + "topeng-abu.png"), tampil)
+    cv2.imwrite(os.path.join(a.tekstur, a.awalan + "topeng-abu-tangan.png"), (tangan * 255).astype(np.uint8))
+    if a.blok:
+        json.dump(data, open(a.json, "w"), indent=2, ensure_ascii=False)   # bawaan blok ditulis sebelum laporan
+    abu["hasil"] = {"otomatis_px": int(otomatis.sum()), "tangan_px": int(tangan.sum()), "komponen": alasan}
+    # Sebaran isian per pita tinggi 10 cm: untuk mengecek tanpa melihat gambar bahwa isian jatuh di kulit
+    # (tangan, pergelangan kaki, leher), bukan di kain.
+    pita = {}
+    for nama, m in (("otomatis", otomatis), ("tangan", tangan)):
+        zz = z_abs[m]
+        if zz.size:
+            tepi_pita = np.arange(np.floor(z0 * 10) / 10, z1 + 0.1, 0.1)
+            hist, _ = np.histogram(zz, bins=tepi_pita)
+            pita[nama] = {f"{tepi_pita[i]:.1f}": int(n_) for i, n_ in enumerate(hist) if n_}
+    abu["hasil"]["per_tinggi_m"] = pita
+    print(f"[abu] isian per pita tinggi (m): {pita}")
     json.dump(data, open(a.json, "w"), indent=2, ensure_ascii=False)
     if a.hanya_deteksi:
         return
@@ -186,7 +258,7 @@ def main():
     # Isi per pulau: sumber inpainting hanya piksel pulau yang sama.
     n_p, label_p, stat_p, _ = cv2.connectedComponentsWithStats(cakupan.astype(np.uint8), connectivity=8)
     hasil = img.copy()
-    pulau_diisi = 0
+    pulau_diisi, pulau_cadangan, warna_cadangan = 0, 0, None
     for i in range(1, n_p):
         x, y, bw, bh, _ = stat_p[i]
         pad = abu["inpaint_radius"] + 2
@@ -198,10 +270,21 @@ def main():
             continue
         # Piksel cadangan tangan ikut di-mask supaya abu-abunya tidak jadi sumber, tapi tidak ditulis balik.
         topeng = (isi | tangan[y0:y1, x0:x1] | ~pulau).astype(np.uint8) * 255
-        potong = cv2.inpaint(hasil[y0:y1, x0:x1], topeng, abu["inpaint_radius"], cv2.INPAINT_TELEA)
-        hasil[y0:y1, x0:x1][isi] = potong[isi]
+        if abu.get("isi_tanpa_kulit") and (pulau & ~isi & kulit[y0:y1, x0:x1]).sum() < 40:
+            # pulau tanpa kulit sebagai sumber: warna kulit rata-rata seluruh tekstur
+            # warna kulit median pada tinggi yang sama (+-8 cm), supaya nadanya mirip kulit di sekitarnya
+            zi = float(np.median(z_abs[y0:y1, x0:x1][isi]))
+            dekat = kulit & cakupan & ~isi_semua & (np.abs(z_abs - zi) < 0.08)
+            if dekat.sum() < 200:
+                dekat = kulit & cakupan & ~isi_semua
+            warna_cadangan = np.median(img[dekat], axis=0).astype(np.uint8)
+            hasil[y0:y1, x0:x1][isi] = warna_cadangan
+            pulau_cadangan += 1
+        else:
+            potong = cv2.inpaint(hasil[y0:y1, x0:x1], topeng, abu["inpaint_radius"], cv2.INPAINT_TELEA)
+            hasil[y0:y1, x0:x1][isi] = potong[isi]
         pulau_diisi += 1
-    print(f"[abu] pulau diisi: {pulau_diisi}")
+    print(f"[abu] pulau diisi: {pulau_diisi}" + (f" (dari warna kulit rata-rata: {pulau_cadangan})" if pulau_cadangan else ""))
 
     # Detail halus dari kulit sekitar: lapisan frekuensi tinggi kulit digeser beberapa piksel
     # (supaya tidak menyalin struktur di tempat yang sama), ditempel pada piksel yang diisi.

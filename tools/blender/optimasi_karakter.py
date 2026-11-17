@@ -10,7 +10,9 @@ Langkah:
   1. impor, gabung verteks berdekatan, hapus verteks lepas, perbaiki normal
   2. salin mesh tinggi, kurangi salinan rendah dengan Decimate (Collapse)
   3. bake normal dari mesh tinggi ke mesh rendah (atau pakai normal map asal: --normal asal)
-  4. skala ke tinggi target, titik pusat di antara kaki di lantai, putar kalau perlu (--putar derajat)
+     (--halus-daerah: tonjolan tipis di mesh tinggi dihaluskan dulu, sebelum decimate dan bake)
+  4. skala ke tinggi target, titik pusat di antara kaki di lantai, putar kalau perlu (--putar derajat),
+     lebar dan tebal dikecilkan kalau diminta (--ramping pecahan)
   5. tekstur diperkecil (base color dan normal ke --tekstur, metallic-roughness ke setengahnya)
   6. ekspor GLB dengan Draco, cetak ringkasan
   7. render pratinjau 4 sudut sebelum dan sesudah (kalau --pratinjau diberi)
@@ -49,6 +51,12 @@ def argumen():
     p.add_argument("--metallic", type=float, default=0.0)
     p.add_argument("--cage", type=float, default=0.003, help="jarak cage bake, pecahan dari tinggi model")
     p.add_argument("--jarak-sinar", type=float, default=0.01, help="jarak sinar bake maksimum, pecahan dari tinggi model")
+    p.add_argument("--halus-daerah", default=None,
+                   help="haluskan mesh tinggi sebelum decimate di daerah 'z_min,z_maks,x_maks' (pecahan tinggi model, "
+                        "x dari sumbu tengah), mis. 0.765,0.875,0.105 untuk tonjolan tali di pangkal leher dan dada atas")
+    p.add_argument("--halus-iterasi", type=int, default=60, help="iterasi Taubin untuk --halus-daerah")
+    p.add_argument("--ramping", type=float, default=0.0,
+                   help="kecilkan lebar dan tebal (sumbu X dan Y) sekian pecahan tanpa mengubah tinggi, mis. 0.065")
     return p.parse_args(argv)
 
 
@@ -258,6 +266,40 @@ def render_sudut(kam, pusat, tinggi_model, folder, awalan):
     kam.data.ortho_scale = skala_penuh
 
 
+def haluskan_daerah(obj, daerah, iterasi, tinggi_model):
+    """Taubin (tidak menyusut) pada verteks di daerah z_min..z_maks dan |x| < x_maks (pecahan tinggi model),
+    dengan tepi daerah memudar. Dipakai pada mesh tinggi sebelum decimate: tonjolan tipis seperti tali leher
+    yang ikut tercetak Tripo, kalau dibiarkan, menjadi kantong lipatan dan segitiga terbalik setelah decimate
+    dan ikut ter-bake ke normal map. Bentuk besar (tulang selangka, otot) tetap."""
+    me = obj.data
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    z0 = co[:, 2].min()
+    zmin, zmaks, xmaks = (float(v) * tinggi_model for v in daerah.split(","))
+    pudar = 0.012 * tinggi_model
+    naik = lambda x: np.clip(x, 0, 1) ** 2 * (3 - 2 * np.clip(x, 0, 1))
+    xc = (co[:, 0].min() + co[:, 0].max()) / 2
+    w = naik((co[:, 2] - z0 - zmin) / pudar + 1) * naik((zmaks - (co[:, 2] - z0)) / pudar + 1) * naik((xmaks - np.abs(co[:, 0] - xc)) / pudar + 1)
+    e = np.empty(len(me.edges) * 2, dtype=np.int64)
+    me.edges.foreach_get("vertices", e)
+    e = e.reshape(-1, 2)
+    e = e[(w[e[:, 0]] > 0) | (w[e[:, 1]] > 0)]
+    hit = np.zeros(len(co))
+    np.add.at(hit, e[:, 0], 1)
+    np.add.at(hit, e[:, 1], 1)
+    hit = np.maximum(hit, 1)[:, None]
+    for _ in range(iterasi):
+        for faktor in (0.5, -0.53):
+            jumlah = np.zeros_like(co)
+            np.add.at(jumlah, e[:, 0], co[e[:, 1]])
+            np.add.at(jumlah, e[:, 1], co[e[:, 0]])
+            co += faktor * w[:, None] * (jumlah / hit - co) * (hit > 1.5)
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    return int((w > 0.5).sum())
+
+
 def ukuran_mb(path):
     return os.path.getsize(path) / (1024 * 1024)
 
@@ -312,6 +354,9 @@ def main():
     bpy.ops.object.mode_set(mode="OBJECT")
     bpy.ops.object.shade_smooth()
     catat(f"setelah rapi: {jumlah_segitiga(tinggi)} segitiga, {len(tinggi.data.vertices)} verteks")
+    if a.halus_daerah:
+        n_halus = haluskan_daerah(tinggi, a.halus_daerah, a.halus_iterasi, tinggi_asal)
+        catat(f"daerah {a.halus_daerah} dihaluskan sebelum decimate: {n_halus} verteks, Taubin {a.halus_iterasi} iterasi")
 
     # 2. salinan rendah
     bpy.ops.object.duplicate()
@@ -377,8 +422,12 @@ def main():
     pilih_hanya(rendah)
     co = np.array([v.co[:] for v in rendah.data.vertices])
     skala = a.tinggi / float(co[:, 2].max() - co[:, 2].min())
-    rendah.scale = (skala, skala, skala)
+    # Ramping: lebar dan tebal dikecilkan, tinggi tetap (prajurit dibuat sedikit lebih ramping dari Wijaya).
+    datar = skala * (1.0 - a.ramping)
+    rendah.scale = (datar, datar, skala)
     bpy.ops.object.transform_apply(scale=True)
+    if a.ramping:
+        catat(f"ramping: lebar dan tebal x {1.0 - a.ramping:.3f}, tinggi tetap")
     co = np.array([v.co[:] for v in rendah.data.vertices])
     z_min = co[:, 2].min()
     kaki = co[co[:, 2] < z_min + 0.05 * a.tinggi / 1.7]

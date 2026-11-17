@@ -797,5 +797,627 @@
       },
       "berkas_mb": 1.96
     }
+  },
+  "prajurit": {
+    "data_z": [
+      0.0,
+      1.7
+    ],
+    "data_x": [
+      0.0,
+      0.46
+    ],
+    "abu": {
+      "abu_kroma_maks": 14,
+      "abu_rona_biru": [
+        85,
+        135
+      ],
+      "abu_sat_biru_maks": 0.4,
+      "abu_v_min": 0.45,
+      "abu_v_maks": 0.92,
+      "lebar_topeng_px": 2,
+      "kulit_rona_maks": 22,
+      "kulit_sat_min": 0.25,
+      "emas_rona": [
+        18,
+        40
+      ],
+      "kain_v_maks": 0.25,
+      "jarak_kain_emas_px": 2,
+      "abu_gelap_v_min": 0.06,
+      "gelap_kroma_maks": 20,
+      "rambut_kroma_maks": 12,
+      "gelap_kulit_cincin_min": 0.2,
+      "gelap_luas_maks_px": 20000,
+      "cokelat_v_maks": 0.4,
+      "cokelat_luas_min_px": 400,
+      "cincin_px": 6,
+      "kulit_cincin_min": 0.3,
+      "kulit_cincin_abaikan": 0.12,
+      "tepi_px": 2,
+      "komponen_min_px": 12,
+      "isi_tepi": true,
+      "dilate_margin_px": 8,
+      "inpaint_radius": 5,
+      "sigma_detail_px": 2.0,
+      "kekuatan_detail": 0.6,
+      "keterangan": "prajurit: bercak Tripo kelabu terang (kroma <= 14, V >= 0,45); kain nila pudar berkroma rendah juga, jadi kain ditentukan menurut posisi (zona_kain) dan tidak disentuh. Kelas bercak gelap hanya di kaki (gelap_z_maks_m); tali lukis dan bayangan di leher dikerjakan sambung_tekstur.py. Jari yang seluruhnya kelabu diisi (isi_tanpa_kulit). Di atas z_maks_m (kepala lama) dilewati.",
+      "gelap_aktif": true,
+      "z_maks_m": 1.5,
+      "zona_kain": {
+        "z_m": [
+          0.49,
+          1.06
+        ],
+        "x_abs_maks_m": 0.25
+      },
+      "hasil": {
+        "otomatis_px": 119968,
+        "tangan_px": 545,
+        "komponen": {
+          "kecil": 5,
+          "otomatis": 96,
+          "tepi": 0,
+          "bukan_kulit": 0,
+          "diabaikan": 1,
+          "gelap": 2,
+          "gelap_dilewati": 0
+        },
+        "per_tinggi_m": {
+          "otomatis": {
+            "0.0": 13043,
+            "0.1": 2864,
+            "0.7": 17608,
+            "0.8": 13639,
+            "0.9": 19316,
+            "1.0": 13323,
+            "1.1": 21812,
+            "1.2": 4257,
+            "1.3": 5464,
+            "1.4": 8479,
+            "1.5": 163
+          },
+          "tangan": {
+            "1.0": 356,
+            "1.3": 114,
+            "1.4": 75
+          }
+        }
+      },
+      "gelap_z_maks_m": 0.12,
+      "isi_tanpa_kulit": {
+        "x_abs_min_m": 0.3
+      }
+    },
+    "kepala": {
+      "kamera": {
+        "ukuran_px": 1024,
+        "ortho_scale": 1.1,
+        "pusat": [
+          0.0,
+          0.0,
+          0.5
+        ],
+        "bbox_min": [
+          -0.28131103515625,
+          -0.3705291748046875,
+          0.0
+        ],
+        "bbox_max": [
+          0.28131103515625,
+          0.3705291748046875,
+          1.0
+        ],
+        "keterangan": "satuan GLB kepala (tinggi 1,0). x = pusat.x + (u/ukuran - 0,5) * ortho; z = pusat.z - (v/ukuran - 0,5) * ortho"
+      },
+      "acuan_px": {
+        "mata_kiri": [
+          421.9,
+          432.9
+        ],
+        "mata_kanan": [
+          604.4,
+          433.2
+        ],
+        "ujung_hidung": [
+          508.9,
+          549.9
+        ],
+        "mulut_kiri": [
+          446.4,
+          633.4
+        ],
+        "mulut_kanan": [
+          571.3,
+          631.9
+        ],
+        "dagu": [
+          507.5,
+          741.6
+        ],
+        "dahi": [
+          513.5,
+          303.7
+        ]
+      },
+      "acuan": {
+        "mata_kiri": [
+          -0.0968,
+          0.585
+        ],
+        "mata_kanan": [
+          0.0993,
+          0.5846
+        ],
+        "ujung_hidung": [
+          -0.0033,
+          0.4593
+        ],
+        "mulut_kiri": [
+          -0.0705,
+          0.3696
+        ],
+        "mulut_kanan": [
+          0.0637,
+          0.3712
+        ],
+        "dagu": [
+          -0.0048,
+          0.2534
+        ],
+        "dahi": [
+          0.0016,
+          0.7238
+        ]
+      },
+      "jarak_mata": 0.1961,
+      "acuan_keterangan": "satuan GLB kepala: [x, z]; mata_kiri = kiri pada gambar",
+      "ringan": {
+        "cara": "tempel",
+        "segitiga": 3500,
+        "segitiga_wajah": 1400,
+        "voxel_m": 0.004,
+        "leher_sisa_m": 0.05,
+        "puncak_tebal_min": 0.6,
+        "halus_rambut_iterasi": 12,
+        "halus_rambut_faktor": 0.5,
+        "wajah_sudut_penuh": 55.0,
+        "wajah_sudut_nol": 75.0,
+        "wajah_atas_penuh_m": 0.025,
+        "wajah_atas_nol_m": 0.04,
+        "wajah_bagi": 1,
+        "smart_uv_sudut": 66.0,
+        "bake_cage_m": 0.008,
+        "bake_sinar_m": 0.06,
+        "keterangan": "meter setelah kepala diskalakan. wajah = jendela depan (sudut dari sumbu tegak kepala: penuh sampai wajah_sudut_penuh, nol di wajah_sudut_nol) di bawah mata + wajah_atas_*; rambut = di atas itu dan belakang kepala. cara 'tempel': verteks wajah ditempel ke permukaan asli; 'remesh': tidak.",
+        "hasil": {
+          "cara": "tempel",
+          "skala_m_per_satuan": 0.3287,
+          "segitiga": 3500,
+          "segitiga_wajah": 1712,
+          "acuan_m": {
+            "mata_kiri": [
+              -0.0318,
+              0.1923
+            ],
+            "mata_kanan": [
+              0.0326,
+              0.1922
+            ],
+            "ujung_hidung": [
+              -0.0011,
+              0.151
+            ],
+            "mulut_kiri": [
+              -0.0232,
+              0.1215
+            ],
+            "mulut_kanan": [
+              0.0209,
+              0.122
+            ],
+            "dagu": [
+              -0.0016,
+              0.0833
+            ],
+            "dahi": [
+              0.0005,
+              0.2379
+            ]
+          },
+          "sumbu_m": [
+            0.0004,
+            0.0075
+          ],
+          "y_depan_mata_m": -0.0967,
+          "puncak_m": 0.3073,
+          "puncak_sanggul_m": 0.3287,
+          "z_bawah_m": 0.0333,
+          "simpangan_mm": {
+            "wajah": [
+              0.16,
+              0.4,
+              2.63
+            ],
+            "mulut": [
+              0.35,
+              1.67,
+              2.83
+            ],
+            "mata": [
+              0.19,
+              0.53,
+              1.05
+            ],
+            "hidung": [
+              0.28,
+              0.81,
+              2.06
+            ],
+            "bawah_dagu": [
+              0.1,
+              0.26,
+              0.5
+            ]
+          },
+          "berkas_mb": 0.49
+        }
+      },
+      "puncak_z": 0.9348,
+      "rasio_tinggi": 7.5
+    },
+    "tinggi_m": 1.68,
+    "sambung": {
+      "dagu_z_m": 1.455,
+      "skala_kepala": 1.0,
+      "telinga_maju_m": 0.0,
+      "geser_x_m": 0.0,
+      "potong_bawah_dagu_m": 0.016,
+      "miring_derajat": 8.0,
+      "celah_m": 0.014,
+      "radius_leher_m": 0.105,
+      "pangkal_m": 0.06,
+      "warp_radius_penuh_m": 0.11,
+      "warp_radius_nol_m": 0.19,
+      "lanjut_sumbu": 0.5,
+      "keterangan": "dagu_z_m: tinggi ujung dagu kepala baru di badan. potong_bawah_dagu_m: bidang potong kepala di sumbu leher sekian di bawah dagu; miring_derajat: bidang lebih rendah di depan; celah_m: jarak ke bidang potong badan (tinggi pita sambungan). pangkal_m: perampingan leher badan mulai sekian di bawah bidang potong badan (bobot 0) sampai bidang potong (bobot 1). telinga_maju_m: kepala digeser maju dari posisi telinga tepat di atas sendi bahu.",
+      "kolom_min": 28,
+      "ruas": 3,
+      "singgung": 0.33,
+      "sudut_singgung_maks": 35.0,
+      "halus_pita_iterasi": 2,
+      "halus_pita_faktor": 0.5,
+      "kepala_skala_uv": 1.8,
+      "pack_margin": 0.004,
+      "ukuran": 2048,
+      "tali": {
+        "aktif": true,
+        "segmen": 44,
+        "sisi": 8,
+        "tinggi_m": 0.007,
+        "tebal_m": 0.0032,
+        "celah_m": 0.0008,
+        "halus_iterasi": 3,
+        "warna_srgb": [
+          58,
+          40,
+          28
+        ]
+      },
+      "tinggi_akhir_m": 1.68,
+      "hasil": {
+        "loop_badan": [
+          {
+            "verteks": 54,
+            "tertutup": true
+          }
+        ],
+        "loop_kepala": [
+          {
+            "verteks": 72,
+            "tertutup": true
+          }
+        ],
+        "tepi_terbuka_dekat_sambungan": 0,
+        "muka_menghadap_dalam_dekat_sambungan": [
+          1,
+          0
+        ],
+        "cincin_badan": {
+          "verteks_asal": 54,
+          "verteks_dirapikan": 27,
+          "verteks": 48,
+          "lebar_m": 0.1175,
+          "tebal_m": 0.1115
+        },
+        "cincin_kepala": {
+          "verteks_asal": 72,
+          "verteks_dirapikan": 30,
+          "verteks": 48,
+          "lebar_m": 0.1176,
+          "tebal_m": 0.1116
+        },
+        "selisih_persen": {
+          "lebar": -0.1,
+          "tebal": -0.1
+        },
+        "pita": {
+          "kolom": 48,
+          "cincin_perantara": 2,
+          "segitiga": 288,
+          "tinggi_m": 0.0153,
+          "keliling_m": 0.3662,
+          "beda_sudut_pasangan_maks_derajat": 2.2
+        },
+        "kepala_lama_muka_dibuang": 1170,
+        "leher_badan": {
+          "posisi": 477,
+          "muka_terbalik": 20,
+          "muka_terbalik_sisa": 20,
+          "verteks_digeser": 1079,
+          "muka_dibalik": 0,
+          "tambalan": [
+            {
+              "pusat_m": [
+                0.012,
+                -0.003,
+                1.342
+              ],
+              "jari_m": 0.029,
+              "muka_dibuang": 57,
+              "tepi_verteks": 13,
+              "segitiga_baru": 13
+            },
+            {
+              "pusat_m": [
+                0.08,
+                0.053,
+                1.392
+              ],
+              "jari_m": 0.035,
+              "muka_dibuang": 77,
+              "tepi_verteks": 19,
+              "segitiga_baru": 19
+            }
+          ]
+        },
+        "tengkuk_kepala_muka_terbalik": [
+          14,
+          0
+        ],
+        "tali": {
+          "segitiga": 704,
+          "jari_dari_sumbu_m": [
+            0.0471,
+            0.0667
+          ],
+          "z_depan_m": 1.4241,
+          "z_belakang_m": 1.4397
+        },
+        "segitiga": 14107,
+        "segitiga_badan": 9807,
+        "segitiga_kepala": 3338,
+        "tinggi_sebelum_skala_m": 1.6986,
+        "skala_akhir": 0.98905,
+        "tinggi_kepala_akhir_m": 0.2215,
+        "berkas_mb": 1.64
+      },
+      "tepi_min_m": 0.006,
+      "cocok_derajat": 2.5,
+      "halus_pangkal": {
+        "aktif": true,
+        "bawah_m": 0.19,
+        "penuh_m": 0.15,
+        "atas_m": 0.03,
+        "x_penuh_m": 0.15,
+        "x_nol_m": 0.21,
+        "iterasi": 40,
+        "lambda": 0.5,
+        "mu": -0.53,
+        "laplace_iterasi": 3,
+        "laplace_faktor": 0.4
+      },
+      "tengkuk_atas_dagu_m": 0.035,
+      "tengkuk_depan_telinga_m": 0.0,
+      "garis_rambut_atas_dagu_m": 0.085,
+      "garis_rambut_belakang_telinga_m": 0.018
+    },
+    "tempat": {
+      "geser_m": [
+        0.0091,
+        0.0522,
+        1.3717
+      ],
+      "skala_kepala": 1.0,
+      "normal": [
+        0.0,
+        -0.13917,
+        0.99027
+      ],
+      "bidang_kepala_m": [
+        0.0092,
+        0.0696,
+        1.439
+      ],
+      "bidang_badan_m": [
+        0.0091,
+        0.074,
+        1.4244
+      ],
+      "arah_sumbu": [
+        0.0023,
+        -0.2477,
+        0.9688
+      ],
+      "cincin_kepala": {
+        "lebar": 0.1175,
+        "tebal": 0.1126,
+        "pusat": [
+          0.0091,
+          0.0705,
+          1.438
+        ],
+        "jari_maks": 0.0657
+      },
+      "cincin_badan_terukur": {
+        "lebar": 0.1224,
+        "tebal": 0.1297,
+        "pusat": [
+          0.0092,
+          0.0271,
+          1.4192
+        ],
+        "jari_maks": 0.0765
+      },
+      "cincin_badan_asal": {
+        "lebar": 0.1152,
+        "tebal": 0.1418,
+        "pusat": [
+          0.011,
+          0.0188,
+          1.4192
+        ],
+        "jari_maks": 0.0765
+      },
+      "badan": {
+        "x0": 0.0095,
+        "z_bahu": 1.325,
+        "y_bahu": 0.0656,
+        "x_bahu": 0.1915,
+        "setengah_lebar_bahu": 0.2724
+      },
+      "kepala": {
+        "telinga_m": [
+          0.0656,
+          1.5501
+        ],
+        "lebar_rahang_m": 0.1215,
+        "lebar_telinga_m": 0.1846,
+        "puncak_m": 1.679,
+        "puncak_sanggul_m": 1.6986,
+        "mata_z_m": 1.564
+      },
+      "sumbu_leher_derajat": 10.3,
+      "telinga_dari_bahu_m": -0.0,
+      "tinggi_total_m": 1.6986
+    },
+    "tekstur": {
+      "kulit": {
+        "rona_pusat": 10,
+        "rona_lebar": 14,
+        "sat_min": 0.18,
+        "sat_maks": 0.85,
+        "v_min": 0.2
+      },
+      "peralihan_m": 0.03,
+      "peralihan_pudar_m": 0.01,
+      "peralihan_kuat": 0.85,
+      "sektor": 48,
+      "kelabu": {
+        "kroma_maks": 20,
+        "v_min": 0.45,
+        "atas_dagu_m": 0.03,
+        "lebar_px": 3
+      },
+      "tali_lukis": {
+        "aktif": true,
+        "bawah_potong_m": 0.17,
+        "x_abs_maks_m": 0.24,
+        "ambang_L": 14.0,
+        "kulit_min": 0.35,
+        "lebar_px": 4,
+        "normal_kuat": 0.3
+      },
+      "separuh_wajah": {
+        "ambang_L": 6.0,
+        "sudut_derajat": [
+          15.0,
+          60.0
+        ]
+      },
+      "margin_px": 8,
+      "keterangan": "peralihan_m: tinggi pita peralihan warna dari kulit badan (bawah) ke kulit kepala (atas), berpusat di bidang tengah sambungan. tali_lukis: texel dada atas (sampai bawah_potong_m di bawah potongan) yang lebih gelap ambang_L dari kulit sekitarnya atau bukan kulit diisi kulit (tali konsep yang ikut tercetak Tripo). kelabu: bercak tanpa warna di bawah dagu kepala.",
+      "hasil": {
+        "bawah_dagu": {
+          "texel_rak": 16894,
+          "texel_bercak": 8902,
+          "kroma_median_kulit": 28.4
+        },
+        "tali_lukis": {
+          "texel": 17834,
+          "daerah_texel": 131005,
+          "L_median": 148.0,
+          "kroma_median": 28.8
+        },
+        "kulit": {
+          "badan_sebelum": [
+            139.7,
+            143.2,
+            149.9
+          ],
+          "kepala": [
+            136.1,
+            144.3,
+            150.7
+          ],
+          "badan_simpang": [
+            19.3,
+            1.8,
+            3.5
+          ],
+          "kepala_simpang": [
+            16.5,
+            3.3,
+            4.6
+          ],
+          "konsep": [
+            140.2,
+            144.0,
+            150.3
+          ]
+        },
+        "peralihan": {
+          "texel_kulit_diubah": 20673,
+          "texel_pita": 14475,
+          "lab_badan_rata": [
+            145.4,
+            144.7,
+            151.9
+          ],
+          "lab_kepala_rata": [
+            141.4,
+            144.1,
+            152.0
+          ],
+          "selisih_L_per_sektor_maks": 9.1
+        },
+        "separuh_wajah": {
+          "L_sisi_a": 140.6,
+          "L_sisi_b": 138.4,
+          "selisih_L": 2.2,
+          "diratakan": false
+        }
+      },
+      "bawah_dagu": {
+        "nz_penuh": -0.45,
+        "nz_nol": -0.15,
+        "atas_dagu_m": 0.02,
+        "sudut_derajat": [
+          90.0,
+          115.0
+        ]
+      },
+      "pucat_rasio": 0.72,
+      "medan": {
+        "voxel_m": 0.006,
+        "sigma": 1.5,
+        "derau_L": 1.5
+      }
+    },
+    "data_r": [
+      0.0,
+      0.6
+    ]
   }
 }

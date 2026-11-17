@@ -23,6 +23,7 @@ def argumen():
     p.add_argument("--keluar", required=True)
     p.add_argument("--kualitas-jpeg", type=int, default=85)
     p.add_argument("--normal", default=None, help="normal map PNG baru (opsional)")
+    p.add_argument("--nama", default="wijaya", help="awalan nama gambar di dalam GLB")
     return p.parse_args(argv)
 
 
@@ -50,13 +51,13 @@ def main():
     scene.render.image_settings.file_format = "JPEG"
     scene.render.image_settings.quality = a.kualitas_jpeg
     scene.render.image_settings.color_mode = "RGB"
-    path_jpg = os.path.join(tmp, "wijaya_basecolor.jpg")
+    path_jpg = os.path.join(tmp, a.nama + "_basecolor.jpg")
     baru.file_format = "JPEG"
     baru.filepath_raw = path_jpg
     baru.save()
     bpy.data.images.remove(baru)
     jpg = bpy.data.images.load(path_jpg)
-    jpg.name = "wijaya_basecolor"
+    jpg.name = a.nama + "_basecolor"
     jpg.colorspace_settings.name = "sRGB"
     tex.image = jpg
     bpy.data.images.remove(lama)
@@ -69,13 +70,13 @@ def main():
         baru_n.colorspace_settings.name = "Non-Color"
         baru_n.pixels[0]
         baru_n.scale(baru_n.size[0], baru_n.size[1])
-        path_njpg = os.path.join(tmp, "wijaya_normal.jpg")
+        path_njpg = os.path.join(tmp, a.nama + "_normal.jpg")
         baru_n.file_format = "JPEG"
         baru_n.filepath_raw = path_njpg
         baru_n.save()
         bpy.data.images.remove(baru_n)
         njpg = bpy.data.images.load(path_njpg)
-        njpg.name = "wijaya_normal"
+        njpg.name = a.nama + "_normal"
         njpg.colorspace_settings.name = "Non-Color"
         tex_n.image = njpg
         bpy.data.images.remove(lama_n)

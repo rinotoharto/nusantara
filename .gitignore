@@ -19,3 +19,13 @@ aset-mentah/tekstur/topeng-kulit.png
 
 # cadangan otomatis Blender
 *.blend1
+
+# berkas antara sambung kepala (per karakter), dibuat ulang oleh data_uv.py, abu_isi.py, kepala_ringan.py,
+# sambung_kepala.py
+aset-mentah/tekstur/*-data.png
+aset-mentah/tekstur/*-topeng-abu.png
+aset-mentah/tekstur/*-kepala-basecolor.png
+aset-mentah/tekstur/*-kepala-normal.png
+aset-mentah/tekstur/*-sambung-A-*.png
+aset-mentah/tekstur/*-sambung-data*.png
+aset-mentah/*-sambung.glb

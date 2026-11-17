@@ -91,6 +91,10 @@ color lama: `tekstur/wijaya-basecolor-sebelum.jpg`.
 - `tekstur/`: base color cadangan, hasil tiap tahap, topeng, dan panduan
   rapikan tangan.
 - `mixamo/`: FBX untuk diunggah ke Mixamo dan hasil unduhannya (Tahap C).
+- `mixamo-prajurit/`: FBX prajurit untuk Mixamo dan `LANGKAH.md`; `idle.fbx` With Skin menyusul. Animasi lain
+  dipakai ulang dari `mixamo/`.
+- `pratinjau/prajurit-*.png`: tumpang penempatan, tumpang siluet dengan konsep, banding wajah, dan pratinjau model
+  tersambung.
 
 ## Masalah kepala (30 Oktober 2026)
 
@@ -135,6 +139,10 @@ Masalah leher yang DITUNDA untuk sesi berikutnya:
 
 ## Prosedur tetap karakter (dari pengalaman Wijaya dan prajurit Kediri)
 
+Pembaruan 17 November 2026: langkah 3 di bawah (ganti_kepala.py) diganti cara potong di tengah leher; prosedur
+yang berlaku sekarang ada di `docs/standar-karakter.md`, skripnya di `tools/blender/README.md` bagian "Sambung
+kepala di tengah leher".
+
 Tripo dari gambar seluruh badan selalu menghasilkan wajah meleleh, bercak abu-abu di bagian yang tidak terlihat (tangan, pergelangan kaki, leher), dan kulit pucat. Jadi setiap karakter dibuat dari dua gambar:
 1. Seluruh badan, pose A, latar putih → Tripo H2.5 → `<nama>-tripo.glb` (dipakai untuk bentuk badan).
 2. Kepala dan leher dekat dari karakter yang sama (percakapan ChatGPT yang sama) → Tripo H2.5 → `<nama>-kepala-tripo.glb`.
@@ -144,8 +152,44 @@ Tripo dari gambar seluruh badan selalu menghasilkan wajah meleleh, bercak abu-ab
 
 - Konsep: docs/referensi/prajurit-kediri-konsep-01.png (ChatGPT; ikat kepala dan kain biru nila, sabuk cokelat pendek, kain bersilang bermotif).
 - Badan: aset-mentah/prajurit-tripo.glb (Tripo H2.5). Bentuk dan kain bagus; wajah meleleh, bercak abu-abu, kulit pucat.
-- Kepala: aset-mentah/prajurit-kepala-tripo.glb (menyusul).
+- Kepala: aset-mentah/prajurit-kepala-tripo.glb (Tripo H2.5, dari docs/referensi/prajurit-kediri-kepala-01.png; 501.040 segitiga, patung dada sampai bahu). Wajah bagus; rambut berserabut; permukaan bawah dagu mosaik pucat.
+- Tampak samping: docs/referensi/prajurit-kediri-samping-01.png (acuan proporsi, bukan untuk Tripo).
 - Dipakai sebagai tubuh dasar semua prajurit dan pengikut; variasi warna ikat kepala dan kain lewat kode (Kediri biru nila, Singasari merah tua, Madura putih dan hitam). Badan agak berotot; kalau perlu diramping lewat skrip supaya Wijaya tetap menonjol.
+
+### Hasil sambung kepala (17 November 2026)
+
+Cara potong di tengah leher (`docs/prompt-prajurit-kepala.md`, lalu dibakukan di `docs/standar-karakter.md`).
+Alur, perintah, dan angka di `tools/blender/README.md` dan `wajah.json` blok `prajurit`. CEK C (penempatan) dan
+CEK F (model diam) disetujui; kepala tidak dimajukan mengikuti konsep.
+
+- Badan (`prajurit-badan.glb`): 10.999 segitiga, 1,68 m, diramping 6,5 persen di X dan Y, tekstur 2048. Tonjolan
+  tali di pangkal leher dan dada dihaluskan pada mesh tinggi sebelum decimate. Bercak kelabu di kulit sekitar
+  100.400 texel menjadi sekitar 2.600 (sebagian di batas kain, untuk dirapikan tangan kalau terlihat); kain ditentukan menurut posisi (nila pudar terbaca sebagai
+  bercak); jari yang seluruhnya kelabu dan bercak gelap telapak kaki ikut diisi.
+- Kepala (`prajurit-kepala.glb`): 3.500 segitiga (wajah 1.712), tekstur 1024, skala 0,3287 m per satuan (dagu ke
+  puncak tanpa sanggul 22,4 cm). Remesh untuk rambut, verteks wajah ditempel ke permukaan asli: simpangan p95
+  mulut 1,67 mm, mata 0,53 mm, hidung 0,81 mm (remesh polos: 2,36, 0,88, 1,20).
+- Penempatan: dagu z 1,455 m, telinga tepat di atas sendi bahu, kepala tidak diskalakan. Leher badan di garis
+  potong semula 12,2 x 13,0 cm dengan pusat 4,7 cm di depan; ditipiskan dan ditegakkan bertahap (bobot 0 mulai
+  6 cm di bawah potongan). Sumbu leher 10,3 derajat ke depan. Lebar rahang 12,2 cm, leher 11,8 cm.
+- Sambungan: bidang potong miring 8 derajat, kepala 1,6 cm di bawah dagu, badan 1,4 cm di bawahnya. Cincin
+  badan 54 dan kepala 72 verteks, dirapikan lalu dipasangkan per sudut menjadi 48 kolom; lebar 11,8 dan tebal
+  11,2 cm di keduanya (selisih 0,1 persen); pita 2 cincin perantara, tinggi 1,5 cm, 288 segitiga. Tidak ada
+  tepi terbuka di sekitar sambungan.
+- Dua kantong lipatan sisa tali di mesh badan (simpul di dada, dan di pangkal leher kiri) dibuang dan ditambal
+  (jari-jari 2,9 dan 3,5 cm; 13 dan 19 segitiga baru, warna kulit polos).
+- Tali leher: mesh pita lonjong 7 x 3,2 mm, 704 segitiga, warna #3A281C, di bidang tengah sambungan (lebih rapat
+  dan lebih tinggi dari konsep). Tali lukis lama dihapus dari tekstur.
+- Tekstur: satu atlas 2048. Kulit badan Lab (139,7, 143,2, 149,9) digeser ke kepala (136,1, 144,3, 150,7);
+  konsep (140,2, 144,0, 150,3). Peralihan 3 cm di sambungan. Pipi kiri-kanan selisih 2,2 L, tidak diratakan.
+  Permukaan bawah dagu diganti warna kulit rata (tanpa detail).
+- Model diam: `prajurit-utuh.glb`, 14.107 segitiga (badan 9.807, kepala 3.338, pita 288, tali 704), 1,68 m,
+  kepala 22,2 cm, 1,8 MB. FBX: `mixamo-prajurit/prajurit-untuk-mixamo.fbx`.
+- Sisa yang diketahui: satu tonjolan kecil helai rambut di dekat telinga; dua tambalan di dada berwarna polos;
+  dari samping kepala konsep sekitar 3 cm lebih maju (sengaja tidak diikuti).
+- Belum dikerjakan: rig Mixamo (`mixamo-prajurit/LANGKAH.md`), gabung animasi, pemasangan ke game, variasi warna
+  ikat kepala dan kain lewat kode. Untuk tahap animasi: masalah bobot kain dan lengan kiri di bagian "Masalah
+  animasi" di bawah kemungkinan muncul juga di prajurit.
 
 ## Sambungan kepala: belum terbukti (catatan 30 Oktober 2026)
 
@@ -186,7 +230,8 @@ Hasil `rapikan_leher.py` (17 November 2026, revisi 1; alur dan angka di `tools/b
 - Pratinjau `pratinjau/leher-*.png`: `badan-samping-istirahat` dan `badan-samping-idle` (garis merah lewat sendi bahu), `samping-istirahat`, `samping-idle`, `dialog`, `depan`, `samping`, `tigaperempat`, `bawah`, `lari`, `serang-2`, `toleh`, `mati`, ringkasan `ringkas-samping` dan `ringkas-dekat`, serta tangkapan layar game `leher-game-dialog.jpg`, `leher-game-samping.jpg`, `leher-game-bawah.jpg` (ringkasan `leher-ringkas-game.jpg`).
 - Sisa yang diketahui: tepi bawah rambut di belakang telinga terpotong lurus mendatar (z 1,512 m); garis zig-zag jahitan UV di dada setinggi puting sudah ada sebelum tahap ini (di luar daerah yang dirapikan); tekstur pita sambungan polos tanpa detail kulit; di mesh ada 256 muka yang arahnya janggal sejak sebelum decimate (lipatan kain dan ketiak) dan sengaja tidak diubah.
 - Penilaian pengguna atas revisi 1 (17 November 2026): belum final, dan tidak direvisi lagi dengan cara ini. Masalah yang tersisa: leher terlalu lebar seperti tiang; dagu tidak terlihat karena bawah rahang rata dengan leher; rambut tengkuk terpotong lurus. Di-commit apa adanya sebagai "Leher Wijaya revisi 1 (belum final)".
-- Langkah berikutnya: Wijaya diulang dengan cara potong di tengah leher (lihat `docs/prompt-prajurit-kepala.md`). Prosedur sambung kepala dengan potongan di bawah rahang belum dinyatakan berhasil.
+- Pelajaran: memotong kepala tepat di bawah dagu dan menyambung di rahang tidak berhasil. Prosedur sambung kepala dengan potongan di bawah rahang belum dinyatakan berhasil.
+- Langkah berikutnya: Wijaya diulang nanti dengan cara potong di tengah leher (lihat `docs/prompt-prajurit-kepala.md`, dicoba dulu pada prajurit Kediri), memakai `aset-mentah/kepala-tripo.glb` yang masih utuh.
 
 ## Tombak (1 November 2026)
 
@@ -214,7 +259,37 @@ Hasil `rapikan_leher.py` (17 November 2026, revisi 1; alur dan angka di `tools/b
 
 ## Prosedur sambung kepala (diputuskan 1 November 2026)
 
+Pembaruan 17 November 2026: prosedur gabungan manual dan skrip di bawah ini tidak dipakai lagi. Yang berlaku:
+potong di tengah leher dengan `sambung_kepala.py` (`docs/standar-karakter.md`), sudah berhasil pada prajurit
+Kediri.
+
 Gabungan manual dan skrip, karena masing-masing gagal di bagian berbeda (skrip: kepala menjorok; manual: Fill Holes dan Merge by Distance merusak wajah).
 1. Manual di Blender (pengguna, sekitar 15 menit): impor badan dan kepala, letakkan kepala (tegak di atas leher, telinga di atas sendi bahu), Bisect kepala sedikit di bawah dagu dan leher badan sedikit di bawahnya, ekstrusi leher badan masuk ke kepala. Simpan sebagai aset-mentah/<nama>-leher.blend.
 2. Skrip rapikan_leher.py (dibuat saat merapikan Wijaya, dipakai ulang): bentuk cincin atas pita leher mengikuti garis rahang, tutup cincin batas bawah kepala, bake ulang warna pita dan samakan kulit di ruang Lab, kalung atau tali leher penutup sambungan, lalu optimasi dan gabung_animasi.
 Cadangan bila hasil Wijaya tetap kurang rapi: MakeHuman/MPFB2 untuk prajurit dan warga; prosedur dua gambar hanya untuk tokoh utama.
+
+## Masalah animasi: lengan kiri saat menyerang (dicatat 17 November 2026)
+
+Saat Wijaya menyerang, lengan kiri tampak tidak proporsional dan menempel ke badan. Dikerjakan bersama sesi pengulangan Wijaya (sambung kepala cara baru). Langkah:
+1. Diagnosis dulu dengan membandingkan pratinjau Mixamo dan render gabung_animasi.py pada bingkai yang sama. Kalau di Mixamo juga menempel: itu sifat klip Sword And Shield (lengan kiri memegang perisai rapat ke badan). Kalau di Mixamo normal: masalah bobot kulit lengan kiri (verteks lengan ikut tulang Spine) atau retarget di gabung_animasi.py.
+2. Perbaikan sesuai penyebab: (a) koreksi rotasi tambahan pada LeftArm dan LeftForeArm untuk klip serang-1, serang-2, serang-3, tangkis (menjauhkan lengan dari badan sekitar 15 sampai 25 derajat, angka di wajah.json); atau (b) di game, lapisan animasi bertopeng: lengan kiri memakai pose siaga atau idle sementara badan dan lengan kanan memakai klip serang (AnimationMixer dengan track yang difilter per tulang); atau (c) perbaiki bobot lengan kiri (transfer bobot ulang, normalisasi, batasi pengaruh Spine pada lengan).
+3. Pratinjau: frame kontak serang-1, serang-2, serang-3 dari depan dan samping.
+
+Pembaruan dari tangkapan layar game 17 November (pose serang, kuda-kuda lebar): ada tiga masalah terpisah.
+- Pose lengan kiri: tangan kiri tertekuk menempel di dada dengan telapak masuk ke otot dada (sifat klip Sword And Shield yang memegang perisai). Perbaiki dengan koreksi rotasi LeftArm/LeftForeArm/LeftHand atau lapisan bertopeng (butir 2a/2b di atas), sampai tangan kiri berada di depan badan sekitar 15 sampai 20 cm, tidak menembus.
+- Bobot kulit salah (penyebab utama "aneh"): ada serat gelap memanjang dari tangan kiri ke kain di pinggang, dan di dekat tangan kanan juga. Dugaan: transfer bobot nearest vertex mengambil bobot tangan untuk verteks kain di dekat pergelangan, karena dalam pose A tangan menggantung tepat di samping kain. Perbaikan: batasi transfer bobot per bagian. Verteks kain dan sabuk hanya boleh dari Hips, Spine, dan paha (UpLeg); verteks lengan dan tangan hanya dari rantai lengan; pisahkan bagian lewat pulau mesh, UV, atau warna tekstur, lalu normalisasi. Cek ulang dengan animasi serang-1 sampai 3 dan lari.
+- Kain pecah dan terkoyak menjadi serpihan pada kuda-kuda lebar: aturan 70 persen Hips belum cukup atau tidak mengenai semua verteks kain. Naikkan porsi Hips untuk kain bagian depan dan belakang (85 sampai 90 persen), haluskan bobot kain beberapa iterasi, dan pastikan tidak ada verteks kain dengan bobot ke tulang lengan. Cek pada bingkai kuda-kuda terlebar serang-1 dan tangkis.
+
+Catatan untuk prajurit Kediri (17 November 2026): prajurit belum dirig, jadi belum diuji. Pose A dan kainnya
+serupa (tangan menggantung di samping kain), sehingga serat kain ke tangan, kain pecah pada kuda-kuda lebar, dan
+lengan kiri saat serang dan tangkis harus dicek saat gabung animasi prajurit; daftar ceknya juga ada di
+`mixamo-prajurit/LANGKAH.md`.
+
+## Rencana pengulangan Wijaya (diputuskan 17 November 2026)
+
+Dijalankan setelah prajurit Kediri berhasil dengan sambung_kepala.py.
+- Badan: mulai dari aset-mentah/wijaya-tripo.glb (mentah Tripo). JANGAN pakai public/models/wijaya.glb, wijaya-leher-rapi.glb, atau wijaya-sebelum-leher.glb: lehernya sudah diubah berkali-kali (ekstrusi, pelebaran, potong, kalung, tekstur dada dihapus).
+- Kepala: aset-mentah/kepala-tripo.glb (utuh sampai leher).
+- Urutan skrip: optimasi_karakter.py (dengan cage dan jarak sinar kecil, roughness tetap 0,8) → abu_isi.py → sambung_kepala.py (potong di tengah leher, leher sekitar 11,5 cm, kepala tegak dengan telinga di atas sendi bahu) → kulit_warna.py (kulit badan ke warna kepala dan konsep) → kalung emas sebagai mesh menutup sambungan → ekspor_mixamo.py (rig Mixamo yang ada bisa dipakai ulang kalau proporsi tidak berubah jauh; kalau berubah, rig ulang) → gabung_animasi.py dengan perbaikan bobot kain dan lengan, koreksi Neck, dan lengan kiri saat serang.
+- Tidak dipakai lagi: proyeksi wajah dari konsep (wajah_*.py), hasil Blender manual, rapikan_leher.py revisi 1.
+- Acuan proporsi: docs/referensi/wijaya-konsep-01.png dan wijaya-samping-01.png (buat dulu di ChatGPT dari gambar depan, seperti prajurit).

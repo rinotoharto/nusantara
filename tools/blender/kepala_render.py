@@ -23,6 +23,7 @@ def argumen():
     p.add_argument("--keluar", required=True)
     p.add_argument("--json", required=True)
     p.add_argument("--ukuran", type=int, default=1024)
+    p.add_argument("--blok", default=None, help="blok karakter di json (bawaan: tingkat atas, Wijaya)")
     return p.parse_args(argv)
 
 
@@ -68,7 +69,8 @@ def main():
     bpy.ops.render.render(write_still=True)
     path_json = os.path.join(akar, a.json)
     data = json.load(open(path_json)) if os.path.exists(path_json) else {}
-    data.setdefault("kepala", {})["kamera"] = {
+    akar_json = data.setdefault(a.blok, {}) if a.blok else data
+    akar_json.setdefault("kepala", {})["kamera"] = {
         "ukuran_px": a.ukuran, "ortho_scale": sisi, "pusat": [pusat.x, pusat.y, pusat.z],
         "bbox_min": [float(v) for v in mn], "bbox_max": [float(v) for v in mx],
         "keterangan": "satuan GLB kepala (tinggi 1,0). x = pusat.x + (u/ukuran - 0,5) * ortho; z = pusat.z - (v/ukuran - 0,5) * ortho",

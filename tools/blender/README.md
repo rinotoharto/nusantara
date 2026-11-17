@@ -296,3 +296,134 @@ map. GLB berkerangka tanpa `--aksi` dirender pada pose istirahat.
 ```
 
 Catatan: `--sudut depan` menulis ulang blok `kamera` di json; untuk render uji pakai salinan json.
+
+## Sambung kepala di tengah leher (17 November 2026, prajurit Kediri)
+
+Cara baku untuk karakter dari dua hasil Tripo (badan seluruh tubuh dan kepala dekat); prosedur dan syaratnya ada di
+`docs/standar-karakter.md`. Menggantikan `ganti_kepala.py` dan `rapikan_leher.py` (potong di bawah dagu), yang
+tidak dipakai lagi. Angka per karakter di `wajah.json`, satu blok per karakter (`prajurit`: `abu`, `kepala`,
+`sambung`, `tempat`, `tekstur`); bawaan ditulis skrip saat pertama jalan, ubah di json lalu jalankan ulang.
+
+Urutan untuk prajurit (dari akar repo; `B` = `/Applications/Blender.app/Contents/MacOS/Blender -b -P`, `V` =
+`tools/.venv/bin/python`):
+
+```bash
+# A. Badan
+B tools/blender/optimasi_karakter.py -- --masuk aset-mentah/prajurit-tripo.glb --keluar aset-mentah/prajurit-badan.glb --segitiga 11000 --tekstur 2048 --tinggi 1.68 --ramping 0.065 --halus-daerah 0.765,0.875,0.105 --nama prajurit
+B tools/blender/data_uv.py -- --masuk aset-mentah/prajurit-badan.glb --keluar aset-mentah/tekstur/prajurit-data.png --json tools/blender/wajah.json --blok prajurit --basecolor-keluar aset-mentah/tekstur/prajurit-basecolor-sebelum.jpg
+V tools/blender/abu_isi.py --json tools/blender/wajah.json --blok prajurit --awalan prajurit- --masuk aset-mentah/tekstur/prajurit-basecolor-sebelum.jpg --data aset-mentah/tekstur/prajurit-data.png --keluar aset-mentah/tekstur/prajurit-basecolor-abu.png --tekstur aset-mentah/tekstur
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/prajurit-badan.glb --basecolor aset-mentah/tekstur/prajurit-basecolor-abu.png --keluar aset-mentah/prajurit-badan.glb --nama prajurit
+# B. Kepala
+B tools/blender/kepala_render.py -- --masuk aset-mentah/prajurit-kepala-tripo.glb --keluar /tmp/prajurit-kepala-depan.png --json tools/blender/wajah.json --blok prajurit
+V tools/blender/kepala_acuan.py --json tools/blender/wajah.json --blok prajurit --render /tmp/prajurit-kepala-depan.png
+B tools/blender/kepala_ringan.py -- --masuk aset-mentah/prajurit-kepala-tripo.glb --keluar aset-mentah/prajurit-kepala.glb --json tools/blender/wajah.json --blok prajurit --tekstur aset-mentah/tekstur --nama prajurit --banding aset-mentah/pratinjau/prajurit-wajah-banding.png
+# C. Penempatan (CEK)
+B tools/blender/sambung_kepala.py -- --badan aset-mentah/prajurit-badan.glb --kepala aset-mentah/prajurit-kepala.glb --json tools/blender/wajah.json --blok prajurit --tahap tempat --pratinjau aset-mentah/pratinjau --nama prajurit
+# D dan E. Sambung dan tekstur
+B tools/blender/sambung_kepala.py -- --badan aset-mentah/prajurit-badan.glb --kepala aset-mentah/prajurit-kepala.glb --json tools/blender/wajah.json --blok prajurit --tahap sambung --tekstur aset-mentah/tekstur --nama prajurit --keluar aset-mentah/prajurit-sambung.glb
+V tools/blender/sambung_tekstur.py --json tools/blender/wajah.json --blok prajurit --tekstur aset-mentah/tekstur --nama prajurit --konsep docs/referensi/prajurit-kediri-konsep-01.png
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/prajurit-sambung.glb --basecolor aset-mentah/tekstur/prajurit-basecolor-sambung.png --normal aset-mentah/tekstur/prajurit-normal-sambung.png --keluar aset-mentah/prajurit-utuh.glb --nama prajurit
+# F. Pratinjau (CEK) dan tumpang siluet dengan konsep
+B tools/blender/pratinjau_karakter.py -- --masuk aset-mentah/prajurit-utuh.glb --json tools/blender/wajah.json --blok prajurit --keluar aset-mentah/pratinjau --nama prajurit
+V tools/blender/tumpang_konsep.py --render <folder sementara>/prajurit-siluet-depan.png --konsep docs/referensi/prajurit-kediri-konsep-01.png --keluar aset-mentah/pratinjau/prajurit-tumpang-konsep-depan.png
+# G. FBX untuk Mixamo
+B tools/blender/ekspor_mixamo.py -- --masuk aset-mentah/prajurit-utuh.glb --keluar aset-mentah/mixamo-prajurit/prajurit-untuk-mixamo.fbx
+```
+
+Render siluet (latar transparan) ditulis `pratinjau_karakter.py` ke folder sementara sistem
+(`nusantara-sambung/`, jalurnya dicetak). Untuk tampak samping pakai `...-siluet-samping.png` dan gambar konsep
+samping.
+
+### Pilihan baru di skrip lama
+
+- `optimasi_karakter.py --ramping <pecahan>`: lebar dan tebal dikecilkan, tinggi tetap. `--halus-daerah
+  z_min,z_maks,x_maks` (pecahan tinggi model) dan `--halus-iterasi`: mesh tinggi dihaluskan (Taubin) di daerah itu
+  sebelum decimate dan bake. Dipakai untuk tali leher yang ikut tercetak Tripo di dada: kalau dibiarkan, tonjolan
+  tipis itu menjadi kantong lipatan setelah decimate dan ikut ter-bake ke normal map.
+- `abu_isi.py --blok <nama> --awalan <nama>-`: angka dari `<blok>.abu`, topeng diberi awalan (topeng Wijaya tidak
+  tertimpa). Pilihan di `<blok>.abu` untuk data dari `data_uv.py`: `zona_kain` (kain ditentukan menurut posisi,
+  bukan warna: kain nila pudar berkroma rendah terbaca sebagai bercak), `z_maks_m`, `gelap_aktif`,
+  `gelap_z_maks_m`, `isi_tanpa_kulit` (jari yang seluruhnya kelabu; pulau tanpa kulit diisi warna kulit median pada
+  tinggi yang sama). `ABU_DEBUG=1` mencetak alasan bercak gelap dilewati.
+- `kepala_render.py`, `kepala_acuan.py`: `--blok`. `tekstur_pasang.py`: `--nama` (nama gambar di GLB).
+- `kulit_warna.py`: `main()` hanya jalan kalau dipanggil langsung, supaya `topeng_kulit`, `statistik`, dan `halus`
+  bisa dipakai `sambung_tekstur.py`.
+
+### `data_uv.py` (Blender)
+
+Bake data per texel ke UV model: R = |x| pada `data_x`, G = tinggi pada `data_z`, B = cakupan pulau. Susunan G dan
+B sama dengan `wajah-data.png`, jadi bisa dipakai `abu_isi.py`. `--basecolor-keluar` menyimpan base color GLB ke
+berkas (cadangan sebelum bercak diisi).
+
+### `kepala_ringan.py` (Blender)
+
+Kepala Tripo (patung dada, tinggi 1 satuan) menjadi kepala ringan dalam meter. Skala: dagu ke puncak kepala tanpa
+sanggul = tinggi badan / `rasio_tinggi` (7,5); puncak dicari sebagai irisan tertinggi yang tebalnya masih 60 persen
+tebal kepala. Langkah: remesh voxel 4 mm (serabut rambut menyatu), hanya komponen terbesar, bahu dibuang kasar
+`leher_sisa_m` di bawah dagu, rambut dihaluskan, lalu cara `tempel`: muka di jendela wajah (depan, di bawah alis,
+sampai tenggorokan) dibagi dan verteksnya ditempel kembali ke permukaan asli Tripo, supaya bibir, kelopak mata,
+dan lubang hidung tidak dihaluskan remesh. Decimate dua tahap dengan jatah segitiga terpisah (`segitiga_wajah`
+dan `segitiga`), Smart UV, bake warna dan normal dari mesh asli ke 1024. Laporan: simpangan wajah terhadap mesh
+asli (mm; rata-rata, p95, maks) per daerah, dan gambar banding (atas asli, bawah hasil). `--cara remesh`
+menjalankan pembanding tanpa tempel. Prajurit: mulut p95 2,36 mm (remesh) menjadi 1,67 mm (tempel).
+
+### `sambung_kepala.py` (Blender)
+
+`--tahap tempat`: ukur dan tempatkan, render tumpang, siluet. `--tahap sambung`: potong, sambung, atlas, bake.
+
+1. Ukur badan: sumbu simetri, puncak bahu, sendi bahu (tengah penampang pangkal lengan). Ukur kepala: telinga
+   (verteks terluar antara mulut dan mata), lebar rahang.
+2. Tempatkan kepala: `skala_kepala` (bawaan 1), dagu di `dagu_z_m`, telinga di atas sendi bahu
+   (`telinga_maju_m` untuk menggeser).
+3. Bidang potong: dua bidang sejajar miring `miring_derajat` (lebih rendah di depan). Bidang kepala lewat sumbu
+   leher kepala `potong_bawah_dagu_m` di bawah dagu; bidang badan `celah_m` di bawahnya.
+4. Leher badan (`bentuk_leher`): digeser dan diskalakan bertahap (bobot 0 di `pangkal_m` di bawah bidang potong
+   badan, 1 di bidang potong) sampai penampangnya sama dengan cincin kepala; parameternya dikoreksi beberapa kali
+   karena verteks yang digeser memotong bidang miring di tempat lain. Lalu pangkal leher dihaluskan (Taubin pada
+   topologi las posisi) dan lipatan dibuka.
+5. Kantong lipatan yang tidak bisa dibuka (`tambal_kantong`; sisa simpul tali): dibuang bersama muka di
+   sekitarnya, lubangnya ditutup kipas segitiga berbahan `tambal`. Las hanya di sekitar lubang.
+6. Potong: badan di bidang badan (kepala lama = muka di atas bidang yang tersambung ke puncak kepala), kepala di
+   bidang kepala. Las hanya verteks di kedua bidang potong.
+7. Cincin: verteks yang lebih rapat dari `tepi_min_m` digabung; lalu kedua cincin dipasangkan per sudut
+   (`pasangkan`): verteks yang sudah ada dalam `cocok_derajat` dipakai, selebihnya disisipkan di tepi cincin lawan
+   pada sudut yang sama. Menyamakan jumlah saja membuat pita terpuntir (beda sudut pasangan sampai 45 derajat).
+8. Pita: `ruas` - 1 cincin perantara pada kurva Bezier yang menyinggung kedua permukaan; hanya cincin perantara
+   yang dihaluskan. Muka di dekat sambungan yang terbalik direlaksasi per kelompok posisi.
+9. Tali leher (`tali`): pita lonjong mengikuti permukaan di bidang tengah sambungan.
+10. Atlas baru (UV disalin, kepadatan disetarakan, kepala `kepala_skala_uv`, pack tanpa rotasi), bake warna dan
+    normal lama ke atlas baru, bake data (`<nama>-sambung-data1.png`, `-data2.png`), skala akhir ke
+    `tinggi_akhir_m`, normal halus per posisi las dipasang sebagai normal khusus (tanpa me-merge mesh).
+
+Laporan di `<blok>.sambung.hasil`: jumlah verteks tiap cincin (asal, dirapikan, disamakan), lebar dan tebal,
+selisih persen, tinggi pita, tambalan, tepi terbuka di dekat sambungan (harus 0). `SAMBUNG_DEBUG=1` mencetak
+rincian muka terbalik dan tepi terbuka tiap langkah.
+
+### `sambung_tekstur.py` (venv)
+
+Tekstur akhir dari bake A dan data. Texel yang diganti diisi dari medan warna kulit 3D (`medan3d`): warna kulit
+yang baik dirata-ratakan per voxel di ruang model lalu dihaluskan, karena pulau UV yang bertetangga di atlas belum
+tentu bertetangga di badan (isian per pulau tampak sebagai mosaik). Langkah: permukaan bawah dagu yang menghadap
+bawah diganti seluruhnya (tekstur Tripo di sana mosaik pucat), bercak kelabu dan pucat di leher kepala; tali lukis
+lama, coretan gelap, dan bercak pucat di dada atas dan punggung atas, termasuk tambalan; kulit badan digeser ke
+rata-rata kulit kepala (Lab); peralihan `peralihan_m` di pita sambungan per sudut; cek pipi kiri-kanan
+(`separuh_wajah`, diratakan kalau selisih L melewati ambang); warna tali; margin pulau; normal map rata di pita,
+tali, dan tambalan, dilemahkan di dada atas. Keluaran `<nama>-basecolor-sambung.png`, `<nama>-normal-sambung.png`.
+
+### `tumpang_konsep.py` (venv) dan `pratinjau_karakter.py` (Blender)
+
+`tumpang_konsep.py`: siluet render (latar transparan) dan gambar konsep disamakan tingginya, alas dan tengahnya
+diimpitkan; tiga panel (seluruh badan dengan garis tepi merah konsep dan biru model, perbesaran kepala sampai
+bahu, perbesaran dengan konsep setengah tembus pandang). `pratinjau_karakter.py`: seluruh badan dari depan,
+samping, tiga perempat; leher dari depan, samping, dekat setinggi wajah, bawah dagu (satu matahari seperti di
+game); siluet. `--hanya a,b` memilih sudut.
+
+### Jebakan yang ditemukan
+
+- Badan Tripo berkepala pendek dan berleher condong ke depan: lebar leher sudah mendekati leher kepala, tetapi
+  tebalnya berlebih dan pusatnya 4 cm di depan; yang perlu dibetulkan tebal dan kemiringan.
+- GLB terpecah di jahitan UV. Menggerakkan satu verteks tanpa kembarannya membuat retakan (lubang gelap); selalu
+  gerakkan per kelompok posisi. Segitiga berluas nol dikeluarkan dari hitungan normal.
+- Sesudah menyimpan gambar JPEG, format keluaran render ikut berubah; set PNG lagi sebelum render. Kamera:
+  `to_track_quat("-Z", "Y")`.
+- Kanal jarak di data1 hanya berlaku 0,1 m dari bidang tengah; batas daerah yang lebih jauh pakai tinggi z.

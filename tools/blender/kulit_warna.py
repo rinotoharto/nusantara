@@ -162,4 +162,5 @@ def main():
     print("[kulit] tersimpan", a.keluar_basecolor, a.keluar_normal)
 
 
-main()
+if __name__ == "__main__":
+    main()

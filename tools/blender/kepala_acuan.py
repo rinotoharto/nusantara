@@ -21,9 +21,11 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--json", required=True)
     p.add_argument("--render", required=True)
+    p.add_argument("--blok", default=None, help="blok karakter di json (bawaan: tingkat atas, Wijaya)")
     a = p.parse_args()
     data = json.load(open(a.json))
-    kam = data["kepala"]["kamera"]
+    K = (data[a.blok] if a.blok else data)["kepala"]
+    kam = K["kamera"]
     img = cv2.imread(a.render, cv2.IMREAD_UNCHANGED)
     if img.shape[2] == 4:
         alpha = img[:, :, 3:4].astype(np.float64) / 255
@@ -34,10 +36,10 @@ def main():
     n, o, c = kam["ukuran_px"], kam["ortho_scale"], kam["pusat"]
     acuan_m = {k: [round(c[0] + (u / n - 0.5) * o, 4), round(c[2] - (v / n - 0.5) * o, 4)] for k, (u, v) in t.items()}
     jarak_mata = float(np.hypot(*(np.array(acuan_m["mata_kanan"]) - np.array(acuan_m["mata_kiri"]))))
-    data["kepala"]["acuan_px"] = t
-    data["kepala"]["acuan"] = acuan_m
-    data["kepala"]["jarak_mata"] = round(jarak_mata, 4)
-    data["kepala"]["acuan_keterangan"] = "satuan GLB kepala: [x, z]; mata_kiri = kiri pada gambar"
+    K["acuan_px"] = t
+    K["acuan"] = acuan_m
+    K["jarak_mata"] = round(jarak_mata, 4)
+    K["acuan_keterangan"] = "satuan GLB kepala: [x, z]; mata_kiri = kiri pada gambar"
     json.dump(data, open(a.json, "w"), indent=2, ensure_ascii=False)
     tanda = img.copy()
     gambar_titik(tanda, t, (255, 128, 0))
