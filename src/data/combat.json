@@ -11,7 +11,7 @@
       "keteranganModel": "Model beranimasi (?model=wijaya). jarakSiaga: keris terhunus di tangan kalau ada lawan sedekat ini (meter); selain itu, dan selama lari kencang, keris disarungkan di pinggang kiri depan. Menyerang dan menangkis selalu menghunusnya. pasang.arahXfn: arah bilah di kerangka acuan tangan kanan (x = garis buku jari ke sisi telunjuk, f = arah jari, n = normal telapak), dikalibrasi dari bingkai kontak tusukan serang-3 oleh tools/blender/pratinjau_animasi.py --kalibrasi-keris; satu sudut untuk semua klip. pasang.skala: pengecil keris balok (panjang sekitar 40 cm). sarung: letak di pinggang relatif tulang pinggul (kiri, atas, depan, meter) dan arah bilah (kiri, atas, depan).",
       "jarakSiaga": 8,
       "pasang": {
-        "arahXfn": [0.7774, 0.5797, 0.2441],
+        "arahXfn": [0.5605, 0.8057, -0.1917],
         "skala": 0.7
       },
       "sarung": {
@@ -19,11 +19,18 @@
         "arah": [0.55, -0.8, 0.1]
       }
     },
+    "lenganJaga": {
+      "keterangan": "Model beranimasi: selama klip di `klip` diputar, rantai lengan kiri (bahu, lengan atas, lengan bawah, tangan) memakai pose jaga tetap yang diambil dari klip `sumberKlip` pada bingkai `bingkai` (30 fps), dengan peralihan halus `peralihan` detik. Badan dan lengan kanan tetap mengikuti klip. Daftar `klip` dikosongkan 17 November 2026: tangan kiri di belakang punggung yang tampak patah ternyata akibat pose istirahat klip yang belum disesuaikan; setelah disesuaikan, lengan kiri klip sudah wajar dan pose sumbernya bukan lagi tangan terangkat di depan wajah.",
+      "klip": [],
+      "sumberKlip": "serang-3",
+      "bingkai": 8,
+      "peralihan": 0.1
+    },
     "seranganRingan": {
-      "durasi": 0.36,
+      "durasi": 0.5,
       "jendelaKena": [
-        0.1,
-        0.22
+        0.16,
+        0.28
       ],
       "majuPerPukulan": 0.5,
       "maksKombo": 3,
@@ -32,10 +39,10 @@
     },
     "seranganBerat": {
       "tahan": 0.5,
-      "durasi": 0.75,
+      "durasi": 0.95,
       "jendelaKena": [
-        0.32,
-        0.46
+        0.41,
+        0.55
       ],
       "maju": 1.0
     },

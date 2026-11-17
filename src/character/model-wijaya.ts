@@ -5,21 +5,22 @@ import type { Pemain } from './player';
 import type { PertarunganPemain, StatusAksi } from '../combat/player-combat';
 import { SILUMAN } from '../stealth/config';
 import { KONFIG } from '../combat/config';
+import { tinggiMedan } from '../world/terrain';
 
 /**
  * Model Wijaya beranimasi (glTF + Draco), hanya aktif dengan `?model=wijaya`. Mengganti kapsul pemain
  * dengan mesh berkulit dan memilih aksi dari status Pemain dan PertarunganPemain. Kapsul tabrakan tetap.
  *
- * Nama aksi mengikuti tools/blender/gabung_animasi.py: idle, siaga, jalan (jalan pelan), lari (lari santai),
- * lari-kencang (lari kencang; lari sebagai cadangan), jongkok-jalan, jongkok-diam, serang-1..3, serang-berat, tangkis, hindar, terkena, mati.
+ * Nama aksi mengikuti tools/blender/gabung_animasi.py: idle, siaga, jalan (jalan pelan), lari-santai,
+ * lari-kencang, jongkok-jalan, jongkok-diam, serang-1..3, serang-berat, tangkis, hindar, terkena, mati.
  */
 
 /**
  * Kecepatan langkah tiap klip (m/s), diukur dari laju kaki tumpu relatif pinggul pada FBX sumber
- * (jalan 1,43; lari lama 4,01, cocok dengan root 4,16; lari-santai 2,35; lari-kencang 4,5; jongkok-jalan
+ * (jalan 1,43; lari-santai 2,35; lari-kencang 4,5; jongkok-jalan
  * 1,10). timeScale = laju / nilai ini, dibatasi SKALA_GERAK supaya langkah tidak tampak dipercepat.
  */
-const LAJU_KLIP: Record<string, number> = { jalan: 1.43, lari: 4.01, 'lari-santai': 2.35, 'lari-kencang': 4.5, 'jongkok-jalan': 1.1 };
+const LAJU_KLIP: Record<string, number> = { jalan: 1.43, 'lari-santai': 2.35, 'lari-kencang': 4.5, 'jongkok-jalan': 1.1 };
 const SKALA_GERAK = { min: 0.6, maks: 1.5 };
 /**
  * Fase kaki tiap klip gerak, diukur dari FBX sumber: `awal` = bagian siklus saat kaki kiri paling depan,
@@ -29,14 +30,17 @@ const FASE_KLIP: Record<string, { awal: number; siklus: number }> = {
   jalan: { awal: 0.256, siklus: 1 },
   'lari-santai': { awal: 0.23, siklus: 1 },
   'lari-kencang': { awal: 0.21, siklus: 2 },
-  lari: { awal: 0.244, siklus: 1 },
   'jongkok-jalan': { awal: 0.271, siklus: 1 },
 };
-/** Pengali waktu klip aksi tetap: kontak serang ringan jatuh di 0,16 s (bingkai 9 dari 19 pada 30 fps). */
+/**
+ * Pengali waktu klip aksi tetap. Klip serang tidak di sini: pengalinya dihitung dari panjang klip dibagi durasi
+ * serangan di combat.json (ringan 0,6 s / 0,5 s = 1,2; berat 1,0 s / 0,95 s = 1,05), sehingga bingkai kontak
+ * (bingkai 8 dan 15) jatuh di tengah jendela kena.
+ */
 const SKALA_WAKTU: Partial<Record<string, number>> = {
-  'serang-1': 1.67, 'serang-2': 1.67, 'serang-3': 1.67, 'serang-berat': 1.03,
   hindar: 2.5, terkena: 2.0, mati: 1.0, tangkis: 1.0, idle: 1.0, siaga: 1.0, 'jongkok-diam': 1.0,
 };
+const SKALA_TIKAMAN = 1.67;
 const SEKALI = new Set(['serang-1', 'serang-2', 'serang-3', 'serang-berat', 'hindar', 'terkena', 'mati']);
 const CROSSFADE = 0.15;
 
@@ -84,6 +88,13 @@ export class ModelWijaya {
   siaga = false;
   /** Benar saat ada lawan dalam jarak siaga keris (combat.json pemain.keris.jarakSiaga); diisi main tiap frame. */
   lawanDekat = false;
+  /** Lapisan lengan kiri: tulang rantai lengan dan pose jaganya (combat.json pemain.lenganJaga), bobot 0 sampai 1. */
+  private readonly lenganJaga: { tulang: THREE.Object3D; pose: THREE.Quaternion }[] = [];
+  private bobotJaga = 0;
+  /** Sendi kaki dan tingginya di atas tanah pada pose istirahat, untuk mengangkat model di lereng. */
+  private readonly sendiKaki: { tulang: THREE.Object3D; tinggi: number }[] = [];
+  private angkat = 0;
+  private readonly bantu = new THREE.Vector3();
   private kerisTangan: THREE.Object3D | null = null;
   private kerisSarung: THREE.Object3D | null = null;
   siap = false;
@@ -131,8 +142,31 @@ export class ModelWijaya {
       }
       this.aksi.set(klip.name, a);
     }
+    // Sendi kaki (pergelangan dan pangkal jari) dengan tinggi istirahatnya di atas titik kaki pemain.
+    akar.updateWorldMatrix(true, true);
+    const yKaki = this.pemain.grup.getWorldPosition(new THREE.Vector3()).y;
+    for (const akhiran of ['LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase']) {
+      const tulang = akar.getObjectByName(`mixamorig${akhiran}`) ?? akar.getObjectByName(`mixamorig:${akhiran}`);
+      if (tulang) this.sendiKaki.push({ tulang, tinggi: tulang.getWorldPosition(new THREE.Vector3()).y - yKaki });
+    }
+    // Pose jaga lengan kiri dari klip sumber pada bingkai kontaknya.
+    const J = KONFIG.pemain.lenganJaga;
+    const sumber = gltf.animations.find((k) => k.name === J.sumberKlip);
+    if (sumber) {
+      for (const akhiran of ['LeftShoulder', 'LeftArm', 'LeftForeArm', 'LeftHand']) {
+        const tulang = akar.getObjectByName(`mixamorig${akhiran}`) ?? akar.getObjectByName(`mixamorig:${akhiran}`);
+        const jalur = sumber.tracks.find((t) => tulang && t.name === `${tulang.name}.quaternion`);
+        if (!tulang || !jalur) continue;
+        // Kunci terdekat dengan waktu bingkai (klip disampel tiap bingkai, jadi tidak perlu interpolasi).
+        const t = J.bingkai / 30;
+        let i = 0;
+        for (let k = 1; k < jalur.times.length; k++) if (Math.abs(jalur.times[k] - t) < Math.abs(jalur.times[i] - t)) i = k;
+        this.lenganJaga.push({ tulang, pose: new THREE.Quaternion().fromArray(jalur.values, i * 4) });
+      }
+    }
     // Kapsul dan hidung disembunyikan; keris balok dipindah ke tulang tangan kanan.
     this.pemain.kapsul.visible = false;
+    this.pemain.condongAktif = false;
     this.pemain.pose.children.forEach((c) => {
       if (c.name === 'hidung') c.visible = false;
     });
@@ -229,7 +263,10 @@ export class ModelWijaya {
     a.enabled = true;
     a.setEffectiveWeight(1);
     if (this.aktif && this.aktif !== a) {
-      a.crossFadeFrom(this.aktif, CROSSFADE, true);
+      // Tanpa warp: warp memperlambat klip yang masuk selama peralihan menurut perbandingan panjang klip
+      // (dari idle 7 detik ke serang 0,6 detik hampir berhenti dulu), sehingga kontak serang pertama terlambat
+      // sekitar 0,07 detik dan bisa jatuh di luar jendela kena. Fase langkah sudah disamakan sendiri di atas.
+      a.crossFadeFrom(this.aktif, CROSSFADE, false);
     }
     a.play();
     this.aktif = a;
@@ -241,6 +278,12 @@ export class ModelWijaya {
     const pakai = this.aksi.has(nama) ? nama : cadangan;
     this.mainkan(pakai);
     this.aktif!.timeScale = Math.min(SKALA_GERAK.maks, Math.max(SKALA_GERAK.min, laju / LAJU_KLIP[pakai]));
+  }
+
+  /** Klip serang dari awal, diputar supaya seluruh klip habis tepat dalam `durasi` detik. */
+  private serang(nama: string, durasi: number): void {
+    this.mainkan(nama, true);
+    if (this.aktif && this.namaAktif === nama) this.aktif.timeScale = this.aktif.getClip().duration / durasi;
   }
 
   /** Dipanggil tiap frame logika dengan dt permainan. */
@@ -257,8 +300,8 @@ export class ModelWijaya {
         if (p.jongkok) {
           if (laju > 0.3) this.gerak('jongkok-jalan', 'jongkok-jalan', laju);
           else this.mainkan('jongkok-diam');
-        } else if (laju > SILUMAN.pemain.lajuLari) this.gerak('lari-kencang', 'lari', laju);
-        else if (laju > SILUMAN.pemain.lajuLariSantai) this.gerak('lari', 'jalan', laju);
+        } else if (laju > SILUMAN.pemain.lajuLari) this.gerak('lari-kencang', 'lari-santai', laju);
+        else if (laju > SILUMAN.pemain.lajuLariSantai) this.gerak('lari-santai', 'jalan', laju);
         else if (laju > 0.3) this.gerak('jalan', 'jalan', laju);
         else if (status === 'mengisi' || this.siaga) this.mainkan('siaga');
         else this.mainkan('idle');
@@ -266,15 +309,19 @@ export class ModelWijaya {
       }
       case 'serangRingan': {
         const nama = `serang-${(this.tarung.komboSekarang % 3) + 1}`;
-        if (masukBaru || this.namaAktif !== nama) this.mainkan(nama, true);
+        if (masukBaru || this.namaAktif !== nama) this.serang(nama, KONFIG.pemain.seranganRingan.durasi);
         break;
       }
       case 'serangBerat':
-        if (masukBaru) this.mainkan('serang-berat', true);
+        if (masukBaru) this.serang('serang-berat', KONFIG.pemain.seranganBerat.durasi);
         break;
       case 'tikaman':
       case 'sergap':
-        if (masukBaru) this.mainkan('serang-3', true);
+        // Tikaman dan Sergap jauh lebih singkat daripada serang ringan: tusukan diputar cepat.
+        if (masukBaru) {
+          this.mainkan('serang-3', true);
+          if (this.aktif) this.aktif.timeScale = SKALA_TIKAMAN;
+        }
         break;
       case 'tangkis':
         this.mainkan('tangkis');
@@ -298,5 +345,26 @@ export class ModelWijaya {
     if (this.kerisTangan) this.kerisTangan.visible = terhunus || !this.kerisSarung;
     if (this.kerisSarung) this.kerisSarung.visible = !terhunus;
     this.mixer.update(dt);
+    // Lereng: tanpa IK kaki, kaki yang melangkah ke arah naik masuk tanah (sampai 20 cm di lereng 25 derajat).
+    // Model diangkat sejauh sendi kaki terdalam berada di bawah tanah; naik cepat, turun pelan supaya tidak
+    // berdenyut tiap langkah. Hanya saat pemain berdiri di medan (bukan di lantai rumah atau batu).
+    let tembus = 0;
+    if (p.diTanah && Math.abs(p.posisi.y - tinggiMedan(p.posisi.x, p.posisi.z)) < 0.05 && status !== 'mati') {
+      for (const { tulang, tinggi } of this.sendiKaki) {
+        tulang.getWorldPosition(this.bantu);
+        tembus = Math.max(tembus, tinggiMedan(this.bantu.x, this.bantu.z) + tinggi - (this.bantu.y - this.angkat));
+      }
+    }
+    this.angkat += (tembus - this.angkat) * Math.min(1, (tembus > this.angkat ? 18 : 3) * dt);
+    this.grup.position.y = this.angkat;
+    // Lapisan bertopeng: setelah klip dipasang ke tulang, rantai lengan kiri dicampur ke pose jaga.
+    const J = KONFIG.pemain.lenganJaga;
+    const jaga = (status === 'serangRingan' || status === 'serangBerat') && (J.klip as string[]).includes(this.namaAktif);
+    const langkah = dt / Math.max(J.peralihan, 1e-3);
+    this.bobotJaga = jaga ? Math.min(1, this.bobotJaga + langkah) : Math.max(0, this.bobotJaga - langkah);
+    if (this.bobotJaga > 0) {
+      const w = this.bobotJaga * this.bobotJaga * (3 - 2 * this.bobotJaga);
+      for (const { tulang, pose } of this.lenganJaga) tulang.quaternion.slerp(pose, w);
+    }
   }
 }

@@ -613,8 +613,43 @@ Di game: jalan pelan memakai `jalan`, lari santai memakai `lari` lama, lari kenc
   `hasil.koreksi_pergelangan`. Lembar `-anim-putaran-<klip>.png` (`--putaran`) menampilkan delapan bingkai
   sepanjang ayunan, baris atas depan dan baris bawah belakang.
 
+- **Penyesuaian pose istirahat** (`samakan_pose_istirahat`, bawaan aktif, untuk semua klip): kunci rotasi tiap
+  klip diubah ke pose istirahat kerangka karakter ini (`q_baru = C @ q` per tulang). Kerangka di game berasal dari
+  FBX With Skin (pose istirahat = pose model yang diunggah, lengan menurun), sedangkan FBX Without Skin selalu
+  berpose istirahat T, siapa pun karakter aktifnya. Untuk klip With Skin, C dihitung dari kerangka berkas itu
+  sendiri (jalan, jongkok: 4,9 derajat). Untuk klip Without Skin, C dihitung sekali dari pose T acuan karakter
+  ini, `pose_t_acuan` (satu FBX Without Skin yang diunduh dengan karakter ini; untuk Wijaya
+  `aset-mentah/mixamo/baru/serang-3.fbx`): lengan atas 50,0, lengan bawah 13,6, bahu 10,0, tangan 7 derajat.
+  Klip dari karakter lain (prajurit) memakai C yang sama, sehingga keanehan kerangkanya (tangan 46 sampai 53
+  derajat, kaki 9 sampai 10) tidak terbawa. Buktinya: dengan satu sudut keris, arah bilah di kontak keempat
+  serangan masuk sasaran tanpa koreksi pergelangan.
+- `buka_lengan`: per klip dan per sisi, jarak terkecil lengan atas, lengan bawah, dan telapak tangan ke permukaan
+  badan diukur (dalam atau luar dengan bilangan lilit), lalu LeftArm/RightArm diputar menjauh dari badan dengan
+  langkah `langkah_derajat` sampai `jarak_m`, paling banyak `maks_derajat`. Hasil per klip di
+  `hasil.buka_lengan` (cm sebelum, derajat, cm sesudah, tercapai atau tidak).
+- `klip_lewati`: klip lama yang tidak dimasukkan ke GLB (`lari`, digantikan `lari-santai`).
+- Tinggi diratakan ke tanah (`ratakan_tanah`, semua klip kecuali `tanah_lewati`): Hips digeser supaya sendi kaki
+  terendah (pergelangan dan pangkal jari, dibanding pose istirahat) tepat di tanah pada bingkai terdalamnya.
+  Geserannya ditulis ke `hasil.tanah_geser_m`.
+
 ### Jebakan yang ditemukan
 
+- **Klip Without Skin tidak bisa langsung dipasang ke kerangka With Skin.** Nama tulangnya sama, tetapi berkas
+  Without Skin berpose istirahat T sedangkan kerangka With Skin berpose seperti model yang diunggah, dan kunci
+  rotasi dihitung relatif terhadap pose istirahat berkasnya. Tanpa penyesuaian lengan atas jatuh sekitar 50 derajat
+  terlalu ke dalam: terbenam di dada, lengan bawah keluar dari depan badan, tangan kiri "di belakang punggung",
+  bahu menggelembung. Mengunduh ulang dengan karakter yang benar TIDAK menghilangkannya (serang-3 unduhan Wijaya
+  tetap 50 derajat); yang berubah hanya Arm-Space dan proporsi. Semua koreksi lengan, bahu, dan pergelangan
+  sebelum 17 November malam mengobati gejala ini.
+- Uji dalam atau luar badan: tanda dari normal muka terdekat salah (lapisan dalam kain bernormal ke dalam, badan
+  terbuka di pangkal lengan), sinar dari sumbu badan salah saat merunduk; yang benar bilangan lilit dengan
+  pangkal lengan atas ikut menutup lubang.
+- `crossFadeFrom(..., warp = true)` di three.js memperlambat klip yang masuk menurut perbandingan panjang klip:
+  dari idle ke serang, kontak serang pertama terlambat sekitar 0,07 detik. Model memakai warp = false.
+- `buang_root` dulu membuang sumbu lokal Hips (0, 1), padahal pada kerangka ini 0 = samping, 1 = TEGAK, 2 = maju.
+  Akibatnya tinggi pinggul membeku di nilai bingkai pertama (kaki tenggelam 18 cm di serang-1, 15 cm di
+  serang-2, 11 cm di hindar; tidak ada naik-turun pinggul saat jalan dan lari) dan gerak maju justru tertinggal
+  (klip lari lama melaju 3,19 m per siklus di depan kapsul, hindar 2,1 m). Sekarang yang dibuang (0, 2).
 - `pratinjau_animasi.py` dulu menyetel 30 fps SESUDAH mengimpor GLB, sehingga pengimpor memakai 24 fps dan semua
   "bingkai kontak" di lembar dan ukuran meleset 2 sampai 3 bingkai ke belakang (lembar sebelum 17 November malam
   menampilkan bingkai setelah kontak). Sekarang fps disetel sebelum impor; bingkai GLB sama dengan bingkai aksi.

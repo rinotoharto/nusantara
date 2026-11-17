@@ -86,6 +86,8 @@ export class Pemain {
   batasLaju: number | null = null;
   /** Benar saat misi menandai area tanpa bahaya: gerak biasa menjadi jalan pelan (lari kencang tetap bisa). */
   jalanPelanPaksa = false;
+  /** Kapsul condong ke arah gerak; dimatikan model beranimasi (klipnya sudah condong, dan condong tambahan menenggelamkan kaki depan). */
+  condongAktif = true;
   /** Salah saat kejadian melarang memanjat sebentar (harus memikul Gajah Pagon dulu). */
   bolehPanjat = true;
   /** Punya obor (dari kepala desa Kudadu, sprint 7); diisi main dari tanda. */
@@ -302,7 +304,7 @@ export class Pemain {
     }
     // Condong hanya dari gerak yang mengikuti arah hadap; luncuran hindar ditangani modul pertarungan.
     const lajuHadap = hadapPaksa === null ? laju : 0;
-    const miringTujuan = Math.min(1, lajuHadap / KECEPATAN_LARI) * MIRING_MAKS;
+    const miringTujuan = this.condongAktif ? Math.min(1, lajuHadap / KECEPATAN_LARI) * MIRING_MAKS : 0;
     this.miring += (miringTujuan - this.miring) * Math.min(1, 8 * dt);
     this.badan.rotation.set(this.miring, this.hadap, 0, 'YXZ');
   }

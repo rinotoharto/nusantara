@@ -101,9 +101,11 @@ def impor_fbx(path):
     return arm[0] if arm else None, mesh, aksi[0] if aksi else None, baru
 
 
-def buang_root(act, sumbu=(0, 1)):
-    """Buang gerak Hips pada sumbu lokal tulang yang diberi (0 = x, 1 = y, 2 = z); di Mixamo, maju
-    mundur dan samping ada di dua sumbu ini, tinggi di sumbu ketiga."""
+def buang_root(act, sumbu=(0, 2)):
+    """Buang gerak Hips pada sumbu lokal tulang yang diberi (0 = x, 1 = y, 2 = z). Pada kerangka Mixamo yang
+    diimpor tanpa orientasi tulang otomatis: 0 = samping, 1 = tegak, 2 = maju mundur (diukur 17 November 2026;
+    sebelumnya (0, 1) yang dibuang, sehingga tinggi pinggul membeku di nilai bingkai pertama, kaki tenggelam
+    sampai 18 cm di klip serang, dan gerak maju klip lari lama dan hindar justru tertinggal di GLB)."""
     for fc in fcurves(act):
         if fc.data_path == f'pose.bones["{PRE}Hips"].location' and fc.array_index in sumbu:
             nilai0 = fc.evaluate(fc.range()[0])
@@ -111,6 +113,90 @@ def buang_root(act, sumbu=(0, 1)):
                 kp.co.y = nilai0
                 kp.handle_left.y = nilai0
                 kp.handle_right.y = nilai0
+
+
+def selisih_pose_istirahat(arm, arm_klip):
+    """Rotasi C per tulang yang mengubah kunci rotasi dari pose istirahat kerangka arm_klip ke pose istirahat
+    kerangka arm: C = (rotasi istirahat relatif induk di arm)^-1 @ (rotasi istirahat relatif induk di arm_klip);
+    untuk tulang akar dipakai orientasi dunia. Mengembalikan {nama tulang: Quaternion}."""
+    Bw, Bp = arm.data.bones, arm_klip.data.bones
+    out = {}
+    for bp in Bp:
+        if bp.name not in Bw:
+            continue
+        bw = Bw[bp.name]
+        if bw.parent is None or bp.parent is None:
+            Mw = arm.matrix_world.to_quaternion() @ bw.matrix_local.to_quaternion()
+            Mp = arm_klip.matrix_world.to_quaternion() @ bp.matrix_local.to_quaternion()
+            out[bp.name] = Mw.inverted() @ Mp
+        else:
+            Rw = bw.parent.matrix_local.to_quaternion().inverted() @ bw.matrix_local.to_quaternion()
+            Rp = bp.parent.matrix_local.to_quaternion().inverted() @ bp.matrix_local.to_quaternion()
+            out[bp.name] = Rw.inverted() @ Rp
+    return out
+
+
+def samakan_pose_istirahat(act, C_tulang):
+    """Ubah kunci rotasi satu klip ke pose istirahat karakter ini: q_baru = C @ q per tulang.
+
+    Latar: kerangka karakter di game berasal dari FBX With Skin (pose istirahat = pose model yang diunggah,
+    lengan menurun, pose A), sedangkan FBX Without Skin berpose istirahat T. Kunci rotasi dihitung relatif
+    terhadap pose istirahat berkasnya, jadi tanpa penyesuaian lengan atas klip Without Skin jatuh sekitar 50
+    derajat terlalu ke dalam (terbenam di dada). C_tulang dari selisih_pose_istirahat: untuk klip With Skin
+    dari kerangka berkas itu sendiri; untuk klip Without Skin dari pose T acuan karakter ini
+    (<blok>.animasi.pose_t_acuan), juga bila klip diunduh dengan karakter lain: nilai kunci Mixamo relatif
+    terhadap pose T dianggap berlaku sama di pose T karakter ini, sehingga keanehan kerangka karakter lain
+    (misalnya tangan prajurit yang berbeda 46 sampai 53 derajat) tidak ikut terbawa.
+    Mengembalikan {tulang: sudut C (derajat)} untuk yang di atas 1 derajat dan punya kunci."""
+    beda = {}
+    for nama, C in C_tulang.items():
+        sudut = math.degrees(C.angle)
+        sudut = min(sudut, 360.0 - sudut)
+        if sudut < 0.2 or not nama.startswith(PRE):
+            continue
+        fc4 = kurva_rotasi(act, nama[len(PRE):])
+        if fc4 is None:
+            continue
+        for k in range(len(fc4[0].keyframe_points)):
+            q = C @ Quaternion([fc.keyframe_points[k].co.y for fc in fc4])
+            for fc, nilai in zip(fc4, q):
+                kp = fc.keyframe_points[k]
+                selisih = nilai - kp.co.y
+                kp.co.y = nilai
+                kp.handle_left.y += selisih
+                kp.handle_right.y += selisih
+        for fc in fc4:
+            fc.update()
+        if sudut >= 1.0:
+            beda[nama.replace(PRE, "")] = round(sudut, 1)
+    return beda
+
+
+def ratakan_tanah(act, arm, pasang):
+    """Geser tinggi Hips satu klip supaya sendi kaki terendah (pergelangan dan pangkal jari kedua kaki,
+    dibanding tingginya pada pose istirahat) tepat menyentuh tanah di bingkai terdalamnya: telapak tidak
+    pernah di bawah tanah. Perlu untuk klip yang diunduh dengan karakter lain (panjang kaki berbeda).
+    Mengembalikan geseran (m, positif = naik) atau None."""
+    jalur = f'pose.bones["{PRE}Hips"].location'
+    fc = [f for f in fcurves(act) if f.data_path == jalur and f.array_index == 1]
+    if not fc:
+        return None
+    sendi = [PRE + n for n in ("LeftFoot", "RightFoot", "LeftToeBase", "RightToeBase")]
+    z0 = {n: arm.data.bones[n].head_local.z for n in sendi}
+    pasang(act)
+    f0, f1 = int(act.frame_range[0]), int(act.frame_range[1])
+    terdalam = 1e9
+    for f in range(f0, f1 + 1):
+        bpy.context.scene.frame_set(f)
+        terdalam = min(terdalam, min((arm.matrix_world @ arm.pose.bones[n].head).z - z0[n] for n in sendi))
+    arah = arm.data.bones[PRE + "Hips"].matrix_local.to_3x3().col[1].z      # sumbu lokal 1 = tegak
+    geser = -terdalam / (arah if abs(arah) > 0.5 else 1.0)
+    for kp in fc[0].keyframe_points:
+        kp.co.y += geser
+        kp.handle_left.y += geser
+        kp.handle_right.y += geser
+    fc[0].update()
+    return round(-terdalam, 3)
 
 
 def potong(act, f0, f1):
@@ -760,6 +846,165 @@ def koreksi_pergelangan(act, arm, pasang, koef, kontak, K):
             "sebelum_per_bingkai": catatan, "sesudah_naik_serong_per_bingkai": sesudah}
 
 
+def siapkan_lengan(arm, utama):
+    """Data untuk mengukur jarak lengan ke badan: segitiga badan (tulang dominan badan, kepala, paha) dan,
+    per sisi, titik contoh di permukaan lengan atas (bagian menjauhi bahu), lengan bawah (termasuk siku),
+    dan telapak tangan, disimpan di kerangka acuan istirahat tulangnya (pendekatan kaku: tanpa campuran bobot)."""
+    nama_grup = [vg.name for vg in utama.vertex_groups]
+    dominan = np.zeros(len(utama.data.vertices), dtype=np.int64)
+    for v in utama.data.vertices:
+        if v.groups:
+            dominan[v.index] = max(v.groups, key=lambda g_: g_.weight).group
+    nm = np.array([n.replace(PRE, "") for n in nama_grup])[dominan]
+    badan_set = np.isin(nm, ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head", "LeftUpLeg", "RightUpLeg", "LeftShoulder", "RightShoulder"])
+    utama.data.calc_loop_triangles()
+    tri = np.empty(len(utama.data.loop_triangles) * 3, dtype=np.int64)
+    utama.data.loop_triangles.foreach_get("vertices", tri)
+    tri = tri.reshape(-1, 3)
+    co = koordinat_dunia(utama)
+    B = arm.data.bones
+    # Pangkal lengan atas (seperempat pertama) ikut dihitung badan: menutup lubang pangkal lengan, yang kalau
+    # terbuka membuat bilangan lilit di sekitar bahu setengah-setengah dan lengan atas terbaca di dalam.
+    t_lengan = {}
+    for sisi in ("Left", "Right"):
+        a0, a1 = np.array(B[PRE + sisi + "Arm"].head_local), np.array(B[PRE + sisi + "ForeArm"].head_local)
+        idx = np.nonzero(nm == sisi + "Arm")[0]
+        t_lengan[sisi] = (idx, (co[idx] - a0) @ (a1 - a0) / float((a1 - a0) @ (a1 - a0)))
+        badan_set[idx[t_lengan[sisi][1] < 0.25]] = True
+    tri = tri[badan_set[tri].all(axis=1)]
+    titik = {}
+    for sisi in ("Left", "Right"):
+        idx, t = t_lengan[sisi]
+        bagian = {}
+        for label, tulang, ii in (("lengan_atas", sisi + "Arm", idx[t > 0.5]), ("lengan_bawah", sisi + "ForeArm", np.nonzero(nm == sisi + "ForeArm")[0]),
+                                  ("tangan", sisi + "Hand", np.nonzero(nm == sisi + "Hand")[0])):
+            if len(ii) > 32:
+                ii = ii[np.linspace(0, len(ii) - 1, 32).astype(int)]
+            Mi = np.array(B[PRE + tulang].matrix_local.inverted())
+            bagian[label] = (tulang, co[ii] @ Mi[:3, :3].T + Mi[:3, 3])
+        titik[sisi] = bagian
+    sp = B[PRE + "Spine2"].matrix_local.to_3x3().inverted()
+    samping = {sisi: sp @ Vector((1.0 if B[PRE + sisi + "Arm"].head_local.x > 0 else -1.0, 0.0, 0.0)) for sisi in ("Left", "Right")}
+    return {"tri": tri, "titik": titik, "samping": samping, "utama": utama}
+
+
+def _bvh_badan(L):
+    """Permukaan badan pada bingkai sekarang: (pohon BVH, koordinat segitiga T x 3 x 3)."""
+    dg = bpy.context.evaluated_depsgraph_get()
+    oe = L["utama"].evaluated_get(dg)
+    me = oe.to_mesh()
+    c_ = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", c_)
+    Mw = np.array(oe.matrix_world)
+    c_ = c_.reshape(-1, 3) @ Mw[:3, :3].T + Mw[:3, 3]
+    oe.to_mesh_clear()
+    return BVHTree.FromPolygons(c_.tolist(), L["tri"].tolist()), c_[L["tri"]]
+
+
+def _jarak_lengan(arm, L, sisi, badan):
+    """Jarak terkecil tiap bagian lengan ke permukaan badan pada pose sekarang; negatif = menembus (dalamnya).
+    Dalam atau luar ditentukan dengan bilangan lilit (jumlah sudut ruang semua segitiga badan dilihat dari
+    titik, dibagi 4 pi: mendekati 1 di dalam, 0 di luar), hanya untuk titik yang lebih dekat dari 12 cm.
+    Cara lain yang dicoba dan salah: tanda dari normal muka terdekat (lapisan dalam kain bernormal ke dalam,
+    badan terbuka di pangkal lengan) dan sinar dari sumbu badan (bagian badan lain di arah yang sama saat
+    merunduk terbaca sebagai permukaan)."""
+    bvh, T = badan
+    out = {}
+    for label, (tulang, lokal) in L["titik"][sisi].items():
+        M = np.array(arm.matrix_world @ arm.pose.bones[PRE + tulang].matrix)
+        P = lokal @ M[:3, :3].T + M[:3, 3]
+        d = np.array([(Vector(q.tolist()) - bvh.find_nearest(Vector(q.tolist()))[0]).length for q in P])
+        dekat = np.nonzero(d < 0.12)[0]
+        if len(dekat):
+            A = T[None, :, 0, :] - P[dekat, None, :]
+            B_ = T[None, :, 1, :] - P[dekat, None, :]
+            C = T[None, :, 2, :] - P[dekat, None, :]
+            la, lb, lc = np.linalg.norm(A, axis=2), np.linalg.norm(B_, axis=2), np.linalg.norm(C, axis=2)
+            num = np.einsum("ijk,ijk->ij", A, np.cross(B_, C))
+            den = la * lb * lc + np.einsum("ijk,ijk->ij", A, B_) * lc + np.einsum("ijk,ijk->ij", A, C) * lb + np.einsum("ijk,ijk->ij", B_, C) * la
+            lilit = (2.0 * np.arctan2(num, den)).sum(axis=1) / (4.0 * math.pi)
+            d[dekat[lilit > 0.5]] *= -1.0
+        out[label] = float(d.min())
+    return out
+
+
+def _sumbu_buka(arm, L, sisi):
+    """Sumbu (di kerangka acuan pose lengan atas) untuk memutar lengan atas menjauh dari badan pada pose
+    sekarang: tegak lurus lengan atas dan arah samping dada. Mengembalikan (sumbu, pengali 0 sampai 1);
+    pengali mengecil saat lengan sudah terentang ke samping."""
+    pb = arm.pose.bones[PRE + sisi + "Arm"]
+    u = ((arm.matrix_world @ arm.pose.bones[PRE + sisi + "ForeArm"].head) - (arm.matrix_world @ pb.head)).normalized()
+    samping = (arm.pose.bones[PRE + "Spine2"].matrix.to_3x3() @ L["samping"][sisi]).normalized()
+    sumbu = u.cross(samping)
+    if sumbu.length < 0.05:
+        return None, 0.0
+    return pb.matrix.to_quaternion().inverted() @ sumbu.normalized(), min(1.0, sumbu.length / 0.5)
+
+
+def buka_lengan(act, arm, L, pasang, K, sisi_list, terapkan=True):
+    """Ukur jarak lengan ke badan sepanjang klip dan cari rotasi buka LeftArm/RightArm terkecil (langkah
+    K["langkah_derajat"], paling banyak K["maks_derajat"]) sampai jarak terkecil semua bagian lengan mencapai
+    K["jarak_m"]; kalau tidak tercapai, dipakai sudut dengan jarak terbaik. Rotasi dipasang ke semua kunci.
+    Mengembalikan {sisi: hasil} dengan jarak dalam cm."""
+    pasang(act)
+    sc = bpy.context.scene
+    f0, f1 = int(act.frame_range[0]), int(act.frame_range[1])
+    bingkai = list(range(f0, f1 + 1, max(1, (f1 - f0) // 16)))
+    cache = {}
+    for fr in bingkai:
+        sc.frame_set(fr)
+        cache[fr] = (_bvh_badan(L), {sisi: (arm.pose.bones[PRE + sisi + "Arm"].rotation_quaternion.copy(), *_sumbu_buka(arm, L, sisi)) for sisi in sisi_list})
+    hasil = {}
+    cm = lambda d: {k: round(v * 100, 1) for k, v in d.items()}
+    for sisi in sisi_list:
+        pb = arm.pose.bones[PRE + sisi + "Arm"]
+
+        def ukur(theta):
+            mn = {}
+            for fr, (bvh, per) in cache.items():
+                sc.frame_set(fr)
+                q, sumbu, s_ = per[sisi]
+                if theta and sumbu is not None:
+                    pb.rotation_quaternion = q @ Quaternion(sumbu, math.radians(theta * s_))
+                    bpy.context.view_layer.update()
+                for k, v in _jarak_lengan(arm, L, sisi, bvh).items():
+                    mn[k] = min(mn.get(k, 9.0), v)
+            return mn
+
+        sebelum = ukur(0)
+        pilih, terbaik = 0, sebelum
+        if terapkan:
+            theta, kini = 0, sebelum
+            while min(kini.values()) < K["jarak_m"] and theta < K["maks_derajat"]:
+                theta = min(K["maks_derajat"], theta + K.get("langkah_derajat", 2))
+                kini = ukur(theta)
+                if min(kini.values()) > min(terbaik.values()) + 1e-4:
+                    pilih, terbaik = theta, kini
+        hasil[sisi] = {"sebelum_cm": cm(sebelum), "derajat": pilih, "sesudah_cm": cm(terbaik),
+                       "tercapai": bool(min(terbaik.values()) >= K["jarak_m"])}
+        if pilih:
+            fc4 = kurva_rotasi(act, sisi + "Arm")
+            if fc4 is None:
+                hasil[sisi]["derajat"] = 0
+                continue
+            tambah = []
+            for kp in fc4[0].keyframe_points:
+                sc.frame_set(int(round(kp.co.x)))
+                sumbu, s_ = _sumbu_buka(arm, L, sisi)
+                tambah.append(Quaternion(sumbu, math.radians(pilih * s_)) if sumbu is not None else Quaternion())
+            for k, X in enumerate(tambah):
+                q = Quaternion([fc.keyframe_points[k].co.y for fc in fc4]) @ X
+                for fc, nilai in zip(fc4, q):
+                    kp = fc.keyframe_points[k]
+                    selisih = nilai - kp.co.y
+                    kp.co.y = nilai
+                    kp.handle_left.y += selisih
+                    kp.handle_right.y += selisih
+            for fc in fc4:
+                fc.update()
+    return hasil
+
+
 def cari_koreksi_lengan(arm, utama, act, K, kontak):
     """Cari rotasi tambahan terkecil supaya sendi tangan menjauh dari badan: pada bingkai kontak sejauh
     K["sasaran_m"] dan sepanjang klip paling dekat K["terkecil_m"]. Koreksi dibagi ke dua sendi supaya bahu
@@ -1122,10 +1367,24 @@ def main():
     if arm.animation_data is None:
         arm.animation_data_create()
 
+    ringkasan_pose, sumber_pose = {}, {}
+    # Pose T acuan karakter ini: kerangka dari satu FBX Without Skin yang diunduh dengan karakter ini.
+    C_acuan = None
+    if A.get("pose_t_acuan") and os.path.exists(os.path.join(akar, A["pose_t_acuan"])):
+        arm_t, _, act_t, baru_t = impor_fbx(os.path.join(akar, A["pose_t_acuan"]))
+        C_acuan = selisih_pose_istirahat(arm, arm_t)
+        for o in baru_t:
+            bpy.data.objects.remove(o, do_unlink=True)
+        if act_t is not None:
+            bpy.data.actions.remove(act_t)
+        catat(f"pose T acuan dari {A['pose_t_acuan']}: " + str({k_.replace(PRE, ''): round(math.degrees(min(v_.angle, 2 * math.pi - v_.angle)), 1)
+              for k_, v_ in C_acuan.items() if min(v_.angle, 2 * math.pi - v_.angle) > math.radians(5)}))
     folder_baru = os.path.join(akar, a.baru) if a.baru else None
     dari_baru = set()
 
     def ambil(nama_berkas, nama_aksi, wajib=True):
+        if nama_aksi in A.get("klip_lewati", []):
+            return None                                        # klip lama yang tidak dipakai lagi (mis. lari)
         path = os.path.join(folder, nama_berkas)
         if nama_aksi in A.get("klip_baru_lewati", []):
             if not wajib:
@@ -1139,6 +1398,14 @@ def main():
                 catat(f"TIDAK ADA: {nama_berkas}")
             return None
         arm2, mesh2, act, baru = impor_fbx(path)
+        if arm2 is not None and A.get("samakan_pose_istirahat", True):
+            pakai_acuan = C_acuan is not None and not mesh2          # Without Skin: pose T acuan karakter ini
+            beda_sendiri = selisih_pose_istirahat(arm, arm2)
+            beda = samakan_pose_istirahat(act, C_acuan if pakai_acuan else beda_sendiri)
+            sumber_pose[nama_aksi] = "pose T acuan" if pakai_acuan else "kerangka berkas (With Skin)"
+            besar = dict(sorted(((k_, v_) for k_, v_ in beda.items() if "Hand" not in k_ or k_.endswith("Hand")), key=lambda kv: -kv[1])[:8])
+            ringkasan_pose[nama_aksi] = besar
+            catat(f"pose istirahat {nama_aksi} ({sumber_pose[nama_aksi]}): {len(beda)} tulang berbeda di atas 1 derajat; terbesar {besar}")
         for o in baru:
             bpy.data.objects.remove(o, do_unlink=True)
         act.name = nama_aksi
@@ -1153,7 +1420,7 @@ def main():
         except Exception:
             pass
 
-    ringkasan = {}
+    ringkasan = {"pose_istirahat_beda_derajat": ringkasan_pose, "pose_istirahat_sumber": sumber_pose}
     act_idle.name = "idle"
     act_idle.use_fake_user = True
     aksi["idle"] = act_idle
@@ -1316,6 +1583,48 @@ def main():
                   f"siku diluruskan {hasil_k['siku']} derajat{'' if hasil_k['sasaran_tercapai'] else ' (sasaran TIDAK tercapai penuh dalam batas rotasi)'}; "
                   f"jarak tangan ke badan {hasil_k['sebelum_m']} -> {hasil_k['sesudah_m']}")
         arm.animation_data.action = None
+
+    # Buka lengan per karakter (wajah.json "<blok>.animasi.buka_lengan"): klip yang diunduh dengan karakter lain
+    # (lebih ramping) menempelkan lengan ke badan. Tiap klip dan tiap sisi diukur, lalu lengan atas diputar
+    # menjauh dari badan sampai berjarak jarak_m, paling banyak maks_derajat.
+    BL = A.get("buka_lengan")
+    if BL and BL.get("aktif", True) and a.blok:
+        L_ = siapkan_lengan(arm, max(model_list, key=lambda o: len(o.data.polygons)))
+        ringkasan["buka_lengan"] = {}
+        for nama_klip, act in aksi.items():
+            if nama_klip in BL.get("lewati", ["mati"]):
+                continue
+            sisi_l = [s_ for s_ in ("Left", "Right") if not (s_ == "Left" and nama_klip in BL.get("lewati_kiri", []))]
+            h_ = buka_lengan(act, arm, L_, pasang, BL, sisi_l)
+            ringkasan["buka_lengan"][nama_klip] = h_
+            for s_, r_ in h_.items():
+                catat(f"buka lengan {nama_klip:<14} {s_:<5} sebelum {r_['sebelum_cm']} -> {r_['derajat']} derajat -> {r_['sesudah_cm']}{'' if r_['tercapai'] else '  (BELUM ' + str(BL['jarak_m'] * 100) + ' cm)'}")
+        # pembanding: klip lama yang dulu diunduh dengan karakter ini (hanya diukur, tidak dimasukkan ke GLB)
+        ringkasan["buka_lengan_klip_lama"] = {}
+        for nama_lama in BL.get("banding_lama", []):
+            path_l = os.path.join(folder, nama_lama + ".fbx")
+            if not os.path.exists(path_l):
+                continue
+            arm_l, mesh_l, act_l, baru_l = impor_fbx(path_l)
+            if arm_l is not None and A.get("samakan_pose_istirahat", True):
+                samakan_pose_istirahat(act_l, C_acuan if (C_acuan is not None and not mesh_l) else selisih_pose_istirahat(arm, arm_l))
+            for o in baru_l:
+                bpy.data.objects.remove(o, do_unlink=True)
+            h_ = buka_lengan(act_l, arm, L_, pasang, BL, ["Left", "Right"], terapkan=False)
+            ringkasan["buka_lengan_klip_lama"][nama_lama] = {s_: r_["sebelum_cm"] for s_, r_ in h_.items()}
+            catat(f"klip lama {nama_lama:<10} (seluruh klip, tanpa koreksi): {ringkasan['buka_lengan_klip_lama'][nama_lama]}")
+            arm.animation_data.action = None
+            bpy.data.actions.remove(act_l)
+        arm.animation_data.action = None
+
+    # Tinggi tiap klip diratakan ke tanah (kecuali klip rebah): telapak tidak pernah di bawah tanah.
+    ringkasan["tanah_geser_m"] = {}
+    for nama_klip, act in aksi.items():
+        if nama_klip in A.get("tanah_lewati", ["mati"]):
+            continue
+        ringkasan["tanah_geser_m"][nama_klip] = ratakan_tanah(act, arm, pasang)
+    arm.animation_data.action = None
+    catat(f"tinggi diratakan ke tanah (geser Hips, m, positif = naik): {ringkasan['tanah_geser_m']}")
 
     # Kepala tetap ke depan selama serangan (wajah.json "<blok>.animasi.kepala_lurus"): klip tebasan memiringkan
     # dan memalingkan kepala menjauh dari arah serangan.

@@ -28,14 +28,14 @@
     "curigaMencari": 0.6
   },
   "pemain": {
-    "keterangan": "Gerak pemain (17 November 2026): jalan pelan (tahan tombol jalanPelan atau stik didorong kurang dari ambangStikPelan), lari santai (gerak biasa), lari kencang (tombol lari). Klip dan laju aslinya: jalan 1,43 (jalan pelan), lari lama 4,01 (lari santai), lari-kencang 4,5 m/s (lari kencang, timeScale 1,29). lajuLariSantai dan lajuLari: batas laju untuk memilih klip dan tingkat suara langkah.",
-    "lajuLariSantai": 2.6,
-    "lajuLari": 4.8,
+    "keterangan": "Gerak pemain (17 November 2026): jalan pelan (tahan tombol jalanPelan atau stik didorong kurang dari ambangStikPelan), lari santai (gerak biasa), lari kencang (tombol lari). Klip dan laju aslinya: jalan 1,43 (jalan pelan), lari-santai 2,35 (lari santai, timeScale 1,15), lari-kencang 4,5 m/s (lari kencang, timeScale 1,29). lajuLariSantai dan lajuLari: batas laju untuk memilih klip dan tingkat suara langkah.",
+    "lajuLariSantai": 2.0,
+    "lajuLari": 3.4,
     "ambangStikPelan": 0.6,
     "faktorJarakJongkok": 0.5,
     "faktorJarakSemak": 0.5,
     "kecepatanJalanPelan": 1.4,
-    "kecepatanLariSantai": 4.0,
+    "kecepatanLariSantai": 2.7,
     "kecepatanLari": 5.8,
     "kecepatanJongkok": 1.4,
     "skalaJongkok": 0.65

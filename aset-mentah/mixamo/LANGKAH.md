@@ -137,7 +137,7 @@ Pengganti klip serang Sword And Shield (lengan kiri terlipat ke dada dan bahu me
 - lari-kencang.fbx: Two Cycle Sprint, Overdrive 35, Arm-Space 55, In Place. Dipakai saat Shift.
 - serang-1.fbx: Stable Sword Outward Slash, Emphasis 100, Angle 50, Overdrive 70, Arm-Space 55.
 - serang-2.fbx: tebasan balik (kemungkinan Stable Sword Inward Slash), pengaturan tidak tercatat.
-- serang-3.fbx: Upward Thrust, Distance 50, Height 50, Direction 50, Overdrive 75, Arm-Space 20 (lengan lebih rendah, gaya silat; cek lengan kiri tidak menempel ke badan).
+- serang-3.fbx: Upward Thrust, Distance 50, Height 50, Direction 50, Overdrive 75, Arm-Space 35-40 (unduh ulang 18 November dengan Wijaya sebagai karakter aktif; versi Arm-Space 20 dari prajurit menembus badan).
 - serang-berat.fbx: satu gerakan kuat dengan ancang-ancang dan langkah maju (bukan kombo).
 jalan.fbx lama tetap dipakai, hanya untuk jalan pelan pada laju aslinya. Klip lama di folder ini tidak dihapus.
 
@@ -145,5 +145,8 @@ Hasil ukur dan pemakaian (17 November 2026):
 - Laju langkah asli: jalan 1,43; lari lama 4,01; lari-santai 2,35; lari-kencang 4,5 m/s.
 - lari-santai.fbx tidak dipakai (terlalu lambat untuk gerak biasa). Gerak biasa memakai lari.fbx lama pada 4,0 m/s (timeScale 1,0), lari kencang memakai lari-kencang.fbx pada 5,8 m/s (timeScale 1,29), jalan pelan memakai jalan.fbx pada 1,4 m/s.
 - Kontak: serang-1 bingkai 18, serang-2 bingkai 26, serang-3 bingkai 18 (masing-masing dipotong 8 sebelum, 10 sesudah); serang-berat bingkai 27 (12 sebelum, 11 sesudah). combat.json tidak berubah.
+- PENTING: berkas Without Skin selalu berpose istirahat T, sedangkan kerangka Wijaya di game (With Skin) berpose seperti model yang diunggah; selisihnya 50 derajat di lengan atas, siapa pun karakter aktif saat mengunduh. gabung_animasi.py menyesuaikannya otomatis (samakan_pose_istirahat, pose T acuan dari baru/serang-3.fbx); tanpa itu lengan terbenam di dada. Karakter aktif tetap menentukan Arm-Space dan proporsi, jadi unduh dengan Wijaya aktif kalau bisa.
+- serang-3.fbx diunduh ulang 18 November 2026 dengan Wijaya aktif (Upward Thrust, Arm-Space 35 sampai 40, 46 bingkai): kontak bingkai 19 (tangan 0,69 m di depan pinggul). Berkas ini juga menjadi pose T acuan dan sumber kalibrasi sudut keris.
+- Sejak 17 November malam: gerak biasa memakai lari-santai.fbx pada 2,7 m/s (timeScale 1,15), lari.fbx lama tidak dipakai. Serang ringan dipotong 7 bingkai sebelum dan 10 sesudah kontak (0,6 s, diputar 1,2 kali untuk durasi 0,5 s); serang-berat 14 sebelum dan 15 sesudah (1,0 s, diputar 1,05 kali untuk 0,95 s). Kontak serang-1 di bingkai 20, serang-2 di 27.
 - Klip baru hanya mengunci jempol dan telunjuk (karakter prajurit berjari dua rantai); jari ditimpa pose genggam di gabung_animasi.py.
 - Lengan kiri serang-1, serang-2, serang-berat: sikap asli klip (tangan di belakang pinggang), tanpa koreksi. Kepala serang-1 dan serang-2 diluruskan ke depan.
