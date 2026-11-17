@@ -137,6 +137,47 @@ function balok(x: number, y: number, z: number, warna: number, logam = 0): THREE
   return m;
 }
 
+const Z_DEPAN = new THREE.Vector3(0, 0, 1);
+
+/** Putar `o` dengan rotasi dunia `q` (di sekitar sendinya sendiri). */
+function putarDunia(o: THREE.Object3D, q: THREE.Quaternion): void {
+  const induk = o.parent!.getWorldQuaternion(new THREE.Quaternion());
+  o.quaternion.premultiply(induk.clone().invert().multiply(q).multiply(induk));
+  o.updateWorldMatrix(false, true);
+}
+
+/**
+ * IK dua tulang sederhana (lengan atas, lengan bawah, tangan): siku ditekuk sampai jarak bahu ke tangan sama
+ * dengan jarak bahu ke sasaran, lalu lengan atas diputar sependek mungkin supaya tangan tiba di sasaran.
+ * Sasaran di luar jangkauan: lengan lurus ke arahnya. `bobot` 0 sampai 1 mencampur dengan pose klip.
+ */
+function ikLengan(atas: THREE.Object3D, bawah: THREE.Object3D, ujung: THREE.Object3D, sasaran: THREE.Vector3, bobot: number): void {
+  if (bobot <= 0) return;
+  const qa = atas.quaternion.clone();
+  const qb = bawah.quaternion.clone();
+  const a = atas.getWorldPosition(new THREE.Vector3());
+  const b = bawah.getWorldPosition(new THREE.Vector3());
+  let c = ujung.getWorldPosition(new THREE.Vector3());
+  const l1 = b.distanceTo(a);
+  const l2 = c.distanceTo(b);
+  const d = THREE.MathUtils.clamp(sasaran.distanceTo(a), Math.abs(l1 - l2) + 1e-3, l1 + l2 - 1e-3);
+  const u = a.clone().sub(b);
+  const v = c.clone().sub(b);
+  const sumbu = u.clone().cross(v);
+  if (sumbu.lengthSq() < 1e-10) sumbu.set(0, 1, 0).cross(v);
+  sumbu.normalize();
+  const sudutKini = u.angleTo(v);
+  const sudutBaru = Math.acos(THREE.MathUtils.clamp((l1 * l1 + l2 * l2 - d * d) / (2 * l1 * l2), -1, 1));
+  putarDunia(bawah, new THREE.Quaternion().setFromAxisAngle(sumbu, sudutBaru - sudutKini));
+  c = ujung.getWorldPosition(c);
+  putarDunia(atas, new THREE.Quaternion().setFromUnitVectors(c.sub(a).normalize(), sasaran.clone().sub(a).normalize()));
+  if (bobot < 1) {
+    atas.quaternion.copy(qa.slerp(atas.quaternion, bobot));
+    bawah.quaternion.copy(qb.slerp(bawah.quaternion, bobot));
+    atas.updateWorldMatrix(false, true);
+  }
+}
+
 export class ModelPrajurit extends ModelKarakter {
   siap = false;
   private dibuang = false;
@@ -149,6 +190,11 @@ export class ModelPrajurit extends ModelKarakter {
   private readonly meshSemua: THREE.Mesh[] = [];
   private readonly bahanSenjata: THREE.MeshStandardMaterial[] = [];
   private tulangTangan: THREE.Object3D | null = null;
+  /** Lengan kiri untuk pegangan dua tangan: lengan atas, lengan bawah, tangan. */
+  private lenganKiri: [THREE.Object3D, THREE.Object3D, THREE.Object3D] | null = null;
+  private bobotDuaTangan = 0;
+  private readonly arahTangan = new THREE.Vector3();
+  private readonly titik = new THREE.Vector3();
   /** Tombak: mengikuti tangan, arahnya di ruang badan (lihat models.json). */
   private tombak: THREE.Group | null = null;
   private readonly arahTombak = new THREE.Quaternion();
@@ -188,6 +234,8 @@ export class ModelPrajurit extends ModelKarakter {
     this.grup.add(akar);
     this.pasangAksi(akar, gltf.animations);
     this.tulangTangan = cariTulang(akar, 'RightHand') ?? null;
+    const [la, lb, lt] = ['LeftArm', 'LeftForeArm', 'LeftHand'].map((n) => cariTulang(akar, n));
+    if (la && lb && lt) this.lenganKiri = [la, lb, lt];
     akar.updateWorldMatrix(true, true);
     if (this.tulangTangan) {
       if (this.jenis === 'tombak') this.pasangTombak();
@@ -263,7 +311,8 @@ export class ModelPrajurit extends ModelKarakter {
   /** Klip serang dimulai sedemikian sehingga bingkai kontaknya jatuh `saatKena` detik dari sekarang. */
   private serangTepat(nama: string, saatKena: number): void {
     const S = M.serang;
-    const awal = Math.max(0, S.kontakDetik - saatKena * S.skala);
+    const kontak = (S.kontakDetik as Record<string, number>)[nama] ?? 0.6;
+    const awal = Math.max(0, kontak - saatKena * S.skala);
     this.mainkan(nama, true, awal);
     if (this.aktif && this.namaAktif === nama) this.aktif.timeScale = S.skala;
   }
@@ -366,14 +415,44 @@ export class ModelPrajurit extends ModelKarakter {
 
     if (this.tombak && this.tulangTangan) {
       const T = M.senjata.tombak;
-      const condong = tusuk ? T.condongTusuk : siapTombak ? T.condongSiap : 90 - T.condongBawa;
-      this.bantuQ.setFromEuler(new THREE.Euler(-THREE.MathUtils.degToRad(condong), 0, 0));
-      this.arahTombak.slerp(this.bantuQ, Math.min(1, dt / Math.max(T.peralihan, 1e-3)));
-      this.tombak.quaternion.copy(this.arahTombak);
+      const D = T.duaTangan;
+      // Pegangan dua tangan (tangan kanan di belakang, kiri di depan) hanya di status bertarung yang disebut.
+      const dua = D.aktif && this.lenganKiri !== null && (D.status as string[]).includes(status);
+      const langkahDua = dt / Math.max(D.peralihan, 1e-3);
+      this.bobotDuaTangan = dua ? Math.min(1, this.bobotDuaTangan + langkahDua) : Math.max(0, this.bobotDuaTangan - langkahDua);
+      const w = this.bobotDuaTangan * this.bobotDuaTangan * (3 - 2 * this.bobotDuaTangan);
+      // Tangan kanan di ruang model.
       this.tulangTangan.getWorldPosition(this.bantu);
       this.grup.worldToLocal(this.bantu);
+      const condong = tusuk ? T.condongTusuk : siapTombak ? T.condongSiap : 90 - T.condongBawa;
+      this.bantuQ.setFromEuler(new THREE.Euler(-THREE.MathUtils.degToRad(condong), 0, 0));
+      let pakaiIk = w > 0;
+      if (w > 0 && D.arahDari === 'tangan' && this.lenganKiri) {
+        // Arah tombak dari tangan kanan ke tangan kiri (klip tusukan dua tangan): kedua tangan sudah di batang.
+        this.lenganKiri[2].getWorldPosition(this.arahTangan);
+        this.grup.worldToLocal(this.arahTangan).sub(this.bantu);
+        if (this.arahTangan.length() > D.jarakTanganMinMutlak * 0.5) {
+          const q = new THREE.Quaternion().setFromUnitVectors(Z_DEPAN, this.arahTangan.normalize());
+          this.bantuQ.slerp(q, w);
+          pakaiIk = false;
+        }
+      }
+      this.arahTombak.slerp(this.bantuQ, Math.min(1, dt / Math.max(T.peralihan, 1e-3)));
+      this.tombak.quaternion.copy(this.arahTombak);
       this.tombak.position.set(this.bantu.x + T.geser[0], this.bantu.y + T.geser[1], this.bantu.z + T.geser[2]);
       this.tombak.visible = status !== 'mati' || l.waktuStatus < 0.4;
+      if (pakaiIk && this.lenganKiri) {
+        // Arah tombak dari badan (klip satu tangan): tangan kiri dibawa ke batang dengan IK. Titik pegangnya
+        // titik batang terdekat dari bahu kiri, di antara jarakTanganMin dan jarakTanganMaks dari tangan kanan.
+        const arah = this.arahTangan.copy(Z_DEPAN).applyQuaternion(this.arahTombak);
+        this.lenganKiri[0].getWorldPosition(this.titik);
+        this.grup.worldToLocal(this.titik).sub(this.tombak.position);
+        let s = THREE.MathUtils.clamp(this.titik.dot(arah), D.jarakTanganMin, D.jarakTanganMaks);
+        if (Math.abs(s) < D.jarakTanganMinMutlak) s = s < 0 ? -D.jarakTanganMinMutlak : D.jarakTanganMinMutlak;
+        this.titik.copy(this.tombak.position).addScaledVector(arah, s);
+        this.grup.localToWorld(this.titik);
+        ikLengan(this.lenganKiri[0], this.lenganKiri[1], this.lenganKiri[2], this.titik, w);
+      }
     }
   }
 }

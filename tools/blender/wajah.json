@@ -2348,6 +2348,106 @@
             7.9
           ]
         },
+        "koreksi_pergelangan": {
+          "serang-1": {
+            "kontak": 18,
+            "rotasi_terbesar_derajat": 22,
+            "rotasi_di_kontak_derajat": 22,
+            "sebelum_per_bingkai": {
+              "16": {
+                "naik": -13,
+                "serong": -35,
+                "rotasi": 1,
+                "bobot": 0.16
+              },
+              "17": {
+                "naik": 14,
+                "serong": -14,
+                "rotasi": 2,
+                "bobot": 0.78
+              },
+              "18": {
+                "naik": 39,
+                "serong": 24,
+                "rotasi": 22,
+                "bobot": 0.84
+              },
+              "19": {
+                "naik": 44,
+                "serong": 93,
+                "rotasi": 13,
+                "bobot": 0.22
+              },
+              "20": {
+                "naik": 28,
+                "serong": 114,
+                "rotasi": 1,
+                "bobot": 0.01
+              }
+            },
+            "sesudah_naik_serong_per_bingkai": {
+              "16": [
+                -13,
+                -35
+              ],
+              "17": [
+                13,
+                -14
+              ],
+              "18": [
+                12,
+                24
+              ],
+              "19": [
+                32,
+                56
+              ],
+              "20": [
+                28,
+                114
+              ]
+            }
+          },
+          "serang-2": {
+            "kontak": 18,
+            "rotasi_terbesar_derajat": 23,
+            "rotasi_di_kontak_derajat": 0,
+            "sebelum_per_bingkai": {
+              "17": {
+                "naik": 52,
+                "serong": 55,
+                "rotasi": 23,
+                "bobot": 0.5
+              },
+              "18": {
+                "naik": 6,
+                "serong": -13,
+                "rotasi": 0,
+                "bobot": 1.0
+              },
+              "19": {
+                "naik": -32,
+                "serong": -49,
+                "rotasi": 14,
+                "bobot": 0.5
+              }
+            },
+            "sesudah_naik_serong_per_bingkai": {
+              "17": [
+                31,
+                40
+              ],
+              "18": [
+                6,
+                -13
+              ],
+              "19": [
+                -21,
+                -39
+              ]
+            }
+          }
+        },
         "genggam": {
           "kanan": {
             "klip": [
@@ -3018,6 +3118,72 @@
             }
           }
         }
+      },
+      "keris": {
+        "kalibrasi_di_gabung": true,
+        "kalibrasi": {
+          "klip": "serang-3",
+          "bingkai": 18
+        },
+        "keterangan": "Golok perampok (kerangka prajurit, tangan berjari dua rantai): sudut pasang dikalibrasi di gabung_animasi.py dari kontak tusukan serang-3 (bilah lurus mendatar ke depan), sama caranya dengan keris Wijaya. Salin arah_xfn ke src/data/models.json prajurit.senjata.golok.arahXfn.",
+        "arah_xfn": [
+          0.0466,
+          0.9822,
+          -0.182
+        ],
+        "arah_di_kontak": {
+          "serang-1": {
+            "bingkai": 18,
+            "naik_derajat": 12,
+            "serong_derajat": 24
+          },
+          "serang-2": {
+            "bingkai": 18,
+            "naik_derajat": 6,
+            "serong_derajat": -13
+          },
+          "serang-3": {
+            "bingkai": 18,
+            "naik_derajat": 0,
+            "serong_derajat": 0
+          },
+          "serang-berat": {
+            "bingkai": 15,
+            "naik_derajat": 1,
+            "serong_derajat": 17
+          },
+          "siaga": {
+            "bingkai": 30,
+            "naik_derajat": -42,
+            "serong_derajat": 35
+          }
+        }
+      },
+      "koreksi_pergelangan": {
+        "aktif": true,
+        "klip": {
+          "serang-1": {
+            "naik_derajat": [
+              -5,
+              12
+            ],
+            "serong_maks_derajat": 30,
+            "inti_sebelum": 0,
+            "inti_sesudah": 0,
+            "pudar": 2
+          },
+          "serang-2": {
+            "naik_derajat": [
+              -10,
+              10
+            ],
+            "serong_maks_derajat": 30,
+            "inti_sebelum": 0,
+            "inti_sesudah": 0,
+            "pudar": 2
+          }
+        },
+        "keterangan": "Golok perampok: tanpa koreksi, bilah di kontak serang-1 naik 39 derajat (serong 24); serang-2 naik 6 (serong -13) tetapi hanya selama satu bingkai (satu bingkai sebelumnya naik 48, serong 45). RightHand diputar supaya bilah mendatar dan menghadap sasaran, bobot penuh hanya di bingkai kontak dan memudar 2 bingkai; dengan inti 1 bingkai dan pudar 3, bingkai tetangga terputar sampai 59 dan 72 derajat dan ayunan tampak berhenti."
       }
     },
     "tambal": {

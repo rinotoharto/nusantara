@@ -821,19 +821,39 @@ def luruskan_kepala(act, arm, pasang, bagian, maks_derajat):
     return round(sebelum, 1), round(sesudah, 1)
 
 
-def arah_bilah_keris(arm, koef):
-    """Arah bilah keris (dunia) pada pose sekarang, dari kerangka acuan tangan kanan (x garis buku jari ke
-    sisi telunjuk, f arah jari, n normal telapak) dan koefisien `koef` (<blok>.animasi.keris.arah_xfn)."""
+def kerangka_tangan(arm):
+    """Kerangka acuan tangan kanan (dunia) pada pose sekarang: x ke sisi telunjuk/jempol, f arah jari, n normal
+    telapak (menghadap bawah pada pose istirahat). Kerangka berjari lengkap: x garis buku jari kelingking ke
+    telunjuk, f ke pangkal jari tengah. Kerangka berjari dua rantai (prajurit, hanya jempol dan telunjuk): f ke
+    pangkal telunjuk, x ke sisi jempol; sama dengan pasangGolok di src/character/model-prajurit.ts."""
     B = arm.data.bones
     t0 = B[PRE + "RightHand"].head_local
-    tanda = -1.0 if (B[PRE + "RightHandIndex1"].head_local - t0).cross(B[PRE + "RightHandPinky1"].head_local - t0).z > 0 else 1.0
-    t, i1, m1, p1 = (arm.matrix_world @ arm.pose.bones[PRE + n].head for n in ("RightHand", "RightHandIndex1", "RightHandMiddle1", "RightHandPinky1"))
-    x = (i1 - p1).normalized()
-    f = m1 - t
-    f = (f - x * f.dot(x)).normalized()
-    n = x.cross(f).normalized()
-    if n.dot((i1 - t).cross(p1 - t)) * tanda < 0:
-        n = -n
+    kepala = lambda n_: arm.matrix_world @ arm.pose.bones[PRE + n_].head
+    t, i1 = kepala("RightHand"), kepala("RightHandIndex1")
+    if PRE + "RightHandPinky1" in B and PRE + "RightHandMiddle1" in B:
+        tanda = -1.0 if (B[PRE + "RightHandIndex1"].head_local - t0).cross(B[PRE + "RightHandPinky1"].head_local - t0).z > 0 else 1.0
+        m1, p1 = kepala("RightHandMiddle1"), kepala("RightHandPinky1")
+        x = (i1 - p1).normalized()
+        f = m1 - t
+        f = (f - x * f.dot(x)).normalized()
+        n = x.cross(f).normalized()
+        if n.dot((i1 - t).cross(p1 - t)) * tanda < 0:
+            n = -n
+        return x, f, n
+    f0 = (B[PRE + "RightHandIndex1"].head_local - t0).normalized()
+    x0 = B[PRE + "RightHandThumb1"].head_local - t0
+    x0 = (x0 - f0 * x0.dot(f0)).normalized()
+    tanda = -1.0 if x0.cross(f0).z > 0 else 1.0           # pose istirahat: telapak menghadap bawah
+    f = (i1 - t).normalized()
+    x = kepala("RightHandThumb1") - t
+    x = (x - f * x.dot(f)).normalized()
+    return x, f, x.cross(f).normalized() * tanda
+
+
+def arah_bilah_keris(arm, koef):
+    """Arah bilah keris atau golok (dunia) pada pose sekarang, dari kerangka acuan tangan kanan dan koefisien
+    `koef` (<blok>.animasi.keris.arah_xfn)."""
+    x, f, n = kerangka_tangan(arm)
     return (x * koef[0] + f * koef[1] + n * koef[2]).normalized()
 
 
@@ -1686,6 +1706,21 @@ def main():
 
     # Koreksi pergelangan per klip (wajah.json "<blok>.animasi.koreksi_pergelangan"): sudut pasang keris tetap
     # satu; di klip yang disebut, pergelangan kanan diputar bertahap di sekitar kontak supaya bilah mendatar.
+    # Kalibrasi sudut pasang di sini (wajah.json "<blok>.animasi.keris.kalibrasi_di_gabung"): pada bingkai kontak
+    # klip kalibrasi (tusukan), bilah lurus mendatar ke depan tokoh. Untuk karakter tanpa lembar keris di
+    # pratinjau_animasi.py (golok perampok pada kerangka prajurit).
+    KRS = A.get("keris")
+    if KRS and KRS.get("kalibrasi_di_gabung"):
+        klip_k = KRS.get("kalibrasi", {}).get("klip", "serang-3")
+        if klip_k in aksi and ringkasan.get(klip_k, {}).get("kontak_baru"):
+            pasang(aksi[klip_k])
+            bpy.context.scene.frame_set(int(ringkasan[klip_k]["kontak_baru"]))
+            x_, f_, n_ = kerangka_tangan(arm)
+            depan_ = Vector((0.0, -1.0, 0.0))
+            KRS["arah_xfn"] = [round(depan_.dot(v_), 4) for v_ in (x_, f_, n_)]
+            KRS["kalibrasi"] = {"klip": klip_k, "bingkai": int(ringkasan[klip_k]["kontak_baru"])}
+            catat(f"sudut pasang dikalibrasi dari {klip_k} bingkai {ringkasan[klip_k]['kontak_baru']}: arah bilah (x, f, n) = {KRS['arah_xfn']}")
+            arm.animation_data.action = None
     KW = A.get("koreksi_pergelangan")
     if KW and KW.get("aktif", True) and "arah_xfn" in A.get("keris", {}):
         ringkasan["koreksi_pergelangan"] = {}
@@ -1694,7 +1729,19 @@ def main():
                 continue
             hasil_w = koreksi_pergelangan(aksi[nama_klip], arm, pasang, A["keris"]["arah_xfn"], ringkasan.get(nama_klip, {}).get("kontak_baru"), KW["klip"][nama_klip])
             ringkasan["koreksi_pergelangan"][nama_klip] = hasil_w
-            catat(f"koreksi pergelangan {nama_klip}: {hasil_w}")
+            catat(f"koreksi pergelangan {nama_klip}: " + str({k_: v_ for k_, v_ in (hasil_w or {}).items() if "per_bingkai" not in k_}))
+        arm.animation_data.action = None
+    if KRS and "arah_xfn" in KRS and KRS.get("kalibrasi_di_gabung"):
+        KRS["arah_di_kontak"] = {}
+        for nama_klip in ("serang-1", "serang-2", "serang-3", "serang-berat", "siaga"):
+            if nama_klip in aksi:
+                fr_ = int(ringkasan.get(nama_klip, {}).get("kontak_baru") or 30)
+                pasang(aksi[nama_klip])
+                bpy.context.scene.frame_set(fr_)
+                d_ = arah_bilah_keris(arm, KRS["arah_xfn"])
+                KRS["arah_di_kontak"][nama_klip] = {"bingkai": fr_, "naik_derajat": round(math.degrees(math.asin(max(-1.0, min(1.0, d_.z))))),
+                                                    "serong_derajat": round(math.degrees(math.atan2(d_.x, -d_.y)))}
+        catat(f"arah bilah di kontak: {KRS['arah_di_kontak']}")
         arm.animation_data.action = None
 
     # Genggaman (wajah.json "<blok>.animasi.genggam"): jari ditimpa pose tetap. Klip serang Mixamo membuka

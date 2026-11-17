@@ -750,3 +750,21 @@ diputar 1,0, sehingga kontaknya jatuh pada saat kena: `combat.json` lawan.isyara
 (dulu 0,08 tertulis di kode), durasiTusuk 0,35; perampok isyarat 0,45, tebasan 0,02 dan 0,47, durasi 0,8. Terukur
 di game: kena pada detik klip 0,583 (prajurit) dan 0,597 (perampok), satu sampai dua bingkai sesudah kontak.
 Lembar: `aset-mentah/pratinjau/game-prajurit-serang-ancang.jpg`, `game-perampok-serang-ancang.jpg`.
+
+### Golok perampok dan tombak dua tangan (18 November 2026)
+
+- `kerangka_tangan(arm)` (baru, dipakai `arah_bilah_keris`): kerangka acuan tangan kanan juga untuk kerangka berjari
+  dua rantai (f ke pangkal telunjuk, x ke sisi jempol); sama dengan `pasangGolok` di
+  `src/character/model-prajurit.ts`.
+- `<blok>.animasi.keris.kalibrasi_di_gabung`: sudut pasang dikalibrasi di `gabung_animasi.py` dari kontak tusukan
+  (serang-3, bilah lurus mendatar ke depan) dan arah bilah tiap klip dicatat di `keris.arah_di_kontak`. Untuk
+  prajurit `arah_xfn` = [0,0466; 0,9822; -0,182]; salin ke `src/data/models.json` (`senjata.golok.arahXfn`). Angka
+  Wijaya tidak bisa dipakai karena kerangka acuan tangannya lain (golok jadi tegak di kontak).
+- `koreksi_pergelangan` prajurit: serang-1 (39 ke 12 derajat naik di kontak, putaran 22) dan serang-2 (bingkai
+  tetangga kontak 52 ke 31 derajat), bobot penuh hanya di bingkai kontak, memudar 2 bingkai.
+- Kontak klip prajurit (bingkai 18) ada di detik 0,600 di GLB, bukan 0,567: arah golok yang diukur di game pada
+  detik t cocok dengan bingkai t x 30 di Blender. Penyejajaran di game per klip
+  (`models.json` `serang.kontakDetik`). Belum diperiksa apakah klip Wijaya punya selisih satu bingkai yang sama.
+- Tombak dua tangan (`models.json` `senjata.tombak.duaTangan`): `arahDari: "tangan"` untuk klip tusukan dua tangan
+  (arah tombak dari tangan kanan ke tangan kiri), `"badan"` + IK dua tulang lengan kiri untuk klip satu tangan
+  yang ada. Lembar: `aset-mentah/pratinjau/game-prajurit-tombak-dua-tangan.jpg`, `game-perampok-golok.jpg`.

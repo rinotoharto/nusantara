@@ -18,13 +18,13 @@
     "kilatanSenjata": 0.8,
     "lingkungan": 0.45,
     "serang": {
-      "keterangan": "kontakDetik: saat kontak di dalam klip serang prajurit (17 bingkai sebelum kontak pada 30 per detik). Klip serang dimulai saat lawan bersiap, dari bagian klip yang membuat kontaknya jatuh pada saat kena di combat.json (lawan.isyarat + tombak.saatKena; perampok.isyarat + tebasan.pertama), diputar skala kali kecepatan asli. Tebasan kedua perampok (serang-2) dimulai jedaLanjut detik sesudah tebasan pertama, dari bagian klip yang kontaknya jatuh pada tebasan.kedua.",
-      "kontakDetik": 0.567,
+      "keterangan": "kontakDetik: detik klip serang yang disejajarkan dengan saat kena di combat.json (lawan.isyarat + tombak.saatKena; perampok.isyarat + tebasan.pertama). Kontak klip prajurit ada di bingkai 18, yaitu detik 0,600 di GLB (terukur di game: arah golok pada detik t sama dengan bingkai t x 30 di Blender). Kena baru dicek pada frame pertama sesudah ambangnya lewat (terlambat 0,02 sampai 0,05 detik klip), jadi nilainya 0,575 supaya klip berada di sekitar 0,60 saat kena; serang-1 0,545 karena bilahnya menghadap sasaran di bingkai 17 sampai 18 (0,57 sampai 0,60) dan sesudah itu sudah menyapu lewat. Klip serang dimulai saat lawan bersiap dan diputar skala kali kecepatan asli. Tebasan kedua perampok (serang-2) dimulai jedaLanjut detik sesudah tebasan pertama, dari bagian klip yang kontaknya jatuh pada tebasan.kedua.",
+      "kontakDetik": { "serang-1": 0.545, "serang-2": 0.575, "serang-3": 0.575 },
       "skala": 1.0,
       "jedaLanjut": 0.12
     },
     "senjata": {
-      "keterangan": "Senjata balok sementara di tulang RightHand. tombak: letaknya mengikuti tangan (geser = meter di ruang model: kiri, atas, depan), arahnya ditentukan di ruang badan supaya tidak terayun bersama lengan: condongBawa = derajat condong ke depan dari tegak saat dibawa, condongSiap dan condongTusuk = derajat di atas mendatar saat bersiap dan menusuk; depan dan belakang = panjang batang di depan dan di belakang genggaman (m); peralihan = detik. golok: ditempel ke tulang, bilah searah arahXfn di kerangka acuan tangan (x sisi jempol, f arah jari, n normal telapak), seperti keris Wijaya.",
+      "keterangan": "Senjata balok sementara di tulang RightHand. tombak: letaknya mengikuti tangan (geser = meter di ruang model: kiri, atas, depan), arahnya ditentukan di ruang badan supaya tidak terayun bersama lengan: condongBawa = derajat condong ke depan dari tegak saat dibawa, condongSiap dan condongTusuk = derajat di atas mendatar saat bersiap dan menusuk; depan dan belakang = panjang batang di depan dan di belakang genggaman (m); peralihan = detik. golok: ditempel ke tulang, bilah searah arahXfn di kerangka acuan tangan (x sisi jempol, f arah jari, n normal telapak); angkanya dikalibrasi gabung_animasi.py dari kontak tusukan serang-3 (wajah.json prajurit.animasi.keris.arah_xfn), dan pergelangan di serang-1 dan serang-2 dikoreksi di GLB supaya bilah mendatar di kontak.",
       "tombak": {
         "depan": 1.5,
         "belakang": 0.55,
@@ -34,10 +34,20 @@
         "condongBawa": 8,
         "condongSiap": 4,
         "condongTusuk": 0,
-        "peralihan": 0.12
+        "peralihan": 0.12,
+        "duaTangan": {
+          "keterangan": "Pegangan dua tangan: tangan kanan di belakang, tangan kiri di depan, hanya di status yang disebut (di luar itu tombak dibawa satu tangan). arahDari = tangan: arah tombak dari tangan kanan ke tangan kiri, untuk klip tusukan dua tangan (kedua tangan sudah di batang, tanpa IK). arahDari = badan: arah dari condongSiap atau condongTusuk seperti biasa, dan tangan kiri dibawa ke batang dengan IK dua tulang; titik pegangnya titik batang terdekat dari bahu kiri, di antara jarakTanganMin dan jarakTanganMaks (m dari tangan kanan, positif = ke arah mata tombak), paling dekat jarakTanganMinMutlak dari tangan kanan. Dengan klip satu tangan yang ada dipakai badan; ganti ke tangan saat klip dua tangan masuk.",
+          "aktif": true,
+          "status": ["bersiap", "menyerang", "mengelilingi", "mundur"],
+          "arahDari": "badan",
+          "jarakTanganMin": -0.45,
+          "jarakTanganMaks": 0.55,
+          "jarakTanganMinMutlak": 0.2,
+          "peralihan": 0.15
+        }
       },
       "golok": {
-        "arahXfn": [0.5605, 0.8057, -0.1917],
+        "arahXfn": [0.0466, 0.9822, -0.182],
         "bilah": 0.55,
         "lebar": 0.11,
         "tebal": 0.04,
