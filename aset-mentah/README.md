@@ -95,7 +95,11 @@ color lama: `tekstur/wijaya-basecolor-sebelum.jpg`.
   dipakai ulang dari `mixamo/`.
 - `pratinjau/prajurit-*.png`: tumpang penempatan, tumpang siluet dengan konsep, banding wajah, dan pratinjau model
   tersambung.
-- `mixamo-wijaya-ulang/`: FBX Wijaya hasil pengulangan untuk Mixamo dan `LANGKAH.md`; `idle.fbx` With Skin menyusul.
+- `mixamo-wijaya-ulang/`: FBX Wijaya hasil pengulangan untuk Mixamo, `LANGKAH.md`, dan `idle.fbx` (Breathing Idle
+  With Skin hasil rig; kerangka dan bobot awal model di game).
+- `arsip/`: `wijaya-lama.glb`, model Wijaya yang dipakai game sampai 17 November 2026 (leher revisi 1).
+- `pratinjau/wijaya-ulang-anim-*.png`: pratinjau animasi sebelum dipasang (bingkai kontak serang, tangkis, lari,
+  jongkok-jalan, pinggang ke kaki dari tiga arah, bahu dari belakang, kalung saat membungkuk, sudut kamera dialog).
 - `pratinjau/wijaya-ulang-*.png`: hal yang sama untuk pengulangan Wijaya, ditambah `banding-*` (berdampingan dengan
   prajurit Kediri) dan `pita-10-vs-6` (dua lebar pita emas).
 
@@ -341,3 +345,54 @@ diganti: versi lama tetap aktif di game sampai bagian 2 (animasi) disetujui.
   dari gambar konsep). Lebar leher di sambungan 11,0 cm, sedikit di bawah kisaran standar 11,5 sampai 12,5 cm.
 - Belum dikerjakan (bagian 2): rig Mixamo (`mixamo-wijaya-ulang/LANGKAH.md`), gabung animasi dengan perbaikan bobot
   kain, lengan kiri, dan bobot kalung (Neck dan Spine2), lalu mengganti `public/models/wijaya.glb`.
+
+### Hasil pengulangan Wijaya, bagian 2: animasi dan masuk game (17 November 2026)
+
+`docs/prompt-wijaya-ulang.md` bagian 2. Perintah dan pilihan skrip ada di `tools/blender/README.md` bagian
+"Pengulangan Wijaya, bagian 2"; angka di `wajah.json` blok `wijaya_ulang.animasi`. Pratinjau disetujui setelah satu
+putaran koreksi kaki. `public/models/wijaya.glb` sudah diganti (2,98 MB, 14.986 segitiga, 14 aksi); versi lama
+disimpan di `arsip/wijaya-lama.glb`. Model diam `wijaya-utuh.glb` ikut berubah sedikit: teksturnya saja (lihat
+"Tekstur tangan"), geometrinya sama dengan yang dirig.
+
+- Kerangka dan mesh dari `mixamo-wijaya-ulang/idle.fbx` (rig lancar; idle Sway 20, Breathing 40, Overdrive 40,
+  Arm-Space 55). Animasi lain dipakai ulang dari `mixamo/`. Mesh di FBX berimpit dengan `wijaya-utuh.glb` (selisih
+  0,00 mm), jadi geometri, UV, dan bahan diambil dari GLB dan hanya kerangka serta bobot dari FBX.
+- Serat kain ke tangan: hilang. Bobot dibatasi per bagian. Kain dan sabuk (zona posisi) hanya Hips, Spine, dan
+  UpLeg; lengan bawah dan tangan hanya rantai lengan sisinya; kaki hanya rantai kaki. Sebelumnya telapak kaki
+  sempat ikut aturan lengan atas (sama jauhnya dari sumbu badan) dan kaki rusak; aturan lengan sekarang hanya
+  berlaku di atas tepi bawah kain.
+- Kain: Hips tidak rata. Dengan Hips rata 0,87 kain kaku seperti rok kayu dan kulit tertarik dari tepi kain ke
+  lutut. Dipakai gradasi Hips 0,87 di sendi paha ke 0,10 di tepi bawah; sisanya UpLeg kiri dan kanan dicampur
+  menurut posisi samping (sama rata di garis tengah, penuh ke satu sisi mulai 14 cm dari tengah), supaya kain tetap
+  berbentuk sarung. Ini menyimpang dari angka prompt (Hips 85 sampai 90 persen) dan disetujui lewat pratinjau.
+- Kaki: mesh ini tidak punya paha di dalam kain. Kaki berupa lingkar utuh sampai sekitar 56 cm dari tanah, lalu
+  menyatu dengan lapisan dalam kain yang berbentuk dua terowongan. Kulit kaki di bawah tepi kain dipisah dari kain
+  menurut jarak ke sumbu paha dan keterhubungan dengan kaki (warna saja tidak cukup: cincin teratasnya gelap), dan
+  hanya memakai UpLeg dan Leg; lapisan dalam kain memudar dari UpLeg sisinya ke aturan kain. Lutut bergradasi
+  UpLeg ke Leg selebar 7 cm. Lingkar lutut (0,371 m) dan lingkar kulit utuh tertinggi di atasnya (0,378 m) pada
+  bingkai kuda-kuda terlebar tangkis, serang-1, dan serang-berat: 0,95 sampai 0,99 dari pose A. Saat lutut ditekuk
+  dalam masih menyusut lebih dari 10 persen: lutut kiri 0,85 (lari, jongkok-jalan) dan 0,78 (mati).
+- Lengan kiri: diagnosis menunjukkan sifat klip Sword And Shield (model lama dan baru sama, tangan 0 sampai 7 cm
+  dari badan), bukan bobot. Koreksi dicari otomatis per klip dan dibagi ke LeftArm (paling banyak 25 derajat per
+  sumbu) dan pelurusan siku, dengan sasaran 12 cm pada bingkai kontak: serang-2 13 cm, serang-3 13 cm, serang-berat
+  14 cm, tangkis 14 cm. Serang-1 tidak tercapai penuh: 8 sampai 12 cm pada kontak (dua cara ukur), dan di awal klip
+  tangan kiri masih menempel di kain pinggul. `siaga` tidak dikoreksi (tangan bertumpu di pinggul).
+- Bahu: pada tampak belakang serang, bahu masih menggelembung. Bentuknya sama tanpa koreksi lengan dan dengan
+  bobot lengan atas asli Mixamo, jadi asalnya klip pada badan berotot ini. Penghalusan bobot di sekitar sendi bahu
+  dicoba (12 sampai 40 iterasi) dan dimatikan: bahu hampir tidak berubah, kalung gantung tenggelam sampai 14 mm.
+  Yang belum dicoba: koreksi rotasi LeftShoulder dan RightShoulder per klip, atau klip serang lain.
+- Kalung gantung: bobotnya mengikuti kulit tepat di bawahnya (interpolasi bobot di segitiga kulit terdekat), bukan
+  hanya Neck dan Spine2; dengan Neck dan Spine2 saja kalung tenggelam 6 mm saat badan membungkuk. Paling dalam
+  0,8 mm di semua klip, termasuk serang-3 dan jongkok-jalan. Pita emas menyalin bobot kulit di bawahnya.
+- Leher: Neck ke Head 5,1 derajat maju terhadap tegak saat idle, tidak perlu koreksi rotasi.
+- Tekstur tangan: tangan kiri tampak gelap saat lari karena sisa bercak kelabu. Isian bercak diganti rata-rata
+  halus warna kulit pulau yang sama (`abu.isi_halus`), dan kulit pucat di tangan dan telapak kaki ikut dianggap
+  bercak (`abu.pucat`); tahap A (tekstur), D, dan E diulang, geometri tidak berubah.
+- Di game (`?model=wijaya`): 14 aksi termuat, konsol tanpa error; idle, lari, jongkok-jalan, tangkis, tiga serang
+  beruntun, serang berat, dan hindar berjalan. `src/character/model-wijaya.ts` tidak diubah.
+- Sisa yang diketahui: gelembung bahu (di atas); lekuk kecil di tengah tepi bawah kain pada kuda-kuda terlebar dari
+  belakang, dan lipatan pantat dari mesh aslinya; gumpalan gelap kecil di ujung lipatan depan kain saat siaga;
+  sisi dalam kain terlihat dari bawah saat tepinya terangkat; lutut menyusut saat ditekuk dalam; tangan kiri di
+  kain pinggul pada awal serang-1; gelang lengan belum metalik.
+- Prajurit: `gabung_animasi.py --blok prajurit` belum dicoba. Blok `prajurit.animasi` belum diisi; mulai dari angka
+  `wijaya_ulang.animasi.bagian`.

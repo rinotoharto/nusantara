@@ -29,6 +29,11 @@ Wijaya tidak tertimpa. Pilihan tambahan di blok "abu" (semua opsional, untuk dat
                  "sigma_px": g, "putaran": n}       lebih gelap selisih_L dari kulit sekitarnya (bercak Tripo sering bergaris
                                                     tepi hitam; kalau ditinggal, garisnya tersisa di lengan dan jadi sumber
                                                     isian yang gelap)
+  "pucat": {"rasio": r, "x_abs_min_m": c,           kulit pucat keabuan ikut dianggap bercak di luar |x| ini (tangan) dan di bawah
+            "z_maks_m": z, "v_min": v}              tinggi ini (kaki): kroma di bawah rasio kali kroma kulit median
+  "isi_halus": {"sigma_px": [a, b, c],              isian diganti rata-rata Gauss warna kulit baik di pulau yang sama (skala besar
+                "bobot_penuh": w,                   sebagai dasar, skala kecil di dekat tepi), bukan hasil rambatan Telea yang
+                "selisih_L_maks": s}                ikut membawa bintik gelap di tepi isian
   "normal_garis": {"median_px": k,                  dengan --normal-masuk/--normal-keluar: garis tajam tipis di normal map kulit
                    "sudut_derajat": s,              (tekukan Tripo di batas bercak, tampak sebagai garis gelap di lengan) diratakan:
                    "lebar_px": l,                   texel yang arah normalnya menyimpang lebih dari sudut_derajat dari median
@@ -165,6 +170,20 @@ def main():
     if abu.get("isi_tanpa_kulit"):
         x0, x1 = akar["data_x"]
         x_abs_semua = x0 + d[:, :, 2] * (x1 - x0)
+    pc = abu.get("pucat")
+    if pc:
+        # Kulit pucat keabuan di bagian yang tidak terlihat pada gambar konsep (telapak tangan, sisi dalam jari,
+        # telapak kaki): kromanya sedikit di atas ambang kelabu, jadi dibandingkan dengan kroma kulit median.
+        x0p, x1p = akar["data_x"]
+        x_abs_p = x0p + d[:, :, 2] * (x1p - x0p)
+        lab_p = cv2.cvtColor(img, cv2.COLOR_BGR2LAB).astype(np.float32)
+        kroma_p = np.hypot(lab_p[:, :, 1] - 128, lab_p[:, :, 2] - 128)
+        v_p = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 2].astype(np.float32) / 255
+        med = float(np.median(kroma_p[kulit & cakupan]))
+        zona_p = cakupan & ~kain & ~emas & ((x_abs_p >= pc.get("x_abs_min_m", 9.0)) | (z_abs <= pc.get("z_maks_m", -1.0)))
+        pucat = zona_p & (kroma_p < pc["rasio"] * med) & (v_p >= pc.get("v_min", 0.25))
+        print(f"[abu] kulit pucat di tangan dan kaki: {pucat.sum()} piksel (kroma kulit median {med:.1f})")
+        kelabu |= pucat
     if abu.get("z_maks_m") is not None:
         kelabu &= z_abs <= abu["z_maks_m"]
     if a.topeng_wajah and os.path.exists(a.topeng_wajah):
@@ -344,6 +363,24 @@ def main():
         else:
             potong = cv2.inpaint(hasil[y0:y1, x0:x1], topeng, abu["inpaint_radius"], cv2.INPAINT_TELEA)
             hasil[y0:y1, x0:x1][isi] = potong[isi]
+            ih = abu.get("isi_halus")
+            if ih:
+                # Isian halus: rata-rata Gauss warna kulit baik pulau ini, dari skala besar (dasar) ke kecil (dekat
+                # tepi). Telea merambatkan apa pun yang ada di tepi isian (bintik gelap, sisa kelabu) sehingga isian
+                # besar di tangan dan mata kaki menjadi blok cokelat keabuan; rata-rata kulit tidak.
+                roi = img[y0:y1, x0:x1].astype(np.float32)
+                L_roi = cv2.cvtColor(img[y0:y1, x0:x1], cv2.COLOR_BGR2LAB)[:, :, 0].astype(np.float32)
+                sumber = pulau & ~isi & ~tangan[y0:y1, x0:x1] & kulit[y0:y1, x0:x1]
+                if sumber.sum() >= 40:
+                    sumber &= L_roi > np.median(L_roi[sumber]) - ih.get("selisih_L_maks", 30.0)
+                    sf = sumber.astype(np.float32)
+                    isi_f = hasil[y0:y1, x0:x1].astype(np.float32)
+                    for sg in sorted(ih.get("sigma_px", [10, 25, 60]), reverse=True):
+                        wgt = cv2.GaussianBlur(sf, (0, 0), sg)
+                        col = cv2.GaussianBlur(roi * sf[..., None], (0, 0), sg) / np.maximum(wgt, 1e-6)[..., None]
+                        alfa = (halus(wgt / ih.get("bobot_penuh", 0.15)) * isi)[..., None]
+                        isi_f = isi_f * (1 - alfa) + col * alfa
+                    hasil[y0:y1, x0:x1][isi] = np.clip(isi_f, 0, 255).astype(np.uint8)[isi]
         pulau_diisi += 1
     print(f"[abu] pulau diisi: {pulau_diisi}" + (f" (dari warna kulit rata-rata: {pulau_cadangan})" if pulau_cadangan else ""))
 

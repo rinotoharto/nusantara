@@ -509,3 +509,83 @@ Kalau tekstur badan atau kepala diubah, tahap C, D, E, dan F harus dijalankan ul
 - Penggantian tekstur bawah dagu memotong janggut kalau batas arah normalnya longgar; perketat `bawah_dagu.nz_*`,
   jangan menurunkan batas tinggi (menyisakan blok gelap di bawah dagu).
 - Nilai negatif untuk argumen di belakang `--` Blender ditulis dengan tanda sama dengan (`--arah=-1,0,0`).
+
+## Pengulangan Wijaya, bagian 2: animasi (17 November 2026)
+
+```bash
+# gabung: kerangka dan bobot awal dari idle.fbx (With Skin), geometri dan bahan dari model diam, animasi lain dari mixamo/
+B tools/blender/gabung_animasi.py -- --model aset-mentah/wijaya-utuh.glb --rig aset-mentah/mixamo-wijaya-ulang/idle.fbx --mixamo aset-mentah/mixamo --json tools/blender/wajah.json --blok wijaya_ulang --keluar aset-mentah/wijaya-ulang-animasi.glb
+# pratinjau dan ukuran (lembar ke aset-mentah/pratinjau/wijaya-ulang-anim-*.png, angka ke <blok>.animasi.ukur)
+B tools/blender/pratinjau_animasi.py -- --masuk aset-mentah/wijaya-ulang-animasi.glb --json tools/blender/wajah.json --blok wijaya_ulang --keluar aset-mentah/pratinjau --nama wijaya-ulang
+# setelah pratinjau disetujui
+cp public/models/wijaya.glb aset-mentah/arsip/wijaya-lama.glb && cp aset-mentah/wijaya-ulang-animasi.glb public/models/wijaya.glb
+```
+
+### `gabung_animasi.py` dengan `--blok`
+
+Dengan `--blok <nama>` (dan `--rig`), skrip memakai cara baru dan membaca angkanya dari `<nama>.animasi` di
+wajah.json, sehingga karakter lain (prajurit) cukup punya bloknya sendiri. Tanpa `--blok`, cara lama untuk model
+Wijaya lama tetap jalan. Yang dibaca dari blok: `tempat` (bidang potong leher), `abu.zona_kain` (zona kain menurut
+posisi), dan `animasi`:
+
+- `bagian`: bobot per bagian. Bobot awal disalin dari verteks terdekat mesh di `--rig`, lalu dibatasi:
+  - kepala dan leher: gradasi Neck ke Head di antara kedua bidang potong (`leher_bawah_m`, `leher_atas_m`);
+  - kain dan sabuk: Hips `kain_hips` di sendi paha, turun ke `kain_hips_tepi` di tepi bawah; sisanya Spine di
+    pinggang dan UpLeg kiri-kanan dicampur menurut posisi samping (`kain_tengah_m` = setengah lebar campuran);
+    dihaluskan `kain_halus_iterasi` kali;
+  - kulit kaki di dalam zona kain: dicari menurut jarak ke sumbu paha (`kaki_jari_longgar` kali jari-jari kaki
+    tepat di bawah zona, paling tinggi `kaki_naik_maks_m` di atas tepi bawah zona) dan keterhubungan lewat tepi
+    mesh dengan kaki di bawah zona; hanya UpLeg dan Leg, gradasi di lutut selebar `lutut_gradasi_m`;
+  - `kain_dalam`: verteks kain di dekat sumbu paha (dalam `jarak_m`) dan di dekat tepi kulit (dalam `naik_m`)
+    memudar ke UpLeg sisinya;
+  - lengan bawah dan tangan hanya rantai lengan sisinya; lengan atas boleh ditambah Spine1 dan Spine2; aturan
+    lengan hanya berlaku di atas tepi bawah zona kain;
+  - bahan berawalan `penutup_awalan` (pita emas) menyalin bobot kulit terdekat; `mesh_tambahan` (objek lain,
+    misalnya kalung gantung) mendapat bobot terinterpolasi dari segitiga kulit terdekat, dibatasi daftar `tulang`;
+  - `bahu_halus`: penghalusan bobot di sekitar sendi bahu, bawaan mati (`iterasi` 0);
+  - paling banyak `pengaruh_maks` (4) tulang per verteks.
+- `koreksi_lengan`: untuk tiap klip di `klip`, rotasi tetap LeftArm (ke depan dan membuka, paling banyak
+  `lengan_maks_derajat` per sumbu) dan pelurusan siku (paling banyak `siku_maks_derajat`) dicari di kisi, dari
+  yang terkecil, sampai sendi tangan berjarak `sasaran_m` dari permukaan badan pada bingkai kontak dan
+  `terkecil_m` sepanjang klip. Kalau tidak ada yang memenuhi, dipakai yang paling mendekati dengan denda untuk
+  rotasi besar (`cadangan_denda_per_derajat`) dan hasilnya ditandai `sasaran_tercapai: false`.
+- `koreksi_rotasi_derajat` dan `koreksi_klip`: koreksi rotasi tetap untuk semua aksi atau per klip (manual).
+- Hasil (potongan klip, bingkai kontak, koreksi lengan, sudut leher, jumlah verteks per bagian, ukuran berkas)
+  ditulis ke `<blok>.animasi.hasil`.
+
+### `pratinjau_animasi.py` (Blender, baru)
+
+Merender GLB beranimasi dan mengukurnya, untuk dinilai sebelum dipasang ke game. Lembar (`--lembar`, bawaan semua):
+`serang` (kontak serang-1 sampai 3, depan dan samping), `gerak` (tangkis, lari, jongkok-jalan), `lebar`
+(kuda-kuda terlebar), `kaki` (dua lembar pinggang ke kaki: depan, samping, belakang), `bahu` (dari belakang pada
+kontak serang), `lain`, `kalung` (bingkai kalung paling dalam saat membungkuk), `dialog` (sudut kamera dialog dan
+perbesaran wajah). Ukuran per klip (`--klip-ukur` membatasi; `--hanya-ukur` tanpa render; `--tanpa-json` tidak
+menulis ke wajah.json): jarak sendi tangan kiri ke badan, tembus tangan ke kain, jarak kalung ke kulit, regangan
+tepi kain, lebar kuda-kuda, dan lingkar lutut serta paha terhadap pose istirahat (cincin bahan yang sama: irisan
+mendatar pose istirahat lewat kulit kaki, diukur ulang tiap bingkai; nilai terkecil dan pada kuda-kuda terlebar).
+Bingkai di GLB mulai dari 0, jadi kontak = awal aksi + `kontak_baru` - 1.
+
+### Pilihan baru `abu_isi.py`
+
+- `abu.isi_halus`: isian bercak diganti rata-rata Gauss beberapa skala (`sigma_px`: skala besar sebagai dasar,
+  skala kecil di dekat tepi) dari warna kulit baik di pulau UV yang sama, bukan hasil rambatan yang ikut membawa
+  bintik gelap dari tepi isian; sumber yang lebih gelap dari median dikurangi `selisih_L_maks` tidak dipakai.
+- `abu.pucat`: kulit pucat keabuan (kroma di bawah `rasio` kali kroma kulit median) di tangan (di luar
+  `x_abs_min_m`) dan kaki (di bawah `z_maks_m`) ikut dianggap bercak.
+
+### Jebakan yang ditemukan
+
+- Aturan bobot menurut jarak dari sumbu badan (lengan atas) menangkap telapak kaki, yang sama jauhnya; beri
+  syarat tinggi.
+- Hips rata untuk seluruh kain membuat kain kaku dan menarik kulit dari tepi kain ke lutut; pakai gradasi ke
+  tepi bawah.
+- Badan Tripo berkain tidak punya paha di dalam kain: kaki menyatu dengan lapisan dalam kain. "Lingkar paha
+  tengah" tidak bisa diukur; yang ada hanya lingkar kulit tepat di bawah tepi kain.
+- Cincin kaki teratas (di bawah bayangan kain) bertekstur gelap, jadi pemisahan kulit dan kain dengan warna saja
+  meninggalkan sebagian cincin di aturan kain.
+- Menghaluskan bobot kulit di sekitar bahu membuat kalung gantung tenggelam (0,8 mm tanpa penghalusan, 5 mm pada
+  24 iterasi, 14 mm pada 40). Dugaan, belum dibuktikan: kulit dan kalung terpotong ke empat tulang yang berbeda.
+- Gelembung bahu pada klip serang tidak berasal dari koreksi lengan maupun pembatasan bobot; uji dengan mematikan
+  keduanya sebelum mengubah sudut.
+- Jarak bertanda ke permukaan badan tidak andal untuk mesh terbuka; tanda hanya dipercaya bila titiknya dekat
+  (di bawah 6 cm) dan jelas di balik muka.
