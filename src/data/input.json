@@ -6,6 +6,7 @@
     "kiri": ["KeyA"],
     "kanan": ["KeyD"],
     "lari": ["ShiftLeft", "ShiftRight"],
+    "jalanPelan": ["KeyX"],
     "jongkok": ["KeyC"],
     "lompat": ["Space"],
     "bicara": ["KeyE"],
@@ -41,8 +42,8 @@
     },
     "kepekaanKamera": 2.2,
     "petunjuk": [
-      ["Stik kiri", "jalan"],
-      ["L3", "lari"],
+      ["Stik kiri", "lari santai, dorong sedikit: jalan pelan"],
+      ["L3", "lari kencang"],
       ["RB", "jongkok"],
       ["A", "lompat / panjat"],
       ["Y", "bicara"],

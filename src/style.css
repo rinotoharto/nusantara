@@ -61,7 +61,7 @@ html, body {
 /* HUD pertarungan */
 .hud-nyawa {
   left: 12px;
-  bottom: 276px; /* di atas daftar petunjuk tombol yang kini 13 baris */
+  bottom: 296px; /* di atas daftar petunjuk tombol yang kini 14 baris */
   width: 240px;
 }
 .hud-nyawa-teks {

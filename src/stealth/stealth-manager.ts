@@ -177,7 +177,7 @@ export class PengelolaSiluman {
   private radiusSuara(laju: number, jongkok: boolean, lari: boolean, diAir: boolean): number {
     const S = SILUMAN.suara;
     if (laju < 0.3) return 0;
-    let r = jongkok ? S.jongkok : lari ? S.lari : S.jalan;
+    let r = jongkok ? S.jongkok : lari ? S.lari : laju > SILUMAN.pemain.lajuLariSantai ? S.lariSantai : S.jalanPelan;
     if (diAir) r *= S.pengaliAir;
     return r;
   }

@@ -7,9 +7,10 @@ import { SILUMAN } from '../stealth/config';
 export const TINGGI_PEMAIN = 1.7;
 export const JARI_PEMAIN = 0.35;
 
-// Kecepatan jalan dan lari dari data (stealth.json blok pemain). Jalan diturunkan dari 4 ke 2 m/s pada
-// penyetelan animasi 1 supaya sesuai langkah klip Mixamo; lari tetap 7,5.
-const KECEPATAN_JALAN = SILUMAN.pemain.kecepatanJalan;
+// Tiga tingkat gerak dari data (stealth.json blok pemain), masing-masing mendekati laju asli klipnya:
+// jalan pelan (tahan tombol jalanPelan atau stik didorong sedikit), lari santai (gerak biasa), lari kencang.
+const KECEPATAN_JALAN_PELAN = SILUMAN.pemain.kecepatanJalanPelan;
+const KECEPATAN_LARI_SANTAI = SILUMAN.pemain.kecepatanLariSantai;
 const KECEPATAN_LARI = SILUMAN.pemain.kecepatanLari;
 const PERCEPATAN = 30;
 const GRAVITASI = 22;
@@ -83,6 +84,8 @@ export class Pemain {
   skalaBadan = 1;
   /** Batas kecepatan dari misi (m/s), misalnya saat membawa Gajah Pagon; null = normal. */
   batasLaju: number | null = null;
+  /** Benar saat misi menandai area tanpa bahaya: gerak biasa menjadi jalan pelan (lari kencang tetap bisa). */
+  jalanPelanPaksa = false;
   /** Salah saat kejadian melarang memanjat sebentar (harus memikul Gajah Pagon dulu). */
   bolehPanjat = true;
   /** Punya obor (dari kepala desa Kudadu, sprint 7); diisi main dari tanda. */
@@ -179,8 +182,17 @@ export class Pemain {
 
     const diAir = this.posisi.y < PERMUKAAN_AIR - 0.3;
     const lari = input.aksiDitekan('lari') && !this.jongkok;
-    let kecepatanMaks = this.jongkok ? SILUMAN.pemain.kecepatanJongkok : lari ? KECEPATAN_LARI : KECEPATAN_JALAN;
-    kecepatanMaks *= Math.max(arah.kekuatan, perintah.kunciGerak ? 1 : 0.0001); // stik setengah = jalan pelan
+    // Jalan pelan: tombol ditahan, stik didorong sedikit, atau area tanpa bahaya. Tingkatnya tetap (tidak
+    // sebanding dorongan stik) supaya laju selalu cocok dengan langkah klip.
+    const pelan = input.aksiDitekan('jalanPelan') || this.jalanPelanPaksa || (arah.ada && arah.kekuatan < SILUMAN.pemain.ambangStikPelan);
+    let kecepatanMaks = this.jongkok
+      ? SILUMAN.pemain.kecepatanJongkok
+      : lari
+        ? KECEPATAN_LARI
+        : pelan
+          ? KECEPATAN_JALAN_PELAN
+          : KECEPATAN_LARI_SANTAI;
+    if (!arah.ada && !perintah.kunciGerak) kecepatanMaks *= 0.0001;
     if (this.batasLaju !== null) kecepatanMaks = Math.min(kecepatanMaks, this.batasLaju);
     if (diAir) kecepatanMaks *= 0.5;
     kecepatanMaks *= perintah.pengaliKecepatan;

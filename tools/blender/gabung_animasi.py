@@ -52,6 +52,7 @@ def argumen():
     p.add_argument("--keluar", required=True)
     p.add_argument("--kualitas-jpeg", type=int, default=85)
     p.add_argument("--rig", default=None, help="FBX Mixamo With Skin (kerangka dan bobot); bawaan <mixamo>/idle.fbx")
+    p.add_argument("--baru", default=None, help="folder klip pengganti (mis. aset-mentah/mixamo/baru); berkas bernama sama di sini didahulukan")
     p.add_argument("--blok", default=None, help="blok karakter di json; tanpa ini: cara lama (Wijaya, leher_rapi)")
     return p.parse_args(argv)
 
@@ -580,6 +581,115 @@ def putar_kunci(act, arm, nama_tulang, sumbu_dunia, derajat, sumbu_lokal=None):
     return True
 
 
+def kurva_rotasi(act, nama_tulang):
+    jalur = f'pose.bones["{PRE}{nama_tulang}"].rotation_quaternion'
+    fc4 = sorted((fc for fc in fcurves(act) if fc.data_path == jalur), key=lambda fc: fc.array_index)
+    if len(fc4) != 4 or len({len(fc.keyframe_points) for fc in fc4}) != 1:
+        return None
+    return fc4
+
+
+def pose_genggam(arm, sisi, sudut, jempol):
+    """Rotasi tetap tiap ruas jari satu tangan (kerangka acuan istirahat tulang) untuk pose menggenggam:
+    tiap ruas menekuk `sudut[ruas]` derajat ke arah telapak pada engselnya (tegak lurus arah jari dan normal
+    telapak pada pose istirahat), tanpa merenggang. Jempol menekuk `jempol[ruas]` derajat ke arah pangkal
+    jari tengah. Mengembalikan {nama tulang: Quaternion}."""
+    B = arm.data.bones
+    kepala = lambda n: B[PRE + n].head_local
+    tangan = kepala(sisi + "Hand")
+    n = (kepala(sisi + "HandIndex1") - tangan).cross(kepala(sisi + "HandPinky1") - tangan).normalized()
+    if n.z > 0:                      # pose istirahat Mixamo: telapak menghadap bawah
+        n = -n
+    out = {}
+    for jari in ("Index", "Middle", "Ring", "Pinky", "Thumb"):
+        for i in (1, 2, 3):
+            nama = f"{sisi}Hand{jari}{i}"
+            if PRE + nama not in B:
+                continue
+            j0, j1 = (i, i + 1) if i < 3 else (i - 1, i)
+            d = (kepala(f"{sisi}Hand{jari}{j1}") - kepala(f"{sisi}Hand{jari}{j0}")).normalized()
+            if jari == "Thumb":
+                t = kepala(sisi + "HandMiddle1") + n * 0.04 - kepala(nama)
+                t = (t - d * t.dot(d)).normalized()
+                engsel, derajat = d.cross(t).normalized(), jempol[i - 1]
+            else:
+                engsel, derajat = d.cross(n).normalized(), sudut[i - 1]
+            out[nama] = Quaternion(B[PRE + nama].matrix_local.to_3x3().inverted() @ engsel, math.radians(derajat))
+    return out
+
+
+def buat_kurva_rotasi(act, nama_tulang):
+    """Buat empat kurva rotasi_quaternion untuk tulang yang tidak punya kunci di aksi ini (klip dari karakter
+    berjari dua rantai hanya mengunci jempol dan telunjuk), dengan kunci di awal dan akhir aksi."""
+    jalur = f'pose.bones["{PRE}{nama_tulang}"].rotation_quaternion'
+    for fc in [fc for fc in fcurves(act) if fc.data_path == jalur]:
+        hapus_fcurve(act, fc)
+    if hasattr(act, "fcurves"):
+        wadah = act.fcurves
+    else:
+        wadah = act.layers[0].strips[0].channelbags[0].fcurves
+    f0, f1 = act.frame_range
+    fc4 = []
+    for i, nilai in enumerate((1.0, 0.0, 0.0, 0.0)):
+        fc = wadah.new(jalur, index=i)
+        fc.keyframe_points.insert(f0, nilai)
+        if f1 > f0:
+            fc.keyframe_points.insert(f1, nilai)
+        fc4.append(fc)
+    return fc4
+
+
+def pasang_genggam(act, pose):
+    """Timpa semua kunci rotasi ruas jari dengan pose tetap. Mengembalikan jumlah tulang yang ditimpa."""
+    n = 0
+    for nama, q in pose.items():
+        fc4 = kurva_rotasi(act, nama) or buat_kurva_rotasi(act, nama)
+        for fc, nilai in zip(fc4, q):
+            for kp in fc.keyframe_points:
+                kp.co.y = nilai
+                kp.handle_left.y = nilai
+                kp.handle_right.y = nilai
+            fc.update()
+        n += 1
+    return n
+
+
+def luruskan_kepala(act, arm, pasang, bagian, maks_derajat):
+    """Kembalikan arah kepala ke depan dan tegak (arah pose istirahat, yaitu arah sasaran di game) sebesar
+    `bagian` dari simpangannya di tiap kunci, paling banyak maks_derajat, dibagi rata ke Neck dan Head.
+    Mengembalikan simpangan kepala terbesar sebelum dan sesudah (derajat), atau None kalau kurva tidak lengkap."""
+    fcN, fcH = kurva_rotasi(act, "Neck"), kurva_rotasi(act, "Head")
+    if fcN is None or fcH is None or len(fcN[0].keyframe_points) != len(fcH[0].keyframe_points):
+        return None
+    pbN, pbH = arm.pose.bones[PRE + "Neck"], arm.pose.bones[PRE + "Head"]
+    R0 = arm.data.bones[PRE + "Head"].matrix_local.to_quaternion()
+    pasang(act)
+    tambah, sebelum, sesudah = [], 0.0, 0.0
+    for kp in fcH[0].keyframe_points:
+        bpy.context.scene.frame_set(int(round(kp.co.x)))
+        Mn, Mh = pbN.matrix.to_quaternion(), pbH.matrix.to_quaternion()
+        D = Mh @ R0.inverted()
+        C = Quaternion().slerp(D.inverted(), bagian)
+        if C.angle > math.radians(maks_derajat):
+            C = Quaternion(C.axis, math.radians(maks_derajat))
+        Ch = Quaternion().slerp(C, 0.5)
+        tambah.append((Mn.inverted() @ Ch @ Mn, Mh.inverted() @ Ch @ Mh))
+        sebelum = max(sebelum, math.degrees(D.angle))
+        sesudah = max(sesudah, math.degrees((C @ D).angle))
+    for fc4, kolom in ((fcN, 0), (fcH, 1)):
+        for k in range(len(fc4[0].keyframe_points)):
+            q = Quaternion([fc.keyframe_points[k].co.y for fc in fc4]) @ tambah[k][kolom]
+            for fc, nilai in zip(fc4, q):
+                kp = fc.keyframe_points[k]
+                selisih = nilai - kp.co.y
+                kp.co.y = nilai
+                kp.handle_left.y += selisih
+                kp.handle_right.y += selisih
+        for fc in fc4:
+            fc.update()
+    return round(sebelum, 1), round(sesudah, 1)
+
+
 def cari_koreksi_lengan(arm, utama, act, K, kontak):
     """Cari rotasi tambahan terkecil supaya sendi tangan menjauh dari badan: pada bingkai kontak sejauh
     K["sasaran_m"] dan sepanjang klip paling dekat K["terkecil_m"]. Koreksi dibagi ke dua sendi supaya bahu
@@ -942,10 +1052,21 @@ def main():
     if arm.animation_data is None:
         arm.animation_data_create()
 
-    def ambil(nama_berkas, nama_aksi):
+    folder_baru = os.path.join(akar, a.baru) if a.baru else None
+    dari_baru = set()
+
+    def ambil(nama_berkas, nama_aksi, wajib=True):
         path = os.path.join(folder, nama_berkas)
+        if nama_aksi in A.get("klip_baru_lewati", []):
+            if not wajib:
+                return None                                    # klip baru yang tidak dipakai (mis. lari-santai)
+        elif folder_baru and os.path.exists(os.path.join(folder_baru, nama_berkas)):
+            path = os.path.join(folder_baru, nama_berkas)
+            dari_baru.add(nama_aksi)
+            catat(f"{nama_aksi}: dari folder klip baru")
         if not os.path.exists(path):
-            catat(f"TIDAK ADA: {nama_berkas}")
+            if wajib:
+                catat(f"TIDAK ADA: {nama_berkas}")
             return None
         arm2, mesh2, act, baru = impor_fbx(path)
         for o in baru:
@@ -970,10 +1091,14 @@ def main():
     buang_root(act_idle)
     for nama in ("jalan", "lari", "jongkok-jalan", "tangkis", "hindar", "terkena", "mati", "tarung", "serang-1", "serang-2", "serang-3"):
         ambil(nama + ".fbx", nama)
+    # klip yang hanya ada kalau disediakan: lari santai dan kencang, serang berat sebagai berkas sendiri
+    for nama in ("lari-santai", "lari-kencang", "serang-berat"):
+        ambil(nama + ".fbx", nama, wajib=False)
     # jongkok-diam asli hanya dibandingkan, tidak dipakai kalau menyimpang
     act_jd = ambil("jongkok-diam.fbx", "jongkok-diam-asli")
 
-    for nama in ("jalan", "lari", "jongkok-jalan", "hindar", "terkena", "serang-1", "serang-2", "serang-3", "tarung", "tangkis"):
+    for nama in ("jalan", "lari", "lari-santai", "lari-kencang", "jongkok-jalan", "hindar", "terkena", "serang-1", "serang-2", "serang-3",
+                 "serang-berat", "tarung", "tangkis"):
         if nama in aksi:
             pasang(aksi[nama])
             buang_root(aksi[nama])
@@ -1029,13 +1154,14 @@ def main():
 
     # serangan: potong di sekitar kontak
     for nama, sb, ss in (("serang-1", A["serang_sebelum"], A["serang_sesudah"]), ("serang-2", A["serang_sebelum"], A["serang_sesudah"]),
-                         ("serang-3", A["serang_sebelum"], A["serang_sesudah"])):
+                         ("serang-3", A["serang_sebelum"], A["serang_sesudah"]), ("serang-berat", A["berat_sebelum"], A["berat_sesudah"])):
         if nama not in aksi:
             continue
         act = aksi[nama]
         f0, f1, laju = laju_tangan(arm, act)
         fc = f0 + int(np.argmax(laju))
-        manual = A.setdefault("kontak_manual", {}).get(nama)
+        # klip dari folder baru punya patokan sendiri (kontak_manual_baru); patokan lama tidak berlaku untuknya
+        manual = A.setdefault("kontak_manual_baru" if nama in dari_baru else "kontak_manual", {}).get(nama)
         if manual:
             # kontak dipatok tangan: [bingkai kontak, sebelum, sesudah]; serang-2 otomatis memilih ayunan balik
             # (bingkai 27) saat tangan kiri terbenam di punggung, tebasan sebenarnya di bingkai 16-19.
@@ -1057,7 +1183,7 @@ def main():
         fc = f0 + int(np.argmax(laju))
         b0, b1 = max(f0, fc - A["berat_sebelum"]), min(f1, fc + A["berat_sesudah"])
         for nama, (x0, x1) in (("siaga", (f0 + i_s, f0 + i_s + n_s - 1)), ("serang-berat", (b0, b1))):
-            if not os.path.exists(os.path.join(folder, nama + ".fbx")):
+            if nama not in aksi:
                 salin = act.copy()
                 salin.name = nama
                 salin.use_fake_user = True
@@ -1065,7 +1191,7 @@ def main():
                 aksi[nama] = salin
                 ringkasan[nama] = {"dari_tarung": [x0, x1], "bingkai": x1 - x0 + 1}
                 catat(f"{nama} dari tarung bingkai {x0}-{x1}")
-        if "serang-berat" in ringkasan:
+        if "dari_tarung" in ringkasan.get("serang-berat", {}):
             ringkasan["serang-berat"]["kontak_baru"] = fc - b0 + 1
         del aksi["tarung"]
         arm.animation_data.action = None
@@ -1101,6 +1227,10 @@ def main():
         for nama_klip in KL["klip"]:
             if nama_klip not in aksi:
                 continue
+            # klip dari folder baru (bukan Sword And Shield) hanya dikoreksi kalau disebut di klip_baru
+            if nama_klip in dari_baru and nama_klip not in KL.get("klip_baru", []):
+                catat(f"koreksi lengan {nama_klip}: dilewati (klip baru)")
+                continue
             kontak_ = ringkasan.get(nama_klip, {}).get("kontak_baru")
             hasil_k = cari_koreksi_lengan(arm, utama_, aksi[nama_klip], KL, kontak_)
             if hasil_k is None:
@@ -1116,6 +1246,34 @@ def main():
                   f"siku diluruskan {hasil_k['siku']} derajat{'' if hasil_k['sasaran_tercapai'] else ' (sasaran TIDAK tercapai penuh dalam batas rotasi)'}; "
                   f"jarak tangan ke badan {hasil_k['sebelum_m']} -> {hasil_k['sesudah_m']}")
         arm.animation_data.action = None
+
+    # Kepala tetap ke depan selama serangan (wajah.json "<blok>.animasi.kepala_lurus"): klip tebasan memiringkan
+    # dan memalingkan kepala menjauh dari arah serangan.
+    KP = A.get("kepala_lurus")
+    if KP and KP.get("aktif", True):
+        ringkasan["kepala_lurus"] = {}
+        for nama_klip in KP["klip"]:
+            if nama_klip not in aksi:
+                continue
+            hasil_kp = luruskan_kepala(aksi[nama_klip], arm, pasang, KP.get("bagian", 0.8), KP.get("maks_derajat", 50))
+            ringkasan["kepala_lurus"][nama_klip] = hasil_kp
+            catat(f"kepala lurus {nama_klip}: simpangan terbesar (derajat) sebelum dan sesudah {hasil_kp}")
+        arm.animation_data.action = None
+
+    # Genggaman (wajah.json "<blok>.animasi.genggam"): jari ditimpa pose tetap. Klip serang Mixamo membuka
+    # telapak dan merenggangkan jari; tangan kanan memegang keris, tangan kiri setengah menggenggam.
+    GG = A.get("genggam")
+    if GG and GG.get("aktif", True):
+        ringkasan["genggam"] = {}
+        for sisi, kunci in (("Right", "kanan"), ("Left", "kiri")):
+            K_ = GG.get(kunci)
+            if not K_:
+                continue
+            pose_g = pose_genggam(arm, sisi, K_["sudut"], K_["jempol"])
+            daftar_g = list(aksi) if K_["klip"] == "semua" else [n_ for n_ in K_["klip"] if n_ in aksi]
+            jumlah = {n_: pasang_genggam(aksi[n_], pose_g) for n_ in daftar_g}
+            ringkasan["genggam"][kunci] = {"klip": daftar_g, "tulang_per_klip": sorted(set(jumlah.values()))}
+            catat(f"genggam {kunci}: {len(daftar_g)} klip, tulang ditimpa per klip {sorted(set(jumlah.values()))}")
 
     # Sudut leher saat idle dan lari (untuk menilai perlu tidaknya koreksi Neck).
     leher_ukur = {}
@@ -1149,6 +1307,7 @@ def main():
         export_draco_position_quantization=14, export_draco_normal_quantization=10, export_draco_texcoord_quantization=12,
     )
     ringkasan["aksi"] = {n: int(act.frame_range[1] - act.frame_range[0] + 1) for n, act in aksi.items()}
+    ringkasan["dari_baru"] = sorted(dari_baru)
     ringkasan["berkas_mb"] = round(os.path.getsize(keluar) / 1e6, 2)
     A["hasil"] = ringkasan
     json.dump(data, open(os.path.join(akar, a.json), "w"), indent=2, ensure_ascii=False)

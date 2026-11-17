@@ -4,11 +4,15 @@
     "petunjuk": [
       [
         "WASD",
-        "jalan"
+        "lari santai"
       ],
       [
         "Shift",
-        "lari"
+        "lari kencang"
+      ],
+      [
+        "X (tahan)",
+        "jalan pelan"
       ],
       [
         "C",

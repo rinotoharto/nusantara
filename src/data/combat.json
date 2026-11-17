@@ -94,7 +94,7 @@
       "dorong": 0.8
     },
     "jarakDeteksi": 12,
-    "kecepatanMendekat": 3.2,
+    "kecepatanMendekat": 4.6,
     "kecepatanMengelilingi": 1.6,
     "jarakMengelilingiMin": 3,
     "jarakMengelilingiMaks": 4,
@@ -182,7 +182,7 @@
       "dorong": 0.6
     },
     "jarakDeteksi": 12,
-    "kecepatanMendekat": 3.4,
+    "kecepatanMendekat": 4.8,
     "kecepatanMengelilingi": 1.8,
     "jarakMengelilingiMin": 2.5,
     "jarakMengelilingiMaks": 3.5,
@@ -231,7 +231,7 @@
     "jarakKeluar": 5,
     "bersiap": 0.35,
     "seruduk": {
-      "kecepatan": 8,
+      "kecepatan": 6.2,
       "jarak": 9,
       "damage": 15,
       "dorong": 1.2,

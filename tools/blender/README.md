@@ -573,8 +573,40 @@ Bingkai di GLB mulai dari 0, jadi kontak = awal aksi + `kontak_baru` - 1.
 - `abu.pucat`: kulit pucat keabuan (kroma di bawah `rasio` kali kroma kulit median) di tangan (di luar
   `x_abs_min_m`) dan kaki (di bawah `z_maks_m`) ikut dianggap bercak.
 
+### Gerak lari dan klip serang keris (17 November 2026)
+
+```bash
+# gabung dengan klip pengganti: berkas bernama sama di --baru didahulukan
+B tools/blender/gabung_animasi.py -- --model aset-mentah/wijaya-utuh.glb --rig aset-mentah/mixamo-wijaya-ulang/idle.fbx --mixamo aset-mentah/mixamo --baru aset-mentah/mixamo/baru --json tools/blender/wajah.json --blok wijaya_ulang --keluar aset-mentah/wijaya-ulang-animasi.glb
+# lembar serang dengan keris sementara: kontak dan satu bingkai sebelumnya, depan dan belakang
+B tools/blender/pratinjau_animasi.py -- --masuk aset-mentah/wijaya-ulang-animasi.glb --json tools/blender/wajah.json --blok wijaya_ulang --keluar aset-mentah/pratinjau --nama wijaya-ulang --lembar keris --klip-ukur serang-1,serang-2,serang-3,serang-berat
+```
+
+Yang baru di `<blok>.animasi`:
+
+- `--baru <folder>`: klip di folder ini menggantikan klip bernama sama; `lari-santai`, `lari-kencang`, dan
+  `serang-berat` diambil kalau ada (serang-berat tidak lagi dipotong dari `tarung`). `klip_baru_lewati`: klip di
+  folder baru yang tidak dipakai (lari-santai: lajunya hanya 2,35 m/s).
+- `kontak_manual_baru`: patokan [bingkai kontak, sebelum, sesudah] untuk klip dari folder baru; `kontak_manual`
+  hanya berlaku untuk klip lama.
+- `koreksi_lengan.klip_baru`: klip baru yang tetap dikoreksi lengan kirinya (kosong: klip baru menaruh tangan kiri
+  di belakang pinggang, dan koreksi 25 derajat mengubah sikapnya).
+- `kepala_lurus`: di klip yang disebut, simpangan kepala dari arah depan-tegak dikurangi `bagian` di tiap kunci
+  (paling banyak `maks_derajat`), dibagi rata ke Neck dan Head. serang-1: 44 ke 9 derajat; serang-2: 39 ke 8.
+- `genggam`: pose jari tetap yang menimpa kunci jari. `kanan` di semua klip (menggenggam hulu keris), `kiri`
+  setengah menggenggam di klip serang, tangkis, siaga. Tiap ruas menekuk pada engsel yang dihitung dari pose
+  istirahat (tegak lurus arah jari dan normal telapak).
+
+Laju langkah klip (kaki tumpu relatif pinggul): jalan 1,43; lari lama 4,01; lari-santai 2,35; lari-kencang 4,5 m/s.
+Di game: jalan pelan memakai `jalan`, lari santai memakai `lari` lama, lari kencang memakai `lari-kencang`
+(angka di `src/data/stealth.json`, tabel laju dan fase kaki di `src/character/model-wijaya.ts`).
+
 ### Jebakan yang ditemukan
 
+- Klip Without Skin yang diunduh dengan karakter berjari dua rantai (prajurit) hanya mengunci jempol dan telunjuk;
+  jari lain tidak punya kurva dan harus dibuat sebelum bisa ditimpa (`buat_kurva_rotasi`).
+- Keris balok modul pertarungan digerakkan tiap frame untuk kapsul; kalau ditempel langsung ke tulang tangan,
+  arahnya ikut berubah. Model memakai salinannya.
 - Aturan bobot menurut jarak dari sumbu badan (lengan atas) menangkap telapak kaki, yang sama jauhnya; beri
   syarat tinggi.
 - Hips rata untuk seluruh kain membuat kain kaku dan menarik kulit dari tepi kain ke lutut; pakai gradasi ke

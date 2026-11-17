@@ -129,3 +129,21 @@ Tambahan: tarung.fbx = Sword Fight One (sekitar 246 bingkai, 8 detik; siaga, men
 - tangkis.fbx: Sword And Shield Block, 18 bingkai, kuda-kuda lebar, lengan kiri menangkis; diputar berulang selama tangkis ditahan, pastikan loop mulus. Arm-Space 55.
 - hindar.fbx: Standing Dodge Backward (satu lompatan mundur, sinkron dengan hindar 0,4 s dan 2,6 m di combat.json; buang perpindahan root kalau In Place tidak tersedia). Arm-Space 55.
 - siaga.fbx: Dodging (goyang siaga di tempat, bukan Fighting Idle) dipakai sebagai diam saat ada lawan dalam jarak kamera bertarung. Arm-Space 55.
+
+## Klip baru (17 November 2026), folder baru/
+
+Pengganti klip serang Sword And Shield (lengan kiri terlipat ke dada dan bahu menggelembung pada Wijaya) dan lari lama (terasa seperti jalan dipercepat). Semua Without Skin, 30 fps, diunduh dengan karakter prajurit (kerangka sama).
+- lari-santai.fbx: jog, In Place, Arm-Space 55. Dipakai untuk gerak biasa (WASD).
+- lari-kencang.fbx: Two Cycle Sprint, Overdrive 35, Arm-Space 55, In Place. Dipakai saat Shift.
+- serang-1.fbx: Stable Sword Outward Slash, Emphasis 100, Angle 50, Overdrive 70, Arm-Space 55.
+- serang-2.fbx: tebasan balik (kemungkinan Stable Sword Inward Slash), pengaturan tidak tercatat.
+- serang-3.fbx: Upward Thrust, Distance 50, Height 50, Direction 50, Overdrive 75, Arm-Space 20 (lengan lebih rendah, gaya silat; cek lengan kiri tidak menempel ke badan).
+- serang-berat.fbx: satu gerakan kuat dengan ancang-ancang dan langkah maju (bukan kombo).
+jalan.fbx lama tetap dipakai, hanya untuk jalan pelan pada laju aslinya. Klip lama di folder ini tidak dihapus.
+
+Hasil ukur dan pemakaian (17 November 2026):
+- Laju langkah asli: jalan 1,43; lari lama 4,01; lari-santai 2,35; lari-kencang 4,5 m/s.
+- lari-santai.fbx tidak dipakai (terlalu lambat untuk gerak biasa). Gerak biasa memakai lari.fbx lama pada 4,0 m/s (timeScale 1,0), lari kencang memakai lari-kencang.fbx pada 5,8 m/s (timeScale 1,29), jalan pelan memakai jalan.fbx pada 1,4 m/s.
+- Kontak: serang-1 bingkai 18, serang-2 bingkai 26, serang-3 bingkai 18 (masing-masing dipotong 8 sebelum, 10 sesudah); serang-berat bingkai 27 (12 sebelum, 11 sesudah). combat.json tidak berubah.
+- Klip baru hanya mengunci jempol dan telunjuk (karakter prajurit berjari dua rantai); jari ditimpa pose genggam di gabung_animasi.py.
+- Lengan kiri serang-1, serang-2, serang-berat: sikap asli klip (tangan di belakang pinggang), tanpa koreksi. Kepala serang-1 dan serang-2 diluruskan ke depan.

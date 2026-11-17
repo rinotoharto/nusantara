@@ -29,7 +29,7 @@ import tempfile
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Matrix, Vector
 from mathutils.bvhtree import BVHTree
 
 PRE = "mixamorig:"
@@ -44,7 +44,7 @@ def argumen():
     p.add_argument("--keluar", required=True)
     p.add_argument("--nama", default="karakter")
     p.add_argument("--hanya-ukur", action="store_true")
-    p.add_argument("--lembar", default=None, help="hanya lembar ini, dipisah koma: serang,gerak,lebar,kaki,bahu,lain,kalung,dialog")
+    p.add_argument("--lembar", default=None, help="hanya lembar ini, dipisah koma: serang,gerak,lebar,kaki,bahu,keris,lain,kalung,dialog")
     p.add_argument("--klip-ukur", default=None, help="ukur hanya klip ini (dipisah koma); bawaan semua")
     p.add_argument("--lain", default="jalan:8,hindar:20,terkena:10,jongkok-diam:0",
                    help="lembar tambahan <nama>-anim-lain.png: daftar klip:bingkai dipisah koma")
@@ -321,20 +321,20 @@ def main():
         out.save()
         bpy.data.images.remove(out)
 
-    def ubin(nama, bingkai):
-        """Dua ubin (depan, samping) satu klip pada satu bingkai."""
+    def ubin(nama, bingkai, belakang=False):
+        """Dua ubin (depan, samping; dengan `belakang` tiga) satu klip pada satu bingkai."""
         pasang(nama, bingkai)
         h = tulang("Hips")
         pusat = (float(h[0]), float(h[1]), 0.90)
         out = []
-        for sudut, arah in (("depan", (0, -1, 0)), ("samping", (1, 0, 0))):
+        for sudut, arah in (("depan", (0, -1, 0)), ("samping", (1, 0, 0))) + ((("belakang", (0, 1, 0)),) if belakang else ()):
             path = os.path.join(tmp, f"{nama}-{bingkai}-{sudut}.png")
             render(path, pusat, arah, (520, 760), ortho=2.25)
             out.append(muat(path))
         return np.hstack(out)
 
-    def lembar(daftar, akhiran):
-        px = np.hstack([ubin(n, fr) for n, fr in daftar])
+    def lembar(daftar, akhiran, belakang=False):
+        px = np.hstack([ubin(n, fr, belakang) for n, fr in daftar])
         path = os.path.join(akar, a.keluar, f"{a.nama}-anim-{akhiran}.png")
         simpan(px, path)
         catat(f"{path}: " + ", ".join(f"{n} bingkai {fr}" for n, fr in daftar))
@@ -344,9 +344,13 @@ def main():
     kontak = lambda n: ukur[n]["tangan_kiri_m"].get("bingkai_kontak", ukur[n]["kaki_m"]["bingkai"])
     lebar = lambda n: ukur[n]["kaki_m"]["bingkai"]
     if mau("serang"):
-        lembar([("serang-1", kontak("serang-1")), ("serang-2", kontak("serang-2")), ("serang-3", kontak("serang-3"))], "serang")
+        # kontak tiap serang dari depan, samping, dan belakang; dua lembar supaya ubin tetap besar
+        lembar([("serang-1", kontak("serang-1")), ("serang-2", kontak("serang-2"))], "serang", belakang=True)
+        lembar([("serang-3", kontak("serang-3")), ("serang-berat", kontak("serang-berat"))], "serang-b", belakang=True)
+    lari_klip = [n for n in ("lari-santai", "lari-kencang") if n in aksi] or ["lari"]
     if mau("gerak"):
-        lembar([("tangkis", lebar("tangkis")), ("lari", lebar("lari")), ("jongkok-jalan", lebar("jongkok-jalan"))], "gerak")
+        lembar([("tangkis", lebar("tangkis")), ("jongkok-jalan", lebar("jongkok-jalan"))], "gerak")
+        lembar([(n, lebar(n)) for n in lari_klip], "lari")
     if mau("lebar"):
         lain = [("serang-1", lebar("serang-1")), ("serang-berat", kontak("serang-berat"))]
         if "siaga" in aksi:
@@ -371,12 +375,70 @@ def main():
 
     tengah = lambda n: (ukur[n]["bingkai"][0] + ukur[n]["bingkai"][1]) // 2
     if mau("kaki"):
-        lembar_kaki([("lari", lebar("lari")), ("tangkis", lebar("tangkis")), ("serang-1", lebar("serang-1"))], "kaki-1")
-        lembar_kaki([("serang-berat", lebar("serang-berat")), ("jongkok-jalan", lebar("jongkok-jalan"))] + ([("siaga", tengah("siaga"))] if "siaga" in aksi else []), "kaki-2")
+        lembar_kaki([(n, lebar(n)) for n in lari_klip] + [("serang-1", lebar("serang-1"))], "kaki-1")
+        lembar_kaki([("serang-berat", lebar("serang-berat")), ("tangkis", lebar("tangkis")), ("jongkok-jalan", lebar("jongkok-jalan"))] + ([("siaga", tengah("siaga"))] if "siaga" in aksi else []), "kaki-2")
+
+    # Keris sementara (dua balok: hulu di dalam genggaman sepanjang garis buku jari, bilah keluar dari sisi
+    # telunjuk condong ke depan; panjang seluruhnya sekitar 40 cm), ditaruh menurut tulang tangan kanan tiap
+    # bingkai. Hanya untuk lembar "keris": kontak dan satu bingkai sebelumnya, depan dan belakang.
+    if mau("keris"):
+        def balok(nama_b, warna):
+            bpy.ops.mesh.primitive_cube_add(size=2.0)
+            o = bpy.context.active_object
+            o.name = nama_b
+            bahan = bpy.data.materials.new(nama_b)
+            bahan.use_nodes = True
+            bahan.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = warna
+            o.data.materials.append(bahan)
+            return o
+        hulu, bilah = balok("keris_hulu", (0.25, 0.14, 0.06, 1.0)), balok("keris_bilah", (0.55, 0.56, 0.6, 1.0))
+        Bd = arm.data.bones
+        t0 = Bd[PRE + "RightHand"].head_local
+        tanda_n = -1.0 if (Bd[PRE + "RightHandIndex1"].head_local - t0).cross(Bd[PRE + "RightHandPinky1"].head_local - t0).z > 0 else 1.0
+
+        def taruh_keris():
+            t, i1, m1, p1 = (Vector(tulang(n_)) for n_ in ("RightHand", "RightHandIndex1", "RightHandMiddle1", "RightHandPinky1"))
+            n_t = (i1 - t).cross(p1 - t).normalized() * tanda_n          # normal telapak, ke arah telapak
+            x = (i1 - p1).normalized()                                   # garis buku jari, ke sisi telunjuk
+            f = (m1 - t).normalized()
+            f = (f - x * f.dot(x)).normalized()
+            pusat = t + (m1 - t) * 0.75 + n_t * 0.03
+            arah_b = (f * 0.85 + x * 0.5).normalized()
+            lebar_b = arah_b.cross(n_t).normalized()
+            def matriks(sb1, sb2, sb3, p_, ukuran3):
+                M = Matrix.Identity(4)
+                for k_, (sb, u) in enumerate(zip((sb1, sb2, sb3), ukuran3)):
+                    for r_ in range(3):
+                        M[r_][k_] = sb[r_] * u / 2.0
+                for r_ in range(3):
+                    M[r_][3] = p_[r_]
+                return M
+            hulu.matrix_world = matriks(x, f, n_t, pusat, (0.10, 0.03, 0.03))
+            ujung = pusat + x * 0.05
+            bilah.matrix_world = matriks(arah_b, lebar_b, n_t, ujung + arah_b * 0.155, (0.31, 0.032, 0.008))
+
+        for akhiran, pasangan in (("keris-1", ("serang-1", "serang-2")), ("keris-2", ("serang-3", "serang-berat"))):
+            baris_px = []
+            for n in pasangan:
+                ubin_ = []
+                for fr in (kontak(n) - 1, kontak(n)):
+                    pasang(n, fr)
+                    taruh_keris()
+                    h_ = tulang("Hips")
+                    for sudut, arah in (("depan", (0, -1, 0)), ("belakang", (0, 1, 0))):
+                        path = os.path.join(tmp, f"keris-{n}-{fr}-{sudut}.png")
+                        render(path, (float(h_[0]), float(h_[1]), 0.90), arah, (560, 760), ortho=2.25)
+                        ubin_.append(muat(path))
+                baris_px.append(np.hstack(ubin_))
+            path = os.path.join(akar, a.keluar, f"{a.nama}-anim-{akhiran}.png")
+            simpan(np.vstack(baris_px[::-1]), path)
+            catat(f"{path} (baris dari atas: {pasangan[0]}, {pasangan[1]}; kolom: sebelum kontak depan, belakang, kontak depan, belakang)")
+        for o in (hulu, bilah):
+            bpy.data.objects.remove(o, do_unlink=True)
 
     # Bahu kiri dari belakang tokoh pada bingkai kontak serangan.
     ubin_b = []
-    for n in (("serang-1", "serang-2", "serang-3") if mau("bahu") else ()):
+    for n in (("serang-1", "serang-2", "serang-3", "serang-berat") if mau("bahu") else ()):
         pasang(n, kontak(n))
         ki, ka = tulang("LeftArm"), tulang("RightArm")
         belakang = np.cross(np.array([0.0, 0.0, 1.0]), ki - ka)
@@ -388,7 +450,7 @@ def main():
     if ubin_b:
         path = os.path.join(akar, a.keluar, f"{a.nama}-anim-bahu.png")
         simpan(np.hstack(ubin_b), path)
-        catat(f"{path}: bahu kiri dari belakang pada kontak serang-1, serang-2, serang-3")
+        catat(f"{path}: bahu kiri dari belakang pada kontak serang-1, serang-2, serang-3, serang-berat")
 
     lain = [(n, int(fr)) for n, fr in (b.split(":") for b in a.lain.split(",") if b) if n in aksi]
     if lain and mau("lain"):

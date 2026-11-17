@@ -28,11 +28,15 @@
     "curigaMencari": 0.6
   },
   "pemain": {
-    "lajuLari": 5.0,
+    "keterangan": "Gerak pemain (17 November 2026): jalan pelan (tahan tombol jalanPelan atau stik didorong kurang dari ambangStikPelan), lari santai (gerak biasa), lari kencang (tombol lari). Klip dan laju aslinya: jalan 1,43 (jalan pelan), lari lama 4,01 (lari santai), lari-kencang 4,5 m/s (lari kencang, timeScale 1,29). lajuLariSantai dan lajuLari: batas laju untuk memilih klip dan tingkat suara langkah.",
+    "lajuLariSantai": 2.6,
+    "lajuLari": 4.8,
+    "ambangStikPelan": 0.6,
     "faktorJarakJongkok": 0.5,
     "faktorJarakSemak": 0.5,
-    "kecepatanJalan": 2,
-    "kecepatanLari": 7.5,
+    "kecepatanJalanPelan": 1.4,
+    "kecepatanLariSantai": 4.0,
+    "kecepatanLari": 5.8,
     "kecepatanJongkok": 1.4,
     "skalaJongkok": 0.65
   },
@@ -49,7 +53,7 @@
     "lebarFormasi": 1.6,
     "jarakBerhenti": 0.5,
     "jarakLonggar": 4.0,
-    "kecepatanMaks": 7.5,
+    "kecepatanMaks": 6.5,
     "pengaliKecepatan": 2.5,
     "jarakTertinggal": 15,
     "jarakPertarungan": 12,
@@ -60,7 +64,8 @@
   "suara": {
     "keterangan": "Pendengaran penjaga: radius suara langkah pemain menurut gerak (meter); pengikut memancarkan pengaliPengikut kali, Gajah Pagon pengaliPagon kali. Penjaga di dalam radius menjadi curiga dan menoleh; di dalam bagianPenuh kali radius selama waktuPenuh detik meterannya penuh.",
     "jongkok": 2,
-    "jalan": 6,
+    "jalanPelan": 5,
+    "lariSantai": 8,
     "lari": 12,
     "pengaliAir": 1.5,
     "pengaliPengikut": 0.7,
