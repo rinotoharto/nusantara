@@ -623,3 +623,31 @@ Urutan:
 4. Kalau playtest lolos: tahap alur aset resmi (lingkungan desa dan sawah, prajurit Kediri pertama, keris sebagai benda terpisah). Kalau tidak lolos: kembali ke desain sebelum menyentuh aset lagi.
 
 Catatan repo: aset-mentah/ (sekitar 120 MB) ikut ter-commit; pertimbangkan Git LFS atau mengeluarkannya dari repo saat ada waktu.
+
+## Perubahan rencana 17 November 2026
+
+Masukan narasumber kedua (docs/isi/narasumber-rute-final.md) mengubah bab 1 menjadi delapan misi (GDD bagian Cerita). Misi pelarian kini misi 4 dengan naskah baru docs/isi/misi4-pelarian-naskah.md: ada Tribhuwaneswari, urutan Pandakan → Talaga Pager → lembah → Pamotan/Terung → Kali Mas (sisa 12) → Kudadu → perahu Krembangan ke Hujung Galuh. Kode prototipe belum diubah (masih misi3.json dengan dua rute); penyusunan ulang data dan dialog menunggu konfirmasi label sumber dari narasumber. Playtest tetap memakai prototipe yang ada.
+
+Urutan kerja berikutnya: (1) rapikan leher Wijaya (docs/prompt-rapikan-leher.md), (2) playtest, (3) konfirmasi narasumber lalu tulis dialog dan Kitab misi 4, (4) prompt Claude Code penyusunan ulang misi 4.
+
+## Catatan keseimbangan 17 November
+
+Skema gerak baru (`src/data/stealth.json`): jalan pelan 1,4 m/s (tahan X atau stik didorong sedikit), lari santai 2,7 m/s (gerak biasa, klip lari-santai), lari kencang 5,8 m/s (Shift). Sebelumnya jalan 2 dan lari 7,5. Lawan mengejar 4,6 dan perampok 4,8 m/s, jadi lari santai tidak cukup untuk kabur dan lari kencang cukup; babi menyeruduk 6,2; pengikut paling cepat 6,5; batas lari setelah Wirot ditinggal 4,5.
+
+Gajah Pagon: selama ia ikut, rombongan tetap dibatasi 4 m/s (`pagonIkut.lajuMaks` di misi3.json). Dengan Shift ia berlari 4,0 m/s (tanpa Shift 2,7), tetap di bawah lawan (4,6) dan perampok (4,8), sehingga pemain tidak bisa kabur dengan berlari. Gajah Pagon ikut sejak awal misi sampai pemain memilih meninggalkannya di Pandakan. Ini disengaja: ia terluka dan segmen itu segmen mengendap. Untuk playtest: amati apakah pemain yang membawa Pagon merasa terjebak saat ketahuan, dan apakah mereka mengerti bahwa pilihannya bersembunyi atau bertarung.
+
+Belum diukur: waktu tempuh dengan bot rute penuh. Perkiraan dari panjang rute sekitar 530 m: dengan Shift terus sekitar 91 detik (dulu 71), tanpa Shift sekitar 196 detik (dulu 265); selama Pagon ikut, dengan Shift sekitar 133 detik.
+
+## Catatan sesi 17–18 November 2026 (karakter dan animasi)
+
+Selesai:
+- Standar karakter (docs/standar-karakter.md): sambung kepala di tengah leher, aturan bobot, pose T acuan untuk klip Mixamo Without Skin, senjata, kecepatan gerak.
+- Prajurit Kediri: badan dan kepala tersambung, rig Mixamo, masuk game (?model=prajurit) untuk penjaga dan perampok, warna pihak (Kediri, Singasari, Madura, perampok), tombak dua tangan dengan IK tangan kiri (klip masih satu tangan), golok dikalibrasi.
+- Wijaya diulang: badan dan kepala tersambung (pita emas 6 mm + kalung gantung), rig ulang, klip baru: lari santai 2,7 m/s, lari kencang 5,8 m/s, jalan pelan 1,4 m/s (X), kombo sayatan naik / tebasan turun / tusukan, serangan berat berputar, keris dikalibrasi dari tusukan, keris bersarung saat lari kencang.
+- Serangan pemain 0,50 s (berat 0,95 s); serangan lawan dengan ancang-ancang terbaca, klip pada kecepatan asli.
+- Keseimbangan: lawan mengejar 4,6, perampok 4,8, babi 6,2, pengikut 6,5; segmen Gajah Pagon dibatasi 4 m/s (sengaja, segmen mengendap).
+
+Lanjut berikutnya:
+1. Cari klip tusukan tombak dua tangan di Mixamo (spear, staff, two hand, great sword, thrust), simpan aset-mentah/mixamo/baru/prajurit-tusuk.fbx (+ prajurit-siaga.fbx kalau ada); lalu ganti senjata.tombak.duaTangan.arahDari ke "tangan".
+2. Pilih: harimau (kandidat Sketchfab "Tiger" oleh planeta-elefante, CC BY, 4,7k segitiga, 4 animasi run/idle/stomp/attack; cadangan: "Tiger" oleh Blender Guru, tanpa animasi, cek lisensi) dan buaya (Tripo + rig rantai punggung + animasi prosedural); optimasi benda (docs/prompt-optimasi-benda.md); atau susun ulang misi 4 (perlu jawaban 4 pertanyaan Pak Yayat).
+3. Ditunda: prajurit bertameng (keputusan desain; tanya Pak Yayat bentuk tameng), sprint visual (docs/prompt-sprint-visual.md), koreksi pergelangan klip tangkis Wijaya.

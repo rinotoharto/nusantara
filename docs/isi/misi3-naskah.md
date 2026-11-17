@@ -1,5 +1,7 @@
 # Naskah misi 3: Malam pelarian
 
+> DIGANTIKAN 17 November 2026 oleh docs/isi/misi4-pelarian-naskah.md (susunan delapan misi, rute final narasumber). Berkas ini disimpan sebagai catatan prototipe; kode masih memakai misi3.json.
+
 Versi prototipe (8 sampai 12 menit, kapsul dan balok). Versi produksi memperpanjangnya menjadi 15 sampai 18 menit dengan tujuan pilihan tambahan dan sinematik.
 
 ## Dasar sejarah

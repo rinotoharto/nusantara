@@ -37,3 +37,7 @@ src/
   data/            misi3.json, dialog.json, codex.json
 docs/              gdd.md, prototipe.md, catatan-sprint.md
 ```
+
+## Karakter 3D
+
+Semua pembuatan dan perbaikan karakter manusia (sambung kepala, rig, animasi) mengikuti docs/standar-karakter.md. Jangan memakai cara potong kepala di bawah dagu.
