@@ -127,6 +127,13 @@ def main():
     kepala = cak & (bagian >= 0.75)
     print(f"[tekstur] texel badan {badan.sum()}, kepala {kepala.sum()}, pita {pita.sum()}, tali {tali.sum()}")
     lapor = {}
+    # Kain menurut posisi (opsional): kain cokelat atau merah berona sama dengan kulit, jadi tanpa ini ikut terhitung
+    # sebagai kulit badan dan ikut digeser warnanya.
+    zk = X.get("zona_kain")
+    kain_zona = np.zeros_like(cak)
+    if zk:
+        kain_zona = badan & (z >= zk["z_m"][0]) & (z <= zk["z_m"][1]) & (x_abs <= zk["x_abs_maks_m"])
+        print(f"[tekstur] zona kain menurut posisi: {kain_zona.sum()} texel tidak dihitung sebagai kulit")
 
     def kelas(img):
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV).astype(np.float32)
@@ -193,7 +200,7 @@ def main():
 
     # 2. Warna kulit: badan digeser ke rata-rata kulit kepala (sebaran badan tetap).
     kulit, v, kroma, lab = kelas(bc)
-    w_badan, w_kepala = kulit * badan, kulit * kepala
+    w_badan, w_kepala = kulit * badan * ~kain_zona, kulit * kepala
     rata_b, simpang_b = statistik(lab, w_badan)
     rata_k, simpang_k = statistik(lab, w_kepala)
     lab = lab + (rata_k - rata_b) * w_badan[..., None]

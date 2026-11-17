@@ -23,6 +23,8 @@ aset-mentah/tekstur/topeng-kulit.png
 # berkas antara sambung kepala (per karakter), dibuat ulang oleh data_uv.py, abu_isi.py, kepala_ringan.py,
 # sambung_kepala.py
 aset-mentah/tekstur/*-data.png
+aset-mentah/tekstur/*-normal-sebelum.png
+aset-mentah/tekstur/*-normal-abu.png
 aset-mentah/tekstur/*-topeng-abu.png
 aset-mentah/tekstur/*-kepala-basecolor.png
 aset-mentah/tekstur/*-kepala-normal.png

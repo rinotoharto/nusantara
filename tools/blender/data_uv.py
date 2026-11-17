@@ -28,6 +28,7 @@ def argumen():
     p.add_argument("--blok", required=True, help="blok di json tempat data_x dan data_z disimpan")
     p.add_argument("--ukuran", type=int, default=2048)
     p.add_argument("--basecolor-keluar", default=None, help="simpan base color GLB ke berkas ini (JPEG atau PNG)")
+    p.add_argument("--normal-keluar", default=None, help="simpan normal map GLB ke berkas ini (PNG)")
     return p.parse_args(argv)
 
 
@@ -69,6 +70,19 @@ def main():
         img.filepath_raw = path
         img.save()
         catat(f"base color {img.size[0]}x{img.size[1]} disimpan ke {a.basecolor_keluar}")
+
+    if a.normal_keluar:
+        mat0 = obj.data.materials[0]
+        nmap = next(n for n in mat0.node_tree.nodes if n.type == "NORMAL_MAP")
+        img = nmap.inputs["Color"].links[0].from_node.image
+        path = os.path.join(akar, a.normal_keluar)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        scene.render.image_settings.file_format = "PNG"
+        scene.render.image_settings.color_mode = "RGB"
+        img.file_format = "PNG"
+        img.filepath_raw = path
+        img.save()
+        catat(f"normal map {img.size[0]}x{img.size[1]} disimpan ke {a.normal_keluar}")
 
     mat = bpy.data.materials.new("bake_data")
     mat.use_nodes = True

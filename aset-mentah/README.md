@@ -95,6 +95,9 @@ color lama: `tekstur/wijaya-basecolor-sebelum.jpg`.
   dipakai ulang dari `mixamo/`.
 - `pratinjau/prajurit-*.png`: tumpang penempatan, tumpang siluet dengan konsep, banding wajah, dan pratinjau model
   tersambung.
+- `mixamo-wijaya-ulang/`: FBX Wijaya hasil pengulangan untuk Mixamo dan `LANGKAH.md`; `idle.fbx` With Skin menyusul.
+- `pratinjau/wijaya-ulang-*.png`: hal yang sama untuk pengulangan Wijaya, ditambah `banding-*` (berdampingan dengan
+  prajurit Kediri) dan `pita-10-vs-6` (dua lebar pita emas).
 
 ## Masalah kepala (30 Oktober 2026)
 
@@ -293,3 +296,48 @@ Dijalankan setelah prajurit Kediri berhasil dengan sambung_kepala.py.
 - Urutan skrip: optimasi_karakter.py (dengan cage dan jarak sinar kecil, roughness tetap 0,8) → abu_isi.py → sambung_kepala.py (potong di tengah leher, leher sekitar 11,5 cm, kepala tegak dengan telinga di atas sendi bahu) → kulit_warna.py (kulit badan ke warna kepala dan konsep) → kalung emas sebagai mesh menutup sambungan → ekspor_mixamo.py (rig Mixamo yang ada bisa dipakai ulang kalau proporsi tidak berubah jauh; kalau berubah, rig ulang) → gabung_animasi.py dengan perbaikan bobot kain dan lengan, koreksi Neck, dan lengan kiri saat serang.
 - Tidak dipakai lagi: proyeksi wajah dari konsep (wajah_*.py), hasil Blender manual, rapikan_leher.py revisi 1.
 - Acuan proporsi: docs/referensi/wijaya-konsep-01.png dan wijaya-samping-01.png (buat dulu di ChatGPT dari gambar depan, seperti prajurit).
+
+### Hasil pengulangan Wijaya, bagian 1: sambung kepala (17 November 2026)
+
+Mengikuti `docs/standar-karakter.md` (tahap A sampai G, `docs/prompt-wijaya-ulang.md` bagian 1). Alur, perintah, dan
+pilihan baru skrip ada di `tools/blender/README.md` bagian "Pengulangan Wijaya"; angka di `wajah.json` blok
+`wijaya_ulang`. CEK C (penempatan, ramping 0) dan CEK F (model diam) disetujui. `public/models/wijaya.glb` belum
+diganti: versi lama tetap aktif di game sampai bagian 2 (animasi) disetujui.
+
+- Bahan: `wijaya-tripo.glb` (badan mentah) dan `kepala-tripo.glb` (kepala Tripo dari gambar kepala dekat, 501.316
+  segitiga, patung dada sampai bahu). Berkas leher lama, `rapikan_leher.py`, dan `wajah_*.py` tidak dipakai.
+- Badan (`wijaya-ulang-badan.glb`): 11.400 segitiga, 1,70 m, tidak dirampingkan, tekstur 2048. Tonjolan kalung konsep
+  di dada dihaluskan pada mesh tinggi sebelum decimate; puting yang menonjol seperti kancing diratakan separuh (mundur
+  3,7 mm). Pulau UV ditata ulang dengan margin dan warna di-bake dari mesh tinggi (garis zig-zag di dada hilang).
+  Bercak kelabu 125.100 texel diisi, termasuk pinggiran gelapnya; garis tajam normal map di batas bercak (tampak
+  sebagai garis gelap panjang di lengan) diratakan, 85.985 texel. Kain ditentukan menurut posisi.
+- Kepala (`wijaya-ulang-kepala.glb`): 3.598 segitiga (wajah 1.725, kedua telinga 639), tekstur 1024, skala 0,2837 m
+  per satuan (dagu ke puncak tanpa sanggul 22,7 cm, sanggul 1,8 cm di atasnya). Simpangan wajah p95: mulut 0,67 mm,
+  mata 0,50 mm, hidung 0,96 mm.
+- Penempatan: dagu z 1,455 m, telinga tepat di atas sendi bahu, kepala tidak diskalakan dan tidak dimajukan (di
+  konsep samping kepala sekitar 4 cm lebih maju). Puncak bahu badan 1,354 m (prajurit 1,32 m), jadi leher di garis
+  potong semula 18,3 x 13,6 cm dan dirampingkan bertahap ke cincin kepala. Sumbu leher 8,5 derajat ke depan. Lebar
+  rahang 13,2 cm.
+- Sambungan: bidang potong miring 8 derajat, kepala 1,6 cm di bawah dagu, badan 1,4 cm di bawahnya. Tengkuk kepala
+  dirapikan dulu sebelum cincin diukur (ujung helai rambut ikut terpotong bidang potong). Cincin badan 51 dan kepala
+  62 verteks, dipasangkan per sudut menjadi 43 kolom; badan 11,0 x 9,1 cm, kepala 10,9 x 9,0 cm (selisih 0,4 dan
+  1,1 persen); pita 2 cincin perantara, tinggi 1,5 cm, 258 segitiga. Tidak ada tepi terbuka, tidak ada tambalan.
+- Pita emas (penutup sambungan): pita pipih 6 x 2 mm, 352 segitiga, di bidang tengah sambungan, bagian dari mesh
+  badan dengan bahan kedua `emas_kalung` (warna #C9A04A, metallic 1, roughness 0,35). Semula 10 mm; ditipiskan
+  karena leher tampak pendek (`pratinjau/wijaya-ulang-pita-10-vs-6.png`).
+- Kalung gantung: objek mesh terpisah `kalung_gantung`, tabung 3,6 mm, 400 segitiga, bahan `emas_kalung` yang sama.
+  Bentuk dari gambar konsep depan: parabola dengan titik terendah 11,3 cm di bawah dagu (konsep 11,9 cm), lebar
+  12,8 cm, lalu melingkar di pangkal leher dan lewat tepat di bawah pita emas di tengkuk. Kalung lukis lama dihapus
+  dari tekstur.
+- Tekstur: satu atlas 2048. Kulit badan Lab (131,9, 145,2, 152,1) digeser ke kepala (135,8, 145,7, 149,1); konsep
+  (126,2, 144,9, 150,0). Peralihan 3 cm di sambungan. Pipi kiri-kanan selisih 1,1 L. Coretan gelap (bayangan rambut)
+  di bahu dan punggung atas dihapus. Permukaan bawah dagu diganti warna kulit rata; janggut di dagu utuh.
+- Model diam: `wijaya-utuh.glb`, 14.986 segitiga (badan 10.579, kepala 3.424, pita sambungan 258, pita emas 352,
+  kalung gantung 400), 1,70 m, kepala 22,7 cm, 2,0 MB, dua bahan (`karakter`, `emas_kalung`). Bahu terluar 49,7 cm,
+  8 persen lebih lebar dari prajurit (46,0 cm). FBX: `mixamo-wijaya-ulang/wijaya-untuk-mixamo.fbx` (dua mesh).
+- Sisa yang diketahui: bercak samar keabuan di pergelangan tangan kiri dan tumit kanan; beberapa serpihan gelap kecil
+  di puncak telinga; garis tipis tegak di tulang dada dari sudut bawah; kulit bawah dagu tanpa detail; gelang lengan
+  belum metalik (masih tekstur); goresan gelap pendek di lengan bawah dan tulang kering dibiarkan (luka dan kotoran
+  dari gambar konsep). Lebar leher di sambungan 11,0 cm, sedikit di bawah kisaran standar 11,5 sampai 12,5 cm.
+- Belum dikerjakan (bagian 2): rig Mixamo (`mixamo-wijaya-ulang/LANGKAH.md`), gabung animasi dengan perbaikan bobot
+  kain, lengan kiri, dan bobot kalung (Neck dan Spine2), lalu mengganti `public/models/wijaya.glb`.

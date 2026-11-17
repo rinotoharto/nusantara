@@ -34,7 +34,8 @@ def main():
     os.makedirs(tmp, exist_ok=True)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=os.path.join(akar, a.masuk))
-    obj = [o for o in bpy.data.objects if o.type == "MESH"][0]
+    semua_mesh = [o for o in bpy.data.objects if o.type == "MESH"]
+    obj = max(semua_mesh, key=lambda o: len(o.data.polygons))     # mesh lain (mis. kalung gantung) ikut diekspor apa adanya
     mat = obj.data.materials[0]
     nt = mat.node_tree
     bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
@@ -83,7 +84,8 @@ def main():
 
     keluar = os.path.join(akar, a.keluar)
     bpy.ops.object.select_all(action="DESELECT")
-    obj.select_set(True)
+    for o in semua_mesh:
+        o.select_set(True)
     bpy.context.view_layer.objects.active = obj
     bpy.ops.export_scene.gltf(
         filepath=keluar, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,

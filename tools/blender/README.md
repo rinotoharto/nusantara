@@ -427,3 +427,85 @@ game); siluet. `--hanya a,b` memilih sudut.
 - Sesudah menyimpan gambar JPEG, format keluaran render ikut berubah; set PNG lagi sebelum render. Kamera:
   `to_track_quat("-Z", "Y")`.
 - Kanal jarak di data1 hanya berlaku 0,1 m dari bidang tengah; batas daerah yang lebih jauh pakai tinggi z.
+
+## Pengulangan Wijaya (17 November 2026)
+
+Alur yang sama dengan prajurit (`docs/standar-karakter.md`), dengan beberapa pilihan baru karena bahan Wijaya
+berbeda: kain berona kulit, kalung konsep yang menggantung ke dada, bahu tinggi, dan dua kalung emas dari mesh.
+Angka di `wajah.json` blok `wijaya_ulang`; berkas antara berawalan `wijaya-ulang-`. Urutan (dari akar repo; `B`
+dan `V` seperti di atas):
+
+```bash
+# A. Badan
+B tools/blender/optimasi_karakter.py -- --masuk aset-mentah/wijaya-tripo.glb --keluar aset-mentah/wijaya-ulang-badan.glb --segitiga 11400 --tekstur 2048 --tinggi 1.70 --ramping 0 --halus-daerah 0.765,0.875,0.105 --halus-titik 0.055,0.7285,0.016,14 --atlas-baru --nama wijaya-ulang
+B tools/blender/data_uv.py -- --masuk aset-mentah/wijaya-ulang-badan.glb --keluar aset-mentah/tekstur/wijaya-ulang-data.png --json tools/blender/wajah.json --blok wijaya_ulang --basecolor-keluar aset-mentah/tekstur/wijaya-ulang-basecolor-sebelum.jpg --normal-keluar aset-mentah/tekstur/wijaya-ulang-normal-sebelum.png
+V tools/blender/abu_isi.py --json tools/blender/wajah.json --blok wijaya_ulang --awalan wijaya-ulang- --masuk aset-mentah/tekstur/wijaya-ulang-basecolor-sebelum.jpg --data aset-mentah/tekstur/wijaya-ulang-data.png --keluar aset-mentah/tekstur/wijaya-ulang-basecolor-abu.png --tekstur aset-mentah/tekstur --normal-masuk aset-mentah/tekstur/wijaya-ulang-normal-sebelum.png --normal-keluar aset-mentah/tekstur/wijaya-ulang-normal-abu.png
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/wijaya-ulang-badan.glb --basecolor aset-mentah/tekstur/wijaya-ulang-basecolor-abu.png --normal aset-mentah/tekstur/wijaya-ulang-normal-abu.png --keluar aset-mentah/wijaya-ulang-badan.glb --nama wijaya-ulang
+# B. Kepala
+B tools/blender/kepala_render.py -- --masuk aset-mentah/kepala-tripo.glb --keluar <folder sementara>/wijaya-ulang-kepala-depan.png --json tools/blender/wajah.json --blok wijaya_ulang
+V tools/blender/kepala_acuan.py --json tools/blender/wajah.json --blok wijaya_ulang --render <folder sementara>/wijaya-ulang-kepala-depan.png
+B tools/blender/kepala_ringan.py -- --masuk aset-mentah/kepala-tripo.glb --keluar aset-mentah/wijaya-ulang-kepala.glb --json tools/blender/wajah.json --blok wijaya_ulang --tekstur aset-mentah/tekstur --nama wijaya-ulang --banding aset-mentah/pratinjau/wijaya-ulang-wajah-banding.png
+# C. Penempatan (CEK), dengan model sementara untuk gambar berdampingan
+B tools/blender/sambung_kepala.py -- --badan aset-mentah/wijaya-ulang-badan.glb --kepala aset-mentah/wijaya-ulang-kepala.glb --json tools/blender/wajah.json --blok wijaya_ulang --tahap tempat --pratinjau aset-mentah/pratinjau --nama wijaya-ulang --keluar <folder sementara>/wijaya-ulang-tempat.glb
+B tools/blender/banding_karakter.py -- --kiri <folder sementara>/wijaya-ulang-tempat.glb --kanan aset-mentah/prajurit-utuh.glb --keluar aset-mentah/pratinjau --nama wijaya-ulang
+# D dan E. Sambung (pita emas, kalung gantung) dan tekstur
+B tools/blender/sambung_kepala.py -- --badan aset-mentah/wijaya-ulang-badan.glb --kepala aset-mentah/wijaya-ulang-kepala.glb --json tools/blender/wajah.json --blok wijaya_ulang --tahap sambung --tekstur aset-mentah/tekstur --nama wijaya-ulang --keluar aset-mentah/wijaya-ulang-sambung.glb
+V tools/blender/sambung_tekstur.py --json tools/blender/wajah.json --blok wijaya_ulang --tekstur aset-mentah/tekstur --nama wijaya-ulang --konsep docs/referensi/wijaya-konsep-01.png
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/wijaya-ulang-sambung.glb --basecolor aset-mentah/tekstur/wijaya-ulang-basecolor-sambung.png --normal aset-mentah/tekstur/wijaya-ulang-normal-sambung.png --keluar aset-mentah/wijaya-utuh.glb --nama wijaya
+# F. Pratinjau (CEK), tumpang siluet konsep, berdampingan dengan prajurit
+B tools/blender/pratinjau_karakter.py -- --masuk aset-mentah/wijaya-utuh.glb --json tools/blender/wajah.json --blok wijaya_ulang --keluar aset-mentah/pratinjau --nama wijaya-ulang
+V tools/blender/tumpang_konsep.py --render <folder sementara>/wijaya-ulang-siluet-depan.png --konsep docs/referensi/wijaya-konsep-01.png --keluar aset-mentah/pratinjau/wijaya-ulang-tumpang-konsep-depan.png
+V tools/blender/tumpang_konsep.py --render <folder sementara>/wijaya-ulang-siluet-samping.png --konsep docs/referensi/wijaya-samping-01.png --keluar aset-mentah/pratinjau/wijaya-ulang-tumpang-konsep-samping.png
+B tools/blender/banding_karakter.py -- --kiri aset-mentah/wijaya-utuh.glb --kanan aset-mentah/prajurit-utuh.glb --keluar aset-mentah/pratinjau --nama wijaya-ulang
+# G. FBX untuk Mixamo
+B tools/blender/ekspor_mixamo.py -- --masuk aset-mentah/wijaya-utuh.glb --keluar aset-mentah/mixamo-wijaya-ulang/wijaya-untuk-mixamo.fbx
+```
+
+Kalau tekstur badan atau kepala diubah, tahap C, D, E, dan F harus dijalankan ulang (tahap C menulis ulang blok
+`tempat` yang dipakai D).
+
+### Pilihan baru
+
+- `optimasi_karakter.py --atlas-baru` (`--atlas-margin`): pulau UV mesh rendah ditata ulang dengan margin (bentuk
+  pulau tetap), lalu base color ikut di-bake dari mesh tinggi (dua kali: jarak sinar kecil, lalu 5 kali lebih jauh
+  untuk texel yang meleset). Tanpa ini tepi pulau hasil decimate memotong keluar dari pulau asli di atlas Tripo
+  dan mengambil warna pulau tetangga: tambalan terang berbentuk zig-zag di dada, bercak di tepi pulau.
+- `optimasi_karakter.py --halus-titik x,z,jari[,iterasi]` (boleh diulang): Laplace pada cakram kecil di permukaan
+  depan, kiri dan kanan, di mesh tinggi sebelum decimate. Untuk puting Tripo yang menonjol seperti kancing: 14
+  iterasi mengurangi tonjolan separuh, 60 meratakannya.
+- `data_uv.py --normal-keluar`: normal map GLB disimpan ke berkas.
+- `abu_isi.py` (blok `<blok>.abu`): `tepi_gelap` (pinggiran hitam bercak ikut diisi, supaya tidak menjadi sumber
+  isian yang gelap); `zona_kain.hanya_posisi` (kelas kain menurut warna dimatikan: bintik cokelat gelap di kulit
+  bukan kain); `normal_garis` dengan `--normal-masuk` dan `--normal-keluar` (garis tajam tipis di normal map kulit
+  diisi ulang dari sekitarnya).
+- `kepala_ringan.py` (blok `<blok>.kepala.ringan`): `segitiga_telinga` (jatah segitiga daun telinga pada decimate,
+  tahap sendiri di antara wajah dan sisanya) dan `telinga.aktif` (texel di kotak telinga yang hasil bake-nya jauh
+  lebih gelap dari warna titik terdekat mesh asli diganti warna itu).
+- `sambung_kepala.py` (blok `<blok>.sambung`): `tengkuk_dulu` (tengkuk kepala dirapikan sebelum cincin kepala
+  diukur); `gabung_cincin: "luar"` (verteks cincin yang rapat digabung di verteks terluar); `tali.bentuk: "pita"`
+  (penampang pipih yang mengikuti kemiringan kulit) dan `tali.bahan` (penutup sambungan menjadi bahan kedua dengan
+  nama itu, `metallic` dan `roughness` tetap, bukan warna di atlas); `kalung_gantung` (objek mesh terpisah: tabung
+  yang rebah di kulit, bagian depan diparametrikan menurut x dari bentuk di gambar konsep, bagian samping dan
+  belakang melingkar di pangkal leher); `--keluar` pada tahap `tempat` (GLB sementara yang belum disambung).
+- `sambung_tekstur.py` (blok `<blok>.tekstur`): `zona_kain` (kain menurut posisi tidak dihitung sebagai kulit badan
+  dan tidak ikut digeser warnanya).
+- `tekstur_pasang.py`: memakai mesh terbesar dan mengekspor semua mesh (kalung gantung ikut terbawa).
+- `banding_karakter.py` (baru): dua GLB berdiri berdampingan pada skala yang sama dari depan, samping, dan badan
+  atas; mencetak tinggi, puncak bahu, jarak antarsendi bahu, dan lebar bahu terluar.
+
+### Jebakan yang ditemukan
+
+- Garis gelap panjang di lengan bukan dari base color tetapi dari normal map: mesh Tripo bertekuk di batas bercak
+  kelabu dan tekukan itu ikut ter-bake. Render tanpa tekstur tidak menunjukkannya; periksa normal map.
+- Tepi telinga gelap bergerigi bukan soal warna bake: daun telinga ikut diruntuhkan bersama rambut pada decimate
+  sampai compang-camping, dan rambut di belakangnya tampak di sela-selanya.
+- Kain cokelat dan sabuk merah berona sama dengan kulit. Tanpa zona kain, rata-rata kulit badan terhitung terlalu
+  gelap (L 109, seharusnya 132) dan seluruh badan digeser menjadi pucat.
+- Ujung helai rambut di tengkuk ikut terpotong bidang potong kepala. Kalau tengkuk dirapikan sesudah cincin diukur,
+  leher badan dibentuk ke penampang yang salah (selisih tebal 11 persen).
+- Badan berbahu tinggi (otot bahu naik sampai pangkal leher): sinar mendatar dari sumbu leher pada tinggi beberapa
+  cm di bawah sambungan mendarat jauh di atas otot bahu. Kalung yang jalurnya dicari dengan sinar seperti itu
+  melebar sampai 25 cm; bagian samping dan belakang harus dinaikkan cepat ke tepat di bawah pita.
+- Penggantian tekstur bawah dagu memotong janggut kalau batas arah normalnya longgar; perketat `bawah_dagu.nz_*`,
+  jangan menurunkan batas tinggi (menyisakan blok gelap di bawah dagu).
+- Nilai negatif untuk argumen di belakang `--` Blender ditulis dengan tanda sama dengan (`--arah=-1,0,0`).

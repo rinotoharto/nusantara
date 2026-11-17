@@ -48,7 +48,8 @@ def argumen():
     p.add_argument("--tahap", choices=["tempat", "sambung"], required=True)
     p.add_argument("--pratinjau", default=None, help="folder render tumpang (tahap tempat)")
     p.add_argument("--nama", default="karakter")
-    p.add_argument("--keluar", default=None, help="GLB hasil (tahap sambung)")
+    p.add_argument("--keluar", default=None, help="GLB hasil (tahap sambung); di tahap tempat: GLB sementara badan dan "
+                                                  "kepala yang sudah ditempatkan tetapi belum disambung (untuk banding_karakter.py)")
     p.add_argument("--tekstur", default=None, help="folder keluaran bake (tahap sambung)")
     return p.parse_args(argv)
 
@@ -188,6 +189,29 @@ def ukur_kepala(co, R):
             "lebar_rahang": float(2 * dx[(co[:, 2] > am["dagu"][1] + 0.025) & (co[:, 2] < z_mulut)].max())}
 
 
+def rapikan_tengkuk(kepala, S, y_telinga):
+    """Serpihan helai rambut di garis rambut bawah dan lipatan di belakang rahang dibuka (telinga tidak disentuh).
+    Mengubah penampang kepala di tengkuk: helai rambut yang menjuntai sampai bidang potong ikut menyusut."""
+    Tk = topologi_las(kepala)
+    co_k = koordinat(kepala)
+    pos_k = np.zeros((Tk["nu"], 3))
+    pos_k[Tk["wid"]] = co_k
+
+    def wilayah_tengkuk(c):
+        # belakang rahang di bawah telinga, dan garis rambut di belakang telinga
+        bawah = (c[:, 2] < S["dagu_z_m"] + S.setdefault("tengkuk_atas_dagu_m", 0.035)) & (c[:, 1] > y_telinga - S.setdefault("tengkuk_depan_telinga_m", 0.0))
+        rambut = (c[:, 2] < S["dagu_z_m"] + S.setdefault("garis_rambut_atas_dagu_m", 0.085)) & \
+                 (c[:, 1] > y_telinga + S.setdefault("garis_rambut_belakang_telinga_m", 0.018))
+        return bawah | rambut
+
+    wil = np.zeros(Tk["nu"], bool)
+    wil[Tk["wid"]] = wilayah_tengkuk(co_k)
+    pos_k, awal_k, sisa_k = buka_lipatan(pos_k, Tk, wil)
+    pasang_koordinat(kepala, pos_k[Tk["wid"]])
+    dibalik_k, sisa_k = perbaiki_arah(kepala, wilayah_tengkuk)
+    return awal_k, dibalik_k, sisa_k
+
+
 def tempatkan(badan, kepala, P):
     """Skala dan posisi kepala; bidang potong; sasaran perampingan leher badan. Mengisi P['tempat']."""
     S = P.setdefault("sambung", {})
@@ -207,6 +231,12 @@ def tempatkan(badan, kepala, P):
     kepala.location = Vector(geser)
     pilih_hanya(kepala)
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    lapor_t = None
+    if S.get("tengkuk_dulu"):
+        # Tengkuk dirapikan sebelum cincin kepala diukur, supaya leher badan dibentuk ke penampang kepala yang
+        # sebenarnya dipotong (kalau sesudahnya, selisih tebal cincin bisa melewati 10 persen).
+        lapor_t = rapikan_tengkuk(kepala, S, float(Kp["telinga"][0] * s + geser[1]))
+        catat(f"tengkuk kepala dirapikan sebelum ukur: muka terbalik {lapor_t[0]}, dibalik {lapor_t[1]}, sisa {lapor_t[2]}")
     co_k, tri_k = koordinat(kepala), segitiga(kepala)
 
     # Bidang potong kepala: lewat sumbu leher kepala, potong_bawah_dagu_m di bawah dagu.
@@ -241,6 +271,8 @@ def tempatkan(badan, kepala, P):
                    "puncak_sanggul_m": round(float(co_k[:, 2].max()), 4), "mata_z_m": round(float(Kp["z_mata"] * s + geser[2]), 4)},
     }
     P["tempat"] = T
+    if lapor_t is not None:
+        T["tengkuk"] = [int(v) for v in lapor_t]
     # Penampang hasil perampingan disamakan ke cincin kepala: parameter "asal" dikoreksi beberapa kali, karena
     # verteks yang digeser mendatar memotong bidang miring di tempat lain.
     Tp = topologi_las(badan)
@@ -839,6 +871,14 @@ def tahap_tempat(a, akar, data, P, badan, kepala):
         catat("siluet", path)
     T["siluet"] = {"ortho_m": round(ortho, 4), "tinggi_px": 1400, "folder": tmp}
     catat(f"tinggi total {tinggi:.3f} m")
+    if a.keluar:
+        bpy.ops.object.select_all(action="DESELECT")
+        badan.select_set(True)
+        kepala.select_set(True)
+        bpy.context.view_layer.objects.active = badan
+        bpy.ops.export_scene.gltf(filepath=os.path.join(akar, a.keluar), export_format="GLB", use_selection=True, export_apply=True,
+                                  export_yup=True, export_materials="EXPORT", export_animations=False, export_skins=False)
+        catat(f"model sementara (belum disambung) diekspor ke {a.keluar}")
     json.dump(data, open(os.path.join(akar, a.json), "w"), indent=2, ensure_ascii=False)
 
 
@@ -925,8 +965,10 @@ def urutkan(vs, pusat):
     return vs[mulai:] + vs[:mulai], np.roll(sudut, -mulai)
 
 
-def rapikan_cincin(bm, vs, pj_min):
-    """Gabung verteks cincin yang berjarak kurang dari pj_min (hanya di tepi potongan)."""
+def rapikan_cincin(bm, vs, pj_min, pusat=None):
+    """Gabung verteks cincin yang berjarak kurang dari pj_min (hanya di tepi potongan). Bawaan: di titik tengah.
+    Dengan `pusat` (cara "luar"): di verteks yang lebih jauh dari pusat cincin, supaya rentetan verteks rapat (ujung
+    helai rambut di tengkuk) tidak memotong sudut dan mengecilkan penampang."""
     vs = list(vs)
     berubah = True
     while berubah and len(vs) > 12:
@@ -934,7 +976,13 @@ def rapikan_cincin(bm, vs, pj_min):
         for i in range(len(vs)):
             va, vb = vs[i], vs[(i + 1) % len(vs)]
             if (va.co - vb.co).length < pj_min:
-                bmesh.ops.pointmerge(bm, verts=[va, vb], merge_co=(va.co + vb.co) / 2)
+                if pusat is None:
+                    di = (va.co + vb.co) / 2
+                else:
+                    ja = math.hypot(va.co.x - pusat[0], va.co.y - pusat[1])
+                    jb = math.hypot(vb.co.x - pusat[0], vb.co.y - pusat[1])
+                    di = (va.co if ja >= jb else vb.co).copy()
+                bmesh.ops.pointmerge(bm, verts=[va, vb], merge_co=di)
                 vs.pop((i + 1) % len(vs))
                 berubah = True
                 break
@@ -1149,6 +1197,123 @@ def normal_las(obj, tol=1e-5):
     me.update()
 
 
+def bahan_logam(nama, warna_srgb, metallic, roughness):
+    mat = bpy.data.materials.new(nama)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = (*[(c / 255) ** 2.2 for c in warna_srgb], 1.0)
+    bsdf.inputs["Metallic"].default_value = metallic
+    bsdf.inputs["Roughness"].default_value = roughness
+    return mat
+
+
+def kalung_gantung(model, G, T, f, mat):
+    """Kalung gantung sebagai objek mesh terpisah: tabung tipis yang rebah di kulit. Dari depan bentuknya mengikuti
+    gambar konsep: parabola dari titik terendah di dada (z_depan_m) naik ke kedua sisi sampai (x_atas_m, z_atas_m),
+    lalu melingkar lewat pangkal leher ke tengkuk (z_belakang_m, sedikit di bawah pita penutup sambungan).
+    Angka dalam meter pada model akhir. Titik jalur dicari dengan sinar ke kulit (bahan pertama saja)."""
+    me = model.data
+    co, tri = koordinat(model), segitiga(model)
+    pi_ = np.empty(len(me.loop_triangles), dtype=np.int64)
+    me.loop_triangles.foreach_get("polygon_index", pi_)
+    mi = np.empty(len(me.polygons), dtype=np.int64)
+    me.polygons.foreach_get("material_index", mi)
+    bvh = BVHTree.FromPolygons(co.tolist(), tri[mi[pi_] == 0].tolist())
+    x0, y_ax = T["badan"]["x0"] * f, T["bidang_badan_m"][1] * f
+    z_f, z_t, z_b, x_t = G["z_depan_m"], G["z_atas_m"], G["z_belakang_m"], G["x_atas_m"]
+    nf, nb = 25, 24
+    depan = []
+    for i in range(nf):
+        x = -x_t + 2 * x_t * i / (nf - 1)
+        z = z_f + (z_t - z_f) * (abs(x) / x_t) ** G.get("pangkat", 2.0)
+        kena = bvh.ray_cast(Vector((x0 + x, -1.0, z)), Vector((0, 1, 0)), 2.0)
+        if kena[0] is None:
+            raise SystemExit(f"kalung gantung: sinar depan meleset di x {x:.3f} z {z:.3f}")
+        depan.append(np.array(kena[0][:]))
+
+    def belakang(tanda, P_t, sampai):
+        th_t = math.atan2(abs(P_t[0] - x0), -(P_t[1] - y_ax))
+        hasil_ = []
+        for j in range(1, sampai + 1):
+            u_ = j / nb
+            th = th_t + (math.pi - th_t) * u_
+            # naik cepat ke tinggi tengkuk (dalam pecahan `naik` pertama busur), lalu tetap: di samping dan belakang
+            # kalung merapat ke pangkal leher, tidak melebar ke atas otot bahu
+            v_ = min(1.0, u_ / G.get("naik", 0.3))
+            z = z_t + (z_b - z_t) * v_ * v_ * (3 - 2 * v_)
+            d = np.array([tanda * math.sin(th), -math.cos(th), 0.0])
+            kena = bvh.ray_cast(Vector(np.array([x0, y_ax, z]) + d * 0.35), Vector(-d), 0.35)
+            if kena[0] is not None:
+                hasil_.append(np.array(kena[0][:]))
+        return hasil_
+
+    kanan = belakang(1.0, depan[-1], nb)            # termasuk tengkuk
+    kiri = belakang(-1.0, depan[0], nb - 1)
+    jalur = np.array(depan + kanan + kiri[::-1])
+    # sampel ulang berjarak sama sepanjang jalur tertutup
+    K = G["segmen"]
+    tutup = np.vstack([jalur, jalur[:1]])
+    pj = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(tutup, axis=0), axis=1))])
+    s_ = np.linspace(0, pj[-1], K, endpoint=False)
+    titik = np.stack([np.interp(s_, pj, tutup[:, k]) for k in range(3)], axis=1)
+    for _ in range(G.get("halus_iterasi", 2)):
+        titik = (np.roll(titik, 1, axis=0) + 2 * titik + np.roll(titik, -1, axis=0)) / 4
+    # tempel ke kulit, lalu angkat sejauh jari-jari tabung dan celah
+    kulit, nrm = np.zeros_like(titik), np.zeros_like(titik)
+    for i in range(K):
+        kena = bvh.find_nearest(Vector(titik[i].tolist()))
+        kulit[i], nrm[i] = np.array(kena[0][:]), np.array(kena[1][:])
+    for _ in range(3):
+        nrm = np.roll(nrm, 1, axis=0) + 2 * nrm + np.roll(nrm, -1, axis=0)
+        nrm /= np.linalg.norm(nrm, axis=1)[:, None]
+    r = G["jari_m"]
+    pusat = kulit + nrm * (r + G["celah_m"])
+    for _ in range(1):
+        pusat = (np.roll(pusat, 1, axis=0) + 2 * pusat + np.roll(pusat, -1, axis=0)) / 4
+    # titik yang sesudah dihaluskan terlalu dekat ke kulit didorong keluar lagi
+    for i in range(K):
+        kena = bvh.find_nearest(Vector(pusat[i].tolist()))
+        arah_ = pusat[i] - np.array(kena[0][:])
+        jarak = float(np.linalg.norm(arah_))
+        luar = arah_ / jarak if jarak > 1e-6 and arah_ @ np.array(kena[1][:]) > 0 else np.array(kena[1][:])
+        if jarak < r + G["celah_m"] * 0.5 or arah_ @ np.array(kena[1][:]) <= 0:
+            pusat[i] = np.array(kena[0][:]) + luar * (r + G["celah_m"])
+    sisi = G["sisi"]
+    bm = bmesh.new()
+    cincin = []
+    for i in range(K):
+        t = pusat[(i + 1) % K] - pusat[i - 1]
+        t /= np.linalg.norm(t)
+        nn = nrm[i] - (nrm[i] @ t) * t
+        nn /= np.linalg.norm(nn)
+        bb = np.cross(t, nn)
+        cincin.append([bm.verts.new((pusat[i] + r * (math.cos(2 * math.pi * q / sisi) * nn + math.sin(2 * math.pi * q / sisi) * bb)).tolist())
+                       for q in range(sisi)])
+    for i in range(K):
+        i2 = (i + 1) % K
+        for q in range(sisi):
+            q2 = (q + 1) % sisi
+            f_ = bm.faces.new((cincin[i][q], cincin[i2][q], cincin[i2][q2], cincin[i][q2]))
+            f_.smooth = True
+    bm.normal_update()
+    tengah_ = Vector(pusat.mean(axis=0).tolist())
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+    me_k = bpy.data.meshes.new(G.get("nama", "kalung_gantung"))
+    bm.to_mesh(me_k)
+    bm.free()
+    me_k.materials.append(mat)
+    ob = bpy.data.objects.new(G.get("nama", "kalung_gantung"), me_k)
+    bpy.context.scene.collection.objects.link(ob)
+    for p_ in me_k.polygons:
+        p_.use_smooth = True
+    panjang = float(np.linalg.norm(np.diff(np.vstack([pusat, pusat[:1]]), axis=0), axis=1).sum())
+    lapor = {"segitiga": len(me_k.polygons), "panjang_m": round(panjang, 3),
+             "z_depan_m": round(float(pusat[:, 2].min()), 4), "z_belakang_m": round(float(pusat[np.argmax(pusat[:, 1]), 2]), 4),
+             "lebar_m": round(float(np.ptp(pusat[:, 0])), 4), "y_depan_m": round(float(pusat[:, 1].min()), 4)}
+    return ob, lapor
+
+
 def tahap_sambung(a, akar, data, P, badan, kepala):
     S, T, B, Tp = tempatkan(badan, kepala, P)
     bawaan_sambung(S)
@@ -1167,24 +1332,13 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     badan.data.materials.append(mat_tambal)
     lapor_leher["tambalan"] = tambal_kantong(badan, lambda c: wilayah_pangkal(c, S, T), len(badan.data.materials) - 1)
     catat(f"leher badan: {lapor_leher}")
-    # Tengkuk kepala: serpihan helai rambut di garis rambut bawah dan lipatan di belakang rahang dibuka.
-    Tk = topologi_las(kepala)
-    co_k = koordinat(kepala)
-    pos_k = np.zeros((Tk["nu"], 3))
-    pos_k[Tk["wid"]] = co_k
-    wil = np.zeros(Tk["nu"], bool)
-    def wilayah_tengkuk(c):
-        # belakang rahang di bawah telinga, dan garis rambut di belakang telinga (telinga sendiri tidak disentuh)
-        y_t = T["kepala"]["telinga_m"][0]
-        bawah = (c[:, 2] < S["dagu_z_m"] + S.setdefault("tengkuk_atas_dagu_m", 0.035)) & (c[:, 1] > y_t - S.setdefault("tengkuk_depan_telinga_m", 0.0))
-        rambut = (c[:, 2] < S["dagu_z_m"] + S.setdefault("garis_rambut_atas_dagu_m", 0.085)) & \
-                 (c[:, 1] > y_t + S.setdefault("garis_rambut_belakang_telinga_m", 0.018))
-        return bawah | rambut
-    wil[Tk["wid"]] = wilayah_tengkuk(co_k)
-    pos_k, awal_k, sisa_k = buka_lipatan(pos_k, Tk, wil)
-    pasang_koordinat(kepala, pos_k[Tk["wid"]])
-    dibalik_k, sisa_k = perbaiki_arah(kepala, wilayah_tengkuk)
-    catat(f"tengkuk kepala: muka terbalik {awal_k}, dibalik {dibalik_k}, sisa {sisa_k}")
+    # Tengkuk kepala: serpihan helai rambut di garis rambut bawah dan lipatan di belakang rahang dibuka (kalau
+    # tengkuk_dulu, sudah dikerjakan di tempatkan sebelum cincin kepala diukur).
+    if not S.get("tengkuk_dulu"):
+        awal_k, dibalik_k, sisa_k = rapikan_tengkuk(kepala, S, T["kepala"]["telinga_m"][0])
+        catat(f"tengkuk kepala: muka terbalik {awal_k}, dibalik {dibalik_k}, sisa {sisa_k}")
+    else:
+        awal_k, dibalik_k, sisa_k = T["tengkuk"]
     # Sumbu leher dari samping (pusat irisan badan 3 cm di bawah bidang potong badan ke pusat cincin kepala) dan
     # letak telinga terhadap garis tegak sendi bahu, dicatat juga di tahap ini.
     bawah = penampang(koordinat(badan), segitiga(badan), np.array(p0_b[:]) - np.array([0, 0, 0.03]), np.array([0, 0, 1.0]),
@@ -1238,8 +1392,9 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     uk_b0, uk_k0 = ukuran_cincin(cincin["badan"]), ukuran_cincin(cincin["kepala"])
     # Cincin dirapikan (verteks yang terlalu rapat digabung), lalu disamakan: setiap kolom punya verteks di
     # kedua cincin pada sudut yang sama.
-    rb0, _ = urutkan(rapikan_cincin(bm, cincin["badan"], S["tepi_min_m"]), uk_b0["pusat"])
-    rk0, _ = urutkan(rapikan_cincin(bm, cincin["kepala"], S["tepi_min_m"]), uk_k0["pusat"])
+    luar_ = S.setdefault("gabung_cincin", "tengah") == "luar"
+    rb0, _ = urutkan(rapikan_cincin(bm, cincin["badan"], S["tepi_min_m"], uk_b0["pusat"] if luar_ else None), uk_b0["pusat"])
+    rk0, _ = urutkan(rapikan_cincin(bm, cincin["kepala"], S["tepi_min_m"], uk_k0["pusat"] if luar_ else None), uk_k0["pusat"])
     n_b1, n_k1 = len(rb0), len(rk0)
     if os.environ.get("SAMBUNG_DEBUG"):
         catat(f"tepi terbuka sesudah cincin dirapikan: {tepi_terbuka(bm, p_mid_awal, nV)[0]} (cincin {n_b1} + {n_k1})")
@@ -1378,28 +1533,62 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
         bvh = BVHTree.FromBMesh(bm)
         p_tengah = (np.array(p0_b[:]) + np.array(p0_k[:])) / 2
         K = L_["segmen"]
-        arah, jari = [], []
+        pipih = L_.get("bentuk") == "pita"
+        setengah_t = L_["tinggi_m"] / 2
+        arah, jari, jari_a, jari_b = [], [], [], []
+
+        def jari_di(pusat_, d_):
+            kena_ = bvh.ray_cast(Vector(pusat_ + d_ * 0.3), Vector(-d_), 0.3)
+            return (np.array(kena_[0][:]) - pusat_) @ d_ if kena_[0] is not None else np.nan
+
         for i in range(K):
             th = -math.pi / 2 + 2 * math.pi * i / K
             d = np.array([math.cos(th), math.sin(th), 0.0])
             d = d - (d @ n) * n
             d /= np.linalg.norm(d)
-            kena = bvh.ray_cast(Vector(p_tengah + d * 0.3), Vector(-d), 0.3)
             arah.append(d)
-            jari.append((np.array(kena[0][:]) - p_tengah) @ d if kena[0] is not None else np.nan)
-        jari = np.array(jari)
-        jari[np.isnan(jari)] = np.nanmean(jari)
-        for _ in range(L_["halus_iterasi"]):
-            jari = np.maximum(jari, (jari + np.roll(jari, 1) + np.roll(jari, -1)) / 3)   # tidak pernah masuk ke kulit
+            jari.append(jari_di(p_tengah, d))
+            if pipih:
+                jari_a.append(jari_di(p_tengah + n * setengah_t, d))
+                jari_b.append(jari_di(p_tengah - n * setengah_t, d))
+
+        def rapikan_jari(j_):
+            j_ = np.array(j_)
+            j_[np.isnan(j_)] = np.nanmean(j_)
+            for _ in range(L_["halus_iterasi"]):
+                j_ = np.maximum(j_, (j_ + np.roll(j_, 1) + np.roll(j_, -1)) / 3)   # tidak pernah masuk ke kulit
+            return j_
+
+        jari = rapikan_jari(jari)
         sisi = L_["sisi"]
         cincin_tali = []
-        for i in range(K):
-            pusat = p_tengah + arah[i] * (jari[i] + L_["celah_m"] + L_["tebal_m"] / 2)
-            vs = []
-            for q in range(sisi):
-                ph = 2 * math.pi * q / sisi
-                vs.append(bm.verts.new((pusat + arah[i] * (L_["tebal_m"] / 2) * math.cos(ph) + n * (L_["tinggi_m"] / 2) * math.sin(ph)).tolist()))
-            cincin_tali.append(vs)
+        if pipih:
+            # Pita pipih: sumbu tingginya mengikuti kemiringan kulit di antara tepi atas dan tepi bawah pita (di bawah
+            # dagu kulit condong ke depan), supaya tepi pita tidak tenggelam atau melayang.
+            jari_a, jari_b = rapikan_jari(jari_a), rapikan_jari(jari_b)
+            for i in range(K):
+                P_a = p_tengah + n * setengah_t + arah[i] * max(jari_a[i], jari[i] - 0.004)
+                P_b = p_tengah - n * setengah_t + arah[i] * max(jari_b[i], jari[i] - 0.004)
+                sumbu = (P_a - P_b) / np.linalg.norm(P_a - P_b)
+                luar = arah[i] - (arah[i] @ sumbu) * sumbu
+                luar /= np.linalg.norm(luar)
+                tengah_kulit = np.maximum((P_a + P_b) / 2 @ luar, (p_tengah + arah[i] * jari[i]) @ luar)
+                pusat = (P_a + P_b) / 2 + luar * (tengah_kulit - (P_a + P_b) / 2 @ luar + L_["celah_m"] + L_["tebal_m"] / 2)
+                vs = []
+                for q in range(sisi):
+                    ph = 2 * math.pi * (q + 0.5) / sisi
+                    cs, sn = math.cos(ph), math.sin(ph)
+                    cs, sn = math.copysign(abs(cs) ** 0.3, cs), math.copysign(abs(sn) ** 0.3, sn)
+                    vs.append(bm.verts.new((pusat + luar * (L_["tebal_m"] / 2) * cs + sumbu * setengah_t * sn).tolist()))
+                cincin_tali.append(vs)
+        else:
+            for i in range(K):
+                pusat = p_tengah + arah[i] * (jari[i] + L_["celah_m"] + L_["tebal_m"] / 2)
+                vs = []
+                for q in range(sisi):
+                    ph = 2 * math.pi * q / sisi
+                    vs.append(bm.verts.new((pusat + arah[i] * (L_["tebal_m"] / 2) * math.cos(ph) + n * (L_["tinggi_m"] / 2) * math.sin(ph)).tolist()))
+                cincin_tali.append(vs)
         kel_tali = 2 * math.pi * float(np.mean(jari))
         kel_sisi = math.pi * (L_["tinggi_m"] + L_["tebal_m"]) / 2 * 2
         muka_tali = []
@@ -1544,6 +1733,9 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     # Material akhir (tekstur bake A sebagai pengisi; warna akhir dipasang tekstur_pasang.py), skala akhir, normal.
     me.uv_layers.remove(me.uv_layers["UVMap"])
     me.uv_layers[0].name = "UVMap"
+    mi_lama = np.empty(len(me.polygons), dtype=np.int64)
+    me.polygons.foreach_get("material_index", mi_lama)
+    muka_tali = mi_lama == i_tali
     me.materials.clear()
     mat = bpy.data.materials.new("karakter")
     mat.use_nodes = True
@@ -1562,6 +1754,14 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     me.materials.append(mat)
     for poly in me.polygons:
         poly.material_index = 0
+    # Penutup sambungan dari logam (kalung emas): bahan kedua dengan nama tetap, bukan warna di atlas. Nama berawalan
+    # "emas" dikenali gabung_animasi.py (bobot Neck dan Spine2) dan model-wijaya.ts (pantulan lingkungan logam).
+    mat_logam = None
+    if S["tali"]["aktif"] and S["tali"].get("bahan"):
+        mat_logam = bahan_logam(S["tali"]["bahan"], S["tali"]["warna_srgb"], S["tali"].get("metallic", 1.0), S["tali"].get("roughness", 0.35))
+        me.materials.append(mat_logam)
+        for i_ in np.nonzero(muka_tali)[0]:
+            me.polygons[int(i_)].material_index = 1
     co = koordinat(model)
     tinggi = float(co[:, 2].max() - co[:, 2].min())
     f_akhir = S["tinggi_akhir_m"] / tinggi if S["tinggi_akhir_m"] else 1.0
@@ -1569,10 +1769,20 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     co[:, 2] -= co[:, 2].min()
     pasang_koordinat(model, co)
     normal_las(model)
-    hasil.update({"segitiga": len(segitiga(model)), "segitiga_badan": seg_badan, "segitiga_kepala": seg_kepala,
+    ob_kalung = None
+    Gk = S.get("kalung_gantung")
+    if Gk and Gk.get("aktif"):
+        if mat_logam is None:
+            mat_logam = bahan_logam(Gk.get("bahan", "emas_kalung"), Gk.get("warna_srgb", [201, 160, 74]), 1.0, 0.35)
+        ob_kalung, hasil["kalung_gantung"] = kalung_gantung(model, Gk, T, f_akhir, mat_logam)
+        catat(f"kalung gantung: {hasil['kalung_gantung']}")
+    hasil.update({"segitiga": len(segitiga(model)) + (hasil.get("kalung_gantung", {}).get("segitiga", 0)),
+                  "segitiga_badan": seg_badan, "segitiga_kepala": seg_kepala,
                   "tinggi_sebelum_skala_m": round(tinggi, 4), "skala_akhir": round(f_akhir, 5),
                   "tinggi_kepala_akhir_m": round((T["kepala"]["puncak_m"] - S["dagu_z_m"]) * f_akhir, 4)})
     pilih_hanya(model)
+    if ob_kalung is not None:
+        ob_kalung.select_set(True)
     keluar = os.path.join(akar, a.keluar)
     bpy.ops.export_scene.gltf(
         filepath=keluar, export_format="GLB", use_selection=True, export_apply=True, export_yup=True,
@@ -1585,7 +1795,7 @@ def tahap_sambung(a, akar, data, P, badan, kepala):
     S["hasil"] = hasil
     json.dump(data, open(os.path.join(akar, a.json), "w"), indent=2, ensure_ascii=False)
     catat(f"ekspor {a.keluar}: {hasil['segitiga']} segitiga (badan {seg_badan}, kepala {seg_kepala}, pita {hasil['pita']['segitiga']}, "
-          f"tali {hasil.get('tali', {}).get('segitiga', 0)}), tinggi {tinggi:.3f} -> {S['tinggi_akhir_m']} m (skala {f_akhir:.4f}), "
+          f"tali {hasil.get('tali', {}).get('segitiga', 0)}, kalung gantung {hasil.get('kalung_gantung', {}).get('segitiga', 0)}), tinggi {tinggi:.3f} -> {S['tinggi_akhir_m']} m (skala {f_akhir:.4f}), "
           f"{hasil['berkas_mb']} MB")
 
 

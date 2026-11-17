@@ -11,6 +11,8 @@ Langkah:
   2. salin mesh tinggi, kurangi salinan rendah dengan Decimate (Collapse)
   3. bake normal dari mesh tinggi ke mesh rendah (atau pakai normal map asal: --normal asal)
      (--halus-daerah: tonjolan tipis di mesh tinggi dihaluskan dulu, sebelum decimate dan bake)
+     (--atlas-baru: pulau UV mesh rendah ditata ulang dengan margin, lalu warna ikut di-bake dari mesh tinggi;
+      tanpa ini tepi pulau hasil decimate memotong keluar dari pulau asli dan mengambil warna pulau tetangga)
   4. skala ke tinggi target, titik pusat di antara kaki di lantai, putar kalau perlu (--putar derajat),
      lebar dan tebal dikecilkan kalau diminta (--ramping pecahan)
   5. tekstur diperkecil (base color dan normal ke --tekstur, metallic-roughness ke setengahnya)
@@ -55,6 +57,14 @@ def argumen():
                    help="haluskan mesh tinggi sebelum decimate di daerah 'z_min,z_maks,x_maks' (pecahan tinggi model, "
                         "x dari sumbu tengah), mis. 0.765,0.875,0.105 untuk tonjolan tali di pangkal leher dan dada atas")
     p.add_argument("--halus-iterasi", type=int, default=60, help="iterasi Taubin untuk --halus-daerah")
+    p.add_argument("--halus-titik", action="append", default=[],
+                   help="ratakan tonjolan kecil di mesh tinggi sebelum decimate di sekitar titik 'x,z,jari[,iterasi]' "
+                        "(pecahan tinggi model; x dari sumbu tengah dan dicerminkan kiri-kanan; hanya permukaan depan), "
+                        "mis. puting yang menonjol seperti kancing: 0.055,0.7285,0.016,60. Boleh diulang.")
+    p.add_argument("--atlas-baru", action="store_true",
+                   help="tata ulang pulau UV mesh rendah dengan margin dan bake base color dari mesh tinggi "
+                        "(menghilangkan garis gelap dan tambalan salah warna di jahitan UV)")
+    p.add_argument("--atlas-margin", type=float, default=0.003, help="margin antarpulau untuk --atlas-baru (pecahan atlas)")
     p.add_argument("--ramping", type=float, default=0.0,
                    help="kecilkan lebar dan tebal (sumbu X dan Y) sekian pecahan tanpa mengubah tinggi, mis. 0.065")
     return p.parse_args(argv)
@@ -193,6 +203,103 @@ def bake_normal(tinggi, rendah, ukuran, path_png, cage, jarak_sinar):
     return baru, lama
 
 
+def tata_ulang_uv(rendah, margin):
+    """Pulau UV mesh rendah ditata ulang dengan margin (bentuk pulau tetap, tanpa rotasi). Sesudah decimate, tepi
+    pulau adalah tali busur dari garis pulau asli: sebagian segitiga keluar dari pulau aslinya dan mengambil
+    texel margin (bercak kelabu) atau texel pulau tetangga (garis gelap, tambalan salah warna). Di atlas baru
+    setiap pulau punya margin sendiri dan warnanya di-bake ulang dari mesh tinggi."""
+    pilih_hanya(rendah)
+    bpy.ops.object.mode_set(mode="EDIT")
+    bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.select_all(action="SELECT")
+    bpy.ops.uv.pack_islands(rotate=False, margin=margin)
+    bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def bake_warna(tinggi, rendah, img_sumber, ukuran, path_png, cage, jarak_sinar):
+    """Base color mesh tinggi (tekstur asli, UV asli) ke UV mesh rendah. Dua kali: jarak sinar kecil (supaya
+    sinar dari paha tidak mengenai kain), lalu jarak sinar 5 kali lebih jauh hanya untuk texel yang meleset."""
+    scene = bpy.context.scene
+    scene.render.engine = "CYCLES"
+    siapkan_gpu()
+    scene.cycles.samples = 16
+    scene.cycles.use_denoising = False
+    scene.render.bake.use_selected_to_active = True
+    scene.render.bake.use_clear = True
+    # mesh tinggi memancarkan warna teksturnya (tanpa pengaruh cahaya, metallic, dan normal map)
+    nt_t = tinggi.data.materials[0].node_tree
+    keluaran = next(n for n in nt_t.nodes if n.type == "OUTPUT_MATERIAL")
+    tex = nt_t.nodes.new("ShaderNodeTexImage")
+    tex.image = img_sumber
+    emisi = nt_t.nodes.new("ShaderNodeEmission")
+    nt_t.links.new(tex.outputs["Color"], emisi.inputs["Color"])
+    nt_t.links.new(emisi.outputs["Emission"], keluaran.inputs["Surface"])
+    for l in list(keluaran.inputs["Volume"].links):
+        nt_t.links.remove(l)
+
+    nt = rendah.data.materials[0].node_tree
+    hasil = []
+    t0 = time.time()
+    for ke, (kali, margin) in enumerate(((1.0, 0), (5.0, 0))):
+        img = bpy.data.images.new(f"bake_warna_{ke}", ukuran, ukuran, alpha=True)
+        img.colorspace_settings.name = "sRGB"
+        img.generated_color = (0.0, 0.0, 0.0, 0.0)
+        node = nt.nodes.new("ShaderNodeTexImage")
+        node.image = img
+        for n in nt.nodes:
+            n.select = False
+        node.select = True
+        nt.nodes.active = node
+        scene.render.bake.cage_extrusion = cage * kali
+        scene.render.bake.max_ray_distance = jarak_sinar * kali
+        scene.render.bake.margin = margin
+        bpy.ops.object.select_all(action="DESELECT")
+        tinggi.select_set(True)
+        rendah.select_set(True)
+        bpy.context.view_layer.objects.active = rendah
+        bpy.ops.object.bake(type="EMIT")
+        px = np.empty(ukuran * ukuran * 4, dtype=np.float32)
+        img.pixels.foreach_get(px)
+        hasil.append(px.reshape(ukuran, ukuran, 4).copy())
+        nt.nodes.remove(node)
+        bpy.data.images.remove(img)
+    dekat, jauh = hasil
+    kena = dekat[:, :, :3].max(axis=2) > 1e-4
+    kena_jauh = jauh[:, :, :3].max(axis=2) > 1e-4
+    px = np.where(kena[:, :, None], dekat, jauh)
+    ada = kena | kena_jauh
+    px[:, :, 3] = 1.0
+    # Margin: warna dilebarkan ke texel kosong di sekitar pulau (rata-rata tetangga yang sudah berisi), 16 langkah.
+    warna = px[:, :, :3] * ada[:, :, None]
+    isi = ada.astype(np.float32)
+    for _ in range(16):
+        jml = np.zeros_like(warna)
+        cnt = np.zeros_like(isi)
+        for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+            jml += np.roll(warna, (dy, dx), axis=(0, 1))
+            cnt += np.roll(isi, (dy, dx), axis=(0, 1))
+        baru = (isi < 0.5) & (cnt > 0.5)
+        warna[baru] = jml[baru] / cnt[baru][:, None]
+        isi[baru] = 1.0
+    px[:, :, :3] = warna
+    lama = time.time() - t0
+    catat(f"bake warna {ukuran}px: {lama:.1f} s; texel kena {int(kena.sum())}, meleset lalu kena di jarak 5x "
+          f"{int((~kena & kena_jauh).sum())}")
+    img = bpy.data.images.new("bake_warna", ukuran, ukuran, alpha=False)
+    img.colorspace_settings.name = "sRGB"
+    img.pixels.foreach_set(px.ravel())
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGB"
+    scene.render.image_settings.compression = 50
+    img.file_format = "PNG"
+    img.filepath_raw = path_png
+    img.save()
+    baru = bpy.data.images.load(path_png)
+    baru.colorspace_settings.name = "sRGB"
+    bpy.data.images.remove(img)
+    return baru
+
+
 def siapkan_render(obj, tinggi_model):
     """Kamera ortografis potret yang memuat seluruh badan, lampu sederhana, latar polos."""
     scene = bpy.context.scene
@@ -300,6 +407,51 @@ def haluskan_daerah(obj, daerah, iterasi, tinggi_model):
     return int((w > 0.5).sum())
 
 
+def haluskan_titik(obj, daftar, tinggi_model):
+    """Laplace (menyusut) pada permukaan depan di dalam cakram kecil di sekitar titik, kiri dan kanan. Tepi cakram
+    tetap, jadi tonjolan di dalamnya turun ke permukaan sekitarnya; makin banyak iterasi makin rata. Dipakai pada
+    mesh tinggi sebelum decimate dan bake (puting Tripo yang menonjol seperti kancing)."""
+    me = obj.data
+    co = np.empty(len(me.vertices) * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(-1, 3)
+    z0 = co[:, 2].min()
+    xc = (co[:, 0].min() + co[:, 0].max()) / 2
+    e_semua = np.empty(len(me.edges) * 2, dtype=np.int64)
+    me.edges.foreach_get("vertices", e_semua)
+    e_semua = e_semua.reshape(-1, 2)
+    naik = lambda x: np.clip(x, 0, 1) ** 2 * (3 - 2 * np.clip(x, 0, 1))
+    lapor = []
+    for butir in daftar:
+        angka = [float(v) for v in butir.split(",")]
+        x_f, z_f, r_f = angka[:3]
+        iterasi = int(angka[3]) if len(angka) > 3 else 60
+        for tanda in (1.0, -1.0):
+            cx, cz, r = xc + tanda * x_f * tinggi_model, z0 + z_f * tinggi_model, r_f * tinggi_model
+            d = np.hypot(co[:, 0] - cx, co[:, 2] - cz)
+            dekat = d < r
+            if not dekat.any():
+                continue
+            y_tengah = (co[dekat, 1].min() + co[dekat, 1].max()) / 2
+            w = naik((r - d) / (0.4 * r)) * (co[:, 1] < y_tengah)
+            e = e_semua[(w[e_semua[:, 0]] > 0) | (w[e_semua[:, 1]] > 0)]
+            hit = np.zeros(len(co))
+            np.add.at(hit, e[:, 0], 1)
+            np.add.at(hit, e[:, 1], 1)
+            hit = np.maximum(hit, 1)[:, None]
+            awal = co[w > 0.5, 1].min()
+            for _ in range(iterasi):
+                jumlah = np.zeros_like(co)
+                np.add.at(jumlah, e[:, 0], co[e[:, 1]])
+                np.add.at(jumlah, e[:, 1], co[e[:, 0]])
+                co += 0.5 * w[:, None] * (jumlah / hit - co)
+            lapor.append(f"x {tanda * x_f:+.3f} z {z_f:.4f}: {int((w > 0.5).sum())} verteks, puncak mundur "
+                         f"{(co[w > 0.5, 1].min() - awal) / tinggi_model * 1000:.1f} per seribu tinggi")
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    return lapor
+
+
 def ukuran_mb(path):
     return os.path.getsize(path) / (1024 * 1024)
 
@@ -357,6 +509,9 @@ def main():
     if a.halus_daerah:
         n_halus = haluskan_daerah(tinggi, a.halus_daerah, a.halus_iterasi, tinggi_asal)
         catat(f"daerah {a.halus_daerah} dihaluskan sebelum decimate: {n_halus} verteks, Taubin {a.halus_iterasi} iterasi")
+    if a.halus_titik:
+        for baris in haluskan_titik(tinggi, a.halus_titik, tinggi_asal):
+            catat("tonjolan diratakan sebelum decimate,", baris)
 
     # 2. salinan rendah
     bpy.ops.object.duplicate()
@@ -384,6 +539,10 @@ def main():
     bpy.ops.object.shade_smooth()
     segitiga_akhir = jumlah_segitiga(rendah)
     catat(f"rendah: {segitiga_akhir} segitiga, {len(rendah.data.vertices)} verteks")
+
+    if a.atlas_baru:
+        tata_ulang_uv(rendah, a.atlas_margin)
+        catat(f"pulau UV mesh rendah ditata ulang (margin {a.atlas_margin})")
 
     # 3. normal map
     n_base = node_gambar(mat, "base")
@@ -414,6 +573,13 @@ def main():
         mat.node_tree.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
     n_normal.image = img_normal
     n_normal.image.colorspace_settings.name = "Non-Color"
+    if a.atlas_baru:
+        if a.normal != "bake" or a.normal_dari:
+            raise SystemExit("--atlas-baru perlu --normal bake (normal map lama tidak cocok dengan UV baru)")
+        # sesudah bake normal: bahan mesh tinggi diubah menjadi pemancar warna
+        n_base.image = bake_warna(tinggi, rendah, node_gambar(mat_asal, "base").image, a.tekstur,
+                                  os.path.join(tmp, f"{a.nama}_basecolor_bake.png"), a.cage * tinggi_asal,
+                                  a.jarak_sinar * tinggi_asal)
 
     # mesh tinggi tidak dipakai lagi (kecuali sudah dirender)
     bpy.data.objects.remove(tinggi, do_unlink=True)

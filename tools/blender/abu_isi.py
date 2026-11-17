@@ -16,7 +16,8 @@ Karakter lain: --blok <nama> memakai data[<nama>]["abu"] dan data[<nama>]["data_
 blok "abu" Wijaya lalu disetel di json), --awalan <nama>- menamai topeng <nama>-topeng-abu*.png supaya topeng
 Wijaya tidak tertimpa. Pilihan tambahan di blok "abu" (semua opsional, untuk data dari data_uv.py):
   "zona_kain": {"z_m": [a, b], "x_abs_maks_m": c}  daerah kain menurut posisi (bukan warna), tidak disentuh;
-               dipakai kalau warna kain mirip bercak (nila pudar prajurit: kroma rendah, kebiruan)
+               dipakai kalau warna kain mirip bercak (nila pudar prajurit: kroma rendah, kebiruan).
+               "hanya_posisi": true = kain hanya zona ini (kelas kain menurut warna dimatikan)
   "kain_rona": [a, b] dan "kain_sat_min"            kain berwarna yang tidak gelap, menurut rona
   "gelap_aktif": false                              matikan kelas bercak gelap (abu-abu gelap, cokelat gelap)
   "z_maks_m": z                                     di atas tinggi ini tidak dideteksi (kepala yang akan diganti)
@@ -24,6 +25,14 @@ Wijaya tidak tertimpa. Pilihan tambahan di blok "abu" (semua opsional, untuk dat
   "isi_tanpa_kulit": {"x_abs_min_m": c}             bercak tanpa kulit di sekelilingnya (jari yang seluruhnya kelabu) tetap
                                                     diisi kalau letaknya di luar |x| ini (tangan), dengan warna kulit
                                                     rata-rata kalau pulaunya tidak punya kulit
+  "tepi_gelap": {"jarak_px": j, "selisih_L": s,     pinggiran gelap bercak ikut diisi: texel dalam jarak_px dari isian yang
+                 "sigma_px": g, "putaran": n}       lebih gelap selisih_L dari kulit sekitarnya (bercak Tripo sering bergaris
+                                                    tepi hitam; kalau ditinggal, garisnya tersisa di lengan dan jadi sumber
+                                                    isian yang gelap)
+  "normal_garis": {"median_px": k,                  dengan --normal-masuk/--normal-keluar: garis tajam tipis di normal map kulit
+                   "sudut_derajat": s,              (tekukan Tripo di batas bercak, tampak sebagai garis gelap di lengan) diratakan:
+                   "lebar_px": l,                   texel yang arah normalnya menyimpang lebih dari sudut_derajat dari median
+                   "jarak_emas_px": j}              k x k sekitarnya diisi ulang dari sekitarnya; kain, emas, dan kepala dilewati
 """
 import argparse
 import json
@@ -45,6 +54,8 @@ def argumen():
     p.add_argument("--isi-tepi", action="store_true", help="isi juga komponen yang menyentuh tepi pulau (bawaan: tangan)")
     p.add_argument("--blok", default=None, help="blok karakter di json (bawaan: tingkat atas, Wijaya)")
     p.add_argument("--awalan", default="", help="awalan nama berkas topeng, mis. 'prajurit-'")
+    p.add_argument("--normal-masuk", default=None, help="normal map PNG (UV yang sama) untuk diratakan garis tajamnya")
+    p.add_argument("--normal-keluar", default=None, help="normal map hasil")
     return p.parse_args()
 
 
@@ -79,6 +90,30 @@ def kelas_warna(bgr, abu):
     # Cokelat gelap (bayangan rambut terproyeksi di bahu): rona kulit tapi jauh lebih gelap dari kulit sekitar.
     cokelat_gelap = (h <= abu["kulit_rona_maks"]) & (s >= 0.3) & (v >= abu["abu_gelap_v_min"]) & (v < abu["cokelat_v_maks"])
     return kulit, emas, kain, kelabu_terang, rambut, kelabu_gelap, cokelat_gelap
+
+
+def ratakan_garis_normal(path_masuk, path_keluar, daerah, ng):
+    """Garis tajam tipis di normal map (bukan detail kulit: tekukan mesh Tripo di batas bercak yang ikut ter-bake)
+    diisi ulang dari sekitarnya. daerah: texel kulit yang boleh diubah."""
+    nm = cv2.imread(path_masuk, cv2.IMREAD_COLOR)
+    k = ng.get("median_px", 15)
+    med = cv2.medianBlur(nm, k)
+    v = nm[:, :, ::-1].astype(np.float32) / 127.5 - 1.0
+    vm = med[:, :, ::-1].astype(np.float32) / 127.5 - 1.0
+    v /= np.maximum(np.linalg.norm(v, axis=2, keepdims=True), 1e-6)
+    vm /= np.maximum(np.linalg.norm(vm, axis=2, keepdims=True), 1e-6)
+    sudut = np.degrees(np.arccos(np.clip((v * vm).sum(axis=2), -1, 1)))
+    garis = daerah & (sudut > ng["sudut_derajat"])
+    garis = (cv2.dilate(garis.astype(np.uint8), np.ones((3, 3), np.uint8), iterations=ng.get("lebar_px", 2)) > 0) & daerah
+    isi = cv2.inpaint(nm, garis.astype(np.uint8) * 255, 4, cv2.INPAINT_TELEA)
+    w = cv2.GaussianBlur(garis.astype(np.float32), (0, 0), 1.2)[..., None]
+    w = np.clip(w * 2.0, 0, 1)
+    hasil = nm.astype(np.float32) * (1 - w) + isi.astype(np.float32) * w
+    vh = hasil[:, :, ::-1] / 127.5 - 1.0
+    vh /= np.maximum(np.linalg.norm(vh, axis=2, keepdims=True), 1e-6)
+    hasil = np.clip((vh[:, :, ::-1] + 1.0) * 127.5, 0, 255).astype(np.uint8)
+    cv2.imwrite(path_keluar, hasil)
+    return int(garis.sum())
 
 
 def main():
@@ -118,6 +153,10 @@ def main():
         x0, x1 = akar["data_x"]
         x_abs = x0 + d[:, :, 2] * (x1 - x0)
         zona = cakupan & (z_abs >= zk["z_m"][0]) & (z_abs <= zk["z_m"][1]) & (x_abs <= zk["x_abs_maks_m"])
+        if zk.get("hanya_posisi"):
+            # Kain hanya menurut posisi: bintik gelap berwarna di kulit (tangan, mata kaki) bukan kain. Kalau tetap
+            # dianggap kain, bintik itu tidak diisi dan menjadi sumber gelap bagi isian di sebelahnya.
+            kain = zona.copy()
         kain |= zona
         kulit &= ~zona
         kelabu &= ~zona
@@ -221,6 +260,28 @@ def main():
             continue
         alasan["gelap"] += 1
         otomatis[y0:y1, x0:x1] |= komp & ~dekat_kain_emas[y0:y1, x0:x1]
+    tg = abu.get("tepi_gelap")
+    if tg:
+        # Pinggiran gelap bercak: dibandingkan dengan terang kulit baik di sekitarnya (rata-rata berbobot Gauss).
+        L = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)[:, :, 0].astype(np.float32)
+        sig = tg.get("sigma_px", 12)
+        j = tg["jarak_px"]
+        inti_j = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * j + 1, 2 * j + 1))
+        n_tepi = 0
+        for _ in range(tg.get("putaran", 3)):
+            baik = (kulit & cakupan & ~otomatis & ~tangan).astype(np.float32)
+            bobot = cv2.GaussianBlur(baik, (0, 0), sig)
+            L_ref = cv2.GaussianBlur(L * baik, (0, 0), sig) / np.maximum(bobot, 1e-3)
+            dekat = cv2.dilate(otomatis.astype(np.uint8), inti_j) > 0
+            tepi_gelap = dekat & cakupan & ~otomatis & ~tangan & ~kain & ~emas & ~dekat_kain_emas & (bobot > 0.05) \
+                & (L < L_ref - tg["selisih_L"])
+            if abu.get("z_maks_m") is not None:
+                tepi_gelap &= z_abs <= abu["z_maks_m"]
+            if not tepi_gelap.any():
+                break
+            n_tepi += int(tepi_gelap.sum())
+            otomatis |= tepi_gelap
+        alasan["tepi_gelap_px"] = n_tepi
     print(f"[abu] piksel abu-abu di pulau: {kelabu.sum()}; komponen {n - 1}; {alasan}; "
           f"piksel dekat kain/emas ke tangan: {piksel_dekat_kain_emas}")
     print(f"[abu] piksel diisi otomatis: {otomatis.sum()}, untuk tangan: {tangan.sum()}")
@@ -320,6 +381,17 @@ def main():
     hasil = np.clip(f, 0, 255).astype(np.uint8)
     cv2.imwrite(a.keluar, hasil)
     print("[abu] tersimpan", a.keluar)
+
+    ng = abu.get("normal_garis")
+    if ng and a.normal_masuk and a.normal_keluar:
+        jauh_emas = cv2.dilate((kain | emas).astype(np.uint8), inti_lebar, iterations=ng.get("jarak_emas_px", 8)) == 0
+        daerah_n = cakupan & ~kain & ~emas & jauh_emas
+        if abu.get("z_maks_m") is not None:
+            daerah_n &= z_abs <= abu["z_maks_m"]
+        n_garis = ratakan_garis_normal(a.normal_masuk, a.normal_keluar, daerah_n, ng)
+        abu["hasil"]["normal_garis_px"] = n_garis
+        json.dump(data, open(a.json, "w"), indent=2, ensure_ascii=False)
+        print(f"[abu] normal map: {n_garis} texel garis tajam diratakan; tersimpan {a.normal_keluar}")
 
 
 main()

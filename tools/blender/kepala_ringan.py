@@ -185,6 +185,119 @@ def bake_dari_asli(asli, rendah, jenis, img, cage, sinar, margin=8):
     nt.nodes.remove(node)
 
 
+def peta_posisi(obj, N):
+    """Posisi (meter) tiap texel UV mesh rendah, dan topeng texel yang tercakup."""
+    scene = bpy.context.scene
+    mat_lama = obj.data.materials[0]
+    m = bpy.data.materials.new("posisi")
+    m.use_nodes = True
+    nt = m.node_tree
+    for n in list(nt.nodes):
+        nt.nodes.remove(n)
+    keluaran = nt.nodes.new("ShaderNodeOutputMaterial")
+    emisi = nt.nodes.new("ShaderNodeEmission")
+    geo = nt.nodes.new("ShaderNodeNewGeometry")
+    kali = nt.nodes.new("ShaderNodeVectorMath")
+    kali.operation = "MULTIPLY_ADD"                 # (posisi + 1) / 2 supaya tidak negatif
+    kali.inputs[1].default_value = (0.5, 0.5, 0.5)
+    kali.inputs[2].default_value = (0.5, 0.5, 0.5)
+    nt.links.new(geo.outputs["Position"], kali.inputs[0])
+    nt.links.new(kali.outputs["Vector"], emisi.inputs["Color"])
+    nt.links.new(emisi.outputs["Emission"], keluaran.inputs["Surface"])
+    img = bpy.data.images.new("posisi", N, N, alpha=True, float_buffer=True)
+    img.colorspace_settings.name = "Non-Color"
+    node = nt.nodes.new("ShaderNodeTexImage")
+    node.image = img
+    for n in nt.nodes:
+        n.select = False
+    node.select = True
+    nt.nodes.active = node
+    obj.data.materials[0] = m
+    pilih_hanya(obj)
+    scene.render.bake.use_selected_to_active = False
+    scene.render.bake.margin = 0
+    scene.render.bake.use_clear = True
+    bpy.ops.object.bake(type="EMIT")
+    px = np.empty(N * N * 4, dtype=np.float32)
+    img.pixels.foreach_get(px)
+    px = px.reshape(N, N, 4)
+    obj.data.materials[0] = mat_lama
+    bpy.data.images.remove(img)
+    bpy.data.materials.remove(m)
+    return px[:, :, :3] * 2.0 - 1.0, px[:, :, :3].max(axis=2) > 1e-5
+
+
+def warna_telinga(asli, kerja, img_bc, img_asli, uv_asli, bvh_a, co_a, tri_a, am, x_c, G):
+    """Tepi daun telinga: sinar bake dari tepi yang tipis meleset dari telinga asli dan mengenai rambut di
+    belakangnya (tepi telinga gelap bergerigi). Di kotak sekitar tiap telinga, texel yang hasil bake-nya jauh
+    lebih gelap dari warna titik TERDEKAT di permukaan asli diganti dengan warna titik terdekat itu. Rambut
+    sungguhan tidak berubah (titik terdekatnya juga rambut). Mengembalikan topeng texel yang diganti."""
+    N = img_bc.size[0]
+    pos, ada = peta_posisi(kerja, N)
+    z_mata = (am["mata_kiri"][1] + am["mata_kanan"][1]) / 2
+    z_mulut = (am["mulut_kiri"][1] + am["mulut_kanan"][1]) / 2
+    co = koordinat(kerja)
+    pita = (co[:, 2] > z_mulut) & (co[:, 2] < z_mata + 0.01)
+    zona = np.zeros((N, N), bool)
+    for tanda in (1.0, -1.0):
+        dx = (co[:, 0] - x_c) * tanda
+        luar = pita & (dx > dx[pita].max() - 0.008)
+        y_t, z_t = float(co[luar, 1].mean()), float(co[luar, 2].mean())
+        zona |= ada & ((pos[:, :, 0] - x_c) * tanda > G["x_min_m"]) & (np.abs(pos[:, :, 1] - y_t) < G["setengah_y_m"]) \
+            & (np.abs(pos[:, :, 2] - z_t) < G["setengah_z_m"])
+    # warna asli: tekstur dan UV mesh asli
+    wa, ha = img_asli.size
+    px_a = np.empty(wa * ha * 4, dtype=np.float32)
+    img_asli.pixels.foreach_get(px_a)
+    px_a = px_a.reshape(ha, wa, 4)
+    lt = np.empty(len(asli.data.loop_triangles) * 3, dtype=np.int64)
+    asli.data.loop_triangles.foreach_get("loops", lt)
+    lt = lt.reshape(-1, 3)
+    uv = np.empty(len(asli.data.loops) * 2, dtype=np.float32)
+    asli.data.uv_layers[uv_asli].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    px = np.empty(N * N * 4, dtype=np.float32)
+    img_bc.pixels.foreach_get(px)
+    px = px.reshape(N, N, 4)
+    ganti = np.zeros((N, N), bool)
+    ys, xs = np.nonzero(zona)
+    for y, x in zip(ys, xs):
+        kena = bvh_a.find_nearest(Vector(pos[y, x].tolist()), G["jarak_maks_m"])
+        if kena[0] is None:
+            continue
+        t = kena[2]
+        a_, b_, c_ = co_a[tri_a[t, 0]], co_a[tri_a[t, 1]], co_a[tri_a[t, 2]]
+        v0, v1, v2 = b_ - a_, c_ - a_, np.array(kena[0]) - a_
+        d00, d01, d11, d20, d21 = v0 @ v0, v0 @ v1, v1 @ v1, v2 @ v0, v2 @ v1
+        den = d00 * d11 - d01 * d01
+        if abs(den) < 1e-18:
+            continue
+        w1, w2 = (d11 * d20 - d01 * d21) / den, (d00 * d21 - d01 * d20) / den
+        st = uv[lt[t, 0]] * (1 - w1 - w2) + uv[lt[t, 1]] * w1 + uv[lt[t, 2]] * w2
+        u_, v_ = int(np.clip(st[0] * wa, 0, wa - 1)), int(np.clip(st[1] * ha, 0, ha - 1))
+        warna = px_a[max(v_ - 1, 0):v_ + 2, max(u_ - 1, 0):u_ + 2, :3].reshape(-1, 3).mean(axis=0)
+        if warna.mean() - px[y, x, :3].mean() > G["ambang_terang"] and warna.mean() > 0.35:
+            px[y, x, :3] = warna
+            ganti[y, x] = True
+    # margin di sekitar texel yang diganti diisi ulang dari texel tercakup
+    dekat = ganti.copy()
+    for _ in range(10):
+        dekat = dekat | np.roll(dekat, 1, 0) | np.roll(dekat, -1, 0) | np.roll(dekat, 1, 1) | np.roll(dekat, -1, 1)
+    warna_ = px[:, :, :3] * ada[:, :, None]
+    isi = ada.astype(np.float32)
+    for _ in range(8):
+        jml, cnt = np.zeros_like(warna_), np.zeros_like(isi)
+        for dy, dx_ in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)):
+            jml += np.roll(warna_, (dy, dx_), axis=(0, 1))
+            cnt += np.roll(isi, (dy, dx_), axis=(0, 1))
+        baru = (isi < 0.5) & (cnt > 0.5) & dekat
+        warna_[baru] = jml[baru] / cnt[baru][:, None]
+        px[:, :, :3][baru] = warna_[baru]
+        isi[baru] = 1.0
+    img_bc.pixels.foreach_set(px.ravel())
+    return ganti, int(zona.sum())
+
+
 def simpan_png(img, path):
     img.filepath_raw = path
     img.file_format = "PNG"
@@ -293,6 +406,8 @@ def main():
                       "itu dan belakang kepala. cara 'tempel': verteks wajah ditempel ke permukaan asli; 'remesh': tidak.",
     }.items():
         R.setdefault(k, v)
+    G = R.setdefault("telinga", {"aktif": False, "x_min_m": 0.058, "setengah_y_m": 0.04, "setengah_z_m": 0.045,
+                                 "jarak_maks_m": 0.012, "ambang_terang": 0.08})
     cara = a.cara or R["cara"]
     tmp = os.path.join(tempfile.gettempdir(), "nusantara-ringan")
     os.makedirs(tmp, exist_ok=True)
@@ -429,11 +544,39 @@ def main():
         w = bobot_wajah(koordinat(kerja))
         return int((w[t] > 0.5).all(axis=1).sum()), len(t)
 
+    # Daun telinga punya jatah segitiga sendiri (segitiga_telinga, untuk kedua telinga). Tanpa itu telinga ikut
+    # diruntuhkan bersama rambut sampai compang-camping, dan rambut gelap di belakangnya tampak di sela-selanya.
+    seg_tel = R.get("segitiga_telinga", 0)
+    z_mulut_m = (am["mulut_kiri"][1] + am["mulut_kanan"][1]) / 2
+    pusat_tel = []
+    if seg_tel:
+        pita_t = (c[:, 2] > z_mulut_m) & (c[:, 2] < z_mata + 0.01)
+        for tanda in (1.0, -1.0):
+            dx = (c[:, 0] - x_c) * tanda
+            luar = pita_t & (dx > dx[pita_t].max() - 0.008)
+            pusat_tel.append((tanda, float(c[luar, 1].mean()), float(c[luar, 2].mean())))
+
+    def topeng_telinga(k_):
+        m = np.zeros(len(k_), bool)
+        for tanda, y_t, z_t in pusat_tel:
+            m |= ((k_[:, 0] - x_c) * tanda > G["x_min_m"]) & (np.abs(k_[:, 1] - y_t) < G["setengah_y_m"]) \
+                & (np.abs(k_[:, 2] - z_t) < G["setengah_z_m"])
+        return m
+
+    def hitung_telinga():
+        t = segitiga(kerja)
+        m = topeng_telinga(koordinat(kerja)) & ~(bobot_wajah(koordinat(kerja)) > 0.5)
+        return int(m[t].all(axis=1).sum()), len(t)
+
     g_wajah = kerja.vertex_groups.new(name="wajah")
+    g_tel = kerja.vertex_groups.new(name="telinga")
     g_lain = kerja.vertex_groups.new(name="lain")
     keras = ww > 0.5
+    tel = topeng_telinga(c) & ~keras
     g_wajah.add(np.nonzero(keras)[0].tolist(), 1.0, "REPLACE")
-    g_lain.add(np.nonzero(~keras)[0].tolist(), 1.0, "REPLACE")
+    if tel.any():
+        g_tel.add(np.nonzero(tel)[0].tolist(), 1.0, "REPLACE")
+    g_lain.add(np.nonzero(~keras & ~tel)[0].tolist(), 1.0, "REPLACE")
 
     def decimate(sasaran_total, grup):
         dec = kerja.modifiers.new("Decimate", "DECIMATE")
@@ -450,10 +593,17 @@ def main():
     if R["segitiga_wajah"] and cara == "tempel":
         if n_w > R["segitiga_wajah"]:
             decimate(n_t - (n_w - R["segitiga_wajah"]), "wajah")
+        n_e0 = n_e1 = 0
+        if seg_tel:
+            n_e0, n_te = hitung_telinga()
+            if n_e0 > seg_tel:
+                decimate(n_te - (n_e0 - seg_tel), "telinga")
+            n_e1, _ = hitung_telinga()
         n_w1, n_t1 = hitung_wajah()
         decimate(R["segitiga"], "lain")
         n_w2, n_t2 = hitung_wajah()
-        catat(f"decimate dua tahap: wajah {n_w} -> {n_w1} -> {n_w2}; total {n_t} -> {n_t1} -> {n_t2}")
+        catat(f"decimate dua tahap: wajah {n_w} -> {n_w1} -> {n_w2}; total {n_t} -> {n_t1} -> {n_t2}"
+              + (f"; telinga {n_e0} -> {n_e1} -> {hitung_telinga()[0]}" if seg_tel else ""))
     else:
         decimate(R["segitiga"], None)
         n_w2, n_t2 = hitung_wajah()
@@ -494,11 +644,22 @@ def main():
     img_bc = bpy.data.images.new("bake_bc", N, N, alpha=False)
     img_bc.colorspace_settings.name = "sRGB"
     bake_dari_asli(asli, kerja, "EMIT", img_bc, R["bake_cage_m"], R["bake_sinar_m"])
+    ganti_telinga = None
+    if G.get("aktif"):
+        ganti_telinga, n_zona = warna_telinga(asli, kerja, img_bc, img_bc_asli, uv_asli, bvh_a, co_a, tri_a, am, x_c, G)
+        catat(f"telinga: {int(ganti_telinga.sum())} dari {n_zona} texel di kotak telinga diganti warna titik terdekat mesh asli")
     simpan_png(img_bc, path_bc)
     material_sumber(mat_asli, img_n_asli, uv_asli, "normal")
     img_n = bpy.data.images.new("bake_n", N, N, alpha=False)
     img_n.colorspace_settings.name = "Non-Color"
     bake_dari_asli(asli, kerja, "NORMAL", img_n, R["bake_cage_m"], R["bake_sinar_m"])
+    if ganti_telinga is not None and ganti_telinga.any():
+        # di texel itu normal hasil bake berasal dari rambut: dibuat rata
+        pn = np.empty(N * N * 4, dtype=np.float32)
+        img_n.pixels.foreach_get(pn)
+        pn = pn.reshape(N, N, 4)
+        pn[ganti_telinga, :3] = (0.5, 0.5, 1.0)
+        img_n.pixels.foreach_set(pn.ravel())
     simpan_png(img_n, path_n)
     catat(f"bake warna dan normal {N}px dari mesh asli selesai")
 
