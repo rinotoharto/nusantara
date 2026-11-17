@@ -52,6 +52,8 @@ export interface DataPenjaga {
   syarat?: string;
   /** Dipasang saat segmennya mulai walau tanpa syarat. */
   dinamis?: boolean;
+  /** Pihak penjaga: kediri (bawaan), singasari, madura; warna kain model di src/data/models.json. */
+  pihak?: string;
 }
 
 export interface DataBatuMisi {
@@ -107,6 +109,8 @@ export interface DataKejadian {
   muncul?: [number, number];
   /** Posisi tiap anggota untuk kejadian berkelompok (perampok). */
   posisi?: [number, number][];
+  /** Pihak aktor kejadian (perampok); warna kain model di src/data/models.json. */
+  pihak?: string;
   /** Longsor: balok tumpukan yang menutup jalan (tidak bisa dipanjat) dan tangga tebing pendek (bisa dipanjat). */
   tumpukan?: DataBatuMisi[];
   tangga?: DataBatuMisi[];

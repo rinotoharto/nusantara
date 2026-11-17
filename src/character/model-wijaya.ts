@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { ModelKarakter, muatGlb, type TabelKlip } from './model-karakter';
 import type { Pemain } from './player';
 import type { PertarunganPemain, StatusAksi } from '../combat/player-combat';
 import { SILUMAN } from '../stealth/config';
@@ -43,6 +42,7 @@ const SKALA_WAKTU: Partial<Record<string, number>> = {
 const SKALA_TIKAMAN = 1.67;
 const SEKALI = new Set(['serang-1', 'serang-2', 'serang-3', 'serang-berat', 'hindar', 'terkena', 'mati']);
 const CROSSFADE = 0.15;
+const TABEL: TabelKlip = { laju: LAJU_KLIP, fase: FASE_KLIP, skalaWaktu: SKALA_WAKTU, sekali: SEKALI, skalaGerak: SKALA_GERAK, crossfade: CROSSFADE };
 
 /**
  * Peta lingkungan kecil khusus model ini (hanya dimuat dengan `?model=wijaya`; adegan tidak punya
@@ -76,12 +76,7 @@ function petaLingkunganModel(): THREE.CubeTexture {
 const LINGKUNGAN_LOGAM = 1.0;
 const LINGKUNGAN_BADAN = 0.45;
 
-export class ModelWijaya {
-  readonly grup = new THREE.Group();
-  private mixer: THREE.AnimationMixer | null = null;
-  private readonly aksi = new Map<string, THREE.AnimationAction>();
-  private aktif: THREE.AnimationAction | null = null;
-  private namaAktif = '';
+export class ModelWijaya extends ModelKarakter {
   private statusSebelum: StatusAksi = 'bebas';
   private tulangTangan: THREE.Object3D | null = null;
   /** Benar saat ada lawan dekat (kamera mode bertarung); diisi main tiap frame. */
@@ -101,6 +96,7 @@ export class ModelWijaya {
   waktuMuatMs = 0;
 
   constructor(private pemain: Pemain, private tarung: PertarunganPemain) {
+    super(TABEL);
     this.grup.frustumCulled = false;
     pemain.badan.add(this.grup);
   }
@@ -108,11 +104,7 @@ export class ModelWijaya {
   /** Muat GLB; `dasar` adalah import.meta.env.BASE_URL. */
   async muat(dasar: string): Promise<void> {
     const mulai = performance.now();
-    const draco = new DRACOLoader();
-    draco.setDecoderPath(`${dasar}draco/`);
-    const loader = new GLTFLoader();
-    loader.setDRACOLoader(draco);
-    const gltf = await loader.loadAsync(`${dasar}models/wijaya.glb`);
+    const gltf = await muatGlb(dasar, 'models/wijaya.glb');
     const akar = gltf.scene;
     let lingkungan: THREE.CubeTexture | null = null;
     akar.traverse((o) => {
@@ -133,15 +125,7 @@ export class ModelWijaya {
       if (o.name === 'mixamorigRightHand' || o.name === 'mixamorig:RightHand') this.tulangTangan = o;
     });
     this.grup.add(akar);
-    this.mixer = new THREE.AnimationMixer(akar);
-    for (const klip of gltf.animations) {
-      const a = this.mixer.clipAction(klip);
-      if (SEKALI.has(klip.name)) {
-        a.setLoop(THREE.LoopOnce, 1);
-        a.clampWhenFinished = true;
-      }
-      this.aksi.set(klip.name, a);
-    }
+    this.pasangAksi(akar, gltf.animations);
     // Sendi kaki (pergelangan dan pangkal jari) dengan tinggi istirahatnya di atas titik kaki pemain.
     akar.updateWorldMatrix(true, true);
     const yKaki = this.pemain.grup.getWorldPosition(new THREE.Vector3()).y;
@@ -243,47 +227,6 @@ export class ModelWijaya {
     m.premultiply(new THREE.Matrix4().copy(tangan.matrixWorld).invert());
     m.decompose(keris.position, keris.quaternion, keris.scale);
     tangan.add(keris);
-  }
-
-  private mainkan(nama: string, ulangDariAwal = false): void {
-    const a = this.aksi.get(nama);
-    if (!a) return;
-    if (a === this.aktif && !ulangDariAwal) return;
-    // Fase langkah klip yang ditinggalkan (0 sampai 1), kalau keduanya klip gerak.
-    const faseLama = FASE_KLIP[this.namaAktif];
-    const faseBaru = FASE_KLIP[nama];
-    let fase: number | null = null;
-    if (this.aktif && faseLama && faseBaru && !ulangDariAwal) {
-      const durLama = this.aktif.getClip().duration;
-      fase = ((this.aktif.time / durLama) * faseLama.siklus - faseLama.awal + 8) % 1;
-    }
-    a.reset();
-    if (fase !== null) a.time = (((fase + faseBaru.awal) / faseBaru.siklus) % 1) * a.getClip().duration;
-    a.timeScale = SKALA_WAKTU[nama] ?? 1;
-    a.enabled = true;
-    a.setEffectiveWeight(1);
-    if (this.aktif && this.aktif !== a) {
-      // Tanpa warp: warp memperlambat klip yang masuk selama peralihan menurut perbandingan panjang klip
-      // (dari idle 7 detik ke serang 0,6 detik hampir berhenti dulu), sehingga kontak serang pertama terlambat
-      // sekitar 0,07 detik dan bisa jatuh di luar jendela kena. Fase langkah sudah disamakan sendiri di atas.
-      a.crossFadeFrom(this.aktif, CROSSFADE, false);
-    }
-    a.play();
-    this.aktif = a;
-    this.namaAktif = nama;
-  }
-
-  /** Klip gerak untuk laju sekarang; klip baru dipakai kalau ada di GLB, kalau tidak klip lama. */
-  private gerak(nama: string, cadangan: string, laju: number): void {
-    const pakai = this.aksi.has(nama) ? nama : cadangan;
-    this.mainkan(pakai);
-    this.aktif!.timeScale = Math.min(SKALA_GERAK.maks, Math.max(SKALA_GERAK.min, laju / LAJU_KLIP[pakai]));
-  }
-
-  /** Klip serang dari awal, diputar supaya seluruh klip habis tepat dalam `durasi` detik. */
-  private serang(nama: string, durasi: number): void {
-    this.mainkan(nama, true);
-    if (this.aktif && this.namaAktif === nama) this.aktif.timeScale = this.aktif.getClip().duration / durasi;
   }
 
   /** Dipanggil tiap frame logika dengan dt permainan. */

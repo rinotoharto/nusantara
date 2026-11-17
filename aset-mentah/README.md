@@ -396,3 +396,13 @@ disimpan di `arsip/wijaya-lama.glb`. Model diam `wijaya-utuh.glb` ikut berubah s
   kain pinggul pada awal serang-1; gelang lengan belum metalik.
 - Prajurit: `gabung_animasi.py --blok prajurit` belum dicoba. Blok `prajurit.animasi` belum diisi; mulai dari angka
   `wijaya_ulang.animasi.bagian`.
+
+### Prajurit masuk game (18 November 2026)
+
+`aset-mentah/prajurit-animasi.glb` (15 aksi, 2,56 MB) disalin ke `public/models/prajurit.glb`; aktif dengan
+`?model=prajurit` (atau `?model=wijaya,prajurit`) untuk semua penjaga, lawan bertombak, dan perampok. Perintah dan
+angka di tools/blender/README.md bagian "Prajurit Kediri: animasi dan masuk game". Tekstur ditambal dua tempat
+(bercak kelabu lengan bawah kanan, lancip kain di punggung bawah); `prajurit-utuh.glb` kini memakai
+`tekstur/prajurit-basecolor-tambal.png`. Warna pihak (Kediri bawaan, Singasari, Madura, perampok), tombak dan golok
+balok, serta tabel klip ada di `src/data/models.json`. Tangkapan layar game: `pratinjau/game-prajurit-*.jpg` dan
+`pratinjau/game-perampok.jpg`.

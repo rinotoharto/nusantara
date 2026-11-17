@@ -21,6 +21,8 @@ export interface RutePatroli {
   /** `bolak-balik`: maju lalu mundur menyusuri daftar; `melingkar`: kembali ke titik pertama. */
   mode: string;
   titik: TitikJalan[];
+  /** Pihak penjaga (bawaan kediri); lihat src/data/models.json `warna.pihak`. */
+  pihak?: string;
 }
 
 const WARNA_TENANG = new THREE.Color(0x3fbf5a);
@@ -59,6 +61,7 @@ export class Penjaga extends Lawan {
     private konteks: KonteksSiluman,
   ) {
     super(data, rute.titik[0].x, rute.titik[0].z);
+    this.pihak = rute.pihak ?? 'kediri';
     this.hidupkan();
   }
 

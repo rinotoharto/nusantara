@@ -432,6 +432,29 @@ def bobot_per_bagian(arm, rig_meshes, model_meshes, P, A):
         for p_ in utama.data.polygons:
             if p_.material_index in idx_bahan:
                 penutup[list(p_.vertices)] = True
+    # penutup sebagai komponen terpisah di mesh utama tanpa bahan sendiri (tali leher prajurit):
+    # <blok>.animasi.bagian.penutup_komponen = {"z_m": [bawah, atas], "verteks": [min, maks]}
+    PK = G.get("penutup_komponen")
+    penutup_komp = np.zeros(nv, bool)
+    if PK:
+        induk = np.arange(nu)
+        def akar_(x):
+            while induk[x] != x:
+                induk[x] = induk[induk[x]]
+                x = induk[x]
+            return x
+        for ea, eb in e:
+            ra, rb = akar_(ea), akar_(eb)
+            if ra != rb:
+                induk[ra] = rb
+        akar_v = np.array([akar_(w_) for w_ in wid])
+        for r_ in np.unique(akar_v):
+            m_ = akar_v == r_
+            z_ = co[m_, 2]
+            if PK["verteks"][0] <= int(m_.sum()) <= PK["verteks"][1] and z_.min() >= PK["z_m"][0] * f and z_.max() <= PK["z_m"][1] * f:
+                penutup_komp |= m_
+        penutup |= penutup_komp
+        lapor["penutup_komponen_verteks"] = int(penutup_komp.sum())
     kulit = ~penutup
 
     # 2a. kepala dan leher: gradasi Neck ke Head di sekitar sambungan
@@ -595,8 +618,26 @@ def bobot_per_bagian(arm, rig_meshes, model_meshes, P, A):
         kd.insert(co[i], k_)
     kd.balance()
     if penutup.any():
-        for i in np.nonzero(penutup)[0]:
+        for i in np.nonzero(penutup & ~penutup_komp)[0]:
             W[i] = W[idx_kulit[kd.find(co[i])[1]]]
+    if penutup_komp.any():
+        # bobot diinterpolasi di segitiga kulit terdekat (seperti mesh tambahan): verteks kulit terdekat bisa
+        # berjarak 1 cm lebih dan membuat tali tenggelam saat bahu bergerak
+        utama.data.calc_loop_triangles()
+        tri_p = np.empty(len(utama.data.loop_triangles) * 3, dtype=np.int64)
+        utama.data.loop_triangles.foreach_get("vertices", tri_p)
+        tri_p = tri_p.reshape(-1, 3)
+        tri_p = tri_p[kulit[tri_p].all(axis=1)]
+        bvh_p = BVHTree.FromPolygons(co.tolist(), tri_p.tolist())
+        W_k = W.copy()
+        for i in np.nonzero(penutup_komp)[0]:
+            kena = bvh_p.find_nearest(Vector(co[i].tolist()))
+            ta, tb, tc = tri_p[kena[2]]
+            v0, v1, v2 = co[tb] - co[ta], co[tc] - co[ta], np.array(kena[0][:]) - co[ta]
+            d00, d01, d11, d20, d21 = v0 @ v0, v0 @ v1, v1 @ v1, v2 @ v0, v2 @ v1
+            den = d00 * d11 - d01 * d01
+            w1, w2 = ((d11 * d20 - d01 * d21) / den, (d00 * d21 - d01 * d20) / den) if abs(den) > 1e-18 else (0.0, 0.0)
+            W[i] = W_k[ta] * (1 - w1 - w2) + W_k[tb] * w1 + W_k[tc] * w2
         lapor["penutup_verteks"] = int(penutup.sum())
     tanpa = tulis_bobot(utama, W, nama_tulang, G["pengaruh_maks"])
 
@@ -683,7 +724,11 @@ def pose_genggam(arm, sisi, sudut, jempol):
     B = arm.data.bones
     kepala = lambda n: B[PRE + n].head_local
     tangan = kepala(sisi + "Hand")
-    n = (kepala(sisi + "HandIndex1") - tangan).cross(kepala(sisi + "HandPinky1") - tangan).normalized()
+    # Kerangka berjari dua rantai (prajurit: hanya jempol dan telunjuk, telunjuk menggerakkan keempat jari):
+    # bidang telapak dari telunjuk dan jempol, dan sasaran jempol pangkal telunjuk.
+    sisi_lain = "HandPinky1" if PRE + sisi + "HandPinky1" in B else "HandThumb1"
+    tengah = "HandMiddle1" if PRE + sisi + "HandMiddle1" in B else "HandIndex1"
+    n = (kepala(sisi + "HandIndex1") - tangan).cross(kepala(sisi + sisi_lain) - tangan).normalized()
     if n.z > 0:                      # pose istirahat Mixamo: telapak menghadap bawah
         n = -n
     out = {}
@@ -695,7 +740,7 @@ def pose_genggam(arm, sisi, sudut, jempol):
             j0, j1 = (i, i + 1) if i < 3 else (i - 1, i)
             d = (kepala(f"{sisi}Hand{jari}{j1}") - kepala(f"{sisi}Hand{jari}{j0}")).normalized()
             if jari == "Thumb":
-                t = kepala(sisi + "HandMiddle1") + n * 0.04 - kepala(nama)
+                t = kepala(sisi + tengah) + n * 0.04 - kepala(nama)
                 t = (t - d * t.dot(d)).normalized()
                 engsel, derajat = d.cross(t).normalized(), jempol[i - 1]
             else:

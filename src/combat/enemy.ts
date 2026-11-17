@@ -57,6 +57,8 @@ export class Lawan {
   protected readonly bahan: THREE.MeshStandardMaterial;
   protected readonly tombak = new THREE.Group();
   status: StatusLawan = 'diam';
+  /** Pihak lawan ini (misi3.json `pihak`); menentukan warna kain model beranimasi (src/data/models.json). */
+  pihak = 'kediri';
   readonly nyawa = new Nyawa(this.nyawaMaks());
   /** Detik sejak masuk status sekarang. */
   protected waktu = 0;
@@ -119,6 +121,21 @@ export class Lawan {
     this.tombak.position.set(JARI_LAWAN + 0.08, 1.0, 0);
     this.badan.add(this.tombak);
     return bahan;
+  }
+
+  /** Detik sejak masuk status sekarang; dibaca model beranimasi untuk menyelaraskan klip serang. */
+  get waktuStatus(): number {
+    return this.waktu;
+  }
+
+  /** Tubuh kapsul beserta senjata baloknya; disembunyikan kalau model beranimasi terpasang. */
+  get simpulKapsul(): THREE.Group {
+    return this.badan;
+  }
+
+  /** Bahan kapsul: sinar isyarat dan kilatan kena dibaca model beranimasi dari sini. */
+  get bahanKapsul(): THREE.MeshStandardMaterial {
+    return this.bahan;
   }
 
   /** Nyawa penuh jenis lawan ini; turunan (harimau, perampok) mengambilnya dari bagian combat.json miliknya. */

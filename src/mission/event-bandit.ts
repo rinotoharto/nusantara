@@ -28,7 +28,7 @@ export class KejadianPerampok implements AktorKejadian {
   ) {
     const posisi = data.posisi ?? [data.pusat];
     for (const [x, z] of posisi) {
-      const p = new Perampok(d.tabrakan, x, z, this.gerombolan);
+      const p = new Perampok(d.tabrakan, x, z, this.gerombolan, data.pihak);
       d.scene.add(p.grup);
       d.lawan.tambah(p);
     }

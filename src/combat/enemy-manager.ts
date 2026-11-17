@@ -18,12 +18,17 @@ export class PengelolaLawan implements PemberiGiliran {
   private penyerang: Lawan | null = null;
   private readonly antrean: Lawan[] = [];
 
+  /** Dipanggil saat lawan didaftarkan atau dicabut (pemasangan model beranimasi di main.ts). */
+  saatTambah: ((lawan: Lawan) => void) | null = null;
+  saatHapus: ((lawan: Lawan) => void) | null = null;
+
   /** Semua lawan dibuat modul lain (penjaga dari data misi) dan didaftarkan lewat `tambah`. */
   constructor() {}
 
   /** Mendaftarkan lawan yang dibuat modul lain (misalnya penjaga) supaya ikut aturan yang sama. */
   tambah(lawan: Lawan): void {
     this.daftar.push(lawan);
+    this.saatTambah?.(lawan);
   }
 
   /** Mencabut lawan dari pengelolaan (misalnya penjaga bersyarat saat misi diulang). */
@@ -31,6 +36,7 @@ export class PengelolaLawan implements PemberiGiliran {
     const i = this.daftar.indexOf(lawan);
     if (i >= 0) this.daftar.splice(i, 1);
     this.lepasGiliran(lawan);
+    this.saatHapus?.(lawan);
   }
 
   mintaGiliran(lawan: Lawan): boolean {

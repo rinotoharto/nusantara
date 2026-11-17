@@ -1,0 +1,64 @@
+{
+  "prajurit": {
+    "keterangan": "Model prajurit beranimasi (?model=prajurit) untuk penjaga, lawan, dan perampok. lajuKlip: laju langkah asli klip (m/s) dari FBX sumber; timeScale klip gerak = laju lawan / nilai ini, dibatasi skalaGerak. faseKlip: awal = bagian siklus saat kaki kiri paling depan, siklus = jumlah siklus langkah per klip. ambangLaju: di bawah diam = berdiri; di bawah jalan = klip jalan; di bawah lariSantai = lari-santai; di atasnya lari-kencang. skalaWaktu: pengali waktu klip tetap (mati 1,7: klip 4,1 detik harus selesai sebelum lawan menghilang, combat.json hilangSetelahMati 3 detik). kilatan: bagian sinar isyarat dan kilatan kena kapsul yang diteruskan ke bahan model.",
+    "berkas": "models/prajurit.glb",
+    "lajuKlip": { "jalan": 1.43, "lari-santai": 2.35, "lari-kencang": 4.5 },
+    "faseKlip": {
+      "jalan": { "awal": 0.256, "siklus": 1 },
+      "lari-santai": { "awal": 0.23, "siklus": 1 },
+      "lari-kencang": { "awal": 0.21, "siklus": 2 }
+    },
+    "skalaGerak": { "min": 0.6, "maks": 1.5 },
+    "skalaWaktu": { "terkena": 1.3, "mati": 1.7 },
+    "crossfade": 0.15,
+    "ambangLaju": { "diam": 0.25, "jalan": 2.0, "lariSantai": 3.6 },
+    "kilatan": 0.12,
+    "lingkungan": 0.45,
+    "serang": {
+      "keterangan": "kontakDetik: saat kontak di dalam klip serang (bingkai 8 dari 30 per detik). Klip dimulai sedemikian sehingga kontak jatuh pada saat kena di combat.json (tusukan 0,08 detik setelah mulai menyerang; tebasan perampok pada tebasan.pertama dan tebasan.kedua). skala: pengali waktu klip serang.",
+      "kontakDetik": 0.267,
+      "skala": 1.3
+    },
+    "senjata": {
+      "keterangan": "Senjata balok sementara di tulang RightHand. tombak: letaknya mengikuti tangan (geser = meter di ruang model: kiri, atas, depan), arahnya ditentukan di ruang badan supaya tidak terayun bersama lengan: condongBawa = derajat condong ke depan dari tegak saat dibawa, condongSiap dan condongTusuk = derajat di atas mendatar saat bersiap dan menusuk; depan dan belakang = panjang batang di depan dan di belakang genggaman (m); peralihan = detik. golok: ditempel ke tulang, bilah searah arahXfn di kerangka acuan tangan (x sisi jempol, f arah jari, n normal telapak), seperti keris Wijaya.",
+      "tombak": {
+        "depan": 1.5,
+        "belakang": 0.55,
+        "tebal": 0.05,
+        "mata": 0.3,
+        "geser": [0, 0, 0.02],
+        "condongBawa": 8,
+        "condongSiap": 4,
+        "condongTusuk": 0,
+        "peralihan": 0.12
+      },
+      "golok": {
+        "arahXfn": [0.5605, 0.8057, -0.1917],
+        "bilah": 0.55,
+        "lebar": 0.11,
+        "tebal": 0.04,
+        "gagang": 0.16
+      }
+    },
+    "warna": {
+      "keterangan": "Kain dan ikat kepala diwarnai ulang di shader menurut pihak. Topeng rona saja bocor (kain nila bertekstur kelabu dan keunguan, hanya sebagian yang terbaca biru), jadi kain ditentukan menurut posisi: tinggi verteks pada pose istirahat di dalam zonaKain (m), dan texelnya tidak hangat: (merah - biru) / kanal terbesar di bawah hangat[0] penuh, di atas hangat[1] tidak diwarnai (kulit paha dan sabuk cokelat; bagian kain yang kecokelatan masih di bawah 0,25). Ikat kepala: di atas tinggiIkat (m) dan berona biru, kebiruan = (biru - maks(merah, hijau)) / kanal terbesar, naik dari ambang[0] ke ambang[1] (rambut hitam tidak ikut). terangAcuan: terang rata-rata kain nila (linear); warna sasaran dikalikan terang texel / terangAcuan supaya lipatan kain tetap terbaca. Pihak tanpa warna (kediri) memakai tekstur apa adanya.",
+      "ambang": [0.02, 0.12],
+      "hangat": [0.28, 0.42],
+      "zonaKain": [0.49, 1.08],
+      "tinggiIkat": 1.5,
+      "terangAcuan": 0.1,
+      "pihak": {
+        "kediri": null,
+        "singasari": { "ikat": "#6e1414", "kain": "#5c1212" },
+        "madura": { "ikat": "#e8e4d8", "kain": "#1c1c1e" },
+        "perampok": { "ikat": "#5a4630", "kain": "#4a3a28" }
+      }
+    },
+    "performa": {
+      "keterangan": "Penghematan untuk banyak karakter berkerangka; aktif hanya kalau hemat = true (dinyalakan bila fps di bawah 50 dengan sekitar 10 karakter). jarakSetengah: di atas jarak ini (m dari pemain) animasi diperbarui tiap dua frame; jarakBayangan: bayangan hanya untuk karakter dalam jarak ini; luar kamera tidak dianimasikan.",
+      "hemat": false,
+      "jarakSetengah": 30,
+      "jarakBayangan": 25
+    }
+  }
+}

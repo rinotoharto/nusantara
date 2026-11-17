@@ -69,8 +69,10 @@ export class Perampok extends Lawan {
     x: number,
     z: number,
     private readonly gerombolan: Gerombolan,
+    pihak = 'perampok',
   ) {
     super(data, x, z);
+    this.pihak = pihak;
     gerombolan.anggota.push(this);
   }
 

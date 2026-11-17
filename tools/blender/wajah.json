@@ -1418,7 +1418,1642 @@
     "data_r": [
       0.0,
       0.6
-    ]
+    ],
+    "animasi": {
+      "serang_sebelum": 8,
+      "serang_sesudah": 10,
+      "berat_sebelum": 12,
+      "berat_sesudah": 11,
+      "jongkok_diam_detik": 3.0,
+      "siaga_detik": 2.0,
+      "kontak_manual": {
+        "serang-2": [
+          18,
+          8,
+          7
+        ]
+      },
+      "koreksi_rotasi_derajat": {
+        "Neck": 0.0,
+        "Head": 0.0
+      },
+      "koreksi_klip": {},
+      "bagian": {
+        "kain_hips": 0.87,
+        "kain_pudar_atas_m": 0.04,
+        "kain_tengah_m": 0.14,
+        "kain_halus_iterasi": 8,
+        "leher_bawah_m": 0.045,
+        "leher_atas_m": 0.02,
+        "leher_radius_m": 0.2,
+        "lengan_dari_siku_m": 0.03,
+        "penutup_awalan": "emas",
+        "mesh_tambahan": {
+          "tulang": [
+            "Neck",
+            "Spine2",
+            "Spine1",
+            "LeftShoulder",
+            "RightShoulder",
+            "Head",
+            "LeftArm",
+            "RightArm"
+          ],
+          "halus_iterasi": 2
+        },
+        "pengaruh_maks": 4,
+        "kain_hips_tepi": 0.1,
+        "lutut_gradasi_m": 0.07,
+        "kaki_posisi_di_atas_m": 0.1,
+        "keterangan": "kain_hips: porsi Hips untuk kain dan sabuk setinggi sendi paha ke atas (zona kain dari <blok>.abu.zona_kain), sisanya Spine di pinggang dan UpLeg kiri-kanan menurut posisi; porsi Hips turun bertahap ke kain_hips_tepi di tepi bawah kain, supaya tepi kain ikut paha (dengan Hips rata 0,87 kain kaku dan lutut keluar dari bawahnya dengan kulit tertarik). Kulit paha di bawah kain (dicari dari warna dan keterhubungan ke kaki) bukan kain: hanya UpLeg dan Leg, dan porsi Hips kain sudah mencapai kain_hips_tepi di tinggi kulit paha teratas supaya paha tidak menembus kain. kain_tengah_m: setengah lebar daerah tengah tempat UpLeg kiri dan kanan dicampur (di garis tengah sama rata), supaya kain tetap berbentuk sarung. lutut_gradasi_m: setengah panjang gradasi UpLeg ke Leg di sekitar sendi lutut. leher_*: gradasi Neck ke Head mulai leher_bawah_m di bawah bidang potong badan sampai leher_atas_m di atas bidang potong kepala. lengan_dari_siku_m: lengan bawah dan tangan (hanya rantai lengan) mulai sekian sebelum siku. penutup_awalan: bahan penutup sambungan di mesh utama mengikuti bobot kulit terdekat. mesh_tambahan: mesh lain (kalung gantung) mengikuti kulit terdekat, hanya tulang yang disebut. Dengan Neck dan Spine2 saja kalung tenggelam sampai 6 mm saat badan membungkuk, karena kulit di bawahnya juga ikut Spine1 dan Shoulder; daftar bawaan memuat semua tulang kulit leher dan dada atas.",
+        "bahu_halus": {
+          "radius_m": 0.14,
+          "iterasi": 0,
+          "keterangan": "penghalusan bobot di sekitar sendi bahu. Dicoba 12, 24, dan 40 iterasi (radius 0,14 sampai 0,20 m): gelembung bahu pada serang tidak berubah berarti (itu dari klipnya), sedangkan kalung gantung makin tenggelam (sampai 14 mm pada 40 iterasi). Jadi dimatikan."
+        },
+        "kaki_jari_longgar": 1.12,
+        "kaki_naik_maks_m": 0.07,
+        "kain_dalam": {
+          "jarak_m": 0.04,
+          "naik_m": 0.12
+        },
+        "penutup_komponen": {
+          "z_m": [
+            1.38,
+            1.45
+          ],
+          "verteks": [
+            100,
+            1200
+          ],
+          "keterangan": "tali leher: komponen terpisah di mesh utama (405 verteks, z 1,405 sampai 1,428 m) tanpa bahan sendiri; bobotnya diinterpolasi dari segitiga kulit terdekat. Dengan bobot Mixamo-nya sendiri tali tenggelam sampai 8 mm."
+        }
+      },
+      "koreksi_lengan": {
+        "aktif": true,
+        "sisi": "Left",
+        "klip": [
+          "serang-1",
+          "serang-2",
+          "serang-3",
+          "serang-berat",
+          "tangkis"
+        ],
+        "sasaran_m": 0.08,
+        "terkecil_m": 0.05,
+        "maks_m": 0.3,
+        "lengan_maks_derajat": 25,
+        "siku_maks_derajat": 40,
+        "siku_bobot": 0.5,
+        "keterangan": "jarak sendi tangan kiri ke permukaan badan: paling sedikit sasaran_m pada bingkai kontak dan terkecil_m sepanjang klip. Rotasi dicari otomatis dan dibagi ke LeftArm (paling banyak lengan_maks_derajat per sumbu) dan siku (LeftForeArm diluruskan, paling banyak siku_maks_derajat), supaya bahu tidak menggelembung.",
+        "klip_baru": [
+          "serang-3"
+        ]
+      },
+      "kontak_manual_baru": {
+        "serang-1": [
+          20,
+          7,
+          10
+        ],
+        "serang-2": [
+          27,
+          7,
+          10
+        ],
+        "serang-3": [
+          19,
+          7,
+          10
+        ],
+        "serang-berat": [
+          27,
+          14,
+          15
+        ],
+        "keterangan": "Patokan klip dari folder baru/ (17 November 2026): [bingkai kontak, sebelum, sesudah]. serang-1 tebasan keluar (laju tangan puncak bingkai 18), serang-2 tebasan balik turun (bingkai 26-27; ayunan bingkai 4-15 adalah ancang-ancang), serang-3 tusukan (lengan lurus mulai bingkai 18), serang-berat (tangan paling depan bingkai 27). Revisi: serang-1 kontak di bingkai 20 (dua bingkai setelah laju tangan puncak), saat bilah sudah menyapu ke depan dan naik; di bingkai 18 bilah masih menunjuk 57 derajat ke bawah. serang-3 di bingkai 19 (tangan paling depan). serang-2 kontak di bingkai 27 (satu bingkai setelah patokan lama): di bingkai 26 bilah masih 69 derajat ke atas, di 27 sudah menyapu ke depan (naik 11, serong 6). Potongan 17 November malam: serang ringan 7 bingkai sebelum dan 10 sesudah kontak (18 bingkai, 0,6 s; di game diputar 1,2 kali untuk durasi 0,5 s, kontak di 0,22 s); serang-berat 14 sebelum dan 15 sesudah (30 bingkai, 1,0 s; diputar 1,05 kali untuk 0,95 s, kontak di 0,48 s). serang-3 diunduh ulang 18 November 2026 dengan Wijaya aktif (46 bingkai): laju tangan puncak bingkai 17, tangan paling depan mulai bingkai 19 (0,69 m), jadi kontak tetap 19."
+      },
+      "klip_baru_lewati": [],
+      "genggam": {
+        "aktif": true,
+        "kanan": {
+          "klip": "semua",
+          "sudut": [
+            70,
+            85,
+            55
+          ],
+          "jempol": [
+            30,
+            25,
+            35
+          ]
+        },
+        "kiri": {
+          "klip": [
+            "serang-1",
+            "serang-2",
+            "serang-3",
+            "serang-berat",
+            "tangkis",
+            "siaga"
+          ],
+          "sudut": [
+            35,
+            40,
+            25
+          ],
+          "jempol": [
+            12,
+            10,
+            10
+          ]
+        },
+        "keterangan": "Pose jari tetap yang menimpa kunci jari klip. kanan: menggenggam hulu keris, di semua klip (keris selalu di tangan kanan). kiri: setengah menggenggam, rileks, jari rapat, hanya di klip yang disebut. sudut: tekukan ruas 1, 2, 3 jari telunjuk sampai kelingking (derajat); jempol: tekukan ruas jempol ke arah pangkal jari tengah."
+      },
+      "kepala_lurus": {
+        "aktif": true,
+        "klip": [
+          "serang-1",
+          "serang-2"
+        ],
+        "bagian": 0.8,
+        "maks_derajat": 50,
+        "keterangan": "Di klip yang disebut, simpangan kepala dari arah depan-tegak dikurangi sebesar bagian (0 sampai 1) di tiap kunci, paling banyak maks_derajat, dibagi rata ke Neck dan Head."
+      },
+      "klip_lewati": [
+        "lari"
+      ],
+      "tanah_lewati": [
+        "mati"
+      ],
+      "buka_lengan": {
+        "aktif": true,
+        "jarak_m": 0.02,
+        "maks_derajat": 12,
+        "langkah_derajat": 3,
+        "lewati": [
+          "mati"
+        ],
+        "lewati_kiri": [
+          "serang-1",
+          "serang-2",
+          "serang-berat"
+        ],
+        "banding_lama": [
+          "lari",
+          "serang-1",
+          "serang-2",
+          "serang-3"
+        ],
+        "keterangan": "Koreksi buka lengan per karakter. Klip yang diunduh di Mixamo dengan karakter lain yang lebih ramping (prajurit) menghitung Arm-Space untuk badan itu, sehingga lengan menempel atau menembus badan karakter ini. Untuk tiap klip dan tiap sisi, jarak terkecil lengan atas, lengan bawah (siku), dan telapak tangan ke permukaan badan diukur sepanjang klip, lalu LeftArm/RightArm diputar menjauh dari badan (sumbu tegak lurus lengan atas dan arah samping dada) dengan langkah langkah_derajat sampai jarak terkecil mencapai jarak_m, paling banyak maks_derajat. lewati_kiri: klip yang lengan kirinya diganti pose jaga di game. banding_lama: klip lama (diunduh dengan karakter ini) yang hanya diukur sebagai pembanding."
+      },
+      "samakan_pose_istirahat": true,
+      "pose_t_acuan": "aset-mentah/mixamo/baru/serang-1.fbx",
+      "keterangan": "Disalin dari wijaya_ulang.animasi (18 November 2026). Beda: tanpa keris dan koreksi pergelangan (prajurit bertombak), tanpa mesh tambahan (tali leher bagian dari mesh utama, ikut gradasi Neck ke Head seperti kulit di bawahnya), pose_t_acuan dari klip Without Skin yang diunduh dengan prajurit.",
+      "hasil": {
+        "pose_istirahat_beda_derajat": {
+          "jalan": {
+            "RightHand": 50.1,
+            "LeftHand": 43.3,
+            "LeftFoot": 8.9,
+            "RightFoot": 8.7,
+            "LeftToeBase": 4.3,
+            "LeftForeArm": 3.5,
+            "RightToeBase": 3.4,
+            "RightForeArm": 3.3
+          },
+          "jongkok-jalan": {
+            "RightHand": 50.1,
+            "LeftHand": 43.3,
+            "LeftFoot": 8.9,
+            "RightFoot": 8.7,
+            "LeftToeBase": 4.3,
+            "LeftForeArm": 3.5,
+            "RightToeBase": 3.4,
+            "RightForeArm": 3.3
+          },
+          "tangkis": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "hindar": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "terkena": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "mati": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "tarung": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "serang-1": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "serang-2": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "serang-3": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "lari-santai": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "lari-kencang": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "serang-berat": {
+            "LeftArm": 48.1,
+            "RightArm": 48.1,
+            "LeftForeArm": 16.8,
+            "RightForeArm": 16.5,
+            "LeftHand": 13.7,
+            "LeftShoulder": 12.4,
+            "RightShoulder": 12.4,
+            "RightHand": 9.5
+          },
+          "jongkok-diam-asli": {
+            "RightHand": 50.1,
+            "LeftHand": 43.3,
+            "LeftFoot": 8.9,
+            "RightFoot": 8.7,
+            "LeftToeBase": 4.3,
+            "LeftForeArm": 3.5,
+            "RightToeBase": 3.4,
+            "RightForeArm": 3.3
+          }
+        },
+        "pose_istirahat_sumber": {
+          "jalan": "kerangka berkas (With Skin)",
+          "jongkok-jalan": "kerangka berkas (With Skin)",
+          "tangkis": "pose T acuan",
+          "hindar": "pose T acuan",
+          "terkena": "pose T acuan",
+          "mati": "pose T acuan",
+          "tarung": "pose T acuan",
+          "serang-1": "pose T acuan",
+          "serang-2": "pose T acuan",
+          "serang-3": "pose T acuan",
+          "lari-santai": "pose T acuan",
+          "lari-kencang": "pose T acuan",
+          "serang-berat": "pose T acuan",
+          "jongkok-diam-asli": "kerangka berkas (With Skin)"
+        },
+        "jongkok_diam": {
+          "pinggul_asli": 0.514,
+          "pinggul_jalan": 0.76,
+          "kaki_asli": 0.811,
+          "kaki_jalan": 0.444,
+          "pakai_asli": false
+        },
+        "serang-1": {
+          "kontak_asli": 20,
+          "dipotong": [
+            13,
+            30
+          ],
+          "bingkai": 18,
+          "kontak_baru": 8
+        },
+        "serang-2": {
+          "kontak_asli": 27,
+          "dipotong": [
+            20,
+            37
+          ],
+          "bingkai": 18,
+          "kontak_baru": 8
+        },
+        "serang-3": {
+          "kontak_asli": 19,
+          "dipotong": [
+            12,
+            29
+          ],
+          "bingkai": 18,
+          "kontak_baru": 8
+        },
+        "serang-berat": {
+          "kontak_asli": 27,
+          "dipotong": [
+            13,
+            42
+          ],
+          "bingkai": 30,
+          "kontak_baru": 15
+        },
+        "siaga": {
+          "dari_tarung": [
+            164,
+            223
+          ],
+          "bingkai": 60
+        },
+        "koreksi_lengan": {
+          "serang-3": {
+            "depan": 5,
+            "buka": 5,
+            "siku": 10,
+            "sumbu_depan": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "sumbu_buka": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "engsel_siku": [
+              0.1756,
+              0.0217,
+              0.9842
+            ],
+            "tulang": "LeftArm",
+            "tulang_siku": "LeftForeArm",
+            "sasaran_tercapai": true,
+            "sebelum_m": {
+              "kontak": 0.027,
+              "terkecil": 0.016
+            },
+            "sesudah_m": {
+              "kontak": 0.089,
+              "terkecil": 0.073
+            }
+          },
+          "tangkis": {
+            "depan": 0,
+            "buka": 0,
+            "siku": 0,
+            "sumbu_depan": [
+              -1.0,
+              0.0,
+              0.0
+            ],
+            "sumbu_buka": [
+              0.0,
+              0.0,
+              1.0
+            ],
+            "engsel_siku": [
+              -0.2796,
+              0.1521,
+              0.948
+            ],
+            "tulang": "LeftArm",
+            "tulang_siku": "LeftForeArm",
+            "sasaran_tercapai": true,
+            "sebelum_m": {
+              "kontak": 0.21,
+              "terkecil": 0.21
+            },
+            "sesudah_m": {
+              "kontak": 0.21,
+              "terkecil": 0.21
+            }
+          }
+        },
+        "buka_lengan": {
+          "idle": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 3.1,
+                "lengan_bawah": 7.3,
+                "tangan": 7.0
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.1,
+                "lengan_bawah": 7.3,
+                "tangan": 7.0
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 2.6,
+                "lengan_bawah": 7.7,
+                "tangan": 6.9
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 2.6,
+                "lengan_bawah": 7.7,
+                "tangan": 6.9
+              },
+              "tercapai": true
+            }
+          },
+          "jalan": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 2.0,
+                "lengan_bawah": 5.4,
+                "tangan": 5.9
+              },
+              "derajat": 3,
+              "sesudah_cm": {
+                "lengan_atas": 2.7,
+                "lengan_bawah": 6.7,
+                "tangan": 8.5
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 2.6,
+                "lengan_bawah": 6.6,
+                "tangan": 9.7
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 2.6,
+                "lengan_bawah": 6.6,
+                "tangan": 9.7
+              },
+              "tercapai": true
+            }
+          },
+          "jongkok-jalan": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 15.0,
+                "tangan": 16.5
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 15.0,
+                "tangan": 16.5
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 1.7,
+                "lengan_bawah": 7.1,
+                "tangan": 7.9
+              },
+              "derajat": 3,
+              "sesudah_cm": {
+                "lengan_atas": 2.4,
+                "lengan_bawah": 8.5,
+                "tangan": 9.7
+              },
+              "tercapai": true
+            }
+          },
+          "tangkis": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 11.9,
+                "tangan": 18.6
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 11.9,
+                "tangan": 18.6
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 4.3,
+                "lengan_bawah": 13.5,
+                "tangan": 22.8
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 4.3,
+                "lengan_bawah": 13.5,
+                "tangan": 22.8
+              },
+              "tercapai": true
+            }
+          },
+          "hindar": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 2.4,
+                "lengan_bawah": 9.7,
+                "tangan": 22.4
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 2.4,
+                "lengan_bawah": 9.7,
+                "tangan": 22.4
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 3.1,
+                "lengan_bawah": 11.3,
+                "tangan": 21.5
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.1,
+                "lengan_bawah": 11.3,
+                "tangan": 21.5
+              },
+              "tercapai": true
+            }
+          },
+          "terkena": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 3.8,
+                "lengan_bawah": 3.7,
+                "tangan": 11.8
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.8,
+                "lengan_bawah": 3.7,
+                "tangan": 11.8
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 4.5,
+                "lengan_bawah": 9.5,
+                "tangan": 13.9
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 4.5,
+                "lengan_bawah": 9.5,
+                "tangan": 13.9
+              },
+              "tercapai": true
+            }
+          },
+          "serang-1": {
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 4.4,
+                "lengan_bawah": 11.0,
+                "tangan": 17.6
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 4.4,
+                "lengan_bawah": 11.0,
+                "tangan": 17.6
+              },
+              "tercapai": true
+            }
+          },
+          "serang-2": {
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 5.7,
+                "lengan_bawah": 12.0,
+                "tangan": 13.9
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 5.7,
+                "lengan_bawah": 12.0,
+                "tangan": 13.9
+              },
+              "tercapai": true
+            }
+          },
+          "serang-3": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 1.2,
+                "lengan_bawah": 4.4,
+                "tangan": 2.6
+              },
+              "derajat": 6,
+              "sesudah_cm": {
+                "lengan_atas": 2.7,
+                "lengan_bawah": 6.0,
+                "tangan": 3.3
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 4.3,
+                "lengan_bawah": 3.1,
+                "tangan": 0.1
+              },
+              "derajat": 6,
+              "sesudah_cm": {
+                "lengan_atas": 5.3,
+                "lengan_bawah": 4.7,
+                "tangan": 2.1
+              },
+              "tercapai": true
+            }
+          },
+          "lari-santai": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 3.2,
+                "lengan_bawah": 5.9,
+                "tangan": 8.9
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.2,
+                "lengan_bawah": 5.9,
+                "tangan": 8.9
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 3.6,
+                "lengan_bawah": 8.8,
+                "tangan": 7.3
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.6,
+                "lengan_bawah": 8.8,
+                "tangan": 7.3
+              },
+              "tercapai": true
+            }
+          },
+          "lari-kencang": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 3.0,
+                "lengan_bawah": 2.4,
+                "tangan": 3.1
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 3.0,
+                "lengan_bawah": 2.4,
+                "tangan": 3.1
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 1.8,
+                "lengan_bawah": 5.7,
+                "tangan": 8.5
+              },
+              "derajat": 3,
+              "sesudah_cm": {
+                "lengan_atas": 2.4,
+                "lengan_bawah": 6.9,
+                "tangan": 8.7
+              },
+              "tercapai": true
+            }
+          },
+          "serang-berat": {
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 0.8,
+                "lengan_bawah": 6.8,
+                "tangan": 11.3
+              },
+              "derajat": 9,
+              "sesudah_cm": {
+                "lengan_atas": 2.2,
+                "lengan_bawah": 9.7,
+                "tangan": 17.4
+              },
+              "tercapai": true
+            }
+          },
+          "jongkok-diam": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 15.2,
+                "tangan": 19.3
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 7.1,
+                "lengan_bawah": 15.2,
+                "tangan": 19.3
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 2.8,
+                "lengan_bawah": 10.7,
+                "tangan": 16.3
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 2.8,
+                "lengan_bawah": 10.7,
+                "tangan": 16.3
+              },
+              "tercapai": true
+            }
+          },
+          "siaga": {
+            "Left": {
+              "sebelum_cm": {
+                "lengan_atas": 6.5,
+                "lengan_bawah": 5.4,
+                "tangan": 6.2
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 6.5,
+                "lengan_bawah": 5.4,
+                "tangan": 6.2
+              },
+              "tercapai": true
+            },
+            "Right": {
+              "sebelum_cm": {
+                "lengan_atas": 7.7,
+                "lengan_bawah": 13.6,
+                "tangan": 18.6
+              },
+              "derajat": 0,
+              "sesudah_cm": {
+                "lengan_atas": 7.7,
+                "lengan_bawah": 13.6,
+                "tangan": 18.6
+              },
+              "tercapai": true
+            }
+          }
+        },
+        "buka_lengan_klip_lama": {
+          "lari": {
+            "Left": {
+              "lengan_atas": 4.3,
+              "lengan_bawah": 6.5,
+              "tangan": 7.7
+            },
+            "Right": {
+              "lengan_atas": 3.1,
+              "lengan_bawah": 9.4,
+              "tangan": 8.7
+            }
+          },
+          "serang-1": {
+            "Left": {
+              "lengan_atas": 4.9,
+              "lengan_bawah": 5.5,
+              "tangan": 6.7
+            },
+            "Right": {
+              "lengan_atas": 4.2,
+              "lengan_bawah": 5.8,
+              "tangan": 4.3
+            }
+          },
+          "serang-2": {
+            "Left": {
+              "lengan_atas": 4.1,
+              "lengan_bawah": 8.2,
+              "tangan": 4.4
+            },
+            "Right": {
+              "lengan_atas": 3.6,
+              "lengan_bawah": 11.3,
+              "tangan": 17.2
+            }
+          },
+          "serang-3": {
+            "Left": {
+              "lengan_atas": 0.7,
+              "lengan_bawah": 1.6,
+              "tangan": -1.7
+            },
+            "Right": {
+              "lengan_atas": 5.7,
+              "lengan_bawah": 11.1,
+              "tangan": 8.9
+            }
+          }
+        },
+        "tanah_geser_m": {
+          "idle": 0.0,
+          "jalan": 0.008,
+          "jongkok-jalan": -0.005,
+          "tangkis": 0.016,
+          "hindar": 0.015,
+          "terkena": 0.011,
+          "serang-1": 0.002,
+          "serang-2": 0.002,
+          "serang-3": 0.02,
+          "lari-santai": -0.001,
+          "lari-kencang": 0.003,
+          "serang-berat": -0.002,
+          "jongkok-diam": -0.014,
+          "siaga": 0.015
+        },
+        "kepala_lurus": {
+          "serang-1": [
+            45.0,
+            9.0
+          ],
+          "serang-2": [
+            39.4,
+            7.9
+          ]
+        },
+        "genggam": {
+          "kanan": {
+            "klip": [
+              "idle",
+              "jalan",
+              "jongkok-jalan",
+              "tangkis",
+              "hindar",
+              "terkena",
+              "mati",
+              "serang-1",
+              "serang-2",
+              "serang-3",
+              "lari-santai",
+              "lari-kencang",
+              "serang-berat",
+              "jongkok-diam",
+              "siaga"
+            ],
+            "tulang_per_klip": [
+              6
+            ]
+          },
+          "kiri": {
+            "klip": [
+              "serang-1",
+              "serang-2",
+              "serang-3",
+              "serang-berat",
+              "tangkis",
+              "siaga"
+            ],
+            "tulang_per_klip": [
+              6
+            ]
+          }
+        },
+        "leher": {
+          "idle": {
+            "neck_ke_head_terhadap_punggung_atas": 6.5,
+            "neck_ke_head_terhadap_tegak": 5.5
+          },
+          "siaga": {
+            "neck_ke_head_terhadap_punggung_atas": 11.8,
+            "neck_ke_head_terhadap_tegak": 36.1
+          }
+        },
+        "bobot": {
+          "penutup_komponen_verteks": 405,
+          "kepala_verteks": 3116,
+          "leher_gradasi_verteks": 591,
+          "kulit_paha_di_bawah_kain": {
+            "verteks": 140,
+            "z_teratas_m": 0.555
+          },
+          "kain_dalam_verteks": 661,
+          "kain_verteks": 4036,
+          "lengan_left_verteks": 685,
+          "lengan_right_verteks": 691,
+          "kaki_left_verteks": 510,
+          "kaki_right_verteks": 547,
+          "penutup_verteks": 405,
+          "verteks_tanpa_bobot": 0
+        },
+        "aksi": {
+          "idle": 220,
+          "jalan": 36,
+          "jongkok-jalan": 37,
+          "tangkis": 18,
+          "hindar": 50,
+          "terkena": 39,
+          "mati": 124,
+          "serang-1": 18,
+          "serang-2": 18,
+          "serang-3": 18,
+          "lari-santai": 26,
+          "lari-kencang": 39,
+          "serang-berat": 30,
+          "jongkok-diam": 90,
+          "siaga": 60
+        },
+        "dari_baru": [
+          "lari-kencang",
+          "lari-santai",
+          "serang-1",
+          "serang-2",
+          "serang-3",
+          "serang-berat"
+        ],
+        "berkas_mb": 2.56
+      },
+      "ukur": {
+        "hindar": {
+          "bingkai": [
+            1,
+            50
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.251,
+            "bingkai": 27
+          },
+          "tembus_tangan_m": 0.215,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.16,
+            "terbesar": 5.47
+          },
+          "kaki_m": {
+            "terlebar": 0.763,
+            "bingkai": 44
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.934,
+              "kuda_kuda_terlebar": 0.987
+            },
+            "lutut_kiri": {
+              "terkecil": 0.908,
+              "kuda_kuda_terlebar": 0.978
+            },
+            "paha_kanan": {
+              "terkecil": 0.956,
+              "kuda_kuda_terlebar": 0.994
+            },
+            "paha_kiri": {
+              "terkecil": 0.931,
+              "kuda_kuda_terlebar": 0.984
+            }
+          }
+        },
+        "idle": {
+          "bingkai": [
+            1,
+            220
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.104,
+            "bingkai": 169
+          },
+          "tembus_tangan_m": 0.02,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 1.14,
+            "terbesar": 1.56
+          },
+          "kaki_m": {
+            "terlebar": 0.32,
+            "bingkai": 22
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.997,
+              "kuda_kuda_terlebar": 0.998
+            },
+            "lutut_kiri": {
+              "terkecil": 0.987,
+              "kuda_kuda_terlebar": 0.988
+            },
+            "paha_kanan": {
+              "terkecil": 1.0,
+              "kuda_kuda_terlebar": 1.001
+            },
+            "paha_kiri": {
+              "terkecil": 0.99,
+              "kuda_kuda_terlebar": 0.991
+            }
+          }
+        },
+        "jalan": {
+          "bingkai": [
+            1,
+            36
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.119,
+            "bingkai": 2
+          },
+          "tembus_tangan_m": 0.057,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 1.83,
+            "terbesar": 4.35
+          },
+          "kaki_m": {
+            "terlebar": 0.805,
+            "bingkai": 10
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.939,
+              "kuda_kuda_terlebar": 1.001
+            },
+            "lutut_kiri": {
+              "terkecil": 0.928,
+              "kuda_kuda_terlebar": 0.999
+            },
+            "paha_kanan": {
+              "terkecil": 0.96,
+              "kuda_kuda_terlebar": 1.001
+            },
+            "paha_kiri": {
+              "terkecil": 0.946,
+              "kuda_kuda_terlebar": 1.0
+            }
+          }
+        },
+        "jongkok-diam": {
+          "bingkai": [
+            1,
+            90
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.227,
+            "bingkai": 1
+          },
+          "tembus_tangan_m": 0.193,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.09,
+            "terbesar": 6.2
+          },
+          "kaki_m": {
+            "terlebar": 0.725,
+            "bingkai": 1
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.95,
+              "kuda_kuda_terlebar": 0.95
+            },
+            "lutut_kiri": {
+              "terkecil": 0.969,
+              "kuda_kuda_terlebar": 0.969
+            },
+            "paha_kanan": {
+              "terkecil": 0.967,
+              "kuda_kuda_terlebar": 0.967
+            },
+            "paha_kiri": {
+              "terkecil": 0.978,
+              "kuda_kuda_terlebar": 0.978
+            }
+          }
+        },
+        "jongkok-jalan": {
+          "bingkai": [
+            1,
+            37
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.201,
+            "bingkai": 13
+          },
+          "tembus_tangan_m": 0.163,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.13,
+            "terbesar": 6.63
+          },
+          "kaki_m": {
+            "terlebar": 0.742,
+            "bingkai": 10
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.919,
+              "kuda_kuda_terlebar": 0.948
+            },
+            "lutut_kiri": {
+              "terkecil": 0.885,
+              "kuda_kuda_terlebar": 0.96
+            },
+            "paha_kanan": {
+              "terkecil": 0.946,
+              "kuda_kuda_terlebar": 0.966
+            },
+            "paha_kiri": {
+              "terkecil": 0.914,
+              "kuda_kuda_terlebar": 0.971
+            }
+          }
+        },
+        "lari-kencang": {
+          "bingkai": [
+            1,
+            39
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.049,
+            "bingkai": 16
+          },
+          "tembus_tangan_m": -0.054,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.54,
+            "terbesar": 8.95
+          },
+          "kaki_m": {
+            "terlebar": 1.098,
+            "bingkai": 25
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.845,
+              "kuda_kuda_terlebar": 0.929
+            },
+            "lutut_kiri": {
+              "terkecil": 0.839,
+              "kuda_kuda_terlebar": 0.989
+            },
+            "paha_kanan": {
+              "terkecil": 0.902,
+              "kuda_kuda_terlebar": 0.953
+            },
+            "paha_kiri": {
+              "terkecil": 0.878,
+              "kuda_kuda_terlebar": 0.991
+            }
+          }
+        },
+        "lari-santai": {
+          "bingkai": [
+            1,
+            26
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.124,
+            "bingkai": 25
+          },
+          "tembus_tangan_m": 0.042,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 1.8,
+            "terbesar": 3.99
+          },
+          "kaki_m": {
+            "terlebar": 0.824,
+            "bingkai": 19
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.909,
+              "kuda_kuda_terlebar": 0.997
+            },
+            "lutut_kiri": {
+              "terkecil": 0.906,
+              "kuda_kuda_terlebar": 0.985
+            },
+            "paha_kanan": {
+              "terkecil": 0.939,
+              "kuda_kuda_terlebar": 0.999
+            },
+            "paha_kiri": {
+              "terkecil": 0.929,
+              "kuda_kuda_terlebar": 0.99
+            }
+          }
+        },
+        "mati": {
+          "bingkai": [
+            1,
+            124
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.128,
+            "bingkai": 58
+          },
+          "tembus_tangan_m": 0.031,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.4,
+            "terbesar": 7.54
+          },
+          "kaki_m": {
+            "terlebar": 0.901,
+            "bingkai": 1
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.885,
+              "kuda_kuda_terlebar": 0.985
+            },
+            "lutut_kiri": {
+              "terkecil": 0.839,
+              "kuda_kuda_terlebar": 0.968
+            },
+            "paha_kanan": {
+              "terkecil": 0.923,
+              "kuda_kuda_terlebar": 0.993
+            },
+            "paha_kiri": {
+              "terkecil": 0.878,
+              "kuda_kuda_terlebar": 0.977
+            }
+          }
+        },
+        "serang-1": {
+          "bingkai": [
+            1,
+            18
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.147,
+            "bingkai": 16,
+            "kontak": 0.29,
+            "bingkai_kontak": 8
+          },
+          "tembus_tangan_m": 0.093,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 1.8,
+            "terbesar": 4.67
+          },
+          "kaki_m": {
+            "terlebar": 0.643,
+            "bingkai": 13
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.956,
+              "kuda_kuda_terlebar": 0.981
+            },
+            "lutut_kiri": {
+              "terkecil": 0.962,
+              "kuda_kuda_terlebar": 0.971
+            },
+            "paha_kanan": {
+              "terkecil": 0.972,
+              "kuda_kuda_terlebar": 0.989
+            },
+            "paha_kiri": {
+              "terkecil": 0.972,
+              "kuda_kuda_terlebar": 0.979
+            }
+          }
+        },
+        "serang-2": {
+          "bingkai": [
+            1,
+            18
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.075,
+            "bingkai": 5,
+            "kontak": 0.27,
+            "bingkai_kontak": 8
+          },
+          "tembus_tangan_m": 0.044,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.07,
+            "terbesar": 5.37
+          },
+          "kaki_m": {
+            "terlebar": 0.677,
+            "bingkai": 1
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.948,
+              "kuda_kuda_terlebar": 0.985
+            },
+            "lutut_kiri": {
+              "terkecil": 0.921,
+              "kuda_kuda_terlebar": 0.97
+            },
+            "paha_kanan": {
+              "terkecil": 0.966,
+              "kuda_kuda_terlebar": 0.991
+            },
+            "paha_kiri": {
+              "terkecil": 0.94,
+              "kuda_kuda_terlebar": 0.978
+            }
+          }
+        },
+        "serang-3": {
+          "bingkai": [
+            1,
+            18
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.088,
+            "bingkai": 7,
+            "kontak": 0.104,
+            "bingkai_kontak": 8
+          },
+          "tembus_tangan_m": -0.003,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.39,
+            "terbesar": 5.89
+          },
+          "kaki_m": {
+            "terlebar": 0.952,
+            "bingkai": 14
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.924,
+              "kuda_kuda_terlebar": 0.964
+            },
+            "lutut_kiri": {
+              "terkecil": 0.924,
+              "kuda_kuda_terlebar": 0.928
+            },
+            "paha_kanan": {
+              "terkecil": 0.949,
+              "kuda_kuda_terlebar": 0.978
+            },
+            "paha_kiri": {
+              "terkecil": 0.944,
+              "kuda_kuda_terlebar": 0.947
+            }
+          }
+        },
+        "serang-berat": {
+          "bingkai": [
+            1,
+            30
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.125,
+            "bingkai": 8,
+            "kontak": 0.278,
+            "bingkai_kontak": 15
+          },
+          "tembus_tangan_m": 0.064,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.49,
+            "terbesar": 5.99
+          },
+          "kaki_m": {
+            "terlebar": 0.776,
+            "bingkai": 29
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.947,
+              "kuda_kuda_terlebar": 0.998
+            },
+            "lutut_kiri": {
+              "terkecil": 0.9,
+              "kuda_kuda_terlebar": 0.963
+            },
+            "paha_kanan": {
+              "terkecil": 0.966,
+              "kuda_kuda_terlebar": 1.0
+            },
+            "paha_kiri": {
+              "terkecil": 0.918,
+              "kuda_kuda_terlebar": 0.972
+            }
+          }
+        },
+        "siaga": {
+          "bingkai": [
+            1,
+            60
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.109,
+            "bingkai": 1
+          },
+          "tembus_tangan_m": 0.079,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.16,
+            "terbesar": 5.91
+          },
+          "kaki_m": {
+            "terlebar": 0.691,
+            "bingkai": 60
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.932,
+              "kuda_kuda_terlebar": 0.938
+            },
+            "lutut_kiri": {
+              "terkecil": 0.927,
+              "kuda_kuda_terlebar": 0.931
+            },
+            "paha_kanan": {
+              "terkecil": 0.955,
+              "kuda_kuda_terlebar": 0.959
+            },
+            "paha_kiri": {
+              "terkecil": 0.945,
+              "kuda_kuda_terlebar": 0.948
+            }
+          }
+        },
+        "tangkis": {
+          "bingkai": [
+            1,
+            18
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.21,
+            "bingkai": 5
+          },
+          "tembus_tangan_m": 0.186,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 2.64,
+            "terbesar": 8.11
+          },
+          "kaki_m": {
+            "terlebar": 1.135,
+            "bingkai": 13
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.98,
+              "kuda_kuda_terlebar": 0.993
+            },
+            "lutut_kiri": {
+              "terkecil": 0.919,
+              "kuda_kuda_terlebar": 0.939
+            },
+            "paha_kanan": {
+              "terkecil": 0.989,
+              "kuda_kuda_terlebar": 0.996
+            },
+            "paha_kiri": {
+              "terkecil": 0.939,
+              "kuda_kuda_terlebar": 0.954
+            }
+          }
+        },
+        "terkena": {
+          "bingkai": [
+            1,
+            39
+          ],
+          "tangan_kiri_m": {
+            "terkecil": 0.158,
+            "bingkai": 37
+          },
+          "tembus_tangan_m": 0.123,
+          "kalung_m": null,
+          "kain_regang": {
+            "p99": 1.72,
+            "terbesar": 4.01
+          },
+          "kaki_m": {
+            "terlebar": 0.652,
+            "bingkai": 16
+          },
+          "lingkar": {
+            "lutut_kanan": {
+              "terkecil": 0.971,
+              "kuda_kuda_terlebar": 0.973
+            },
+            "lutut_kiri": {
+              "terkecil": 0.97,
+              "kuda_kuda_terlebar": 0.978
+            },
+            "paha_kanan": {
+              "terkecil": 0.983,
+              "kuda_kuda_terlebar": 0.984
+            },
+            "paha_kiri": {
+              "terkecil": 0.978,
+              "kuda_kuda_terlebar": 0.985
+            }
+          }
+        }
+      }
+    },
+    "tambal": {
+      "daerah": [
+        {
+          "nama": "bercak kelabu lengan bawah",
+          "x_abs_m": [
+            0.2,
+            0.46
+          ],
+          "z_m": [
+            0.8,
+            1.38
+          ],
+          "pilih": "kelabu",
+          "b_maks": 8
+        },
+        {
+          "nama": "lancip kain di punggung bawah",
+          "x_abs_m": [
+            0.0,
+            0.035
+          ],
+          "z_m": [
+            1.039,
+            1.08
+          ],
+          "pilih": "bukan_kulit"
+        }
+      ],
+      "keterangan": "sisa tekstur yang ditambal dengan warna kulit sekitar (tambal_tekstur.py), 18 November 2026: bercak kelabu di lengan bawah dekat siku, dan lancip warna kain di tengah punggung bawah tepat di atas tepi kain (mesh di situ rata; lancipnya hanya di tekstur).",
+      "kulit_a_min": 6,
+      "kulit_b_min": 10,
+      "sigma_px": 14,
+      "lebar_px": 3,
+      "hasil": {
+        "texel_per_daerah": {
+          "bercak kelabu lengan bawah": 3309,
+          "lancip kain di punggung bawah": 304
+        },
+        "texel_ditambal": 9309
+      },
+      "margin_px": 10
+    }
   },
   "wijaya_ulang": {
     "kepala": {

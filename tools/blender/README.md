@@ -671,3 +671,56 @@ Di game: jalan pelan memakai `jalan`, lari santai memakai `lari` lama, lari kenc
   keduanya sebelum mengubah sudut.
 - Jarak bertanda ke permukaan badan tidak andal untuk mesh terbuka; tanda hanya dipercaya bila titiknya dekat
   (di bawah 6 cm) dan jelas di balik muka.
+
+## Prajurit Kediri: animasi dan masuk game (18 November 2026)
+
+```bash
+# gabung (klip sama dengan Wijaya; angka di wajah.json prajurit.animasi)
+B tools/blender/gabung_animasi.py -- --model aset-mentah/prajurit-utuh.glb --rig aset-mentah/mixamo-prajurit/idle.fbx --mixamo aset-mentah/mixamo --baru aset-mentah/mixamo/baru --json tools/blender/wajah.json --blok prajurit --keluar aset-mentah/prajurit-animasi.glb
+# pratinjau dan ukuran
+B tools/blender/pratinjau_animasi.py -- --masuk aset-mentah/prajurit-animasi.glb --json tools/blender/wajah.json --blok prajurit --keluar aset-mentah/pratinjau --nama prajurit --lembar serang,gerak,lebar,kaki,bahu,lain
+# setelah pratinjau disetujui
+cp aset-mentah/prajurit-animasi.glb public/models/prajurit.glb
+# tambalan tekstur setempat (data per texel dari model utuh), lalu pasang dan gabung ulang
+B tools/blender/data_uv.py -- --masuk aset-mentah/prajurit-utuh.glb --keluar <sementara>/utuh-data.png --json <salinan wajah.json> --blok prajurit
+V tools/blender/tambal_tekstur.py --json tools/blender/wajah.json --blok prajurit --masuk aset-mentah/tekstur/prajurit-basecolor-sambung.png --data <sementara>/utuh-data.png --keluar aset-mentah/tekstur/prajurit-basecolor-tambal.png
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/prajurit-utuh.glb --basecolor aset-mentah/tekstur/prajurit-basecolor-tambal.png --keluar aset-mentah/prajurit-utuh.glb --nama prajurit
+```
+
+Beda `prajurit.animasi` dari `wijaya_ulang.animasi`:
+
+- `pose_t_acuan`: `aset-mentah/mixamo/baru/serang-1.fbx`, satu untuk semua klip (lengan atas 48,1 derajat, bahu 12,4,
+  lengan bawah 16,8). Tanpa `keris` dan `koreksi_pergelangan`.
+- `bagian.penutup_komponen` (baru): tali leher prajurit adalah komponen terpisah di mesh utama tanpa bahan sendiri
+  (405 verteks). Komponen dalam rentang `z_m` dan jumlah `verteks` diperlakukan sebagai penutup, bobotnya
+  diinterpolasi dari segitiga kulit terdekat.
+- `bagian.leher_bawah_m` 0,045 dan `leher_atas_m` 0,02 (Wijaya 0,015 dan 0,008): dengan gradasi sempit, lipatan
+  tengkuk menutupi tali saat kepala mendongak (sampai 21 persen verteks tali terkubur di hindar, lari-kencang,
+  jongkok, serang-1 dan 2); dengan gradasi lebar tidak ada yang terkubur di 15 klip.
+- `koreksi_lengan.klip_baru: ["serang-3"]`, `sasaran_m` 0,08: klip serang-3 diunduh dengan Wijaya (Arm-Space 35
+  sampai 40) dan tangan kirinya menembus perut prajurit 5,9 cm; dengan koreksi kecil (LeftArm 5 derajat ke depan,
+  5 membuka, siku 10) tangan menyentuh kain (0 sampai 4 mm).
+- `pose_genggam` kini jalan untuk kerangka berjari dua rantai (34 tulang, hanya jempol dan telunjuk): bidang
+  telapak dari telunjuk dan jempol.
+
+Hasil ukur: lingkar paha dan lutut di kuda-kuda terlebar 0,93 sampai 1,00; regangan kain setara Wijaya; tali tidak
+terkubur. Sisa: lari-kencang tangan kiri menyerempet kain 5,7 cm (Wijaya 5,2), lutut 0,84 saat ditekuk dalam
+(lari-kencang, mati), garis gelap normal map di lengan terlihat di game.
+
+### `tambal_tekstur.py` (venv, baru)
+
+Mengganti texel terpilih dengan rata-rata Gauss warna kulit sekitarnya, termasuk margin pulau UV di sebelahnya
+(kalau tidak, warna lama merembes di jahitan). Daerah di `<blok>.tambal.daerah`: kotak posisi (`x_abs_m`, `z_m`)
+dan `pilih` = `kelabu` (b Lab di bawah `b_maks`) atau `bukan_kulit`. Untuk prajurit: bercak kelabu di sisi dalam
+lengan bawah kanan, dan lancip warna kain di tengah punggung bawah (mesh di situ rata; lancipnya pulau UV kecil
+berwarna kain). Sebelum dan sesudah: `aset-mentah/pratinjau/prajurit-tambal-sebelum-sesudah.jpg`.
+
+### Jebakan yang ditemukan
+
+- Mengukur tali terhadap normal segitiga kulit terdekat tidak andal (segitiga kusut di bawah tali, dan permukaan
+  lain seperti dagu ikut terhitung). Yang dipakai: sinar dari verteks tali sepanjang normalnya; kalau menabrak
+  kulit dari sisi dalam dalam 2 cm, verteks itu terkubur.
+- Memberi tali bobot kulit di bawahnya saja tidak cukup; penyebab tali hilang adalah lipatan kulit tengkuk.
+- Di game, topeng warna dari rona saja bocor (kain nila sebagian besar kelabu dan keunguan). Topeng kain dihitung
+  di shader dari tinggi verteks pose istirahat (zona kain) dan texel yang tidak hangat; angka di
+  `src/data/models.json`.

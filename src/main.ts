@@ -8,6 +8,10 @@ import { Hud } from './ui/hud';
 import { HudPertarungan } from './ui/combat-hud';
 import { PertarunganPemain } from './combat/player-combat';
 import { ModelWijaya } from './character/model-wijaya';
+import { PengelolaModelPrajurit } from './character/model-prajurit';
+import { Lawan } from './combat/enemy';
+import { Perampok } from './combat/bandit';
+import { Penjaga } from './stealth/guard';
 import { PengelolaLawan } from './combat/enemy-manager';
 import { KONFIG } from './combat/config';
 import { PengelolaSiluman } from './stealth/stealth-manager';
@@ -72,11 +76,22 @@ const pemain = new Pemain(dunia.tabrakan);
 scene.add(pemain.grup);
 
 const tarung = new PertarunganPemain(pemain);
-// Model Wijaya beranimasi hanya dengan ?model=wijaya; tanpa itu prototipe tetap kapsul.
-const modelWijaya = new URLSearchParams(window.location.search).get('model') === 'wijaya' ? new ModelWijaya(pemain, tarung) : null;
+// Model beranimasi hanya dengan ?model=wijaya, ?model=prajurit, atau keduanya (?model=wijaya,prajurit);
+// tanpa itu prototipe tetap kapsul.
+const modelDiminta = new Set((new URLSearchParams(window.location.search).get('model') ?? '').split(',').map((s) => s.trim()));
+const modelWijaya = modelDiminta.has('wijaya') ? new ModelWijaya(pemain, tarung) : null;
 modelWijaya?.muat(import.meta.env.BASE_URL).catch((e) => console.error('[model] gagal memuat wijaya.glb', e));
 
 const lawan = new PengelolaLawan();
+// Model prajurit untuk penjaga dan lawan bertombak serta perampok bergolok; babi dan harimau tetap balok.
+const modelPrajurit = modelDiminta.has('prajurit') ? new PengelolaModelPrajurit(import.meta.env.BASE_URL) : null;
+if (modelPrajurit) {
+  lawan.saatTambah = (l) => {
+    if (l instanceof Perampok) modelPrajurit.pasang(l, 'golok');
+    else if (l instanceof Penjaga || l.constructor === Lawan) modelPrajurit.pasang(l, 'tombak');
+  };
+  lawan.saatHapus = (l) => modelPrajurit.lepas(l);
+}
 const siluman = new PengelolaSiluman(dunia, scene, lawan);
 const pengikut = new PengelolaPengikut(dunia.tabrakan, scene, ATURAN.pagonIkut.lajuPagon);
 tarung.pencariSasaran = (pos, maks) => lawan.lawanTerdekat(pos, maks);
@@ -668,6 +683,7 @@ function perbaruiPermainan(dt: number): void {
   }
   pengikut.perbarui(dt, pemain, siluman.konteks.pemain, lawan.daftar, camera);
   lawan.perbarui(dt, pemain, tarung);
+  modelPrajurit?.perbarui(dt, pemain.posisi, camera);
   if (!tarung.mati) kejadian.perbarui(dt);
 
   // Pemicu Kitab dan pemicu segmen misi.
@@ -768,7 +784,7 @@ renderer.setAnimationLoop(() => {
 // Pegangan untuk pengujian di konsol browser, hanya saat pengembangan.
 if (import.meta.env.DEV) {
   (window as unknown as { nusantara: unknown }).nusantara = {
-    pemain, modelWijaya, renderer, scene, camera, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
+    pemain, modelWijaya, modelPrajurit, renderer, scene, camera, kamera: kameraOrangKetiga, tarung, lawan, siluman, pengikut, input, status, dialog: mesinDialog, uiDialog, mulaiDialog,
     npc, kitab: uiKitab, menu: menuJeda, bukaKitab, bukaMenu, pemicu, rombongan, hudRombongan, misi, panel, dunia, layarJudul, layarSelesai,
     perbaruiSinematikPerahu, tampilkanSelesai, pemandu, penunjuk, subtitle, peta, terapkanKualitas, catatan, kejadian, hudKejadian, prolog,
     get waktuMisi() {
