@@ -741,3 +741,12 @@ B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/prajurit-utuh.glb --bas
   (rambut hitam kebiruan berterang di bawah 0,02, kain ikat 0,03 sampai 0,09); sinar isyarat penuh hanya di tepi
   siluet dan senjata. Game hanya punya satu keadaan cahaya (sore, dengan pengali per segmen), jadi "malam" diuji
   dengan semua lampu 40 persen. Sebelum dan sesudah: `aset-mentah/pratinjau/prajurit-kecil-sebelum-sesudah.jpg`.
+
+### Serangan lawan pada kecepatan asli klip (18 November 2026)
+
+`prajurit.animasi.kontak_manual_baru`: serang-1 sampai 3 dipotong 17 bingkai sebelum dan 10 sesudah kontak (28
+bingkai, kontak di 0,567 s); potongan Wijaya tidak berubah. Di game klip serang lawan dimulai saat bersiap dan
+diputar 1,0, sehingga kontaknya jatuh pada saat kena: `combat.json` lawan.isyarat 0,55 + tombak.saatKena 0,02
+(dulu 0,08 tertulis di kode), durasiTusuk 0,35; perampok isyarat 0,45, tebasan 0,02 dan 0,47, durasi 0,8. Terukur
+di game: kena pada detik klip 0,583 (prajurit) dan 0,597 (perampok), satu sampai dua bingkai sesudah kontak.
+Lembar: `aset-mentah/pratinjau/game-prajurit-serang-ancang.jpg`, `game-perampok-serang-ancang.jpg`.

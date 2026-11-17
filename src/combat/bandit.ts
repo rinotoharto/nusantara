@@ -53,7 +53,7 @@ export class Gerombolan {
 /**
  * Perampok (sprint 7): kapsul cokelat tua dengan golok pendek. Tanpa kerucut pandang: berdiri
  * menghadang jalan sampai kejadian memulai pertarungan atau ia diserang. Menyerang dua tebasan
- * beruntun dengan satu isyarat 0,35 detik; tebasan kedua datang tanpa isyarat.
+ * beruntun dengan satu isyarat (combat.json perampok.isyarat); tebasan kedua datang tanpa isyarat.
  */
 export class Perampok extends Lawan {
   declare private golok: THREE.Group;

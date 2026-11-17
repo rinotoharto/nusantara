@@ -18,9 +18,10 @@
     "kilatanSenjata": 0.8,
     "lingkungan": 0.45,
     "serang": {
-      "keterangan": "kontakDetik: saat kontak di dalam klip serang (bingkai 8 dari 30 per detik). Klip dimulai sedemikian sehingga kontak jatuh pada saat kena di combat.json (tusukan 0,08 detik setelah mulai menyerang; tebasan perampok pada tebasan.pertama dan tebasan.kedua). skala: pengali waktu klip serang.",
-      "kontakDetik": 0.267,
-      "skala": 1.3
+      "keterangan": "kontakDetik: saat kontak di dalam klip serang prajurit (17 bingkai sebelum kontak pada 30 per detik). Klip serang dimulai saat lawan bersiap, dari bagian klip yang membuat kontaknya jatuh pada saat kena di combat.json (lawan.isyarat + tombak.saatKena; perampok.isyarat + tebasan.pertama), diputar skala kali kecepatan asli. Tebasan kedua perampok (serang-2) dimulai jedaLanjut detik sesudah tebasan pertama, dari bagian klip yang kontaknya jatuh pada tebasan.kedua.",
+      "kontakDetik": 0.567,
+      "skala": 1.0,
+      "jedaLanjut": 0.12
     },
     "senjata": {
       "keterangan": "Senjata balok sementara di tulang RightHand. tombak: letaknya mengikuti tangan (geser = meter di ruang model: kiri, atas, depan), arahnya ditentukan di ruang badan supaya tidak terayun bersama lengan: condongBawa = derajat condong ke depan dari tegak saat dibawa, condongSiap dan condongTusuk = derajat di atas mendatar saat bersiap dan menusuk; depan dan belakang = panjang batang di depan dan di belakang genggaman (m); peralihan = detik. golok: ditempel ke tulang, bilah searah arahXfn di kerangka acuan tangan (x sisi jempol, f arah jari, n normal telapak), seperti keris Wijaya.",

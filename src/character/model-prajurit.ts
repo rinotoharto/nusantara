@@ -296,20 +296,24 @@ export class ModelPrajurit extends ModelKarakter {
         if (masukBaru) this.mainkan('terkena', true);
         break;
       case 'bersiap':
-        this.mainkan('siaga');
+        // Ancang-ancang klip serang berjalan selama bersiap; kontaknya jatuh pada saat kena sesudah isyarat.
+        if (masukBaru) {
+          this.tebasanKedua = false;
+          if (this.jenis === 'tombak') this.serangTepat('serang-3', KONFIG.lawan.isyarat + KONFIG.lawan.tombak.saatKena);
+          else this.serangTepat('serang-1', KONFIG.perampok.isyarat + KONFIG.perampok.tebasan.pertama);
+        }
         siapTombak = true;
         break;
       case 'menyerang':
         if (this.jenis === 'tombak') {
-          // Tusukan mengenai 0,08 detik setelah mulai menyerang (src/combat/enemy.ts).
-          if (masukBaru) this.serangTepat('serang-3', 0.08);
+          // Menyerang tanpa lewat bersiap (tidak terjadi di AI sekarang): klip dimulai tepat di sini.
+          if (masukBaru && this.namaAktif !== 'serang-3') this.serangTepat('serang-3', KONFIG.lawan.tombak.saatKena);
           tusuk = true;
         } else {
           const T = KONFIG.perampok.tebasan;
-          if (masukBaru) {
-            this.tebasanKedua = false;
-            this.serangTepat('serang-1', T.pertama);
-          } else if (!this.tebasanKedua && l.waktuStatus >= T.kedua - M.serang.kontakDetik / M.serang.skala) {
+          if (masukBaru && this.namaAktif !== 'serang-1') this.serangTepat('serang-1', T.pertama);
+          // Tebasan kedua: mulai sesudah ayunan pertama lewat (jedaLanjut), dari bagian klip yang kontaknya tepat di T.kedua.
+          if (!this.tebasanKedua && l.waktuStatus >= T.pertama + M.serang.jedaLanjut) {
             this.tebasanKedua = true;
             this.serangTepat('serang-2', Math.max(0, T.kedua - l.waktuStatus));
           }

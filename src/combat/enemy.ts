@@ -48,7 +48,7 @@ export interface PemberiGiliran {
 
 /**
  * Prajurit Kediri: kapsul merah tua dengan tombak. AI berstatus: diam, mendekat, mengelilingi,
- * bersiap (isyarat kuning 0,5 detik), menyerang (menusuk), mundur, terhuyung, mati.
+ * bersiap (isyarat kuning, lama di combat.json lawan.isyarat), menyerang (menusuk), mundur, terhuyung, mati.
  */
 export class Lawan {
   readonly grup = new THREE.Group();
@@ -286,7 +286,7 @@ export class Lawan {
         break;
 
       case 'menyerang':
-        if (!this.tusukanSudahKeluar && this.waktu >= 0.08) {
+        if (!this.tusukanSudahKeluar && this.waktu >= L.tombak.saatKena) {
           this.tusukanSudahKeluar = true;
           this.tusuk(pemain, tarung);
         }

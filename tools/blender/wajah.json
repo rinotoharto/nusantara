@@ -1521,17 +1521,17 @@
       "kontak_manual_baru": {
         "serang-1": [
           20,
-          7,
+          17,
           10
         ],
         "serang-2": [
           27,
-          7,
+          17,
           10
         ],
         "serang-3": [
           19,
-          7,
+          17,
           10
         ],
         "serang-berat": [
@@ -1539,7 +1539,7 @@
           14,
           15
         ],
-        "keterangan": "Patokan klip dari folder baru/ (17 November 2026): [bingkai kontak, sebelum, sesudah]. serang-1 tebasan keluar (laju tangan puncak bingkai 18), serang-2 tebasan balik turun (bingkai 26-27; ayunan bingkai 4-15 adalah ancang-ancang), serang-3 tusukan (lengan lurus mulai bingkai 18), serang-berat (tangan paling depan bingkai 27). Revisi: serang-1 kontak di bingkai 20 (dua bingkai setelah laju tangan puncak), saat bilah sudah menyapu ke depan dan naik; di bingkai 18 bilah masih menunjuk 57 derajat ke bawah. serang-3 di bingkai 19 (tangan paling depan). serang-2 kontak di bingkai 27 (satu bingkai setelah patokan lama): di bingkai 26 bilah masih 69 derajat ke atas, di 27 sudah menyapu ke depan (naik 11, serong 6). Potongan 17 November malam: serang ringan 7 bingkai sebelum dan 10 sesudah kontak (18 bingkai, 0,6 s; di game diputar 1,2 kali untuk durasi 0,5 s, kontak di 0,22 s); serang-berat 14 sebelum dan 15 sesudah (30 bingkai, 1,0 s; diputar 1,05 kali untuk 0,95 s, kontak di 0,48 s). serang-3 diunduh ulang 18 November 2026 dengan Wijaya aktif (46 bingkai): laju tangan puncak bingkai 17, tangan paling depan mulai bingkai 19 (0,69 m), jadi kontak tetap 19."
+        "keterangan": "Prajurit (18 November 2026): serang-1 sampai 3 dipotong 17 bingkai sebelum dan 10 sesudah kontak (28 bingkai, 0,93 s; kontak di 0,567 s), supaya ancang-ancang terlihat penuh selama lawan bersiap dan klip diputar pada kecepatan asli (combat.json lawan.isyarat 0,55 + tombak.saatKena 0,02). Bingkai kontak sama dengan Wijaya; riwayat pemilihan kontak ada di wijaya_ulang.animasi.kontak_manual_baru."
       },
       "klip_baru_lewati": [],
       "genggam": {
@@ -1788,29 +1788,29 @@
         "serang-1": {
           "kontak_asli": 20,
           "dipotong": [
-            13,
+            3,
             30
           ],
-          "bingkai": 18,
-          "kontak_baru": 8
+          "bingkai": 28,
+          "kontak_baru": 18
         },
         "serang-2": {
           "kontak_asli": 27,
           "dipotong": [
-            20,
+            10,
             37
           ],
-          "bingkai": 18,
-          "kontak_baru": 8
+          "bingkai": 28,
+          "kontak_baru": 18
         },
         "serang-3": {
           "kontak_asli": 19,
           "dipotong": [
-            12,
+            2,
             29
           ],
-          "bingkai": 18,
-          "kontak_baru": 8
+          "bingkai": 28,
+          "kontak_baru": 18
         },
         "serang-berat": {
           "kontak_asli": 27,
@@ -2420,9 +2420,9 @@
           "hindar": 50,
           "terkena": 39,
           "mati": 124,
-          "serang-1": 18,
-          "serang-2": 18,
-          "serang-3": 18,
+          "serang-1": 28,
+          "serang-2": 28,
+          "serang-3": 28,
           "lari-santai": 26,
           "lari-kencang": 39,
           "serang-berat": 30,
@@ -2437,7 +2437,7 @@
           "serang-3",
           "serang-berat"
         ],
-        "berkas_mb": 2.54
+        "berkas_mb": 2.56
       },
       "ukur": {
         "hindar": {

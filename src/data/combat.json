@@ -108,15 +108,16 @@
       "jangkauan": 2.2,
       "sudutKena": 50,
       "damage": 25,
-      "dorong": 0.8
+      "dorong": 0.8,
+      "saatKena": 0.02
     },
     "jarakDeteksi": 12,
     "kecepatanMendekat": 4.6,
     "kecepatanMengelilingi": 1.6,
     "jarakMengelilingiMin": 3,
     "jarakMengelilingiMaks": 4,
-    "isyarat": 0.5,
-    "durasiTusuk": 0.3,
+    "isyarat": 0.55,
+    "durasiTusuk": 0.35,
     "mundurMin": 1.0,
     "mundurMaks": 2.0,
     "terhuyung": 1.0,
@@ -203,11 +204,11 @@
     "kecepatanMengelilingi": 1.8,
     "jarakMengelilingiMin": 2.5,
     "jarakMengelilingiMaks": 3.5,
-    "isyarat": 0.35,
+    "isyarat": 0.45,
     "tebasan": {
-      "pertama": 0.08,
-      "kedua": 0.38,
-      "durasi": 0.55
+      "pertama": 0.02,
+      "kedua": 0.47,
+      "durasi": 0.8
     },
     "mundurMin": 0.8,
     "mundurMaks": 1.6,
