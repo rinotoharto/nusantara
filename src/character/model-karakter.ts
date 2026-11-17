@@ -118,6 +118,36 @@ export class ModelKarakter {
   /** Klip serang dari awal, diputar supaya seluruh klip habis tepat dalam `durasi` detik. */
   protected serang(nama: string, durasi: number): void {
     this.mainkan(nama, true);
+    this.lajuLanjutan = null;
     if (this.aktif && this.namaAktif === nama) this.aktif.timeScale = this.aktif.getClip().duration / durasi;
+  }
+
+  /** Rencana laju sesudah kontak untuk `serangSejajar`: begitu klip melewati `kontak`, timeScale menjadi `laju`. */
+  private lajuLanjutan: { aksi: THREE.AnimationAction; kontak: number; laju: number } | null = null;
+
+  /**
+   * Klip serang dari awal dengan dua laju, supaya bingkai kontaknya (`kontak`, detik di dalam klip) jatuh tepat
+   * `saatKena` detik dari sekarang, yaitu saat serangan dikeluarkan di logika. Sesudah kontak, sisa klip diputar
+   * `lajuSesudah` kali, atau kalau `durasi` diberikan, selaju yang membuat klip habis tepat di `durasi`.
+   * Panggil `perbaruiLajuSerang` tiap frame sebelum mixer diperbarui.
+   */
+  protected serangSejajar(nama: string, kontak: number, saatKena: number, durasi?: number, lajuSesudah = 1): void {
+    this.mainkan(nama, true);
+    this.lajuLanjutan = null;
+    if (!this.aktif || this.namaAktif !== nama) return;
+    const panjang = this.aktif.getClip().duration;
+    this.aktif.timeScale = kontak / Math.max(saatKena, 1e-3);
+    const laju = durasi !== undefined ? (panjang - kontak) / Math.max(durasi - saatKena, 1e-3) : lajuSesudah;
+    this.lajuLanjutan = { aksi: this.aktif, kontak, laju };
+  }
+
+  protected perbaruiLajuSerang(): void {
+    const r = this.lajuLanjutan;
+    if (!r) return;
+    if (r.aksi !== this.aktif) this.lajuLanjutan = null;
+    else if (r.aksi.time >= r.kontak) {
+      r.aksi.timeScale = r.laju;
+      this.lajuLanjutan = null;
+    }
   }
 }

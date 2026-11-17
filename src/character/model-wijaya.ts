@@ -5,6 +5,7 @@ import type { PertarunganPemain, StatusAksi } from '../combat/player-combat';
 import { SILUMAN } from '../stealth/config';
 import { KONFIG } from '../combat/config';
 import { tinggiMedan } from '../world/terrain';
+import DATA_MODEL from '../data/models.json';
 
 /**
  * Model Wijaya beranimasi (glTF + Draco), hanya aktif dengan `?model=wijaya`. Mengganti kapsul pemain
@@ -32,14 +33,16 @@ const FASE_KLIP: Record<string, { awal: number; siklus: number }> = {
   'jongkok-jalan': { awal: 0.271, siklus: 1 },
 };
 /**
- * Pengali waktu klip aksi tetap. Klip serang tidak di sini: pengalinya dihitung dari panjang klip dibagi durasi
- * serangan di combat.json (ringan 0,6 s / 0,5 s = 1,2; berat 1,0 s / 0,95 s = 1,05), sehingga bingkai kontak
- * (bingkai 8 dan 15) jatuh di tengah jendela kena.
+ * Pengali waktu klip aksi tetap. Klip serang tidak di sini: diputar dua laju (serangSejajar) supaya bingkai
+ * kontak (bingkai 8 = 0,267 s dan 15 = 0,5 s) jatuh di awal jendela kena, saat serangan dikeluarkan logika,
+ * dan klip habis tepat di durasi serangan (ringan: 1,67 lalu 0,98; berat: 1,22 lalu 0,93).
  */
 const SKALA_WAKTU: Partial<Record<string, number>> = {
   hindar: 2.5, terkena: 2.0, mati: 1.0, tangkis: 1.0, idle: 1.0, siaga: 1.0, 'jongkok-diam': 1.0,
 };
 const SKALA_TIKAMAN = 1.67;
+/** Detik kontak di dalam tiap klip serang (bingkai kontak / 30). */
+const KONTAK: Record<string, number> = DATA_MODEL.wijaya.serang.kontakDetik;
 const SEKALI = new Set(['serang-1', 'serang-2', 'serang-3', 'serang-berat', 'hindar', 'terkena', 'mati']);
 const CROSSFADE = 0.15;
 const TABEL: TabelKlip = { laju: LAJU_KLIP, fase: FASE_KLIP, skalaWaktu: SKALA_WAKTU, sekali: SEKALI, skalaGerak: SKALA_GERAK, crossfade: CROSSFADE };
@@ -250,20 +253,25 @@ export class ModelWijaya extends ModelKarakter {
         else this.mainkan('idle');
         break;
       }
+      // Serangan dikeluarkan logika di awal jendela kena (jendelaKena[0]) dan di akhir lesatan Tikaman dan
+      // Sergap; bingkai kontak klip disejajarkan ke saat itu (models.json wijaya.serang.kontakDetik).
       case 'serangRingan': {
+        const R = KONFIG.pemain.seranganRingan;
         const nama = `serang-${(this.tarung.komboSekarang % 3) + 1}`;
-        if (masukBaru || this.namaAktif !== nama) this.serang(nama, KONFIG.pemain.seranganRingan.durasi);
+        if (masukBaru || this.namaAktif !== nama) this.serangSejajar(nama, KONTAK[nama] ?? 0.267, R.jendelaKena[0], R.durasi);
         break;
       }
-      case 'serangBerat':
-        if (masukBaru) this.serang('serang-berat', KONFIG.pemain.seranganBerat.durasi);
+      case 'serangBerat': {
+        const B = KONFIG.pemain.seranganBerat;
+        if (masukBaru) this.serangSejajar('serang-berat', KONTAK['serang-berat'] ?? 0.5, B.jendelaKena[0], B.durasi);
         break;
+      }
       case 'tikaman':
       case 'sergap':
-        // Tikaman dan Sergap jauh lebih singkat daripada serang ringan: tusukan diputar cepat.
+        // Tikaman dan Sergap jauh lebih singkat daripada serang ringan: sesudah kontak tusukan diputar cepat.
         if (masukBaru) {
-          this.mainkan('serang-3', true);
-          if (this.aktif) this.aktif.timeScale = SKALA_TIKAMAN;
+          const lesat = status === 'tikaman' ? KONFIG.pemain.tikaman.lesat : KONFIG.pemain.sergap.lesat;
+          this.serangSejajar('serang-3', KONTAK['serang-3'] ?? 0.267, lesat, undefined, SKALA_TIKAMAN);
         }
         break;
       case 'tangkis':
@@ -287,6 +295,7 @@ export class ModelWijaya extends ModelKarakter {
     const terhunus = beraksi || (this.lawanDekat && !lariKencang);
     if (this.kerisTangan) this.kerisTangan.visible = terhunus || !this.kerisSarung;
     if (this.kerisSarung) this.kerisSarung.visible = !terhunus;
+    this.perbaruiLajuSerang();
     this.mixer.update(dt);
     // Lereng: tanpa IK kaki, kaki yang melangkah ke arah naik masuk tanah (sampai 20 cm di lereng 25 derajat).
     // Model diangkat sejauh sendi kaki terdalam berada di bawah tanah; naik cepat, turun pelan supaya tidak

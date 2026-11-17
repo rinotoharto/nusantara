@@ -768,3 +768,15 @@ Lembar: `aset-mentah/pratinjau/game-prajurit-serang-ancang.jpg`, `game-perampok-
 - Tombak dua tangan (`models.json` `senjata.tombak.duaTangan`): `arahDari: "tangan"` untuk klip tusukan dua tangan
   (arah tombak dari tangan kanan ke tangan kiri), `"badan"` + IK dua tulang lengan kiri untuk klip satu tangan
   yang ada. Lembar: `aset-mentah/pratinjau/game-prajurit-tombak-dua-tangan.jpg`, `game-perampok-golok.jpg`.
+
+### Penyejajaran kontak klip serang Wijaya (18 November 2026)
+
+Kunci pertama klip di GLB ada di 1/30 detik, jadi bingkai f berada di detik f / 30: kontak serang-1 sampai 3 di
+0,267 s (bingkai 8), serang-berat di 0,5 s (bingkai 15). Angka Wijaya sudah memakai hitungan ini (tidak ada selisih
+satu bingkai seperti pada prajurit), tetapi klip dulu disetel supaya kontak jatuh di tengah jendela kena, padahal
+logika mengeluarkan serangan di awal jendela. Terukur di game sebelum perbaikan: kena pada detik klip 0,200
+(ringan) dan 0,439 (berat), dua bingkai klip sebelum kontak; Tikaman dan Sergap 0,250 (setengah bingkai).
+Sekarang klip diputar dua laju (`serangSejajar` di `src/character/model-karakter.ts`, kontak di
+`src/data/models.json` `wijaya.serang.kontakDetik`): sampai kontak 1,67 kali (ringan) atau 1,22 kali (berat), lalu
+0,98 atau 0,93 kali supaya klip habis tepat di durasi serangan. Sesudah perbaikan: 0,278 (ringan), 0,508 (berat),
+0,267 (Tikaman dan Sergap).

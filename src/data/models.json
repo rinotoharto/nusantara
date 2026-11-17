@@ -1,4 +1,10 @@
 {
+  "wijaya": {
+    "keterangan": "Model Wijaya beranimasi (?model=wijaya). serang.kontakDetik: detik kontak di dalam tiap klip serang di GLB (bingkai kontak / 30; kunci pertama GLB ada di 1/30 detik, jadi bingkai f berada di detik f / 30). Klip diputar dua laju supaya kontak jatuh saat serangan dikeluarkan logika: awal jendelaKena untuk serang ringan (0,16 s) dan berat (0,41 s), akhir lesatan untuk Tikaman dan Sergap (0,15 s). Sebelum 18 November 2026 klip diputar satu laju dengan kontak di tengah jendela, sehingga kena terjadi dua bingkai klip sebelum kontak (ringan pada detik klip 0,200, berat 0,439).",
+    "serang": {
+      "kontakDetik": { "serang-1": 0.267, "serang-2": 0.267, "serang-3": 0.267, "serang-berat": 0.5 }
+    }
+  },
   "prajurit": {
     "keterangan": "Model prajurit beranimasi (?model=prajurit) untuk penjaga, lawan, dan perampok. lajuKlip: laju langkah asli klip (m/s) dari FBX sumber; timeScale klip gerak = laju lawan / nilai ini, dibatasi skalaGerak. faseKlip: awal = bagian siklus saat kaki kiri paling depan, siklus = jumlah siklus langkah per klip. ambangLaju: di bawah diam = berdiri; di bawah jalan = klip jalan; di bawah lariSantai = lari-santai; di atasnya lari-kencang. skalaWaktu: pengali waktu klip tetap (mati 1,7: klip 4,1 detik harus selesai sebelum lawan menghilang, combat.json hilangSetelahMati 3 detik). kilatan: bagian sinar isyarat dan kilatan kena kapsul yang diteruskan ke bahan model di tepi siluet; di bagian badan yang menghadap kamera tinggal kilatan x kilatanIsi (0,06), dengan peralihan pangkat kilatanTepiPangkat; kilatanSenjata: bagian yang diteruskan ke tombak atau golok, supaya isyarat terbaca dari senjata dan garis tepi badan, bukan dari seluruh badan yang menguning.",
     "berkas": "models/prajurit.glb",
