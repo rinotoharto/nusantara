@@ -4,6 +4,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import type { Pemain } from './player';
 import type { PertarunganPemain, StatusAksi } from '../combat/player-combat';
 import { SILUMAN } from '../stealth/config';
+import { KONFIG } from '../combat/config';
 
 /**
  * Model Wijaya beranimasi (glTF + Draco), hanya aktif dengan `?model=wijaya`. Mengganti kapsul pemain
@@ -81,6 +82,10 @@ export class ModelWijaya {
   private tulangTangan: THREE.Object3D | null = null;
   /** Benar saat ada lawan dekat (kamera mode bertarung); diisi main tiap frame. */
   siaga = false;
+  /** Benar saat ada lawan dalam jarak siaga keris (combat.json pemain.keris.jarakSiaga); diisi main tiap frame. */
+  lawanDekat = false;
+  private kerisTangan: THREE.Object3D | null = null;
+  private kerisSarung: THREE.Object3D | null = null;
   siap = false;
   waktuMuatMs = 0;
 
@@ -131,7 +136,7 @@ export class ModelWijaya {
     this.pemain.pose.children.forEach((c) => {
       if (c.name === 'hidung') c.visible = false;
     });
-    if (this.tulangTangan) this.pasangKeris(this.tulangTangan, this.tarung.ambilKeris());
+    if (this.tulangTangan) this.pasangKeris(this.tulangTangan, this.tarung.ambilKeris(), akar);
     this.waktuMuatMs = performance.now() - mulai;
     this.siap = true;
     this.mainkan('idle');
@@ -143,13 +148,33 @@ export class ModelWijaya {
   /**
    * Keris di genggaman tangan kanan. Keris balok milik modul pertarungan terus digerakkan untuk kapsul, jadi
    * yang ditempel ke tulang adalah salinannya (aslinya disembunyikan). Letaknya dihitung dari pose istirahat:
-   * hulu di tengah telapak (jari menggenggam di semua klip), bilah keluar di sisi telunjuk condong ke depan,
-   * sama dengan keris sementara di tools/blender/pratinjau_animasi.py. Panjang sekitar 40 cm.
+   * hulu di tengah telapak (jari menggenggam di semua klip), arah bilah dari combat.json (pasang.arahXfn,
+   * dikalibrasi dari tusukan serang-3), sama dengan keris sementara di tools/blender/pratinjau_animasi.py.
+   * Salinan kedua di pinggang kiri depan (tulang pinggul) tampil saat keris disarungkan.
    */
-  private pasangKeris(tangan: THREE.Object3D, asli: THREE.Group): void {
+  private pasangKeris(tangan: THREE.Object3D, asli: THREE.Group, akar: THREE.Object3D): void {
+    const K = KONFIG.pemain.keris;
+    const pinggul = akar.getObjectByName('mixamorigHips') ?? akar.getObjectByName('mixamorig:Hips');
+    if (pinggul) {
+      akar.updateWorldMatrix(true, true);
+      const sarung = asli.clone();
+      sarung.visible = false;
+      // Di ruang model: +x kiri tokoh, +y atas, +z depan.
+      const p = pinggul.getWorldPosition(new THREE.Vector3());
+      akar.worldToLocal(p).add(new THREE.Vector3(...(K.sarung.letak as [number, number, number])));
+      const z = new THREE.Vector3(...(K.sarung.arah as [number, number, number])).normalize();
+      const x = new THREE.Vector3(0, 0, 1).cross(z).normalize();
+      const y = z.clone().cross(x);
+      const ms = new THREE.Matrix4().makeBasis(x, y, z).setPosition(p).scale(new THREE.Vector3(K.pasang.skala, K.pasang.skala, K.pasang.skala));
+      ms.premultiply(akar.matrixWorld).premultiply(new THREE.Matrix4().copy(pinggul.matrixWorld).invert());
+      ms.decompose(sarung.position, sarung.quaternion, sarung.scale);
+      pinggul.add(sarung);
+      this.kerisSarung = sarung;
+    }
     asli.visible = false;
     const keris = asli.clone();
     keris.visible = true;
+    this.kerisTangan = keris;
     const cari = (akhiran: string): THREE.Object3D | undefined =>
       tangan.getObjectByName(`mixamorigRightHand${akhiran}`) ?? tangan.getObjectByName(`mixamorig:RightHand${akhiran}`);
     const telunjuk = cari('Index1');
@@ -168,17 +193,19 @@ export class ModelWijaya {
     const i1 = dunia(telunjuk);
     const m1 = dunia(tengah);
     const p1 = dunia(kelingking);
-    // Normal telapak: pada pose istirahat (lengan terentang) telapak menghadap bawah.
-    const normal = i1.clone().sub(t).cross(p1.clone().sub(t)).normalize();
-    if (normal.y > 0) normal.negate();
-    const bukuJari = i1.clone().sub(p1).normalize(); // ke sisi telunjuk
+    // Kerangka acuan tangan dari sendi: x garis buku jari ke sisi telunjuk, f arah jari, n normal telapak
+    // (pada pose istirahat, lengan terentang, telapak menghadap bawah).
+    const bukuJari = i1.clone().sub(p1).normalize();
     const jari = m1.clone().sub(t);
     jari.addScaledVector(bukuJari, -jari.dot(bukuJari)).normalize();
+    const normal = bukuJari.clone().cross(jari).normalize();
+    if (normal.y > 0) normal.negate();
     const pusat = t.clone().lerp(m1, 0.75).addScaledVector(normal, 0.03);
-    const bilah = jari.clone().multiplyScalar(0.85).addScaledVector(bukuJari, 0.5).normalize(); // sumbu +z keris
+    const [ax, af, an] = K.pasang.arahXfn;
+    const bilah = bukuJari.clone().multiplyScalar(ax).addScaledVector(jari, af).addScaledVector(normal, an).normalize(); // sumbu +z keris
     const atas = normal.clone().addScaledVector(bilah, -normal.dot(bilah)).normalize();
     const samping = atas.clone().cross(bilah);
-    const m = new THREE.Matrix4().makeBasis(samping, atas, bilah).setPosition(pusat).scale(new THREE.Vector3(0.7, 0.7, 0.7));
+    const m = new THREE.Matrix4().makeBasis(samping, atas, bilah).setPosition(pusat).scale(new THREE.Vector3(K.pasang.skala, K.pasang.skala, K.pasang.skala));
     m.premultiply(new THREE.Matrix4().copy(tangan.matrixWorld).invert());
     m.decompose(keris.position, keris.quaternion, keris.scale);
     tangan.add(keris);
@@ -263,6 +290,13 @@ export class ModelWijaya {
         if (masukBaru) this.mainkan('mati', true);
         break;
     }
+    // Keris terhunus saat menyerang atau menangkis, atau ada lawan dekat dan tidak sedang lari kencang;
+    // selain itu disarungkan di pinggang.
+    const beraksi = status === 'mengisi' || status === 'serangRingan' || status === 'serangBerat' || status === 'tikaman' || status === 'sergap' || status === 'tangkis';
+    const lariKencang = !p.jongkok && p.laju > SILUMAN.pemain.lajuLari;
+    const terhunus = beraksi || (this.lawanDekat && !lariKencang);
+    if (this.kerisTangan) this.kerisTangan.visible = terhunus || !this.kerisSarung;
+    if (this.kerisSarung) this.kerisSarung.visible = !terhunus;
     this.mixer.update(dt);
   }
 }

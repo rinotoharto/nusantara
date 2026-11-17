@@ -2184,10 +2184,10 @@
           "kontak_baru": 9
         },
         "serang-3": {
-          "kontak_asli": 18,
+          "kontak_asli": 19,
           "dipotong": [
-            10,
-            28
+            11,
+            29
           ],
           "bingkai": 19,
           "kontak_baru": 9
@@ -3068,7 +3068,7 @@
           10
         ],
         "serang-3": [
-          18,
+          19,
           8,
           10
         ],
@@ -3128,6 +3128,49 @@
         "bagian": 0.8,
         "maks_derajat": 50,
         "keterangan": "Di klip yang disebut, simpangan kepala dari arah depan-tegak dikurangi sebesar bagian (0 sampai 1) di tiap kunci, paling banyak maks_derajat, dibagi rata ke Neck dan Head."
+      },
+      "keris": {
+        "arah_xfn": [
+          0.7562,
+          0.5908,
+          0.2814
+        ],
+        "kalibrasi": {
+          "klip": "serang-3",
+          "bingkai": 8
+        },
+        "arah_di_kontak": {
+          "serang-1": {
+            "bingkai": 8,
+            "naik_derajat": -43.0,
+            "serong_derajat": -44.0
+          },
+          "serang-2": {
+            "bingkai": 8,
+            "naik_derajat": 11.0,
+            "serong_derajat": 8.0
+          },
+          "serang-3": {
+            "bingkai": 8,
+            "naik_derajat": 0.0,
+            "serong_derajat": -0.0
+          },
+          "serang-berat": {
+            "bingkai": 12,
+            "naik_derajat": -42.0,
+            "serong_derajat": 28.0
+          },
+          "tangkis": {
+            "bingkai": 7,
+            "naik_derajat": 22.0,
+            "serong_derajat": -42.0
+          },
+          "siaga": {
+            "bingkai": 24,
+            "naik_derajat": -9.0,
+            "serong_derajat": 62.0
+          }
+        }
       }
     }
   }

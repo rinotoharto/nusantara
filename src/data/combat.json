@@ -7,7 +7,17 @@
       "damageRingan": 20,
       "damageBerat": 40,
       "dorongRingan": 0.3,
-      "dorongBerat": 2.0
+      "dorongBerat": 2.0,
+      "keteranganModel": "Model beranimasi (?model=wijaya). jarakSiaga: keris terhunus di tangan kalau ada lawan sedekat ini (meter); selain itu, dan selama lari kencang, keris disarungkan di pinggang kiri depan. Menyerang dan menangkis selalu menghunusnya. pasang.arahXfn: arah bilah di kerangka acuan tangan kanan (x = garis buku jari ke sisi telunjuk, f = arah jari, n = normal telapak), dikalibrasi dari bingkai kontak tusukan serang-3 oleh tools/blender/pratinjau_animasi.py --kalibrasi-keris; satu sudut untuk semua klip. pasang.skala: pengecil keris balok (panjang sekitar 40 cm). sarung: letak di pinggang relatif tulang pinggul (kiri, atas, depan, meter) dan arah bilah (kiri, atas, depan).",
+      "jarakSiaga": 8,
+      "pasang": {
+        "arahXfn": [0.7562, 0.5908, 0.2814],
+        "skala": 0.7
+      },
+      "sarung": {
+        "letak": [0.1, 0.06, 0.14],
+        "arah": [0.55, -0.8, 0.1]
+      }
     },
     "seranganRingan": {
       "durasi": 0.36,

@@ -744,7 +744,10 @@ renderer.setAnimationLoop(() => {
   if (jarakLawan < KONFIG.kamera.jarakDeteksi) sisaWaktuTarung = KONFIG.kamera.waktuKembali;
   else sisaWaktuTarung = Math.max(0, sisaWaktuTarung - dt);
   kameraOrangKetiga.modeTarung = sisaWaktuTarung > 0;
-  if (modelWijaya) modelWijaya.siaga = sisaWaktuTarung > 0;
+  if (modelWijaya) {
+    modelWijaya.siaga = sisaWaktuTarung > 0;
+    modelWijaya.lawanDekat = jarakLawan < KONFIG.pemain.keris.jarakSiaga;
+  }
   kameraOrangKetiga.mendekat = tarung.kameraMendekat;
   kameraOrangKetiga.merendah = tarung.kameraMerendah;
 

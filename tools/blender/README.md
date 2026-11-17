@@ -597,6 +597,12 @@ Yang baru di `<blok>.animasi`:
   setengah menggenggam di klip serang, tangkis, siaga. Tiap ruas menekuk pada engsel yang dihitung dari pose
   istirahat (tegak lurus arah jari dan normal telapak).
 
+- `keris`: arah bilah keris di kerangka acuan tangan kanan (`arah_xfn`: x garis buku jari ke sisi telunjuk, f
+  arah jari, n normal telapak), dikalibrasi `pratinjau_animasi.py --kalibrasi-keris` dari bingkai kontak serang-3
+  supaya bilah lurus mendatar ke depan saat tusukan. Satu sudut untuk semua klip; salin angkanya ke
+  `src/data/combat.json` (`pemain.keris.pasang.arahXfn`). `arah_di_kontak` mencatat arah bilah tiap klip.
+  Lembar `keris` kini juga memuat tangkis dan siaga (`-anim-keris-3.png`) dan satu lembar dari samping.
+
 Laju langkah klip (kaki tumpu relatif pinggul): jalan 1,43; lari lama 4,01; lari-santai 2,35; lari-kencang 4,5 m/s.
 Di game: jalan pelan memakai `jalan`, lari santai memakai `lari` lama, lari kencang memakai `lari-kencang`
 (angka di `src/data/stealth.json`, tabel laju dan fase kaki di `src/character/model-wijaya.ts`).

@@ -48,6 +48,7 @@ def argumen():
     p.add_argument("--klip-ukur", default=None, help="ukur hanya klip ini (dipisah koma); bawaan semua")
     p.add_argument("--lain", default="jalan:8,hindar:20,terkena:10,jongkok-diam:0",
                    help="lembar tambahan <nama>-anim-lain.png: daftar klip:bingkai dipisah koma")
+    p.add_argument("--kalibrasi-keris", action="store_true", help="hitung ulang arah pasang keris dari kontak serang-3")
     p.add_argument("--tanpa-json", action="store_true", help="jangan tulis ukuran ke json (untuk membandingkan model lain)")
     return p.parse_args(argv)
 
@@ -396,15 +397,39 @@ def main():
         t0 = Bd[PRE + "RightHand"].head_local
         tanda_n = -1.0 if (Bd[PRE + "RightHandIndex1"].head_local - t0).cross(Bd[PRE + "RightHandPinky1"].head_local - t0).z > 0 else 1.0
 
-        def taruh_keris():
+        def kerangka_tangan():
+            """Kerangka acuan tangan kanan dari sendi (tidak bergantung pada sumbu tulang, jadi sama di Blender
+            dan di game): x = garis buku jari ke sisi telunjuk, f = arah jari tegak lurus x, n = normal telapak."""
             t, i1, m1, p1 = (Vector(tulang(n_)) for n_ in ("RightHand", "RightHandIndex1", "RightHandMiddle1", "RightHandPinky1"))
-            n_t = (i1 - t).cross(p1 - t).normalized() * tanda_n          # normal telapak, ke arah telapak
-            x = (i1 - p1).normalized()                                   # garis buku jari, ke sisi telunjuk
-            f = (m1 - t).normalized()
+            x = (i1 - p1).normalized()
+            f = (m1 - t)
             f = (f - x * f.dot(x)).normalized()
+            n_t = x.cross(f).normalized()
+            if n_t.dot((i1 - t).cross(p1 - t)) * tanda_n < 0:
+                n_t = -n_t
+            return t, m1, x, f, n_t
+
+        # Arah bilah dalam kerangka acuan tangan (x, f, n): dikalibrasi dari bingkai kontak tusukan (serang-3),
+        # tempat bilah harus lurus mendatar ke arah sasaran (depan tokoh, -Y). Satu sudut untuk semua klip.
+        KRS = A.setdefault("keris", {})
+        if a.kalibrasi_keris or "arah_xfn" not in KRS:
+            pasang("serang-3", kontak("serang-3"))
+            _, _, x_, f_, n_ = kerangka_tangan()
+            depan_ = Vector((0.0, -1.0, 0.0))
+            KRS["arah_xfn"] = [round(depan_.dot(v_), 4) for v_ in (x_, f_, n_)]
+            KRS["kalibrasi"] = {"klip": "serang-3", "bingkai": int(kontak("serang-3"))}
+            catat(f"keris dikalibrasi dari serang-3 bingkai {kontak('serang-3')}: arah bilah (x, f, n) = {KRS['arah_xfn']}")
+            if not a.tanpa_json:
+                json.dump(data, open(path_json, "w"), indent=2, ensure_ascii=False)
+        koef = KRS["arah_xfn"]
+
+        def taruh_keris():
+            t, m1, x, f, n_t = kerangka_tangan()
             pusat = t + (m1 - t) * 0.75 + n_t * 0.03
-            arah_b = (f * 0.85 + x * 0.5).normalized()
-            lebar_b = arah_b.cross(n_t).normalized()
+            arah_b = (x * koef[0] + f * koef[1] + n_t * koef[2]).normalized()
+            lebar_b = arah_b.cross(n_t)
+            lebar_b = (lebar_b if lebar_b.length > 0.2 else arah_b.cross(x)).normalized()
+            taruh_keris.arah = arah_b
             def matriks(sb1, sb2, sb3, p_, ukuran3):
                 M = Matrix.Identity(4)
                 for k_, (sb, u) in enumerate(zip((sb1, sb2, sb3), ukuran3)):
@@ -414,14 +439,41 @@ def main():
                     M[r_][3] = p_[r_]
                 return M
             hulu.matrix_world = matriks(x, f, n_t, pusat, (0.10, 0.03, 0.03))
-            ujung = pusat + x * 0.05
+            ujung = pusat + arah_b * 0.03
             bilah.matrix_world = matriks(arah_b, lebar_b, n_t, ujung + arah_b * 0.155, (0.31, 0.032, 0.008))
 
-        for akhiran, pasangan in (("keris-1", ("serang-1", "serang-2")), ("keris-2", ("serang-3", "serang-berat"))):
+        # Arah bilah di bingkai kontak tiap klip dan satu lembar dari samping.
+        arah_klip, ubin_s = {}, []
+        for n in ("serang-1", "serang-2", "serang-3", "serang-berat", "tangkis", "siaga"):
+            if n not in aksi or n not in ukur:
+                continue
+            fr = kontak(n) if n.startswith("serang") else tengah(n)
+            pasang(n, fr)
+            taruh_keris()
+            d_ = taruh_keris.arah
+            arah_klip[n] = {"bingkai": int(fr), "naik_derajat": round(math.degrees(math.asin(max(-1.0, min(1.0, d_.z)))), 0),
+                            "serong_derajat": round(math.degrees(math.atan2(d_.x, -d_.y)), 0)}
+            h_ = tulang("Hips")
+            path = os.path.join(tmp, f"keris-samping-{n}.png")
+            render(path, (float(h_[0]), float(h_[1]), 0.90), (1, 0, 0), (560, 760), ortho=2.25)
+            ubin_s.append(muat(path))
+        KRS["arah_di_kontak"] = arah_klip
+        catat(f"arah bilah di kontak (naik: derajat di atas mendatar; serong: derajat dari arah depan, positif ke kiri tokoh): {arah_klip}")
+        if ubin_s:
+            path = os.path.join(akar, a.keluar, f"{a.nama}-anim-keris-samping.png")
+            simpan(np.hstack(ubin_s), path)
+            catat(f"{path}: dari samping pada kontak (tangkis dan siaga: bingkai tengah): {', '.join(arah_klip)}")
+        if not a.tanpa_json:
+            json.dump(data, open(path_json, "w"), indent=2, ensure_ascii=False)
+
+        for akhiran, pasangan in (("keris-1", ("serang-1", "serang-2")), ("keris-2", ("serang-3", "serang-berat")), ("keris-3", ("tangkis", "siaga"))):
+            if any(n not in ukur for n in pasangan):
+                continue
             baris_px = []
             for n in pasangan:
                 ubin_ = []
-                for fr in (kontak(n) - 1, kontak(n)):
+                fk_ = kontak(n) if n.startswith("serang") else tengah(n)
+                for fr in (fk_ - 1, fk_):
                     pasang(n, fr)
                     taruh_keris()
                     h_ = tulang("Hips")
