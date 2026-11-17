@@ -26,6 +26,38 @@ const SEKALI = new Set(['serang-1', 'serang-2', 'serang-3', 'serang-berat', 'hin
 const CROSSFADE = 0.15;
 const AMBANG_LARI = 4.5;
 
+/**
+ * Peta lingkungan kecil khusus model ini (hanya dimuat dengan `?model=wijaya`; adegan tidak punya
+ * scene.environment, dan benda lain tidak tersentuh). Dua guna:
+ * - logam penuh (kalung emas, emas gelang lewat tekstur metallic) tanpa pantulan lingkungan tampil hitam;
+ * - kulit mendapat cahaya pengisi lembut, supaya sisi wajah yang membelakangi matahari rendah tidak jatuh
+ *   gelap (game hanya punya satu matahari dan ambien, tanpa cahaya pengisi).
+ * Isinya gradasi langit sore ke tanah cokelat hangat (bukan hijau rumput, supaya emas tidak kehijauan).
+ */
+function petaLingkunganModel(): THREE.CubeTexture {
+  const sisi = (warna: string[]): HTMLCanvasElement => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 16;
+    const g = c.getContext('2d')!;
+    const gradasi = g.createLinearGradient(0, 0, 0, 16);
+    warna.forEach((w, i) => gradasi.addColorStop(warna.length > 1 ? i / (warna.length - 1) : 0, w));
+    g.fillStyle = gradasi;
+    g.fillRect(0, 0, 16, 16);
+    return c;
+  };
+  const langit = '#e8b47a';
+  const kakiLangit = '#c98f55';
+  const tanah = '#5a4a2c';
+  const samping = (): HTMLCanvasElement => sisi([langit, kakiLangit, tanah]);
+  const peta = new THREE.CubeTexture([samping(), samping(), sisi([langit]), sisi([tanah]), samping(), samping()]);
+  peta.colorSpace = THREE.SRGBColorSpace;
+  peta.needsUpdate = true;
+  return peta;
+}
+/** Kekuatan peta lingkungan: penuh untuk logam murni, lemah untuk bahan badan (cahaya pengisi kulit). */
+const LINGKUNGAN_LOGAM = 1.0;
+const LINGKUNGAN_BADAN = 0.45;
+
 export class ModelWijaya {
   readonly grup = new THREE.Group();
   private mixer: THREE.AnimationMixer | null = null;
@@ -53,12 +85,21 @@ export class ModelWijaya {
     loader.setDRACOLoader(draco);
     const gltf = await loader.loadAsync(`${dasar}models/wijaya.glb`);
     const akar = gltf.scene;
+    let lingkungan: THREE.CubeTexture | null = null;
     akar.traverse((o) => {
       if ((o as THREE.Mesh).isMesh) {
         const m = o as THREE.Mesh;
         m.castShadow = true;
         m.receiveShadow = false;
         m.frustumCulled = false;
+        for (const bahan of Array.isArray(m.material) ? m.material : [m.material]) {
+          const std = bahan as THREE.MeshStandardMaterial;
+          if (!std.isMeshStandardMaterial) continue;
+          lingkungan ??= petaLingkunganModel();
+          std.envMap = lingkungan;
+          std.envMapIntensity = std.metalness > 0.5 && !std.metalnessMap ? LINGKUNGAN_LOGAM : LINGKUNGAN_BADAN;
+          std.needsUpdate = true;
+        }
       }
       if (o.name === 'mixamorigRightHand' || o.name === 'mixamorig:RightHand') this.tulangTangan = o;
     });

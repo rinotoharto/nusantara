@@ -21,7 +21,7 @@ import sys
 
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Quaternion, Vector
 
 PRE = "mixamorig:"
 
@@ -193,14 +193,89 @@ def main():
     pilih_hanya(model)
     bpy.ops.object.modifier_apply(modifier="Bobot")
 
-    # Kepala baru: di atas kepala_z_m seluruhnya Head. Di pita leher, bobot hasil transfer dipertahankan.
+    # Kepala baru seluruhnya Head. Kalau model berasal dari rapikan_leher.py (wajah.json "leher_rapi.hasil"),
+    # kepala = semua verteks di atas permukaan potong bawah rahang (bidang miring yang dibatasi bidang datar);
+    # kalau tidak, semua di atas kepala_z_m.
     vg_head = model.vertex_groups[PRE + "Head"]
     co = np.array([model.matrix_world @ v.co for v in model.data.vertices])
-    idx_kepala = [i for i in range(len(co)) if co[i, 2] > A["kepala_z_m"]]
+    LR = data.get("leher_rapi", {}).get("hasil", {})
+    leher = LR.get("pita")
+    if leher:
+        z0 = leher["z0_m"]
+        sx, sy = leher["sumbu_m"]
+        r_leher = data["leher_rapi"].get("radius_leher_m", 0.13)
+        p0, n_bid, z_dtr = np.array(LR["rahang"]["titik_m"]), np.array(LR["rahang"]["normal"]), LR["rahang"]["z_datar_m"]
+        # tinggi permukaan potong di atas (x, y): bidang miring, tidak lebih tinggi dari bidang datar
+        z_potong = np.minimum(p0[2] - (n_bid[0] * (co[:, 0] - p0[0]) + n_bid[1] * (co[:, 1] - p0[1])) / n_bid[2], z_dtr)
+        kalung = set()
+        for p in model.data.polygons:
+            if model.data.materials[p.material_index].name.startswith("emas"):
+                kalung.update(p.vertices)
+        # tinggi bidang potong atas leher badan di (x, y); pita sambungan ada di antara kedua permukaan potong
+        pb0, n_b = np.array(LR["potong_badan"]["titik_m"]), np.array(LR["potong_badan"]["normal"])
+        z_bawah = pb0[2] - (n_b[0] * (co[:, 0] - pb0[0]) + n_b[1] * (co[:, 1] - pb0[1])) / n_b[2]
+        t_leher = (co[:, 2] - z_bawah) / np.maximum(z_potong - z_bawah, 1e-4)
+        idx_kepala = [int(i) for i in np.nonzero((t_leher >= 1.0 - 1e-3) & (co[:, 2] > z_bawah))[0] if i not in kalung]
+    else:
+        idx_kepala = [i for i in range(len(co)) if co[i, 2] > A["kepala_z_m"]]
     for vg in model.vertex_groups:
         vg.remove(idx_kepala)
     vg_head.add(idx_kepala, 1.0, "REPLACE")
     catat(f"kepala: {len(idx_kepala)} verteks diikat ke Head")
+    if leher:
+        # Pita sambungan (di atas cincin badan, di bawah permukaan potong): bobot hasil transfer di pangkal,
+        # beralih ke Head penuh di tepi kepala, supaya leher tidak robek saat kepala bergerak.
+        kepala_set = set(idx_kepala)
+        n_pita = 0
+        for i in range(len(co)):
+            if i in kepala_set or i in kalung or co[i, 2] < z_bawah[i] + 5e-4 or math.hypot(co[i, 0] - sx, co[i, 1] - sy) > r_leher:
+                continue
+            t = float(min(1.0, max(0.0, t_leher[i])))
+            s = t * t * (3 - 2 * t)
+            v = model.data.vertices[i]
+            total = sum(g.weight for g in v.groups) or 1.0
+            for g in list(v.groups):
+                model.vertex_groups[g.group].add([i], g.weight / total * (1 - s), "REPLACE")
+            vg_head.add([i], s, "ADD")
+            n_pita += 1
+        # Kalung: hanya Neck dan Spine2. Bagian belakang (tinggi, di tengkuk) lebih ke Neck, bagian depan
+        # (rendah, di dada) Spine2; gradasi halus menurut tinggi supaya tali tidak patah.
+        idx_kalung = sorted(int(i) for i in kalung)
+        if idx_kalung:
+            zk = co[idx_kalung, 2]
+            neck_maks = A.setdefault("kalung_neck_maks", 0.7)
+            for vg in model.vertex_groups:
+                vg.remove(idx_kalung)
+            for i, z in zip(idx_kalung, zk):
+                t = (z - zk.min()) / max(zk.max() - zk.min(), 1e-6)
+                wn = neck_maks * t * t * (3 - 2 * t)
+                model.vertex_groups[PRE + "Neck"].add([i], wn, "REPLACE")
+                model.vertex_groups[PRE + "Spine2"].add([i], 1 - wn, "REPLACE")
+        catat(f"pita leher: {n_pita} verteks bergradasi ke Head; kalung {len(kalung)} verteks ke Neck (maks {A.get('kalung_neck_maks')}) dan Spine2")
+        A["leher"] = {"pita_verteks": n_pita, "kalung_verteks": len(kalung)}
+
+        # Kerangka ikut ditegakkan seperti mesh: sendi Head (dan anak-anaknya) digeser sejauh geser kepala,
+        # sendi Neck sejauh geser leher pada tingginya, supaya poros putar kepala tetap di tempat yang sama
+        # terhadap kepala. Hanya posisi istirahat; arah tulang dan animasi tidak berubah.
+        tg = LR.get("tegak")
+        if tg:
+            blk = Vector((tg["arah_belakang"][0], tg["arah_belakang"][1], 0.0))
+            pilih_hanya(arm)
+            z_neck = (arm.matrix_world @ arm.data.bones[PRE + "Neck"].head_local).z
+            wz = min(1.0, max(0.0, (z_neck - tg["z_pangkal_m"]) / (z0 - tg["z_pangkal_m"])))
+            wz = wz * wz * (3 - 2 * wz)
+            bpy.ops.object.mode_set(mode="EDIT")
+            eb = arm.data.edit_bones
+            kepala_eb = [eb[PRE + "Head"]] + list(eb[PRE + "Head"].children_recursive)
+            for b in kepala_eb:
+                b.head += blk * tg["geser_kepala_m"]
+                b.tail += blk * tg["geser_kepala_m"]
+            eb[PRE + "Neck"].head += blk * tg["geser_leher_m"] * wz
+            eb[PRE + "Neck"].tail += blk * tg["geser_leher_m"] * wz
+            bpy.ops.object.mode_set(mode="OBJECT")
+            A["leher"]["sendi_head_geser_m"] = tg["geser_kepala_m"]
+            A["leher"]["sendi_neck_geser_m"] = round(tg["geser_leher_m"] * wz, 4)
+            catat(f"kerangka: sendi Head digeser {tg['geser_kepala_m'] * 100:.1f} cm, Neck {tg['geser_leher_m'] * wz * 100:.1f} cm ke belakang")
 
     # 2. Kain: dari warna base color di UV verteks (gelap/cokelat atau merah = kain).
     mat = model.data.materials[0]
@@ -379,6 +454,36 @@ def main():
         del aksi["tarung"]
         arm.animation_data.action = None
         bpy.data.actions.remove(act)
+
+    # Koreksi rotasi tetap pada tulang leher untuk semua aksi (wajah.json "animasi.koreksi_rotasi_derajat",
+    # derajat ke belakang): Mixamo sedikit menunduk dan memajukan kepala. Rotasi diterapkan di kerangka acuan
+    # istirahat tulang (r @ q), jadi setara dengan memiringkan tulang terhadap induknya.
+    koreksi = A.setdefault("koreksi_rotasi_derajat", {"Neck": 0.0, "Head": 5.0})
+    arah_depan = data.get("leher_rapi", {}).get("depan", [0.0, -1.0])
+    sumbu_dunia = Vector((arah_depan[0], arah_depan[1], 0.0)).cross(Vector((0.0, 0.0, 1.0))).normalized()
+    for nama_tulang, derajat in koreksi.items():
+        if not derajat or PRE + nama_tulang not in arm.data.bones:
+            continue
+        sumbu_tulang = arm.data.bones[PRE + nama_tulang].matrix_local.to_3x3().inverted() @ sumbu_dunia
+        r = Quaternion(sumbu_tulang, math.radians(derajat))
+        jalur = f'pose.bones["{PRE}{nama_tulang}"].rotation_quaternion'
+        n_aksi = 0
+        for act in aksi.values():
+            fc4 = sorted((fc for fc in fcurves(act) if fc.data_path == jalur), key=lambda fc: fc.array_index)
+            if len(fc4) != 4 or len({len(fc.keyframe_points) for fc in fc4}) != 1:
+                continue
+            for k in range(len(fc4[0].keyframe_points)):
+                q = r @ Quaternion([fc.keyframe_points[k].co.y for fc in fc4])
+                for fc, nilai in zip(fc4, q):
+                    kp = fc.keyframe_points[k]
+                    selisih = nilai - kp.co.y
+                    kp.co.y = nilai
+                    kp.handle_left.y += selisih
+                    kp.handle_right.y += selisih
+            for fc in fc4:
+                fc.update()
+            n_aksi += 1
+        catat(f"koreksi rotasi {nama_tulang}: {derajat} derajat ke belakang pada {n_aksi} aksi")
 
     # 4. NLA: tiap aksi satu track, lalu ekspor.
     arm.animation_data.action = None

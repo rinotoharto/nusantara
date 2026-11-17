@@ -201,3 +201,98 @@ Catatan: `ganti_kepala.py` membaca badan dari GLB yang masih berkepala lama; GLB
 sebelum ganti kepala ada di git (commit 3857c46). Topeng tangan Tahap 3 tidak cocok
 lagi dengan atlas baru. Sisa yang diketahui: garis tipis di batas pulau UV wajah
 (hanya terlihat dari dekat), coretan gelap di lubang hidung dari tekstur Tripo.
+
+## Rapikan leher (17 November 2026, revisi 1)
+
+Langkah 2 "Prosedur sambung kepala" (aset-mentah/README.md): dari berkas yang kepalanya sudah
+diletakkan dan dipotong manual di Blender ke GLB game. Angka di `wajah.json` blok `leher_rapi`
+(bawaan ditulis skrip saat pertama jalan; ubah di sana lalu jalankan ulang; hapus bloknya untuk
+kembali ke bawaan).
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/rapikan_leher.py -- --masuk aset-mentah/wijaya-leher-rapi.glb --z-potong 1.48 --json tools/blender/wajah.json --tekstur aset-mentah/tekstur --nama wijaya --keluar /tmp/wijaya-leher.glb
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/gabung_animasi.py -- --model /tmp/wijaya-leher.glb --mixamo aset-mentah/mixamo --json tools/blender/wajah.json --keluar public/models/wijaya.glb
+```
+
+`LEHER_DEBUG=1` di depan perintah pertama mencetak profil sambungan, titik cabang cincin, dan
+sebaran rona di kotak gelang.
+
+### `rapikan_leher.py` (Blender)
+
+Syarat masukan: satu mesh, kepala tidak tersambung ke badan, bawah kepala dipotong di sekitar
+`--z-potong`, leher badan diekstrusi naik (pita lama). Mesh hasil ekspor glTF terpecah di
+jahitan UV (Wijaya: 517 keping), jadi tepi terbuka dicari pada topologi yang dilas berdasarkan
+posisi (`las_m` 0,1 mm). Yang benar-benar di-merge hanya duplikat persis di badan bawah (untuk
+Decimate) dan verteks di kedua cincin sambungan (`las_cincin_m` 0,5 mm).
+
+1. Cincin terbuka di sekitar leher dilaporkan; pita lama dan sekat dalam (muka datar sisa Bisect
+   dengan Fill di pangkal pita) dibuang.
+2. Kalung lukis, bagian mesh (`kalung_lukis`): texel dada atas yang jelas gelap atau bukan kulit
+   memberi posisi 3D garis kalung lama; verteks badan dalam `ratakan_radius_m` dari garis itu
+   dihaluskan. Daerahnya `tinggi_m` x `radius_m` dari sumbu leher; jangan dilebarkan sampai
+   ketiak, karena lipatan gelap di sana ikut terdeteksi.
+3. Leher ditegakkan (`tegak`): kepala digeser `geser_kepala_m` ke belakang; badan digeser
+   `geser_leher_m` dengan bobot 0 di `z_pangkal_m` sampai 1 di cincin atas badan, memudar di luar
+   `radius_penuh_m`. Sudut sumbu leher terhadap vertikal diukur sebelum dan sesudah
+   (`hasil.tegak`).
+4. Atas leher badan dipotong ulang dengan bidang miring (`potong_badan`): di belakang tepat di
+   bawah cincin lama, di depan `turun_depan_m` lebih rendah. Ini membuang sisa bawah dagu kepala
+   Tripo lama yang masih menempel di badan.
+5. Bawah kepala dipotong ulang (`rahang`): bidang miring `sudut_derajat` lewat bawah dagu, naik
+   ke belakang mengikuti bawah rahang, tidak lebih dari `naik_maks_m` (bidang datar di belakang
+   telinga supaya rambut tengkuk tidak terpotong tinggi).
+6. Sambungan: cincin tepi kepala dan cincin atas badan (jumlah verteks berbeda) dijahit zig-zag
+   menurut sudut lewat `ruas` - 1 cincin perantara berisi `kolom` verteks. Bawah dagu melandai
+   `sudut_bawah_dagu_derajat`; tonjolan otot tipis (`otot_m`) dari belakang telinga ke selangka;
+   pangkal sambungan dihaluskan (`halus_pangkal_m`). Semua penghalusan memakai posisi las dan
+   memulihkan verteks kalau ada muka yang normalnya berbalik.
+7. Kalung (`kalung`): tali bulat `jari_m` mengikuti permukaan (sinar ke badan lalu jarak tetap
+   `celah_m` dari kulit), `turun_depan_m` lebih rendah di depan, liontin pipih menempel ke dada;
+   material kedua `emas` (warna `warna_srgb`, metallic 1, roughness 0,35).
+8. Anggaran segitiga: Decimate hanya pada verteks badan di bawah `decimate_z_maks_m`. Sesudahnya
+   diperiksa: (a) muka kulit yang teksturnya menjadi bukan kulit (UV terlempar ke pulau lain),
+   lalu decimate diulang dengan daerah itu dilindungi; (b) muka yang arahnya berbalik dibanding
+   sebelum decimate dibalik lagi; (c) skrip berhenti kalau verteks di luar daerah itu berubah.
+9. Normal: normal asli tiap sudut dibawa lewat atribut dan dipasang kembali; sudut baru, cincin
+   sambungan, dan normal yang menyimpang lebih dari sekitar 72 derajat dari arah mukanya dihitung
+   halus per posisi las (badan, kepala, dan sambungan sebagai satu permukaan).
+10. Tekstur: pulau UV sambungan di kotak kosong atlas; warna beralih dari kulit leher badan ke
+    kulit rahang di ruang Lab (`kuat_rahang`, `batas_rahang_L`), peralihan diteruskan
+    `peralihan_m` ke kepala dan ke leher badan. Kalung lukis dihapus dari tekstur: texel gelap
+    diisi dari medan warna kulit per (sudut, kedalaman), bukan dari tetangga di atlas, karena
+    atlas terpecah ratusan pulau. Normal map: rata dalam `normal_rata_m` dari sambungan dan di
+    texel yang dihapus, dilemahkan di kulit kepala (`normal_kulit_kepala`) dan dada atas
+    (`normal_dada`). Margin pulau dibangun ulang. Keluaran `<nama>-basecolor-leher.png`,
+    `<nama>-normal-leher.png`, `<nama>-mr-leher.png`.
+11. Emas lukis gelang lengan (`emas`): topeng posisi (kotak `x_abs_m`, `z_m`) dan warna (rona
+    27,5 sampai 45 derajat, saturasi di atas 0,55) ke tekstur metallic-roughness, kadar logam
+    `metallic_emas` 0,65 supaya warna lukisnya masih terlihat.
+
+Ini menggantikan "optimasi ulang": `optimasi_karakter.py` berangkat dari GLB mentah Tripo dan
+tidak cocok untuk mesh yang sudah bertekstur atlas baru.
+
+### `gabung_animasi.py`
+
+Kalau `leher_rapi.hasil` ada di wajah.json:
+- kepala = verteks di atas permukaan potong bawah rahang; pita sambungan (di antara kedua
+  permukaan potong) bergradasi dari bobot hasil transfer di pangkal ke Head penuh di tepi kepala;
+- kalung (material `emas`) hanya Neck dan Spine2: bagian belakang yang tinggi sampai
+  `animasi.kalung_neck_maks` Neck, bagian depan yang rendah Spine2;
+- sendi Head dan anak-anaknya digeser sejauh geser kepala, Neck sejauh geser leher di tingginya
+  (hanya posisi istirahat, arah tulang tetap);
+- `animasi.koreksi_rotasi_derajat` (bawaan Neck 0, Head 5, derajat ke belakang) diterapkan ke
+  semua aksi di kerangka acuan istirahat tulang.
+
+### `wajah_render.py`
+
+Sudut baru `leher-bawah` (dari bawah dagu) dan `leher-dialog` (depan agak samping); `--aksi <nama>
+--bingkai <n>` merender bingkai animasi (kamera leher mengikuti tulang Head); `--toleh <derajat>`
+uji menoleh; `--garis-bahu` garis vertikal merah lewat sendi bahu; `--matahari az,el` satu
+matahari seperti di game; `--tanpa-normal` dan `--normal-warna` untuk membedakan pengaruh normal
+map. GLB berkerangka tanpa `--aksi` dirender pada pose istirahat.
+
+```bash
+/Applications/Blender.app/Contents/MacOS/Blender -b -P tools/blender/wajah_render.py -- --masuk public/models/wijaya.glb --json tools/blender/wajah.json --sudut badan-samping --netral --garis-bahu --aksi idle --bingkai 60 --keluar aset-mentah/pratinjau/leher-badan-samping-idle.png
+```
+
+Catatan: `--sudut depan` menulis ulang blok `kamera` di json; untuk render uji pakai salinan json.
