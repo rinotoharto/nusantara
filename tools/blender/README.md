@@ -724,3 +724,20 @@ berwarna kain). Sebelum dan sesudah: `aset-mentah/pratinjau/prajurit-tambal-sebe
 - Di game, topeng warna dari rona saja bocor (kain nila sebagian besar kelabu dan keunguan). Topeng kain dihitung
   di shader dari tinggi verteks pose istirahat (zona kain) dan texel yang tidak hangat; angka di
   `src/data/models.json`.
+
+### Perbaikan kecil prajurit (18 November 2026)
+
+```bash
+# garis gelap di lengan: normal map diratakan (angka di prajurit.abu.normal_garis), lalu dipasang dan digabung ulang
+V tools/blender/abu_isi.py --json <salinan wajah.json> --blok prajurit --awalan uji- --masuk aset-mentah/tekstur/prajurit-basecolor-tambal.png --data <sementara>/utuh-data.png --keluar <sementara>/basecolor.png --tekstur <sementara> --normal-masuk aset-mentah/tekstur/prajurit-normal-sambung.png --normal-keluar aset-mentah/tekstur/prajurit-normal-garis.png
+B tools/blender/tekstur_pasang.py -- --masuk aset-mentah/prajurit-utuh.glb --basecolor aset-mentah/tekstur/prajurit-basecolor-tambal.png --normal aset-mentah/tekstur/prajurit-normal-garis.png --keluar aset-mentah/prajurit-utuh.glb --nama prajurit
+```
+
+- Garis gelap tipis di lengan terbukti dari normal map (hilang di game saat `normalMap` dimatikan). `abu_isi.py`
+  dijalankan pada salinan json karena hanya keluaran normalnya yang dipakai (base color hasilnya dibuang).
+- `abu_isi.py`: di luar garis yang diratakan, normal map asli kini tidak disentuh (dulu seluruh gambar ikut
+  dinormalisasi ulang); `normal_garis.z_maks_m` membatasi tinggi sendiri (prajurit 1,38 m, di bawah tali leher).
+- Di game (`src/data/models.json`): Kediri diberi warna pihak sendiri; ikat kepala dibatasi tinggi dan terang
+  (rambut hitam kebiruan berterang di bawah 0,02, kain ikat 0,03 sampai 0,09); sinar isyarat penuh hanya di tepi
+  siluet dan senjata. Game hanya punya satu keadaan cahaya (sore, dengan pengali per segmen), jadi "malam" diuji
+  dengan semua lampu 40 persen. Sebelum dan sesudah: `aset-mentah/pratinjau/prajurit-kecil-sebelum-sesudah.jpg`.

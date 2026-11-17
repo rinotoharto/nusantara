@@ -117,6 +117,7 @@ def ratakan_garis_normal(path_masuk, path_keluar, daerah, ng):
     vh = hasil[:, :, ::-1] / 127.5 - 1.0
     vh /= np.maximum(np.linalg.norm(vh, axis=2, keepdims=True), 1e-6)
     hasil = np.clip((vh[:, :, ::-1] + 1.0) * 127.5, 0, 255).astype(np.uint8)
+    hasil = np.where(w > 0, hasil, nm)          # di luar garis, normal map asli tidak disentuh (tanpa normalisasi ulang)
     cv2.imwrite(path_keluar, hasil)
     return int(garis.sum())
 
@@ -423,8 +424,9 @@ def main():
     if ng and a.normal_masuk and a.normal_keluar:
         jauh_emas = cv2.dilate((kain | emas).astype(np.uint8), inti_lebar, iterations=ng.get("jarak_emas_px", 8)) == 0
         daerah_n = cakupan & ~kain & ~emas & jauh_emas
-        if abu.get("z_maks_m") is not None:
-            daerah_n &= z_abs <= abu["z_maks_m"]
+        z_maks_n = ng.get("z_maks_m", abu.get("z_maks_m"))     # normal_garis.z_maks_m: batas sendiri (mis. di bawah tali leher)
+        if z_maks_n is not None:
+            daerah_n &= z_abs <= z_maks_n
         n_garis = ratakan_garis_normal(a.normal_masuk, a.normal_keluar, daerah_n, ng)
         abu["hasil"]["normal_garis_px"] = n_garis
         json.dump(data, open(a.json, "w"), indent=2, ensure_ascii=False)

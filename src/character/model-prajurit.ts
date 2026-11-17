@@ -67,7 +67,10 @@ function bahanPihak(asal: THREE.MeshStandardMaterial, pihak: string): THREE.Mesh
     uAmbangNila: { value: new THREE.Vector2(W.ambang[0], W.ambang[1]) },
     uAmbangHangat: { value: new THREE.Vector2(W.hangat[0], W.hangat[1]) },
     uZonaKain: { value: new THREE.Vector2(W.zonaKain[0], W.zonaKain[1]) },
-    uTinggiIkat: { value: W.tinggiIkat },
+    uTinggiIkat: { value: new THREE.Vector2(W.tinggiIkat[0], W.tinggiIkat[1]) },
+    uTerangIkat: { value: new THREE.Vector2(W.terangIkat[0], W.terangIkat[1]) },
+    uIsiKilat: { value: M.kilatanIsi },
+    uPangkatTepi: { value: M.kilatanTepiPangkat },
     uTerangAcuan: { value: W.terangAcuan },
   };
   bahan.onBeforeCompile = (shader) => {
@@ -86,7 +89,10 @@ uniform vec3 uWarnaKain;
 uniform vec2 uAmbangNila;
 uniform vec2 uAmbangHangat;
 uniform vec2 uZonaKain;
-uniform float uTinggiIkat;
+uniform vec2 uTinggiIkat;
+uniform vec2 uTerangIkat;
+uniform float uIsiKilat;
+uniform float uPangkatTepi;
 uniform float uTerangAcuan;`,
       )
       .replace(
@@ -95,18 +101,27 @@ uniform float uTerangAcuan;`,
 if (uKuatPihak > 0.0) {
   vec3 asalNila = diffuseColor.rgb;
   float kanalMaks = max(asalNila.r, max(asalNila.g, asalNila.b));
-  // Ikat kepala (di atas uTinggiIkat): texel berona biru. Kain (zona tinggi pada pose istirahat): semua texel
+  // Ikat kepala (tinggi di dalam uTinggiIkat, di bawah sanggul): texel berona biru. Kain (zona tinggi pada pose istirahat): semua texel
   // yang tidak hangat, sehingga kulit paha dan sabuk cokelat di zona yang sama tidak ikut diwarnai.
   float kebiruan = (asalNila.b - max(asalNila.r, asalNila.g)) / max(kanalMaks, 1e-3);
   float hangat = (asalNila.r - asalNila.b) / max(kanalMaks, 1e-3);
-  float diIkat = step(uTinggiIkat, vTinggiModel);
+  float diIkat = step(uTinggiIkat.x, vTinggiModel) * step(vTinggiModel, uTinggiIkat.y);
   float diKain = step(uZonaKain.x, vTinggiModel) * step(vTinggiModel, uZonaKain.y);
-  float topengNila = diIkat * smoothstep(uAmbangNila.x, uAmbangNila.y, kebiruan)
+  float terangAsal = dot(asalNila, vec3(0.2126, 0.7152, 0.0722));
+  // Rambut hitam kebiruan jauh lebih gelap daripada kain ikat: yang di bawah uTerangIkat tidak diwarnai.
+  float topengNila = diIkat * smoothstep(uAmbangNila.x, uAmbangNila.y, kebiruan) * smoothstep(uTerangIkat.x, uTerangIkat.y, terangAsal)
     + diKain * (1.0 - smoothstep(uAmbangHangat.x, uAmbangHangat.y, hangat));
-  float terang = dot(asalNila, vec3(0.2126, 0.7152, 0.0722)) / uTerangAcuan;
+  float terang = terangAsal / uTerangAcuan;
   vec3 sasaran = mix(uWarnaKain, uWarnaIkat, diIkat);
   diffuseColor.rgb = mix(asalNila, sasaran * terang, clamp(topengNila, 0.0, 1.0) * uKuatPihak);
 }`,
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+// Sinar isyarat dan kilatan kena: penuh di tepi siluet, tinggal uIsiKilat di bagian yang menghadap kamera.
+float tepiKilat = pow(1.0 - clamp(abs(dot(normalize(vViewPosition), normal)), 0.0, 1.0), uPangkatTepi);
+totalEmissiveRadiance *= mix(uIsiKilat, 1.0, tepiKilat);`,
       );
   };
   bahan.customProgramCacheKey = () => 'prajurit-pihak';
@@ -132,6 +147,7 @@ export class ModelPrajurit extends ModelKarakter {
   private tebasanKedua = false;
   private readonly bahanSemua: THREE.MeshStandardMaterial[] = [];
   private readonly meshSemua: THREE.Mesh[] = [];
+  private readonly bahanSenjata: THREE.MeshStandardMaterial[] = [];
   private tulangTangan: THREE.Object3D | null = null;
   /** Tombak: mengikuti tangan, arahnya di ruang badan (lihat models.json). */
   private tombak: THREE.Group | null = null;
@@ -199,6 +215,7 @@ export class ModelPrajurit extends ModelKarakter {
     const mata = balok(T.tebal * 1.5, T.tebal * 0.7, T.mata, 0x9aa0a8, 0.6);
     mata.position.z = T.depan;
     tombak.add(batang, mata);
+    this.bahanSenjata.push(batang.material as THREE.MeshStandardMaterial, mata.material as THREE.MeshStandardMaterial);
     this.grup.add(tombak);
     this.tombak = tombak;
     this.arahTombak.setFromEuler(new THREE.Euler(-THREE.MathUtils.degToRad(90 - T.condongBawa), 0, 0));
@@ -216,6 +233,7 @@ export class ModelPrajurit extends ModelKarakter {
     const bilah = balok(G.tebal, G.lebar, G.bilah, 0x8e9299, 0.6);
     bilah.position.z = G.bilah / 2 + G.gagang / 2;
     golok.add(bilah, balok(0.06, 0.06, G.gagang, 0x5a3a1e));
+    this.bahanSenjata.push(bilah.material as THREE.MeshStandardMaterial);
     const telunjuk = tangan.getObjectByName(`${tangan.name}Index1`);
     const jempol = tangan.getObjectByName(`${tangan.name}Thumb1`);
     if (!telunjuk || !jempol) {
@@ -310,6 +328,10 @@ export class ModelPrajurit extends ModelKarakter {
     for (const b of this.bahanSemua) {
       b.emissive.copy(kapsul.emissive);
       b.emissiveIntensity = kapsul.emissiveIntensity * M.kilatan;
+    }
+    for (const b of this.bahanSenjata) {
+      b.emissive.copy(kapsul.emissive);
+      b.emissiveIntensity = kapsul.emissiveIntensity * M.kilatanSenjata;
     }
 
     // Penghematan (models.json performa.hemat): jauh = setengah laju, luar kamera = tidak dianimasikan.

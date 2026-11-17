@@ -888,6 +888,14 @@
       "gelap_z_maks_m": 0.12,
       "isi_tanpa_kulit": {
         "x_abs_min_m": 0.3
+      },
+      "normal_garis": {
+        "median_px": 15,
+        "sudut_derajat": 9.0,
+        "lebar_px": 2,
+        "jarak_emas_px": 8,
+        "z_maks_m": 1.38,
+        "hasil_px": 68317
       }
     },
     "kepala": {
@@ -1889,28 +1897,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 3.1,
-                "lengan_bawah": 7.3,
-                "tangan": 7.0
+                "lengan_bawah": 7.2,
+                "tangan": 7.1
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 3.1,
-                "lengan_bawah": 7.3,
-                "tangan": 7.0
+                "lengan_bawah": 7.2,
+                "tangan": 7.1
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 2.6,
-                "lengan_bawah": 7.7,
-                "tangan": 6.9
+                "lengan_atas": 3.8,
+                "lengan_bawah": 7.2,
+                "tangan": 6.8
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 2.6,
-                "lengan_bawah": 7.7,
-                "tangan": 6.9
+                "lengan_atas": 3.8,
+                "lengan_bawah": 7.2,
+                "tangan": 6.8
               },
               "tercapai": true
             }
@@ -1919,28 +1927,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 2.0,
-                "lengan_bawah": 5.4,
+                "lengan_bawah": 5.3,
                 "tangan": 5.9
               },
               "derajat": 3,
               "sesudah_cm": {
                 "lengan_atas": 2.7,
-                "lengan_bawah": 6.7,
+                "lengan_bawah": 6.6,
                 "tangan": 8.5
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 2.6,
-                "lengan_bawah": 6.6,
-                "tangan": 9.7
+                "lengan_atas": 3.4,
+                "lengan_bawah": 6.9,
+                "tangan": 9.6
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 2.6,
-                "lengan_bawah": 6.6,
-                "tangan": 9.7
+                "lengan_atas": 3.4,
+                "lengan_bawah": 6.9,
+                "tangan": 9.6
               },
               "tercapai": true
             }
@@ -1949,28 +1957,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 7.1,
-                "lengan_bawah": 15.0,
-                "tangan": 16.5
+                "lengan_bawah": 15.6,
+                "tangan": 16.9
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 7.1,
-                "lengan_bawah": 15.0,
-                "tangan": 16.5
+                "lengan_bawah": 15.6,
+                "tangan": 16.9
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 1.7,
+                "lengan_atas": 4.3,
                 "lengan_bawah": 7.1,
                 "tangan": 7.9
               },
-              "derajat": 3,
+              "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 2.4,
-                "lengan_bawah": 8.5,
-                "tangan": 9.7
+                "lengan_atas": 4.3,
+                "lengan_bawah": 7.1,
+                "tangan": 7.9
               },
               "tercapai": true
             }
@@ -1980,26 +1988,26 @@
               "sebelum_cm": {
                 "lengan_atas": 7.1,
                 "lengan_bawah": 11.9,
-                "tangan": 18.6
+                "tangan": 18.8
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 7.1,
                 "lengan_bawah": 11.9,
-                "tangan": 18.6
+                "tangan": 18.8
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 4.3,
-                "lengan_bawah": 13.5,
+                "lengan_atas": 7.4,
+                "lengan_bawah": 13.8,
                 "tangan": 22.8
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 4.3,
-                "lengan_bawah": 13.5,
+                "lengan_atas": 7.4,
+                "lengan_bawah": 13.8,
                 "tangan": 22.8
               },
               "tercapai": true
@@ -2010,26 +2018,26 @@
               "sebelum_cm": {
                 "lengan_atas": 2.4,
                 "lengan_bawah": 9.7,
-                "tangan": 22.4
+                "tangan": 22.8
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 2.4,
                 "lengan_bawah": 9.7,
-                "tangan": 22.4
+                "tangan": 22.8
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 3.1,
-                "lengan_bawah": 11.3,
+                "lengan_atas": 5.8,
+                "lengan_bawah": 11.7,
                 "tangan": 21.5
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 3.1,
-                "lengan_bawah": 11.3,
+                "lengan_atas": 5.8,
+                "lengan_bawah": 11.7,
                 "tangan": 21.5
               },
               "tercapai": true
@@ -2052,15 +2060,15 @@
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 4.5,
-                "lengan_bawah": 9.5,
-                "tangan": 13.9
+                "lengan_atas": 4.9,
+                "lengan_bawah": 8.9,
+                "tangan": 13.8
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 4.5,
-                "lengan_bawah": 9.5,
-                "tangan": 13.9
+                "lengan_atas": 4.9,
+                "lengan_bawah": 8.9,
+                "tangan": 13.8
               },
               "tercapai": true
             }
@@ -2068,14 +2076,14 @@
           "serang-1": {
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 4.4,
-                "lengan_bawah": 11.0,
+                "lengan_atas": 6.5,
+                "lengan_bawah": 10.6,
                 "tangan": 17.6
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 4.4,
-                "lengan_bawah": 11.0,
+                "lengan_atas": 6.5,
+                "lengan_bawah": 10.6,
                 "tangan": 17.6
               },
               "tercapai": true
@@ -2084,15 +2092,15 @@
           "serang-2": {
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 5.7,
+                "lengan_atas": 7.4,
                 "lengan_bawah": 12.0,
-                "tangan": 13.9
+                "tangan": 14.4
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 5.7,
+                "lengan_atas": 7.4,
                 "lengan_bawah": 12.0,
-                "tangan": 13.9
+                "tangan": 14.4
               },
               "tercapai": true
             }
@@ -2101,7 +2109,7 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 1.2,
-                "lengan_bawah": 4.4,
+                "lengan_bawah": 4.5,
                 "tangan": 2.6
               },
               "derajat": 6,
@@ -2114,14 +2122,14 @@
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 4.3,
-                "lengan_bawah": 3.1,
+                "lengan_atas": 5.5,
+                "lengan_bawah": 3.0,
                 "tangan": 0.1
               },
               "derajat": 6,
               "sesudah_cm": {
-                "lengan_atas": 5.3,
-                "lengan_bawah": 4.7,
+                "lengan_atas": 6.8,
+                "lengan_bawah": 4.8,
                 "tangan": 2.1
               },
               "tercapai": true
@@ -2131,28 +2139,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 3.2,
-                "lengan_bawah": 5.9,
-                "tangan": 8.9
+                "lengan_bawah": 5.6,
+                "tangan": 9.0
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 3.2,
-                "lengan_bawah": 5.9,
-                "tangan": 8.9
+                "lengan_bawah": 5.6,
+                "tangan": 9.0
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 3.6,
+                "lengan_atas": 5.1,
                 "lengan_bawah": 8.8,
-                "tangan": 7.3
+                "tangan": 7.1
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 3.6,
+                "lengan_atas": 5.1,
                 "lengan_bawah": 8.8,
-                "tangan": 7.3
+                "tangan": 7.1
               },
               "tercapai": true
             }
@@ -2161,28 +2169,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 3.0,
-                "lengan_bawah": 2.4,
+                "lengan_bawah": 1.1,
                 "tangan": 3.1
               },
-              "derajat": 0,
+              "derajat": 3,
               "sesudah_cm": {
-                "lengan_atas": 3.0,
-                "lengan_bawah": 2.4,
-                "tangan": 3.1
+                "lengan_atas": 3.8,
+                "lengan_bawah": 2.3,
+                "tangan": 4.4
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 1.8,
-                "lengan_bawah": 5.7,
+                "lengan_atas": 3.8,
+                "lengan_bawah": 5.3,
                 "tangan": 8.5
               },
-              "derajat": 3,
+              "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 2.4,
-                "lengan_bawah": 6.9,
-                "tangan": 8.7
+                "lengan_atas": 3.8,
+                "lengan_bawah": 5.3,
+                "tangan": 8.5
               },
               "tercapai": true
             }
@@ -2190,15 +2198,15 @@
           "serang-berat": {
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 0.8,
-                "lengan_bawah": 6.8,
+                "lengan_atas": 1.7,
+                "lengan_bawah": 6.6,
                 "tangan": 11.3
               },
-              "derajat": 9,
+              "derajat": 3,
               "sesudah_cm": {
-                "lengan_atas": 2.2,
-                "lengan_bawah": 9.7,
-                "tangan": 17.4
+                "lengan_atas": 2.4,
+                "lengan_bawah": 7.5,
+                "tangan": 13.4
               },
               "tercapai": true
             }
@@ -2207,28 +2215,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 7.1,
-                "lengan_bawah": 15.2,
-                "tangan": 19.3
+                "lengan_bawah": 15.9,
+                "tangan": 19.5
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 7.1,
-                "lengan_bawah": 15.2,
-                "tangan": 19.3
+                "lengan_bawah": 15.9,
+                "tangan": 19.5
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 2.8,
-                "lengan_bawah": 10.7,
-                "tangan": 16.3
+                "lengan_atas": 5.9,
+                "lengan_bawah": 10.9,
+                "tangan": 16.6
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 2.8,
-                "lengan_bawah": 10.7,
-                "tangan": 16.3
+                "lengan_atas": 5.9,
+                "lengan_bawah": 10.9,
+                "tangan": 16.6
               },
               "tercapai": true
             }
@@ -2237,28 +2245,28 @@
             "Left": {
               "sebelum_cm": {
                 "lengan_atas": 6.5,
-                "lengan_bawah": 5.4,
-                "tangan": 6.2
+                "lengan_bawah": 4.9,
+                "tangan": 6.1
               },
               "derajat": 0,
               "sesudah_cm": {
                 "lengan_atas": 6.5,
-                "lengan_bawah": 5.4,
-                "tangan": 6.2
+                "lengan_bawah": 4.9,
+                "tangan": 6.1
               },
               "tercapai": true
             },
             "Right": {
               "sebelum_cm": {
-                "lengan_atas": 7.7,
+                "lengan_atas": 7.6,
                 "lengan_bawah": 13.6,
-                "tangan": 18.6
+                "tangan": 19.6
               },
               "derajat": 0,
               "sesudah_cm": {
-                "lengan_atas": 7.7,
+                "lengan_atas": 7.6,
                 "lengan_bawah": 13.6,
-                "tangan": 18.6
+                "tangan": 19.6
               },
               "tercapai": true
             }
@@ -2268,24 +2276,24 @@
           "lari": {
             "Left": {
               "lengan_atas": 4.3,
-              "lengan_bawah": 6.5,
+              "lengan_bawah": 6.3,
               "tangan": 7.7
             },
             "Right": {
-              "lengan_atas": 3.1,
-              "lengan_bawah": 9.4,
+              "lengan_atas": 6.1,
+              "lengan_bawah": 9.7,
               "tangan": 8.7
             }
           },
           "serang-1": {
             "Left": {
               "lengan_atas": 4.9,
-              "lengan_bawah": 5.5,
-              "tangan": 6.7
+              "lengan_bawah": 5.6,
+              "tangan": 7.1
             },
             "Right": {
-              "lengan_atas": 4.2,
-              "lengan_bawah": 5.8,
+              "lengan_atas": 6.7,
+              "lengan_bawah": 6.0,
               "tangan": 4.3
             }
           },
@@ -2296,20 +2304,20 @@
               "tangan": 4.4
             },
             "Right": {
-              "lengan_atas": 3.6,
-              "lengan_bawah": 11.3,
+              "lengan_atas": 6.0,
+              "lengan_bawah": 11.0,
               "tangan": 17.2
             }
           },
           "serang-3": {
             "Left": {
               "lengan_atas": 0.7,
-              "lengan_bawah": 1.6,
+              "lengan_bawah": 1.4,
               "tangan": -1.7
             },
             "Right": {
-              "lengan_atas": 5.7,
-              "lengan_bawah": 11.1,
+              "lengan_atas": 7.5,
+              "lengan_bawah": 10.4,
               "tangan": 8.9
             }
           }
@@ -2429,7 +2437,7 @@
           "serang-3",
           "serang-berat"
         ],
-        "berkas_mb": 2.56
+        "berkas_mb": 2.54
       },
       "ukur": {
         "hindar": {
